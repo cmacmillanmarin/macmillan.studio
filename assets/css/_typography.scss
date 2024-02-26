@@ -1,0 +1,333 @@
+@mixin import-font($fontname) {
+  @font-face {
+    font-family: $fontname;
+    src: url('/assets/font/#{$fontname}.woff') format('woff');
+    font-display: swap;
+  }
+}
+
+@include import-font('t-correct-trial');
+@include import-font('t-haas-grotesk-ds-b');
+@include import-font('t-saol-display-bi');
+@include import-font('t-saol-text-bi');
+@include import-font('b-haas-grotesk-tx-b');
+@include import-font('b-haas-grotesk-tx-m');
+@include import-font('b-haas-grotesk-tx-r');
+
+html {
+  font-family: 'b-haas-grotesk-tx-r';
+  font-size: 10px; // 1rem = 10px
+}
+
+.t-underline {
+  text-decoration: underline;
+}
+
+.t-white {
+  color: var(--white);
+}
+
+.t-black {
+  color: var(--black);
+}
+
+.t-bone {
+  color: var(--bone);
+}
+
+.t-beige {
+  color: var(--beige);
+}
+
+.t-red {
+  color: var(--red);
+  &--dark {
+    color: var(--red--dark);
+  }
+}
+
+.t-burgundy {
+  color: var(--burgundy);
+  &--dark {
+    color: var(--burgundy--dark);
+  }
+}
+
+.t-styled {
+  font-family: 't-saol-display-bi' !important;
+  text-transform: lowercase;
+}
+
+.t-h1 {
+  font-family: 't-correct-trial';
+  font-size: max(calc(100vw * 6rem / 37.5rem), 6rem);
+  line-height: max(calc(100vw * 4.8rem / 37.5rem), 4.8rem);
+  font-weight: 400;
+  @include from__desktop {
+    font-size: min(calc(100vw * 12.2rem / 144rem), 16.26rem);
+    line-height: min(calc(100vw * 9.2rem / 144rem), 12.26rem);
+    font-weight: 900;
+  }
+
+  font-stretch: normal;
+  font-style: normal;
+  text-transform: uppercase;
+  .t-styled {
+    font-size: max(calc(100vw * 5.4rem / 144rem), 5.4rem);
+    line-height: max(calc(100vw * 4rem / 144rem), 4rem);
+    font-weight: 400;
+    @include from__desktop {
+      font-size: min(calc(100vw * 11.6rem / 144rem), 15.46rem);
+      line-height: min(calc(100vw * 9.5rem / 144rem), 12.66rem);
+      font-weight: 700;
+    }
+    font-style: italic;
+  }
+}
+
+.t-h2 {
+  font-family: 't-correct-trial';
+  font-size: max(calc(100vw * 4.5rem / 37.5rem), 4.5rem);
+  line-height: max(calc(100vw * 3.8rem / 37.5rem), 3.8rem);
+  font-style: normal;
+  font-weight: 400;
+  text-transform: uppercase;
+  @include from__desktop {
+    font-size: min(calc(100vw * 6.8rem / 144rem), 9.066rem);
+    line-height: min(calc(100vw * 5.6rem / 144rem), 7.066rem);
+    font-weight: 900;
+  }
+}
+
+.t-h3 {
+  font-family: 't-correct-trial';
+  font-size: max(calc(100vw * 3.2rem / 37.5rem), 3.2rem);
+  line-height: max(calc(100vw * 2.8rem / 37.5rem), 2.8rem);
+  letter-spacing: max(calc(100vw * 0.023rem / 37.5rem), 0.023rem);
+  font-style: normal;
+  font-weight: 400;
+  text-transform: uppercase;
+  @include from__desktop {
+    font-size: min(calc(100vw * 4.6rem / 144rem), 6.133rem);
+    line-height: min(calc(100vw * 4rem / 144rem), 5.333rem);
+    font-weight: 900;
+  }
+}
+
+.t-h4 {
+  font-family: 't-haas-grotesk-ds-b';
+  font-size: max(calc(100vw * 2rem / 37.5rem), 2rem);
+  line-height: max(calc(100vw * 2.4rem / 37.5rem), 2.4rem);
+  font-weight: 400;
+  font-style: normal;
+  @include from__desktop {
+    font-size: min(calc(100vw * 2.6rem / 144rem), 3.466rem);
+    line-height: min(calc(100vw * 3.2rem / 144rem), 4.266rem);
+    font-weight: 700;
+  }
+}
+
+.t-star {
+  font-family: 't-haas-grotesk-ds-b';
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: 400;
+  @include from__desktop {
+    font-size: 2.6rem;
+    font-weight: 700;
+  }
+
+  font-style: normal;
+}
+
+.t-b1,
+.t-b2,
+.t-b3,
+.t-btn {
+  font-weight: 500;
+  font-style: normal;
+}
+
+.t-b1 {
+  font-family: 'b-haas-grotesk-tx-m';
+  font-size: 1.5rem;
+  line-height: 1.8rem;
+
+  @include from__desktop {
+    font-size: 1.9rem;
+    line-height: 2.4rem;
+  }
+
+  &--vw {
+    font-size: max(calc(100vw * 1.5rem / 37.5rem), 1.5rem);
+    line-height: max(calc(100vw * 1.8rem / 37.5rem), 1.8rem);
+    @include from__desktop {
+      font-size: min(calc(100vw * 1.9rem / 144rem), 2.533rem);
+      line-height: min(calc(100vw * 2.4rem / 144rem), 3.2rem);
+    }
+  }
+
+  a,
+  strong,
+  &--bold {
+    font-weight: 400;
+    font-family: 'b-haas-grotesk-tx-b';
+  }
+}
+
+.t-input {
+  font-family: 'b-haas-grotesk-tx-m';
+  font-size: 1.6rem;
+  line-height: 1;
+
+  @include from__desktop {
+    font-size: 1.9rem;
+  }
+}
+
+.t-b2 {
+  font-family: 'b-haas-grotesk-tx-r';
+  font-size: 1.2rem;
+  line-height: 1.6rem;
+
+  @include from__desktop {
+    font-size: 1.9rem;
+    line-height: 2.4rem;
+  }
+
+  &--bold {
+    font-weight: 700;
+  }
+}
+
+.t-b3 {
+  font-family: 'b-haas-grotesk-tx-m';
+
+  font-size: 1.2rem;
+  line-height: 1.6rem;
+  @include from__desktop {
+    font-size: 1.3rem;
+  }
+
+  &--small {
+    font-size: 1.1rem;
+    line-height: 1.4rem;
+    @include from__desktop {
+      font-size: 1.3rem;
+      line-height: 1.6rem;
+    }
+  }
+
+  &--vw {
+    font-size: max(calc(100vw * 1.2rem / 37.5rem), 1.2rem);
+    line-height: max(calc(100vw * 1.6rem / 37.5rem), 1.6rem);
+    @include from__desktop {
+      font-size: min(calc(100vw * 1.3rem / 144rem), 1.733rem);
+      line-height: min(calc(100vw * 1.6rem / 144rem), 2.133rem);
+    }
+  }
+
+  &--bold {
+    font-family: 'b-haas-grotesk-tx-b';
+    font-weight: 400;
+    @include from__desktop {
+      font-family: 'b-haas-grotesk-tx-m';
+      font-weight: 700;
+    }
+  }
+
+  &--uppercase {
+    text-transform: uppercase;
+    font-size: 1rem;
+    @include from__desktop {
+      font-size: 1.3rem;
+    }
+  }
+}
+
+.t-footer-hint {
+  font-family: 'b-haas-grotesk-tx-m';
+  text-transform: uppercase;
+  font-size: 1rem;
+  line-height: 1.2rem;
+  font-weight: 400;
+  letter-spacing: 0.05rem;
+  &--bold {
+    font-weight: 700;
+  }
+  @include from__desktop {
+    font-size: 1.3rem;
+    line-height: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1rem;
+  }
+}
+
+.t-quote {
+  font-family: 't-saol-display-bi';
+  font-size: 3.2rem;
+  line-height: 2.8rem;
+  font-weight: 400;
+  letter-spacing: 0.023rem;
+  @include from__desktop {
+    font-weight: 700;
+    font-size: 6.4rem;
+    line-height: 6.4rem;
+    letter-spacing: normal;
+  }
+}
+
+.t-microcopy {
+  font-family: 'b-haas-grotesk-tx-m';
+
+  font-size: 0.9rem;
+  line-height: 1.2rem;
+  @include from__desktop {
+    font-size: 1.3rem;
+    line-height: 1.6rem;
+  }
+
+  &--bold {
+    font-size: 1.4rem;
+    font-weight: 400;
+    @include from__desktop {
+      font-weight: 700;
+    }
+  }
+
+  &--uppercase {
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+  }
+}
+
+.t-btn {
+  font-family: 'b-haas-grotesk-tx-r';
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: 400;
+  text-align: center;
+  @include from__desktop {
+    font-size: min(calc(100vw * 1.9rem / 144rem), 1.9rem);
+  }
+  &--bold {
+    font-family: 'b-haas-grotesk-tx-m';
+  }
+}
+
+.t-tertiary-link {
+  font-family: 'b-haas-grotesk-tx-m';
+  font-size: 1.4rem;
+  line-height: 2.8rem;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.t-seo {
+  position: fixed;
+  top: -10000rem;
+}
+
+a {
+  text-decoration: none;
+}

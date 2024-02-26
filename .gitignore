@@ -1,0 +1,16 @@
+node_modules
+*.log*
+.nuxt
+.nitro
+.cache
+.output
+.vercel
+.env
+dist
+.git
+.DS_Store
+package-lock.json
+
+# Certs
+localhost-key.pem
+localhost.pem

@@ -1,0 +1,19 @@
+{
+  "redirects": [
+    {
+      "source": "/get-your-quote/thank-you",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/admin",
+      "destination": "https://mortgageexpert.ms-cms.com/wp-admin/",
+      "permanent": true
+    },
+    {
+      "source": "/preview",
+      "destination": "https://mortgageexpert-preview.vercel.app/",
+      "permanent": true
+    }
+  ]
+}

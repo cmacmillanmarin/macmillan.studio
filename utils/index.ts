@@ -1,0 +1,200 @@
+import { storeToRefs } from 'pinia'
+import useStore from '~/store/useStore'
+
+export function sleep(time: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, time)
+  })
+}
+
+export function capitalize(str: string): string {
+  const lower = str.toLowerCase()
+  return str.charAt(0).toUpperCase() + lower.slice(1)
+}
+
+export function hyphensToCamelcase(input: string): string {
+  const lowercase: string = input.toLocaleLowerCase()
+  let output: Array<string> = lowercase.split('-')
+  output = output.map(word => word[0].toUpperCase() + word.substring(1))
+  return output.join('')
+}
+
+export function parseVariables(params: {
+  input: string
+  keys: Array<string>
+  values: Array<string>
+}): string {
+  const { keys, values } = params
+  let input: string = params.input
+  for (const index in keys) {
+    input = input.replaceAll(`{{${keys[index]}}}`, values[index])
+  }
+  return input
+}
+
+export function cast(n: number, min: number, max: number) {
+  return Math.min(Math.max(min, n), max)
+}
+
+export function natural(n: number): number {
+  return Math.max(n, 0)
+}
+
+export function toPx(n: number): string {
+  return `${n}px`
+}
+
+export function toPercentage(n: number): string {
+  return `${n}%`
+}
+
+export function toUSD(n: number): string {
+  return `$${n.toLocaleString('en-US')}`
+}
+
+export function round(n: number, decimals?: number): number {
+  return parseFloat(n.toFixed(decimals || 0))
+}
+
+export const focusable =
+  'a[href], button, input, textarea, select, embed, object, iframe, details,[tabindex]:not([tabindex="-1"])'
+
+export function getKeyboardFocusableElements(element: HTMLElement | undefined): Array<Element> {
+  const el = element || document
+  return [...el.querySelectorAll(focusable)].filter(
+    el =>
+      !el.hasAttribute('disabled') &&
+      !el.getAttribute('aria-hidden') &&
+      window.getComputedStyle(el).display !== 'none'
+  )
+}
+
+export function loadScript(params: { src: string; name: string }) {
+  return new Promise(async resolve => {
+    const { src, name } = params
+    if (window[name as any]) resolve(true)
+    else {
+      console.log('Load script', name, src)
+      document?.body?.classList.add('loading')
+      const script = document.createElement('script')
+      script.src = src
+      script.onload = () => {
+        document?.body?.classList.remove('loading')
+        console.log('Script loaded', name, window[name as any])
+        resolve(true)
+      }
+      document?.head?.appendChild(script)
+    }
+  })
+}
+
+export function InView(el: HTMLElement): any {
+  const { top, height } = el.getBoundingClientRect()
+  const { innerHeight } = window
+  const initPos = Math.ceil(top)
+  const lastPos = Math.ceil(initPos + height)
+  return innerHeight > initPos && lastPos > 0
+}
+
+export function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+export function numberToMonth(number: string): string {
+  switch (number) {
+    case '01':
+      return 'Jan'
+    case '02':
+      return 'Feb'
+    case '03':
+      return 'Mar'
+    case '04':
+      return 'Apr'
+    case '05':
+      return 'May'
+    case '06':
+      return 'Jun'
+    case '07':
+      return 'Jul'
+    case '08':
+      return 'Ago'
+    case '09':
+      return 'Sep'
+    case '10':
+      return 'Oct'
+    case '11':
+      return 'Nov'
+    default:
+      return 'Dec'
+  }
+}
+
+export function validateEmail(email: string): boolean {
+  return !!email
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    )
+}
+
+export function validatePhoneNumber(phone: string): boolean {
+  return /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/.test(phone)
+}
+
+export function validateZipCode(code: string): boolean {
+  return /(^\d{5}$)|(^\d{5}-\d{4}$)/.test(code)
+}
+
+export function readingTime(text: string): number {
+  const wpm: number = 225
+  const words: number = text.trim().split(/\s+/).length
+  const time: number = Math.ceil(words / wpm)
+  return time
+}
+
+export function navigateBack(params: { fallback: string }) {
+  const store = useStore()
+  const { routeFrom } = storeToRefs(store)
+
+  const router = useRouter()
+
+  routeFrom.value ? router.back() : router.push(params.fallback)
+}
+
+export function multiplyArrayValues(data?: { input?: Array<any>; times: number }): Array<any> {
+  const input: Array<any> = data?.input || [{ label: 'test' }]
+  const output: Array<any> = []
+  for (let i = 0; i < (data?.times || 10); i++) {
+    output.push(...input)
+  }
+  return output
+}
+
+export function words(input: string): string {
+  const words = input.split(' ')
+  const output: Array<string> = []
+  words.forEach(word => {
+    output.push(`<span class='t-word'>${word}</span>`)
+  })
+  return output.join(' ')
+}
+
+export function wordsForHtml(input: string): string {
+  const el: HTMLElement = document.createElement('div')
+  el.innerHTML = input
+  const arr = Array.from(el.childNodes).map((e: ChildNode) => {
+    // @ts-expect-error
+    return e.outerHTML || e.nodeValue?.split(' ').filter(t => t)
+  })
+  const output: Array<string> = []
+  for (const word of [].concat.apply([], arr)) {
+    output.push(`<span class='t-word'>${word}</span>`)
+  }
+
+  return output.join(' ')
+}

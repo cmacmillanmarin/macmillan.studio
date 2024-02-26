@@ -1,0 +1,30 @@
+{
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ENV=prod nuxt build",
+    "dev": "ENV=dev nuxt dev",
+    "dev-host": "HOST=0 npm run dev",
+    "dev-https": "NODE_TLS_REJECT_UNAUTHORIZED=0 ENV=dev FE_PROTOCOL=https:// BE_PROTOCOL=https:// nuxt dev --https --ssl-cert localhost.pem --ssl-key localhost-key.pem",
+    "generate": "ENV=prod nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@nuxtjs/robots": "^3.0.0",
+    "@nuxtjs/sitemap": "^5.1.0",
+    "dotenv": "^16.0.3",
+    "nuxt": "^3.8.0",
+    "sass": "^1.55.0",
+    "vite-plugin-glsl": "^1.1.2",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.4.3",
+    "pinia": "^2.0.23",
+    "three": "^0.154.0",
+    "webfontloader": "^1.6.28"
+  }
+}

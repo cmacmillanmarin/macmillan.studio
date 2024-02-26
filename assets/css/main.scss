@@ -1,0 +1,106 @@
+@import './reset';
+@import './variables';
+@import './breakpoints';
+@import './grid';
+
+body {
+  background-color: var(--lime);
+  &::after {
+    display: none;
+  }
+  &::after {
+    content: 'mobile';
+    @include from__tablet {
+      content: 'tablet';
+    }
+    @include from__tablet--landscape {
+      content: 'tablet--landscape';
+    }
+    @include from__desktop {
+      content: 'desktop';
+    }
+    @include from__desktop--medium {
+      content: 'desktop--medium';
+    }
+    @include from__desktop--large {
+      content: 'desktop--large';
+    }
+    @include from__desktop--x-large {
+      content: 'desktop--x-large';
+    }
+    @media all and (pointer: coarse) {
+      & {
+        --touch: 1;
+      }
+    }
+  }
+}
+
+.mobile-only {
+  @include from__tablet {
+    display: none;
+  }
+}
+
+.tablet-only {
+  display: none;
+  @include from__tablet {
+    display: block;
+  }
+  @include from__desktop {
+    display: none;
+  }
+}
+
+.desktop-only {
+  display: none;
+  @include from__desktop {
+    display: block;
+  }
+}
+
+.will-fade {
+  opacity: 0.00001;
+  will-change: opacity;
+}
+
+.observer-el {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 0.1rem;
+  // background-color: var(--black);
+  pointer-events: none;
+  z-index: 999;
+}
+
+a,
+button,
+input,
+textarea,
+select,
+embed,
+object,
+iframe,
+details {
+  outline: 0;
+
+  &:focus-visible {
+    outline: 1px solid var(--red--dark);
+    outline-offset: 0.2rem;
+  }
+
+  &.clicked {
+    outline: 0;
+  }
+
+  &::placeholder {
+    color: var(--mid-grey);
+    opacity: 1; /* Firefox */
+  }
+
+  &::-ms-input-placeholder {
+    /* Edge 12 -18 */
+    color: var(--mid-grey);
+  }
+}

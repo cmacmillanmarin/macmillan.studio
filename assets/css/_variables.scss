@@ -1,0 +1,20 @@
+:root {
+  // constants
+  --PI: 3.14159265358979;
+
+  // colors
+  --white: #fff;
+  --black: #000;
+  --lime: #c5ff20;
+
+  // supports
+  --vh: 100vh;
+  @supports (height: 1svh) {
+    --vh: 100svh;
+  }
+
+  --overflow--hidden: hidden;
+  @supports (overflow: clip) {
+    --overflow--hidden: clip;
+  }
+}
