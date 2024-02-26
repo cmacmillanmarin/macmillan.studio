@@ -1,13 +1,11 @@
 <template>
-  <div class="c-page c-page--home" v-transition:out="{ callback: fadeOut, duration: 0.4 }">
+  <div class="c-page--home" v-transition:out="{ callback: fadeOut, duration: 0.4 }">
     <template v-if="data">
       <CustomHead :seo="data.seo" />
 
-      <h1 class="t-h1">MACMILLAN STUDIO</h1>
-      <h2 class="t-h2">Delivering unique digital experiences implemented from the ground up.</h2>
-      <h3 class="t-h3">Independent Development Studio</h3>
-
-      Subpageeeee
+      <h1>MACMILLAN STUDIO</h1>
+      <h2>Delivering unique digital experiences implemented from the ground up.</h2>
+      <h3>Independent Development Studio</h3>
 
       <!-- <HomeLanding data-scroll :data="data.landing" /> -->
       <!-- <ProjectCarousel
@@ -48,9 +46,17 @@ definePageMeta({
 </script>
 
 <style lang="scss">
-.c-page {
-  &--home {
-    padding: 0.8rem;
+.c-page--home {
+  @include page;
+  padding: 0.8rem;
+  h1 {
+    @include t-h1;
+  }
+  h2 {
+    @include t-h2;
+  }
+  h3 {
+    @include t-h3;
   }
 }
 </style>

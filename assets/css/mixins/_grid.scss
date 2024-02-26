@@ -1,0 +1,67 @@
+$layouts: (
+  mobile: 8,
+  tablet: 8,
+  tablet--landscape: 24,
+  desktop: 24,
+  desktop--medium: 24,
+  desktop--large: 24,
+  desktop--x-large: 24,
+);
+
+@mixin grid($type: '') {
+  width: 100%;
+  max-width: var(--layout-max-width);
+
+  display: flex;
+  flex-wrap: wrap;
+  grid-gap: 0;
+  column-gap: var(--layout-gap);
+
+  padding: 0 var(--layout-indent);
+  margin: 0 auto;
+
+  @if $type == 'centered' {
+    align-items: center;
+    justify-content: center;
+  } @else if $type == 'golden' {
+    --layout-indent: 3.1%;
+    --col-xs: 2.65%;
+    --col-s: 10%;
+    --col-m: 10.65%;
+    --col-l: 13.35%;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    grid-gap: 0;
+    column-gap: 0;
+  }
+}
+
+@mixin columns($i, $device: 'mobile') {
+  $columns: map-get($layouts, $device);
+  $col_width: calc((#{$i} / #{$columns}) * 100%);
+  $gap_width: calc(var(--layout-gap) * (1 - (1 / (#{$columns} / #{$i}))));
+  $width_value: calc($col_width - $gap_width);
+  @include from__($device) {
+    width: $width_value;
+  }
+}
+
+@mixin gap($i, $side: '', $device: 'mobile') {
+  $columns: map-get($layouts, $device);
+  $col_width: calc((#{$i} / #{$columns}) * 100%);
+  $gap_margin: calc(var(--layout-gap) * (#{$i} - (1 / (#{$columns} / #{$i}))));
+  $margin_value: calc($col_width - $gap_margin + $i * var(--layout-gap));
+  @include from__($device) {
+    @if $side == 'left' {
+      margin-left: $margin_value;
+    } @else if $side == 'right' {
+      margin-right: $margin_value;
+    } @else {
+      margin-left: $margin_value;
+      margin-right: $margin_value;
+    }
+  }
+}

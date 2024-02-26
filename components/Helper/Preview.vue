@@ -1,5 +1,5 @@
 <template>
-  <div class="helpers-preview">
+  <div class="helper-preview">
     <p class="t-b1 t-white">
       Site Preview <span>{{ isLoading ? '⏳' : '👀' }}</span>
     </p>
@@ -14,7 +14,7 @@ const isLoading = computed<boolean>(() => store.isLoading)
 </script>
 
 <style lang="scss">
-.helpers-preview {
+.helper-preview {
   position: fixed;
   z-index: 9999;
   bottom: var(--layout-indent);

@@ -7,6 +7,11 @@
   --black: #000;
   --lime: #c5ff20;
 
+  // layout
+  --layout-max-width: 1920px;
+  --layout-indent: 1.6rem;
+  --layout-gap: 1.6rem;
+
   // supports
   --vh: 100vh;
   @supports (height: 1svh) {

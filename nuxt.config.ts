@@ -122,7 +122,7 @@ export default defineNuxtConfig({
   components: {
     dirs: [
       {
-        path: '~/components/global',
+        path: '~/components/Global',
         global: true,
       },
       '~/components',
@@ -157,9 +157,10 @@ export default defineNuxtConfig({
       preprocessorOptions: {
         scss: {
           additionalData: `
-            @import "@/assets/css/_grid.scss";
-            @import "@/assets/css/_breakpoints.scss";
-            @import "@/assets/css/_typography.scss";
+            @import "@/assets/css/mixins/_index.scss";
+            @import "@/assets/css/mixins/_breakpoints.scss";
+            @import "@/assets/css/mixins/_grid.scss";
+            @import "@/assets/css/mixins/_typography.scss";
           `,
         },
       },

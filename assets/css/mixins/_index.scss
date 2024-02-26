@@ -1,0 +1,6 @@
+@mixin page() {
+  position: relative;
+  z-index: 1;
+
+  will-change: opacity;
+}

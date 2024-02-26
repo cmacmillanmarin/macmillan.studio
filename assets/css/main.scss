@@ -1,7 +1,17 @@
 @import './reset';
 @import './variables';
-@import './breakpoints';
-@import './grid';
+
+@include import-font('t-correct-trial');
+@include import-font('t-haas-grotesk-ds-b');
+@include import-font('t-saol-display-bi');
+@include import-font('t-saol-text-bi');
+@include import-font('b-haas-grotesk-tx-b');
+@include import-font('b-haas-grotesk-tx-m');
+@include import-font('b-haas-grotesk-tx-r');
+
+html {
+  font-size: 10px; // 1rem = 10px
+}
 
 body {
   background-color: var(--lime);
@@ -69,7 +79,6 @@ body {
   left: 0;
   width: 100%;
   height: 0.1rem;
-  // background-color: var(--black);
   pointer-events: none;
   z-index: 999;
 }
@@ -86,21 +95,11 @@ details {
   outline: 0;
 
   &:focus-visible {
-    outline: 1px solid var(--red--dark);
+    outline: 1px solid magenta;
     outline-offset: 0.2rem;
   }
 
   &.clicked {
     outline: 0;
-  }
-
-  &::placeholder {
-    color: var(--mid-grey);
-    opacity: 1; /* Firefox */
-  }
-
-  &::-ms-input-placeholder {
-    /* Edge 12 -18 */
-    color: var(--mid-grey);
   }
 }

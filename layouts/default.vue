@@ -11,7 +11,7 @@
 
       <div class="__layout__overlay" />
 
-      <HelpersPreview v-if="IS_PREVIEW && user" />
+      <HelperPreview v-if="IS_PREVIEW && user" />
     </ClientOnly>
   </div>
 </template>

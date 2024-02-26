@@ -13,7 +13,7 @@
             <InputNewsletter :placeholder="`${get('newsletterPlaceholder')}`" />
           </div>
         </div>
-        <HelpersGridGoldenRatio v-if="gridType === 'golden'" />
+        <HelperGridGoldenRatio v-if="gridType === 'golden'" />
       </div>
     </ClientOnly>
 

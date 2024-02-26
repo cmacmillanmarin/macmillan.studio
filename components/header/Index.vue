@@ -7,14 +7,26 @@
       { 'c-header--light': headerTheme === 'light' },
     ]">
     <nav class="c-header__nav">
-      <ul class="c-header__nav__logo">
-        <li class="c-header__nav__logo__link">
-          <NuxtLink class="c-header__nav__logo__link__label">Logo</NuxtLink>
+      <ul class="c-header__nav__list--hint">
+        <li class="c-header__nav__hint__item">
+          <NuxtLink class="c-header__nav__list__item__anchor">
+            Independent Development Studio
+          </NuxtLink>
         </li>
       </ul>
-      <ul class="c-header__nav__list">
+      <ul class="c-header__nav__list--primary">
         <li class="c-header__nav__list__item">
           <NuxtLink class="c-header__nav__list__item__anchor" to="/#projects">Projects</NuxtLink>
+        </li>
+      </ul>
+      <ul class="c-header__nav__list--secondary">
+        <li class="c-header__nav__list__item">
+          <NuxtLink class="c-header__nav__list__item__anchor" to="/#contact">Contact</NuxtLink>
+        </li>
+      </ul>
+      <ul class="c-header__nav__list--logo">
+        <li class="c-header__nav__list__item">
+          <NuxtLink class="c-header__nav__list__item__anchor" to="/">Logo</NuxtLink>
         </li>
       </ul>
     </nav>
@@ -117,26 +129,39 @@ function updateSize(): void {
   opacity: 0;
   will-change: transform, opacity;
   &__nav {
-    @extend .grid;
+    @include grid();
     align-items: flex-end;
 
-    &__logo {
-      @extend .grid__col-4--mobile;
-      @extend .grid__col-8--desktop;
-
-      &__link {
-        &__label {
-          @extend .t-b1, .t-black;
-        }
-      }
-    }
     &__list {
-      @extend .grid__col-4--mobile;
-      @extend .grid__col-8--desktop;
-
+      &--hint,
+      &--primary,
+      &--secondary,
+      &--logo {
+        @extend .c-header__nav__list;
+      }
+      &--hint {
+        @include columns(4);
+        @include columns(6, 'desktop');
+        // @include gap(2, 'left');
+        // @include gap(0, 'left', 'desktop');
+        // @include gap(2, 'right', 'desktop');
+      }
+      &--primary {
+        @include columns(4, 'mobile');
+        @include columns(6, 'desktop');
+      }
+      &--secondary {
+        @include columns(4, 'mobile');
+        @include columns(6, 'desktop');
+      }
+      &--logo {
+        @include columns(4, 'mobile');
+        @include columns(6, 'desktop');
+      }
       &__item {
         &__anchor {
-          @extend .t-h4, .t-black;
+          @include t-b1;
+          @include t-black;
         }
       }
     }

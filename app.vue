@@ -8,7 +8,7 @@
       <NuxtPage />
     </NuxtLayout>
 
-    <HelpersGrid v-if="gridType === 'default'" />
+    <HelperGrid v-if="gridType === 'default'" />
   </main>
 </template>
 
