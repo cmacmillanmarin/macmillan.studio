@@ -4,6 +4,7 @@ import useAuthStore from '~/store/useAuthStore'
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const config = useRuntimeConfig()
   const { IS_PASSWORD_PROTECTED, IS_DEV } = config.public
+
   if (!process.server && (IS_PASSWORD_PROTECTED || IS_DEV)) {
     const authStore = useAuthStore()
     const { signInAttempt } = authStore

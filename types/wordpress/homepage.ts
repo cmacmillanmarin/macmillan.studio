@@ -12,8 +12,7 @@ export interface Homepage {
 }
 
 export function parseHomepage(data?: { homepage: WP_Homepage }): Homepage {
-  const { homepage } = data
   return {
-    seo: parseSEO({ seo: homepage.acf.seo, modified: homepage.modified }),
+    seo: parseSEO({ seo: data?.homepage.acf.seo, modified: data?.homepage.modified }),
   }
 }
