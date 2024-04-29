@@ -68,12 +68,6 @@
 @mixin t-b() {
   font-family: 'HelveticaNowDisplayMedium';
 }
-@mixin t-b--medium() {
-  font-family: 'HelveticaNowDisplayMedium';
-}
-@mixin t-b--bold() {
-  font-family: 'HelveticaNowDisplayBold';
-}
 
 @mixin t-b1() {
   @include t-b();
@@ -87,16 +81,6 @@
   }
 }
 
-@mixin t-b1--medium() {
-  @include t-b1();
-  @include t-b--medium();
-}
-
-@mixin t-b1--bold() {
-  @include t-b1();
-  @include t-b--bold();
-}
-
 @mixin t-b2() {
   @include t-b();
 
@@ -107,16 +91,6 @@
     font-size: toScale(1.6rem);
     line-height: toScale(2rem);
   }
-}
-
-@mixin t-b2--medium() {
-  @include t-b2();
-  @include t-b--medium();
-}
-
-@mixin t-b2--bold() {
-  @include t-b2();
-  @include t-b--bold();
 }
 
 @mixin t-b3() {
@@ -132,7 +106,7 @@
 }
 
 @mixin t-input() {
-  @include t-b--medium();
+  @include t-b();
 
   font-size: toScaleUp(1.6rem);
   line-height: 1;

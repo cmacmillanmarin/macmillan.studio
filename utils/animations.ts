@@ -16,7 +16,6 @@ export async function fadeIn(params: {
       duration: duration || 1.2,
       ease: params.ease || ease(),
       opacity: 1,
-      pointerEvents: 'auto',
     }
     gsap.killTweensOf(el)
     gsap.set(el, { y: translate ? 16 : undefined })
@@ -46,7 +45,6 @@ export async function fadeOut(params: {
       duration: duration || 0.5,
       ease: params.ease || ease(),
       opacity: 0,
-      pointerEvents: 'none',
       y: translate ? 16 : undefined,
     }
     gsap.killTweensOf(el)

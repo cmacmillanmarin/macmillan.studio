@@ -4,19 +4,34 @@
       <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
       <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
       <div class="footer__email__christian">
-        <SvgChristian />
+        <a
+          href="mailto:christian@macmillan.studio"
+          rel="noopener"
+          aria-label="christian@macmillan.studio">
+          <SvgChristian />
+        </a>
       </div>
       <div class="footer__email__domain">
-        <SvgDomain />
+        <a
+          href="mailto:christian@macmillan.studio"
+          rel="noopener"
+          aria-label="christian@macmillan.studio">
+          <SvgDomain />
+        </a>
       </div>
       <div class="footer__email__extension">
-        <SvgExtension />
+        <a
+          href="mailto:christian@macmillan.studio"
+          rel="noopener"
+          aria-label="christian@macmillan.studio">
+          <SvgExtension />
+        </a>
       </div>
     </div>
     <nav class="footer__nav" v-transition:in="{ callback: fadeIn }">
       <ul class="footer__nav__social">
         <li v-for="{ url, label } in rrss" class="footer__nav__social__link">
-          <a :href="url" target="_blank" rel="noopener">
+          <a :href="url" target="_blank" rel="noopener" :aria-label="label">
             {{ label }}
           </a>
         </li>
@@ -24,9 +39,10 @@
       <ul class="footer__nav__credits">
         <li class="footer__nav__credits__link">
           <a
-            href="https://www.linkedin.com/in/christian-macmillan-1b1b1b1b1/"
+            href="https://xaviercusso.com"
             target="_blank"
-            rel="noopener">
+            rel="noopener"
+            aria-label="Xavier Cussó">
             Design—Xavier Cussó
           </a>
         </li>
@@ -34,7 +50,9 @@
     </nav>
     <div class="footer__location" v-transition:in="{ callback: fadeIn }">
       <div class="footer__location__coordinates">
-        <p>Cádiz—36.5282º N, 6.18892º W</p>
+        <a href="https://maps.app.goo.gl/osjpdZpbnTjgLg7h7" target="__blank" rel="noopener"
+          >Cádiz—36.5282º N, 6.18892º W</a
+        >
       </div>
       <div class="footer__location__year">
         <p>©2023</p>
@@ -53,19 +71,19 @@ const { gridType } = storeToRefs(useStore())
 const rrss = ref([
   {
     label: 'Twitter',
-    url: '',
+    url: 'https://www.twitter.com/cmacmillanmarin',
   },
   {
     label: 'GitHub',
-    url: '',
+    url: 'https://www.github.com/cmacmillanmarin',
   },
   {
     label: 'LinkedIn',
-    url: '',
+    url: 'https://www.linkedin.com/in/cmacmillanmarin/',
   },
   {
     label: 'Instagram',
-    url: '',
+    url: 'https://www.instagram.com/cmacmillanmarin',
   },
 ])
 </script>
@@ -127,6 +145,7 @@ const rrss = ref([
 
   &__nav,
   &__location {
+    pointer-events: none;
     @include will-fade;
 
     position: absolute;
@@ -153,6 +172,11 @@ const rrss = ref([
 
     align-items: flex-end;
 
+    &__social,
+    &__credits {
+      pointer-events: auto;
+    }
+
     &__social {
       width: var(--col-m);
       margin-left: calc(var(--col-s) + var(--col-l) * 2 + var(--col-xs) + var(--col-m));
@@ -166,8 +190,9 @@ const rrss = ref([
   &__location {
     display: flex;
     justify-content: space-between;
-    p {
-      @include t-b1;
+    &__coordinates,
+    &__year {
+      pointer-events: auto;
     }
   }
 }
