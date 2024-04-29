@@ -5,19 +5,12 @@ import { ease } from '~/utils/animations'
 export default defineNuxtPlugin(async nuxtApp => {
   console.log(
     '%cDeveloped at https://macmillan.studio',
-    'background: black; color: white; padding: 15px 25px; line-height: 1.4'
+    'background: black; color: white; padding: 16px 24px; line-height: 1.4'
   )
-
-  const config = useRuntimeConfig()
-  const { IS_PREVIEW } = config.public
 
   const store = useStore()
   const route = useRoute()
   store.defineEntryRoute(route.fullPath)
-
-  IS_PREVIEW && store.updateLoading(true)
-
-  // gsap.ticker.fps(60)
 
   gsap.defaults({
     duration: 0.8,
@@ -27,13 +20,11 @@ export default defineNuxtPlugin(async nuxtApp => {
   WebFont.load({
     custom: {
       families: [
-        't-correct-trial',
-        't-haas-grotesk-ds-b',
-        't-saol-display-bi',
-        't-saol-text-bi',
-        'b-haas-grotesk-tx-b',
-        'b-haas-grotesk-tx-m',
-        'b-haas-grotesk-tx-r',
+        // 'HelveticaNowTextBold',
+        // 'HelveticaNowTextMedium',
+        'HelveticaNowDisplayBold',
+        'HelveticaNowDisplayMedium',
+        // 'NeuePixelRegular',
       ],
     },
     active: (): void => {

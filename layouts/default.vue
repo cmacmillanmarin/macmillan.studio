@@ -1,69 +1,35 @@
 <template>
   <div ref="el" class="__layout">
-    <Header v-if="!IS_PREVIEW && header" v-bind="header" />
-    <ClientOnly>
-      <Header v-if="IS_PREVIEW && !!user && header" v-bind="header" />
-    </ClientOnly>
+    <Header />
     <slot />
 
-    <ClientOnly>
-      <Noise />
-
-      <div class="__layout__overlay" />
-
-      <HelperPreview v-if="IS_PREVIEW && user" />
-    </ClientOnly>
+    <Three />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
-import useHeaderStore from '~/store/useHeaderStore'
-import useAuthStore from '~/store/useAuthStore'
 import useScrollStore from '~/store/useScrollStore'
-import useDictionaryStore from '~/store/useDictionaryStore'
 import type { Data, Direction } from '~/types/front/store/scroll'
-import type { Theme } from '~/types/front/store/header'
-import type { Header } from '~/types/wordpress/navigation'
-import type { Dictionary } from '~/types/wordpress/dictionary'
-import { round, loadScript } from '~/utils'
+import { round } from '~/utils'
 
 const config = useRuntimeConfig()
 const { IS_PREVIEW } = config.public
 
-const { data: header } = await useFetch<Header>('/api/wordpress/header')
-const { data: dictionary } = await useFetch<Dictionary>('/api/wordpress/dictionary?lang=en')
-
 const route = useRoute()
-const router = useRouter()
 const store = useStore()
-const { isPreloaded, isLoading, routeTo, routeFromTo } = storeToRefs(store)
-const headerStore = useHeaderStore()
-headerStore.updateImage(header.value?.overlay.image)
-const { headerOverlay } = storeToRefs(headerStore)
-const { user } = storeToRefs(useAuthStore())
-
-const { add: addDictionary, get, getImage } = useDictionaryStore()
-addDictionary(dictionary.value as Dictionary)
+const { isPreloaded, isLoading } = storeToRefs(store)
 
 const { touch } = useDevice()
 const { vh, onResize } = useResize()
 const { addTicker, killTicker } = useRaf()
-const { addLinks, removeLinks } = useNuxtNavOnly()
 
 const scrollStore = useScrollStore()
-const { updateScrollTargetId } = scrollStore
-const {
-  scrollEl,
-  scrollPosition,
-  scrollProgress,
-  scrollMode,
-  scrollDisabled,
-  scrollTarget,
-  scrollTargetId,
-  scrollUpdate,
-} = storeToRefs(scrollStore)
+const { updateScroll, updateScrollTarget, updateScrollTargetId } = scrollStore
+const { scrollEl, scrollMode, scrollDisabled, scrollTarget, scrollTargetId, scrollUpdate } =
+  storeToRefs(scrollStore)
+
 let _target: number = 0
 let _current: number = 0
 let _previous: number = 0
@@ -74,10 +40,6 @@ const { create: createScrollLock, destroy: destroyScrollLock } = useScrollLock()
 
 const el = ref<HTMLElement>()
 
-const newsletterSubscriptionOverlay = computed<boolean>(
-  (): boolean => route.query?.newsletter === 'true'
-)
-
 watch(
   () => route.hash,
   (): void => {
@@ -85,43 +47,19 @@ watch(
   }
 )
 
+watch(
+  () => route.params.slug,
+  () => {
+    if (!route.params.slug) {
+      updateScrollTarget(0)
+    }
+    updateScroll()
+  }
+)
+
 watch(onResize, async (): Promise<void> => {
   await nextTick()
   scroll.update()
-})
-
-watch(routeFromTo, (): void => {
-  const hidden = ['get-your-quote']
-  for (const slug of hidden) {
-    if (routeFromTo.value.includes(slug)) {
-      headerStore.updateVisibility(false)
-      return
-    }
-  }
-})
-
-watch(routeTo, (): void => {
-  const light = ['/']
-  const lightContains = ['/blog', '/article']
-
-  headerStore.updateOverlay(false)
-
-  let theme: Theme = 'dark'
-  if (light.indexOf(routeTo.value) >= 0) theme = 'light'
-  else {
-    for (const route of lightContains) {
-      if (routeTo.value.includes(route)) theme = 'light'
-    }
-  }
-  headerStore.updateTheme(theme)
-
-  const hidden = ['get-your-quote']
-  for (const slug of hidden) {
-    if (routeTo.value.includes(slug)) {
-      return
-    }
-  }
-  headerStore.updateVisibility(true)
 })
 
 watch(touch, resetScroll)
@@ -189,29 +127,8 @@ watch(scrollUpdate, async (): Promise<void> => {
   scroll.update()
 })
 
-watch(headerOverlay, (): void => {
-  scroll.disable(headerOverlay.value)
-})
-
-watch(
-  () => store.pageTransition,
-  async (): Promise<void> => {
-    scroll.reset()
-    await nextTick()
-    updateScrollTargetId(route.hash?.substring(1))
-    removeLinks()
-    el.value && addLinks(el.value)
-  }
-)
-
-watchEffect((): void => {
-  store.updateRouteHistory(route.fullPath)
-})
-
 onMounted(async (): Promise<void> => {
   scrollStore.updateEl(el.value)
-  store.updateRouteTo(route.fullPath)
-  store.updateRouteFromTo(route.fullPath)
 
   if (!isPreloaded.value) {
     scrollStore.disableScroll(true)
@@ -224,11 +141,6 @@ onMounted(async (): Promise<void> => {
 
 function init(): void {
   initScroll()
-  store.updateRouteEntered(route.fullPath)
-  el.value && addLinks(el.value)
-  // setTimeout((): void => {
-  //   document.addEventListener('mouseout', showExitIndentOverlay)
-  // }, 1500)
 }
 
 function initScroll(): void {
@@ -288,28 +200,17 @@ onUnmounted((): void => {
 
 <style lang="scss">
 .__layout {
-  .c-header {
-    position: fixed;
-    z-index: 8;
-    bottom: 0;
-    width: 100%;
-  }
-
-  .c-page {
-    position: relative;
-    z-index: 1;
-
-    will-change: opacity;
-  }
-
-  &__overlay {
-    pointer-events: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  .header {
+    position: absolute;
     z-index: 9;
+    bottom: 0;
+    left: 50%;
+    width: 100%;
+    transform: translateX(-50%);
+  }
+  .three {
+    @include absolute-fill();
+    z-index: 8;
   }
 }
 </style>

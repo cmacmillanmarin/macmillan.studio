@@ -44,7 +44,7 @@ onBeforeUnmount(kill)
 
 <style lang="scss">
 .c-scroll-tracker {
-  position: fixed;
+  position: absolute;
   z-index: 9;
   top: 0;
   left: 0;

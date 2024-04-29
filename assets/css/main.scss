@@ -1,20 +1,18 @@
 @import './reset';
 @import './variables';
 
-@include import-font('t-correct-trial');
-@include import-font('t-haas-grotesk-ds-b');
-@include import-font('t-saol-display-bi');
-@include import-font('t-saol-text-bi');
-@include import-font('b-haas-grotesk-tx-b');
-@include import-font('b-haas-grotesk-tx-m');
-@include import-font('b-haas-grotesk-tx-r');
+@include import-font('HelveticaNowTextBold');
+@include import-font('HelveticaNowTextMedium');
+@include import-font('HelveticaNowDisplayMedium');
+@include import-font('HelveticaNowDisplayMedium');
+@include import-font('NeuePixelRegular');
 
 html {
   font-size: 10px; // 1rem = 10px
 }
 
 body {
-  background-color: var(--lime);
+  background-color: var(--white);
   &::after {
     display: none;
   }
@@ -46,34 +44,6 @@ body {
   }
 }
 
-.mobile-only {
-  @include from__tablet {
-    display: none;
-  }
-}
-
-.tablet-only {
-  display: none;
-  @include from__tablet {
-    display: block;
-  }
-  @include from__desktop {
-    display: none;
-  }
-}
-
-.desktop-only {
-  display: none;
-  @include from__desktop {
-    display: block;
-  }
-}
-
-.will-fade {
-  opacity: 0.00001;
-  will-change: opacity;
-}
-
 .observer-el {
   position: absolute;
   left: 0;
@@ -95,7 +65,7 @@ details {
   outline: 0;
 
   &:focus-visible {
-    outline: 1px solid magenta;
+    outline: 1px solid var(--black);
     outline-offset: 0.2rem;
   }
 

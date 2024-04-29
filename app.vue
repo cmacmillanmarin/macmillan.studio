@@ -1,14 +1,12 @@
 <template>
   <main
     class="__main"
-    :class="[{ '__main--loading': isLoading }, { '__main--native-scroll': !isVirtualScroll }]"
-    style="opacity: 0"
-    v-transition:in="{ callback: enter }">
+    :class="[{ '__main--loading': isLoading }, { '__main--native-scroll': !isVirtualScroll }]">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
 
-    <HelperGrid v-if="gridType === 'default'" />
+    <Grid v-if="gridType === 'default'" />
   </main>
 </template>
 
@@ -27,17 +25,15 @@ const { isVirtualScroll } = storeToRefs(useScrollStore())
 
 const { keyPressed } = useKeyboard()
 
-watch(keyPressed, (): void => {
+let index: number = 0
+const grids: Array<GridType> = ['none', 'default', 'golden-ratio', 'rule-of-thirds']
+
+watch(keyPressed, () => {
   if (!IS_PRODUCTION && (keyPressed.value === 'g' || keyPressed.value === 'G')) {
-    const type: GridType =
-      gridType.value === 'none' ? 'default' : gridType.value === 'default' ? 'golden' : 'none'
-    store.updateGrid(type)
+    index++
+    store.updateGrid(grids[index % grids.length])
   }
 })
-
-function enter(params: { el: HTMLElement }) {
-  gsap.set(params.el, { opacity: 1 })
-}
 </script>
 
 <style lang="scss">

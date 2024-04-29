@@ -9,11 +9,8 @@ export interface ImageSize {
   width: number
 }
 
-export type Color = 'burgundy' | 'red' | 'beige' | 'bone' | 'white'
-export type LogoColor = 'burgundy' | 'burgundy--dark' | 'branded'
-
 export type InputValue = string | number
-export type InputType = 'text' | 'number' | 'email' | 'phone' | 'currency' | 'percentage' | 'zip'
+export type InputType = 'text' | 'number' | 'email' | 'phone' | 'password'
 export interface InputEmit {
   key: string
   value: string | number
@@ -29,4 +26,11 @@ export interface Input {
   value?: InputValue
   width?: number
   exception?: boolean
+}
+
+export interface Button {
+  label: string
+  style: 'primary' | 'secondary' | 'tertiary'
+  type: 'internal-link' | 'external-link' | 'action'
+  to?: string
 }

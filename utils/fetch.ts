@@ -1,19 +1,6 @@
-import { Query } from '~/types/wordpress/index'
-import type { Cookie } from '~/types/front/store/auth'
+import fs from 'fs'
 
-export function apiCall(data: { call: string; page?: number }): string {
-  const { call, page } = data
-  const per_page: number = 25
-
-  const operator: string = call.includes('?') ? '&' : '?'
-  const pagination: string = page ? `&page=${page}&per_page=${per_page}` : ''
-  const apiCall: string = `${getBaseUrl(call)}${operator}${Query}${pagination}&date=${Date.now()}`
-
-  // console.log(apiCall)
-  return apiCall
-}
-
-export function getBaseUrl(call: string): string {
+export function getApiCall(call: string): string {
   const config = useRuntimeConfig()
   const { BE_API_URL } = config.public
   return `${BE_API_URL}${call}`
@@ -21,49 +8,47 @@ export function getBaseUrl(call: string): string {
 
 export async function get(call: string): Promise<any> {
   return new Promise(async (resolve): Promise<any> => {
+    const config = useRuntimeConfig()
+    const { IS_OFFLINE } = config.public
+
+    if (IS_OFFLINE) return resolve(getData({ call }))
+
     try {
-      const data = await fetch(apiCall({ call })).then(r => r.json())
-      resolve(data[0])
+      const data = await fetch(getApiCall(call)).then(r => r.json())
+      saveData({ call, data: data[0] })
+
+      return resolve(data[0])
     } catch (error) {
-      resolve(error)
+      return resolve(error)
     }
   })
 }
 
-interface PostRequest {
-  call: string
-  data: any
-}
-export async function post(req: PostRequest): Promise<any> {
-  return new Promise(async (resolve): Promise<any> => {
-    const cookie = useCookie<Cookie | undefined>('wp_session', { sameSite: true })
-    const data = await $fetch(getBaseUrl(req.call), {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${cookie.value?.token}`,
-      },
-      body: {
-        ...req.data,
-      },
-    })
-    resolve(data)
-  })
-}
-
-export async function getList(call: string): Promise<any> {
-  return new Promise(async (resolve): Promise<any> => {
-    let data: Array<any> = []
-
-    let res = await fetch(apiCall({ call, page: 1 }))
-    data = [...(await res.json())]
-
-    const totalPages: number = parseInt(res.headers.get('x-wp-totalpages') || '0')
-
-    for (let page: number = 2; page <= totalPages; page++) {
-      let res = await fetch(apiCall({ call, page }))
-      data = [...data, ...(await res.json())]
+export async function saveData(params: { call: string; data: any }): Promise<void> {
+  const config = useRuntimeConfig()
+  const { IS_DEV } = config.public
+  if (IS_DEV) {
+    let path: string = './public/data'
+    const chunks = params.call.split('/')
+    for (let i: number = 1; i < chunks.length - 1; i++) {
+      if (!fs.existsSync(`${path}/${chunks[i]}`)) {
+        fs.mkdirSync(`${path}/${chunks[i]}`)
+      }
+      path = `${path}/${chunks[i]}`
     }
+    fs.writeFileSync(
+      `${path}/${chunks[chunks.length - 1]}.json`,
+      JSON.stringify(params.data),
+      'utf8'
+    )
+  }
+}
 
-    resolve(data)
-  })
+export async function getData(params: { call: string }): Promise<any> {
+  const data = fs.readFileSync(`./public/data${params.call}.json`, 'utf-8')
+  if (!data)
+    console.warn(
+      `./public/data${params.call}.json not found. To enable OFFLINE mode, ensure that the required data is fetched online at least once.`
+    )
+  return data ? JSON.parse(data) : {}
 }

@@ -1,0 +1,148 @@
+@mixin import-font($fontname) {
+  @font-face {
+    font-family: $fontname;
+    src: url('/assets/font/#{$fontname}.woff') format('woff');
+    font-display: swap;
+  }
+}
+
+@mixin t-white() {
+  color: var(--white);
+}
+
+@mixin t-black() {
+  color: var(--black);
+}
+
+@mixin t-h() {
+  font-family: 'Rift Soft Bold';
+  font-stretch: normal;
+  font-style: normal;
+  text-transform: uppercase;
+
+  font-weight: 400;
+
+  @include from__desktop {
+    font-weight: 900;
+  }
+}
+
+@mixin t-h1() {
+  @include t-h();
+
+  font-size: toScaleUp(6rem);
+  line-height: toScaleUp(4.8rem);
+
+  @include from__desktop {
+    font-size: toScale(12.2rem);
+    line-height: toScale(9.2rem);
+  }
+}
+
+@mixin t-h2() {
+  @include t-h();
+
+  font-size: toScaleUp(4.5rem);
+  line-height: toScaleUp(3.8rem);
+
+  @include from__desktop {
+    font-size: toScale(6.8rem);
+    line-height: toScale(5.6rem);
+  }
+}
+
+@mixin t-h3() {
+  @include t-h;
+
+  font-size: toScaleUp(3.2rem);
+  line-height: toScaleUp(2.8rem);
+  letter-spacing: toScaleUp(0.023rem);
+
+  @include from__desktop {
+    font-size: toScale(4.6rem);
+    line-height: toScale(4rem);
+    letter-spacing: 0;
+  }
+}
+
+@mixin t-b() {
+  font-family: 'HelveticaNowDisplayMedium';
+}
+@mixin t-b--medium() {
+  font-family: 'HelveticaNowDisplayMedium';
+}
+@mixin t-b--bold() {
+  font-family: 'HelveticaNowDisplayBold';
+}
+
+@mixin t-b1() {
+  @include t-b();
+
+  font-size: toScaleUp(1.5rem);
+  line-height: toScaleUp(1.8rem);
+
+  @include from__desktop {
+    font-size: toScale(1.9rem);
+    line-height: toScale(2.4rem);
+  }
+}
+
+@mixin t-b1--medium() {
+  @include t-b1();
+  @include t-b--medium();
+}
+
+@mixin t-b1--bold() {
+  @include t-b1();
+  @include t-b--bold();
+}
+
+@mixin t-b2() {
+  @include t-b();
+
+  font-size: toScaleUp(1.2rem);
+  line-height: toScaleUp(1.6rem);
+
+  @include from__desktop {
+    font-size: toScale(1.6rem);
+    line-height: toScale(2rem);
+  }
+}
+
+@mixin t-b2--medium() {
+  @include t-b2();
+  @include t-b--medium();
+}
+
+@mixin t-b2--bold() {
+  @include t-b2();
+  @include t-b--bold();
+}
+
+@mixin t-b3() {
+  @include t-b();
+
+  font-size: toScaleUp(1.1rem);
+  line-height: toScaleUp(1.3rem);
+
+  @include from__desktop {
+    font-size: toScale(1.2rem);
+    line-height: toScale(1.4rem);
+  }
+}
+
+@mixin t-input() {
+  @include t-b--medium();
+
+  font-size: toScaleUp(1.6rem);
+  line-height: 1;
+
+  @include from__desktop {
+    font-size: toScale(1.9rem);
+  }
+}
+
+@mixin t-seo() {
+  position: fixed;
+  top: -10000rem;
+}

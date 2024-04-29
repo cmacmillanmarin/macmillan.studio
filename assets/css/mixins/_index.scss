@@ -4,3 +4,31 @@
 
   will-change: opacity;
 }
+
+@mixin will-fade() {
+  opacity: 0.00001;
+  will-change: opacity;
+}
+
+@mixin absolute-fill() {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+@mixin absolute-center() {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@function toScale($size, $base: 144rem) {
+  @return min(calc(100vw * $size / $base), calc(192rem * $size / 144rem));
+}
+
+@function toScaleUp($size, $base: 37.5rem) {
+  @return max(calc(100vw * $size / $base), $size);
+}

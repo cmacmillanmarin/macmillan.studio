@@ -35,7 +35,7 @@ export default defineNuxtPlugin(nuxtApp => {
   })
 
   nuxtApp.vueApp.directive('intersect', {
-    async created(el: HTMLElement, binding): Promise<void> {
+    async mounted(el: HTMLElement, binding): Promise<void> {
       await nextTick()
 
       const observer = createIntersectionObserver({

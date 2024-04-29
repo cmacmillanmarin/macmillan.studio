@@ -3,7 +3,7 @@ export function ease(): string {
 }
 
 export async function fadeIn(params: {
-  el: HTMLElement | Array<HTMLElement>
+  el: Element | HTMLElement | Array<HTMLElement>
   delay?: number
   duration?: number
   ease?: string
@@ -13,7 +13,7 @@ export async function fadeIn(params: {
   return new Promise(resolve => {
     const { el, delay, duration, translate, done } = params
     const opacity = {
-      duration: duration || 1,
+      duration: duration || 1.2,
       ease: params.ease || ease(),
       opacity: 1,
       pointerEvents: 'auto',
@@ -33,7 +33,7 @@ export async function fadeIn(params: {
 }
 
 export async function fadeOut(params: {
-  el: HTMLElement | Array<HTMLElement>
+  el: Element | HTMLElement | Array<HTMLElement>
   delay?: number
   duration?: number
   ease?: string
@@ -61,48 +61,10 @@ export async function fadeOut(params: {
   })
 }
 
-export function prepareFadeIn(el: Element): void {
-  gsap.set(el, { opacity: 0 })
+export function transitionFadeIn(el: Element, done: Function): void {
+  fadeIn({ el, done })
 }
 
-export function prepareAbsolute(el: Element): void {
-  gsap.set(el, { position: 'absolute', top: 0, left: 0, width: '100%', opacity: 0 })
-}
-
-export function restoreAbsolute(el: Element): void {
-  gsap.set(el, { clearProps: 'all' })
-}
-
-export async function delayedTransitionFadeIn(el: Element, done: Function): Promise<void> {
-  await fadeIn({ el: el as HTMLElement, delay: 1 })
-  done()
-}
-
-export async function transitionFadeIn(el: Element, done: Function): Promise<void> {
-  await fadeIn({ el: el as HTMLElement })
-  done()
-}
-
-export async function transitionFadeOut(el: Element, done: Function): Promise<void> {
-  await fadeOut({ el: el as HTMLElement })
-  done()
-}
-
-export function transitionOut(el: Element, done: Function): void {
-  done()
-}
-
-export async function overlayIn(el: Element, done: Function): Promise<void> {
-  await fadeIn({ el: el as HTMLElement })
-  done()
-}
-
-export async function overlayOut(el: Element, done: Function): Promise<void> {
-  await fadeOut({ el: el as HTMLElement })
-  done()
-}
-
-export async function getYourQuoteOverlayIn(el: Element, done: Function): Promise<void> {
-  await fadeIn({ el: el as HTMLElement, translate: true, delay: 1 })
-  done()
+export function transitionFadeOut(el: Element, done: Function): void {
+  fadeOut({ el, done })
 }

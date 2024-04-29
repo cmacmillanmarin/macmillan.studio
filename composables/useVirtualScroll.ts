@@ -112,6 +112,7 @@ export default function virtualScroll() {
     _log('update()')
     _getChildren({ reset: false })
     await _updateSize()
+    _run({ force: true })
   }
 
   function disable(value: boolean): void {
@@ -273,7 +274,7 @@ export default function virtualScroll() {
     const lastPos = Math.ceil(initPos + bounding.height)
     const windowSize = vh.value
     const scrollPoint = current.value
-    return scrollPoint + windowSize > initPos && scrollPoint < lastPos
+    return scrollPoint + windowSize + 100 > initPos && scrollPoint - 100 < lastPos
   }
 
   async function _updateSize(): Promise<void> {

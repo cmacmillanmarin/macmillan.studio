@@ -18,12 +18,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { LinkType } from '~/types/wordpress'
-
 const props = defineProps<{
   to?: string
   label?: string
-  anchorType?: LinkType
+  type?: any
   tabFixed?: boolean
   content?: boolean
 }>()
@@ -31,16 +29,16 @@ const props = defineProps<{
 const route = useRoute()
 const router = useRouter()
 
-const isInternal = ref<boolean>(props.anchorType !== 'external')
+const isInternal = ref<boolean>(props.type !== 'external')
 
 const componentType = computed(() => {
-  if (props.to === '') return 'p'
+  if (props.to === '') return 'button'
   if (!isInternal.value) return 'a'
   return resolveComponent('NuxtLink')
 })
 
 async function onClick(): Promise<void> {
-  if (props.anchorType === 'referral') {
+  if (props.type === 'referral') {
     if (props.to === route.fullPath) {
       router.push({ hash: '#_' })
       setTimeout(() => {
@@ -55,3 +53,11 @@ const emit = defineEmits<{
   (e: 'active-clicked'): void
 }>()
 </script>
+
+<style lang="scss" scoped>
+button {
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+</style>

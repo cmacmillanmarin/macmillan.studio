@@ -40,7 +40,7 @@ export default defineNuxtPlugin(nuxtApp => {
   })
 
   nuxtApp.vueApp.directive('transition', {
-    async created(el: HTMLElement, binding): Promise<void> {
+    async mounted(el: HTMLElement, binding): Promise<void> {
       await nextTick()
 
       let observerEl: HTMLElement = el

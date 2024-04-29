@@ -3,6 +3,7 @@ export default function useResize() {
 
   const vr = ref<number>(0)
   const vw = ref<number>(0)
+  const lvw = ref<number>(0)
   const vh = ref<number>(0)
   const svh = ref<number>(0)
 
@@ -28,13 +29,17 @@ export default function useResize() {
   }
 
   function updateSize(): void {
+    const maxWidth = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--layout-max-width')
+    )
     if (vw.value !== window.innerWidth) {
       svh.value = window.innerHeight
     }
     vw.value = window.innerWidth
+    lvw.value = Math.min(vw.value, maxWidth)
     vh.value = window.innerHeight
     vr.value = vw.value / vh.value
   }
 
-  return { vr, vw, vh, svh, onResize }
+  return { vr, vw, lvw, vh, svh, onResize }
 }

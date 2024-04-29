@@ -1,3 +1,3 @@
-# The Mortgage Expert Nuxt 3 Starter
+# MacMillan Studio
 
 Check the development documentation [here](/content/development.md).

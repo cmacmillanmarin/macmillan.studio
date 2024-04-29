@@ -1,7 +1,12 @@
 <template>
-  <main class="__error">
-    <pre class="t-b1">{{ error }}</pre>
-  </main>
+  <div>
+    <NuxtLayout>
+      <main data-scroll class="__error">
+        <pre>{{ error }}</pre>
+      </main>
+      <Footer data-scroll />
+    </NuxtLayout>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -24,9 +29,9 @@ onMounted(() => {
   height: var(--vh);
   justify-content: center;
   align-items: center;
-  p {
-    max-width: 80%;
-    text-align: center;
+  pre {
+    @include t-b1--medium;
+    @include t-black;
   }
 }
 </style>

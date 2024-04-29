@@ -15,7 +15,7 @@ export interface Routes {
   entered: string
 }
 
-export type GridType = 'default' | 'golden' | 'none'
+export type GridType = 'none' | 'default' | 'rule-of-thirds' | 'golden-ratio'
 
 export interface State {
   preloaded: boolean
