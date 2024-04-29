@@ -107,7 +107,7 @@ const componentType = computed(() => {
     position: relative;
     display: block;
     margin: 0 !important;
-    @include t-b1--medium;
+    @include t-b1;
   }
 
   &__hint {
