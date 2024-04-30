@@ -12,6 +12,17 @@
       <div class="landing__content__hint">
         <p>Delivering unique digital experiences implemented from the ground up.</p>
       </div>
+
+      <video
+        ref="videoEl"
+        class="landing__content__video"
+        width="1920"
+        height="1080"
+        muted
+        autoplay
+        loop>
+        <source src="/assets/video/short.webm" type="video/webm" />
+      </video>
     </div>
   </section>
 </template>
@@ -31,7 +42,9 @@ const { current } = storeToRefs(useScrollStore())
 const { layoutIndent } = useCss()
 const { lvw, vw, vh } = useResize()
 
-const verticalGap = computed<number>(() => lvw.value * 0.084)
+const videoEl = ref<HTMLVideoElement>()
+
+const verticalGap = computed<number>(() => lvw.value * 0.082)
 const titleMargin = computed<number>(() => verticalGap.value * 0.5)
 const titleMarginPx = computed<string>(() => toPx(titleMargin.value))
 const scrollGap = computed<number>(() => 1)
@@ -106,6 +119,7 @@ function enter(params: { el: HTMLElement }) {
   $scene.addObject({
     id: 'landing-reel',
     type: 'plane',
+    video: videoEl.value,
     position: position.value,
     size: size.value,
   })
@@ -147,7 +161,7 @@ onUnmounted(() => {
       margin-right: calc(var(--col) * 2);
       padding-left: var(--layout-indent);
       svg {
-        width: 127.75%;
+        width: 127.77%;
         will-change: transform;
         transform-origin: top left;
       }
@@ -168,6 +182,15 @@ onUnmounted(() => {
         padding-right: 30%;
         height: max-content;
       }
+    }
+
+    &__video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 20rem;
+      opacity: 0;
+      pointer-events: none;
     }
   }
 }

@@ -57,7 +57,7 @@ class Scene {
 
     this.updateSize({ size })
 
-    this.generatePlanesBatch()
+    // this.generatePlanesBatch()
   }
 
   addObject(object) {
@@ -108,6 +108,7 @@ class Scene {
         if (!object.mesh) {
           if (object.type === 'plane') {
             const availablePlane = this.getAvailablePlane(object.id)
+            if (!availablePlane) continue
             object.mesh = availablePlane.mesh
             object.meshId = availablePlane.id
           } else {
@@ -128,6 +129,10 @@ class Scene {
         object.mesh.scale.x = object.size.x
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
+        object.mesh.material.uniforms.uPlaneSize.value.x = object.size.x
+        object.mesh.material.uniforms.uPlaneSize.value.y = object.size.y
+        object.mesh.material.uniforms.uResolution.value.x = object.size.x
+        object.mesh.material.uniforms.uResolution.value.y = (object.size.x * 1080) / 1920
       } else if (object.mesh && object.type === 'plane') {
         this.releasePlane(object.meshId)
         object.mesh = null
@@ -170,6 +175,9 @@ class Scene {
   }
 
   getAvailablePlane(id) {
+    if (this.batch.length === 0) {
+      this.generatePlanesBatch()
+    }
     for (const plane of this.batch) {
       if (plane.available) {
         this.log(`Object ${id} gets available plane ${plane.id}`)
@@ -189,6 +197,12 @@ class Scene {
   }
 
   generatePlanesBatch() {
+    const { video } = this.objects[0]
+    let texture = new THREE.VideoTexture(video)
+    // texture.colorSpace = THREE.SRGBColorSpace
+
+    console.log(video.width, video.height)
+
     for (let id = 0; id < this.maxPlanes; id++) {
       const available = true
       const mesh = new THREE.Mesh(
@@ -198,8 +212,11 @@ class Scene {
           fragmentShader: FS,
           uniforms: {
             uOpacity: { type: 'f', value: 1.0 },
+            uTexture: { type: 't', value: texture },
+            uResolution: { type: 'v2', value: new THREE.Vector2(1, 1) },
+            uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
           },
-          wireframe: true,
+          wireframe: false,
           transparent: true,
         })
       )

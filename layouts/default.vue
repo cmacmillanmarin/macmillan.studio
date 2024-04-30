@@ -3,7 +3,9 @@
     <Header />
     <slot />
 
-    <Three />
+    <ClientOnly>
+      <Three />
+    </ClientOnly>
   </div>
 </template>
 
