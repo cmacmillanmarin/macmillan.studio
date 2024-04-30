@@ -30,21 +30,16 @@
     </div>
     <nav class="footer__nav" v-transition:in="{ callback: fadeIn }">
       <ul class="footer__nav__social">
-        <li v-for="{ url, label } in rrss" class="footer__nav__social__link">
-          <a :href="url" target="_blank" rel="noopener" :aria-label="label">
-            {{ label }}
-          </a>
+        <li v-for="{ to, type, label } in rrss" class="footer__nav__social__link">
+          <DecorativeLink :label="label" :to="to" :type="type" />
         </li>
       </ul>
       <ul class="footer__nav__credits">
         <li class="footer__nav__credits__link">
-          <a
-            href="https://xaviercusso.com"
-            target="_blank"
-            rel="noopener"
-            aria-label="Xavier Cussó">
-            Design—Xavier Cussó
-          </a>
+          <DecorativeLink
+            label="Design—Xavier Cussó"
+            to="https://xaviercusso.com"
+            type="extenral" />
         </li>
       </ul>
     </nav>
@@ -71,19 +66,28 @@ const { gridType } = storeToRefs(useStore())
 const rrss = ref([
   {
     label: 'Twitter',
-    url: 'https://www.twitter.com/cmacmillanmarin',
+    to: 'https://www.twitter.com/cmacmillanmarin',
+    type: 'external',
   },
   {
     label: 'GitHub',
-    url: 'https://www.github.com/cmacmillanmarin',
+    to: 'https://www.github.com/cmacmillanmarin',
+    type: 'external',
   },
   {
     label: 'LinkedIn',
-    url: 'https://www.linkedin.com/in/cmacmillanmarin/',
+    to: 'https://www.linkedin.com/in/cmacmillanmarin/',
+    type: 'external',
   },
   {
     label: 'Instagram',
-    url: 'https://www.instagram.com/cmacmillanmarin',
+    to: 'https://www.instagram.com/cmacmillanmarin',
+    type: 'external',
+  },
+  {
+    label: 'Unsplash',
+    to: 'https://unsplash.com/@cmacmillanmarin',
+    type: 'external',
   },
 ])
 </script>
@@ -175,6 +179,11 @@ const rrss = ref([
     &__social,
     &__credits {
       pointer-events: auto;
+      &__link {
+        .svg__arrow line {
+          stroke: var(--lime);
+        }
+      }
     }
 
     &__social {
