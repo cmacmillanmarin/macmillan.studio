@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Data } from '~/types/strapi'
+import type { Data } from '~/types/data'
 
 const { data } = await useFetch<Data>('/api/data')
 

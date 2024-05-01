@@ -61,6 +61,7 @@ export default function virtualScroll() {
     sticky: Sticky
     setProgress: boolean
     setPosition: boolean
+    continuous: boolean
   }
   let _children: Array<Child> = []
 
@@ -202,6 +203,7 @@ export default function virtualScroll() {
 
       const scrollable = el.dataset.scroll != undefined
       const permanent = el.dataset.scrollPermanent != undefined
+      const continuous = el.dataset.scrollContinuous != undefined
       const setProgress = el.dataset.scrollSetProgress != undefined
       const setPosition = el.dataset.scrollSetPosition != undefined
 
@@ -213,6 +215,7 @@ export default function virtualScroll() {
         setProgress,
         setPosition,
         scrollable,
+        continuous,
       })
 
       if (!permanent) delete el.dataset.scroll
@@ -333,7 +336,7 @@ export default function virtualScroll() {
     _currentSticky = []
     for (const child of _children) {
       let y = 0
-      const { scrollable, bounding, sticky, setProgress } = child
+      const { scrollable, continuous, bounding, sticky, setProgress } = child
       const { top, height } = bounding
       if (force) child.inView = _inView(bounding)
       if (sticky.value) {
@@ -342,7 +345,7 @@ export default function virtualScroll() {
         if (y > 0 && y <= stickyPosition.bottomLimit) {
           _currentSticky.push(y)
         }
-      } else if (scrollable && child.inView) y = round(current.value) * -1
+      } else if ((scrollable && child.inView) || continuous) y = round(current.value) * -1
       else if (scrollable && current.value > top) y = Math.ceil(top + height) * -1
       child.el.style.transform = `translate3D(0, ${y}px, 0)`
       if (!force) child.inView = _inView(bounding)

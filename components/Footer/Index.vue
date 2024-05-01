@@ -109,6 +109,7 @@ const rrss = ref([
   &__email,
   &__credits {
     @include will-fade;
+    z-index: 2;
 
     max-width: var(--layout-max-width);
 
@@ -150,6 +151,7 @@ const rrss = ref([
 
   &__nav,
   &__location {
+    z-index: 2;
     pointer-events: none;
     @include will-fade;
 
@@ -208,6 +210,7 @@ const rrss = ref([
 
   .footer__tetris {
     @include absolute-center;
+    z-index: 1;
   }
 }
 </style>

@@ -3,9 +3,9 @@
     <Header />
     <slot />
 
-    <ClientOnly>
-      <Three />
-    </ClientOnly>
+    <Three />
+
+    <div data-scroll data-scroll-continuous class="__layout__top-layer" id="top-layer" />
   </div>
 </template>
 
@@ -212,7 +212,12 @@ onUnmounted((): void => {
   }
   .three {
     @include absolute-fill();
+    z-index: 7;
+  }
+  &__top-layer {
+    @include absolute-fill();
     z-index: 8;
+    pointer-events: none;
   }
 }
 </style>

@@ -6,9 +6,11 @@
       <div class="landing__content__macmillan">
         <SvgMacMillan />
       </div>
-      <div class="landing__content__studio">
-        <SvgStudio />
-      </div>
+      <Teleport to="#top-layer">
+        <div class="landing__content__studio">
+          <SvgStudio />
+        </div>
+      </Teleport>
       <div class="landing__content__hint">
         <p>Delivering unique digital experiences implemented from the ground up.</p>
       </div>
@@ -39,6 +41,7 @@ const videoEl = ref<HTMLVideoElement>()
 const videoPlaying = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
+const verticalGapPx = computed<string>(() => toPx(lvw.value * 0.082 * 1.5))
 const titleMargin = computed<number>(() => verticalGap.value * 0.5)
 const titleMarginPx = computed<string>(() => toPx(titleMargin.value))
 const scrollGap = computed<number>(() => 1)
@@ -118,7 +121,6 @@ function enter(params: { el: HTMLElement }) {
 }
 
 function onPlay() {
-  console.log('onplay')
   $scene.addObject({
     id: 'landing-reel',
     type: 'plane',
@@ -130,7 +132,6 @@ function onPlay() {
 }
 
 onMounted(() => {
-  console.log(videoEl.value)
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.play()
 })
@@ -167,8 +168,9 @@ onUnmounted(() => {
     }
 
     &__studio {
-      width: var(--col);
-      margin-right: calc(var(--col) * 2);
+      pointer-events: auto;
+      width: 33.333333%;
+      padding-top: v-bind(verticalGapPx);
       padding-left: var(--layout-indent);
       svg {
         width: 127.77%;
@@ -201,7 +203,7 @@ onUnmounted(() => {
       width: 20rem;
       height: max-content;
       pointer-events: none;
-      // opacity: 0;
+      opacity: 0;
     }
   }
 }
