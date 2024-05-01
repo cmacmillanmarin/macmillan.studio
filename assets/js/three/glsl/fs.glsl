@@ -20,6 +20,8 @@ void main() {
   uv -= vec2(0.5);
   uv += vec2(0.5);
 
-  vec4 texColor = texture2D(uTexture, uv);
+  vec2 grid_uv = round(uv * float(120)) / float(120);
+
+  vec4 texColor = texture2D(uTexture, grid_uv);
   gl_FragColor = vec4(texColor.xyz, uOpacity);
 }
