@@ -13,14 +13,7 @@
         <p>Delivering unique digital experiences implemented from the ground up.</p>
       </div>
 
-      <video
-        ref="videoEl"
-        class="landing__content__video"
-        width="1920"
-        height="1080"
-        muted
-        autoplay
-        loop>
+      <video ref="videoEl" class="landing__content__video" width="1920" height="1080" muted loop>
         <source src="/assets/video/short.webm" type="video/webm" />
       </video>
     </div>
@@ -43,6 +36,7 @@ const { layoutIndent } = useCss()
 const { lvw, vw, vh } = useResize()
 
 const videoEl = ref<HTMLVideoElement>()
+const videoPlaying = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
 const titleMargin = computed<number>(() => verticalGap.value * 0.5)
@@ -54,11 +48,11 @@ const scrollProgress = computed<number>(() =>
 
 const size = computed<{ x: number; y: number; z: number }>(() => {
   const initWidth = lvw.value * 0.666666 - layoutIndent.value
-  const finalWidth = lvw.value - layoutIndent.value * 2
+  const finalWidth = lvw.value
   const incrementWidth = finalWidth - initWidth
 
   const initHeight = vh.value * 0.666666 - verticalGap.value
-  const finalHeight = vh.value - layoutIndent.value * 2
+  const finalHeight = vh.value
   const incrementHeight = finalHeight - initHeight
 
   return {
@@ -71,14 +65,17 @@ const size = computed<{ x: number; y: number; z: number }>(() => {
 const position = computed<{ x: number; y: number }>(() => {
   const gap = Math.min(0, lvw.value - vw.value) * -0.5
 
+  const x =
+    vw.value - layoutIndent.value - size.value.x - gap + layoutIndent.value * scrollProgress.value
+
   const initY = verticalGap.value
-  const finalY = layoutIndent.value
+  const finalY = 0
   const incrementY = finalY - initY
 
   const scroll = Math.min(0, vh.value * scrollGap.value - current.value)
 
   return {
-    x: vw.value - layoutIndent.value - size.value.x - gap,
+    x: x,
     y: initY + incrementY * scrollProgress.value + scroll,
   }
 })
@@ -107,15 +104,21 @@ watch(current, () => {
 })
 
 watch(position, () => {
-  $scene.updateObject({
-    id: 'landing-reel',
-    size: size.value,
-    position: position.value,
-  })
+  if (videoPlaying.value) {
+    $scene.updateObject({
+      id: 'landing-reel',
+      size: size.value,
+      position: position.value,
+    })
+  }
 })
 
 function enter(params: { el: HTMLElement }) {
   fadeIn({ el: params.el })
+}
+
+function onPlay() {
+  console.log('onplay')
   $scene.addObject({
     id: 'landing-reel',
     type: 'plane',
@@ -123,7 +126,14 @@ function enter(params: { el: HTMLElement }) {
     position: position.value,
     size: size.value,
   })
+  videoPlaying.value = true
 }
+
+onMounted(() => {
+  console.log(videoEl.value)
+  videoEl.value?.addEventListener('play', onPlay)
+  videoEl.value?.play()
+})
 
 onUnmounted(() => {
   $scene.removeObject('landing-reel')
@@ -189,8 +199,9 @@ onUnmounted(() => {
       top: 0;
       left: 0;
       width: 20rem;
-      opacity: 0;
+      height: max-content;
       pointer-events: none;
+      // opacity: 0;
     }
   }
 }

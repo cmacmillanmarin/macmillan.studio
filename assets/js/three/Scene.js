@@ -111,6 +111,12 @@ class Scene {
             if (!availablePlane) continue
             object.mesh = availablePlane.mesh
             object.meshId = availablePlane.id
+            if (object.video) {
+              object.mesh.material.uniforms.uTexture.value.image = object.video
+              object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
+              object.mesh.material.uniforms.uTextureSize.value.y =
+                (object.size.x * object.video.height) / object.video.width
+            }
           } else {
             object.mesh = this.getMesh(object.type)
             this.scene.add(object.mesh)
@@ -122,8 +128,6 @@ class Scene {
           x: object.position.x,
           y: object.position.y,
         })
-        // object.mesh.rotation.x += 0.01
-        // object.mesh.rotation.y += 0.01
         object.mesh.position.x = position.x + object.size.x * 0.5
         object.mesh.position.y = position.y - object.size.y * 0.5
         object.mesh.scale.x = object.size.x
@@ -131,8 +135,8 @@ class Scene {
         object.mesh.scale.z = object.size.z
         object.mesh.material.uniforms.uPlaneSize.value.x = object.size.x
         object.mesh.material.uniforms.uPlaneSize.value.y = object.size.y
-        object.mesh.material.uniforms.uResolution.value.x = object.size.x
-        object.mesh.material.uniforms.uResolution.value.y = (object.size.x * 1080) / 1920
+        object.mesh.material.uniforms.uTexture.value.needsUpdate =
+          object.video.readyState >= object.video.HAVE_CURRENT_DATA
       } else if (object.mesh && object.type === 'plane') {
         this.releasePlane(object.meshId)
         object.mesh = null
@@ -197,11 +201,8 @@ class Scene {
   }
 
   generatePlanesBatch() {
-    const { video } = this.objects[0]
+    const video = document.createElement('video')
     let texture = new THREE.VideoTexture(video)
-    // texture.colorSpace = THREE.SRGBColorSpace
-
-    console.log(video.width, video.height)
 
     for (let id = 0; id < this.maxPlanes; id++) {
       const available = true
@@ -213,7 +214,7 @@ class Scene {
           uniforms: {
             uOpacity: { type: 'f', value: 1.0 },
             uTexture: { type: 't', value: texture },
-            uResolution: { type: 'v2', value: new THREE.Vector2(1, 1) },
+            uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
           },
           wireframe: false,

@@ -53,6 +53,7 @@
         <p>©2023</p>
       </div>
     </div>
+    <FooterTetris />
   </footer>
 </template>
 
@@ -203,6 +204,10 @@ const rrss = ref([
     &__year {
       pointer-events: auto;
     }
+  }
+
+  .footer__tetris {
+    @include absolute-center;
   }
 }
 </style>
