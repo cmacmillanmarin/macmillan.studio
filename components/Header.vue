@@ -3,7 +3,7 @@
     <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
     <div class="header__hint">
-      <p>Independent Development Studio</p>
+      <p><SvgPixelArrow /> Independent Development Studio</p>
     </div>
 
     <nav class="header__nav header__nav--main">
@@ -85,6 +85,9 @@ watch(current, () => {
     padding-left: var(--layout-indent);
     p {
       @include t-b1;
+    }
+    .svg__pixel-arrow {
+      width: 2rem;
     }
   }
 
