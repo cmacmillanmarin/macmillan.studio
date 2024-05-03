@@ -122,7 +122,8 @@ class Scene {
             this.scene.add(object.mesh)
           }
           gsap.killTweensOf(object.mesh.material.uniforms.uOpacity)
-          gsap.to(object.mesh.material.uniforms.uOpacity, { value: 1.0 })
+          gsap.to(object.mesh.material.uniforms.uOpacity, { value: 1.0, duration: 1 })
+          gsap.to(object.mesh.material.uniforms.uPixel, { value: 600, duration: 4, delay: 0.25 })
         }
         const position = this.fromDomToCanvas({
           x: object.position.x,
@@ -212,7 +213,8 @@ class Scene {
           vertexShader: VS,
           fragmentShader: FS,
           uniforms: {
-            uOpacity: { type: 'f', value: 1.0 },
+            uOpacity: { type: 'f', value: 0.0 },
+            uPixel: { type: 'f', value: 0.0 },
             uTexture: { type: 't', value: texture },
             uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },

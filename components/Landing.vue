@@ -6,11 +6,13 @@
       <div class="landing__content__macmillan">
         <SvgMacMillan />
       </div>
-      <Teleport to="#top-layer">
-        <div class="landing__content__studio">
-          <SvgStudio />
-        </div>
-      </Teleport>
+      <ClientOnly>
+        <Teleport to="#top-layer">
+          <div class="landing__content__studio">
+            <SvgStudio />
+          </div>
+        </Teleport>
+      </ClientOnly>
       <div class="landing__content__hint">
         <p>Delivering unique digital experiences implemented from the ground up.</p>
       </div>
@@ -19,6 +21,7 @@
         <source src="/assets/video/short.webm" type="video/webm" />
       </video>
     </div>
+    <div class="landing__reel-target" id="reel-target" data-scroll-target-top />
   </section>
 </template>
 
@@ -48,6 +51,8 @@ const scrollGap = computed<number>(() => 1)
 const scrollProgress = computed<number>(() =>
   Math.min(1, current.value / (vh.value * scrollGap.value))
 )
+const scrollThreshold = computed<number>(() => verticalGap.value * 2.5)
+const scrollThresholdPx = computed<string>(() => toPx(verticalGap.value * 2.5))
 
 const size = computed<{ x: number; y: number; z: number }>(() => {
   const initWidth = lvw.value * 0.666666 - layoutIndent.value
@@ -84,15 +89,13 @@ const position = computed<{ x: number; y: number }>(() => {
 })
 
 watch(current, () => {
-  const threshold = verticalGap.value * 2.5
-
   const initScale = 1
   const finalScale = 0.885
   const incrementScale = initScale - finalScale
-  const scaleProgress = Math.min(1, current.value / threshold)
+  const scaleProgress = Math.min(1, current.value / scrollThreshold.value)
   const scale = initScale - incrementScale * scaleProgress
 
-  const scroll = Math.min(0, threshold - current.value) * 0.5
+  const scroll = Math.min(0, scrollThreshold.value - current.value) * 0.5
 
   const opacity = 1 - (1 * current.value) / (vh.value * 0.4)
 
@@ -143,6 +146,7 @@ onUnmounted(() => {
 
 <style lang="scss">
 .landing {
+  position: relative;
   background-color: var(--lime);
   padding-bottom: calc(var(--vh) * v-bind(scrollGap));
 
@@ -205,6 +209,13 @@ onUnmounted(() => {
       pointer-events: none;
       opacity: 0;
     }
+  }
+
+  &__reel-target {
+    position: absolute;
+    top: var(--vh);
+    left: 0;
+    width: 100%;
   }
 }
 </style>

@@ -8,18 +8,27 @@
 
     <nav class="header__nav header__nav--main">
       <ul class="header__nav__list">
-        <!-- <li class="header__nav__list__item">
-          <CustomLink class="header__nav__list__item__anchor" label="Site in development" />
-        </li> -->
-        <!-- <li class="header__nav__list__item">
-          <CustomLink class="header__nav__list__item__anchor" label="Projects," />
+        <li class="header__nav__list__item">
+          <CustomLink
+            class="header__nav__list__item__anchor"
+            type="referral"
+            to="/#reel"
+            label="Reel," />
         </li>
         <li class="header__nav__list__item">
-          <CustomLink class="header__nav__list__item__anchor" label="Services," />
+          <CustomLink
+            class="header__nav__list__item__anchor"
+            type="referral"
+            to="/#services"
+            label="Services," />
         </li>
         <li class="header__nav__list__item">
-          <CustomLink class="header__nav__list__item__anchor" label="About" />
-        </li> -->
+          <CustomLink
+            class="header__nav__list__item__anchor"
+            type="referral"
+            to="/#about"
+            label="About" />
+        </li>
       </ul>
     </nav>
 

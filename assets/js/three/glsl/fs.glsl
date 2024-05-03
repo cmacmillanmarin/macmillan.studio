@@ -3,6 +3,7 @@ precision highp float;
 varying vec2 vUv;
 
 uniform float uOpacity;
+uniform float uPixel;
 uniform sampler2D uTexture;
 uniform vec2 uTextureSize;  
 uniform vec2 uPlaneSize;    
@@ -20,7 +21,7 @@ void main() {
   uv -= vec2(0.5);
   uv += vec2(0.5);
 
-  vec2 grid_uv = round(uv * float(120)) / float(120);
+  vec2 grid_uv = round(uv * float(uPixel)) / float(uPixel);
 
   vec4 texColor = texture2D(uTexture, grid_uv);
   gl_FragColor = vec4(texColor.xyz, uOpacity);

@@ -2,7 +2,11 @@
   <div v-if="data" class="page page--home">
     <CustomHead :head="data.head" />
 
-    <Landing data-scroll />
+    <Landing data-scroll data-scroll-continuous />
+
+    <Services data-scroll />
+
+    <About data-scroll />
 
     <Footer data-scroll />
   </div>
@@ -21,9 +25,5 @@ definePageMeta({
 <style lang="scss">
 .page--home {
   @include page;
-  > div {
-    @include t-b1;
-    @include will-fade;
-  }
 }
 </style>

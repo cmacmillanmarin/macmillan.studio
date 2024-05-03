@@ -5,7 +5,9 @@
 
     <Three />
 
-    <div data-scroll data-scroll-continuous class="__layout__top-layer" id="top-layer" />
+    <ClientOnly>
+      <div data-scroll data-scroll-continuous class="__layout__top-layer" id="top-layer" />
+    </ClientOnly>
   </div>
 </template>
 
