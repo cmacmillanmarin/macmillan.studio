@@ -1,3 +1,5 @@
+import { shuffle } from '~/utils'
+
 export function ease(): string {
   return CustomEase.create('custom', 'M0,0 C0.53,0.24 0.08,0.99 1,1')
 }
@@ -65,4 +67,12 @@ export function transitionFadeIn(el: Element, done: Function): void {
 
 export function transitionFadeOut(el: Element, done: Function): void {
   fadeOut({ el, done })
+}
+
+export function shuffleIn(params: { el: HTMLElement }) {
+  const { el } = params
+  const paths = shuffle(Array.from(el.querySelectorAll('path')))
+  for (const path of paths) {
+    gsap.to(path, { duration: 0.4, opacity: 1, repeat: 2, delay: Math.random() * 1, yoyo: true })
+  }
 }

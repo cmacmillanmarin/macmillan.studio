@@ -13,6 +13,7 @@
           </div>
         </Teleport>
       </ClientOnly>
+
       <div class="landing__content__hint">
         <p>Delivering unique digital experiences implemented from the ground up.</p>
       </div>
@@ -177,7 +178,7 @@ onUnmounted(() => {
       padding-top: v-bind(verticalGapPx);
       padding-left: var(--layout-indent);
       svg {
-        width: 127.77%;
+        width: 127.9%;
         will-change: transform;
         transform-origin: top left;
       }
@@ -190,7 +191,6 @@ onUnmounted(() => {
       height: var(--col);
       width: var(--col);
       display: flex;
-      //   align-items: center;
       will-change: opacity;
       p {
         @include t-b1;

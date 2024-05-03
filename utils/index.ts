@@ -198,3 +198,23 @@ export function wordsForHtml(input: string): string {
 
   return output.join(' ')
 }
+
+export function shuffle(array: Array<any>): Array<any> {
+  let currentIndex: number = array.length,
+    temporaryValue,
+    randomIndex
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex)
+    currentIndex -= 1
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex]
+    array[currentIndex] = array[randomIndex]
+    array[randomIndex] = temporaryValue
+  }
+
+  return array
+}
