@@ -1,5 +1,5 @@
 <template>
-  <section class="landing">
+  <section class="landing" id="landing-target" data-scroll-target-top>
     <div class="landing__content" v-transition:in="{ callback: enter }">
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 

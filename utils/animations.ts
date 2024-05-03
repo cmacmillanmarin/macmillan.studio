@@ -73,6 +73,15 @@ export function shuffleIn(params: { el: HTMLElement }) {
   const { el } = params
   const paths = shuffle(Array.from(el.querySelectorAll('path')))
   for (const path of paths) {
-    gsap.to(path, { duration: 0.4, opacity: 1, repeat: 2, delay: Math.random() * 1, yoyo: true })
+    const delay = Math.random() * 1.2
+    const duration = 0.2
+    gsap.to(path, { opacity: 1, duration, delay, ease: 'power1.in' })
+    gsap.to(path, {
+      opacity: 0,
+      duration: duration * 0.5,
+      delay: delay + duration,
+      ease: 'power1.out',
+    })
+    gsap.to(path, { opacity: 1, duration, delay: delay + duration * 1.5, ease: 'power1.in' })
   }
 }

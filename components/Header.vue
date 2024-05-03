@@ -43,7 +43,13 @@
         </li>
       </ul>
       <div class="header__nav__logo">
-        <SvgLogo />
+        <CustomLink
+          class="header__nav__list__item__anchor"
+          to="/#landing"
+          type="referral"
+          :content="true">
+          <SvgLogo />
+        </CustomLink>
       </div>
     </nav>
   </header>
