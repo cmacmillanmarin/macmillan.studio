@@ -1,6 +1,6 @@
 <template>
   <footer class="footer" id="contact-target">
-    <div class="footer__email" v-transition:in="{ callback: fadeIn }">
+    <div v-show="!tetris" class="footer__email" v-transition:in="{ callback: fadeIn }">
       <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
       <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
       <div class="footer__email__christian">
@@ -28,7 +28,7 @@
         </a>
       </div>
     </div>
-    <nav class="footer__nav" v-transition:in="{ callback: fadeIn }">
+    <nav v-show="!tetris" class="footer__nav" v-transition:in="{ callback: fadeIn }">
       <ul class="footer__nav__social">
         <li v-for="{ to, type, label } in rrss" class="footer__nav__social__link">
           <DecorativeLink :label="label" :to="to" :type="type" />
@@ -36,11 +36,11 @@
       </ul>
       <ul class="footer__nav__credits">
         <li class="footer__nav__credits__link">
-          <DecorativeLink label="Play Tetris" to="https://xaviercusso.com" type="extenral" />
+          <button class="footer__nav__credits__link__btn" @click="playTetris">Play Tetris</button>
         </li>
       </ul>
     </nav>
-    <div class="footer__location" v-transition:in="{ callback: fadeIn }">
+    <div v-show="!tetris" class="footer__location" v-transition:in="{ callback: fadeIn }">
       <div class="footer__location__coordinates">
         <a href="https://maps.app.goo.gl/osjpdZpbnTjgLg7h7" target="__blank" rel="noopener"
           >Cádiz—36.5282º N, 6.18892º W</a
@@ -88,6 +88,12 @@ const rrss = ref([
     type: 'external',
   },
 ])
+
+const tetris = ref<boolean>(false)
+
+function playTetris() {
+  tetris.value = true
+}
 </script>
 
 <style lang="scss">
@@ -164,6 +170,7 @@ const rrss = ref([
     a,
     p {
       @include t-b1;
+      color: var(--lime);
     }
   }
 
@@ -182,6 +189,11 @@ const rrss = ref([
       &__link {
         .svg__arrow line {
           stroke: var(--lime);
+        }
+        &__btn {
+          @include t-b1;
+          color: var(--lime);
+          padding: 0;
         }
       }
     }

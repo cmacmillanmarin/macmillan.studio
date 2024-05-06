@@ -187,9 +187,18 @@ function drop() {
       })
     })
     tetris.active.piece = undefined
-    // TO DO: CHECK ENTIRE LINE
+    tetris.matrix.forEach((row, y) => {
+      if (checkEntireLine(row)) {
+        tetris.matrix.splice(y, 1)
+        tetris.matrix.unshift(new Array(tetris.board.columns).fill(0))
+      }
+    })
     drop()
   }
+}
+
+function checkEntireLine(line: Array<number>): boolean {
+  return line.every(val => val === 2)
 }
 
 function update() {
