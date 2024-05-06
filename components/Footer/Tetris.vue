@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Tetris, Matrix, Position, Piece } from '~/types/front/tetris'
+import type { Tetris, Matrix, Piece, Position } from '~/types/front/tetris'
 
 const { maxWidth } = useCss()
 const { vw, vh, onResize } = useResize()
@@ -84,7 +84,7 @@ function draw() {
   })
 
   // Draw helpers
-  drawBoard()
+  // drawBoard()
 }
 
 function drawBoard() {
@@ -144,37 +144,19 @@ function rotate() {
     }
   }
 
-  tetris.active.piece.matrix = rotated
-
-  update()
+  if (!checkCollisionX({ matrix: rotated })) {
+    tetris.active.piece.matrix = rotated
+    update()
+  }
 }
 
 function move(dir: number) {
   if (!tetris.active.piece) return
 
-  for (let column = 0; column < tetris.active.piece.matrix[0].length; column++) {
-    for (let row = 0; row < tetris.active.piece.matrix.length; row++) {
-      const value: number = tetris.active.piece.matrix[row][column]
-      if (value === 1) {
-        const board: Position = {
-          x: tetris.active.position.x + column + dir,
-          y: tetris.matrix.length - tetris.active.position.y + row,
-        }
-
-        // collision
-        if (
-          board.x < 0 ||
-          board.x > tetris.matrix[0].length - 1 ||
-          tetris.matrix[board.y][board.x] === 2
-        )
-          return
-      }
-    }
+  if (!checkCollisionX({ matrix: tetris.active.piece.matrix, dir })) {
+    tetris.active.position.x += dir
+    update()
   }
-
-  tetris.active.position.x += dir
-
-  update()
 }
 
 function drop() {
@@ -187,39 +169,92 @@ function drop() {
       x: Math.floor(tetris.board.columns / 2) - 1,
       y: tetris.board.rows - 4 + tetris.active.piece.matrix.length,
     }
-    // CHECK GAME OVER
+    if (checkCollisionY({ matrix: tetris.active.piece.matrix })) {
+      reset()
+      drop()
+    }
   }
 
-  for (let y = 0; y < tetris.active.piece?.matrix.length; y++) {
-    const column: Array<number> = tetris.active.piece.matrix[y]
-    for (let x = 0; x < column.length; x++) {
-      const value: number = tetris.active.piece.matrix[y][x]
+  if (!checkCollisionY({ matrix: tetris.active.piece.matrix, dir: 1 })) {
+    tetris.active.position.y--
+    update()
+  } else {
+    tetris.matrix.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if (value === 1) {
+          tetris.matrix[y][x] = 2
+        }
+      })
+    })
+    tetris.active.piece = undefined
+    // TO DO: CHECK ENTIRE LINE
+    drop()
+  }
+}
+
+function update() {
+  if (!tetris.active.piece) return
+
+  tetris.matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value !== 2) tetris.matrix[y][x] = 0
+    })
+  })
+
+  tetris.active.piece.matrix.forEach((column, y) => {
+    column.forEach((value, x) => {
+      if (value === 1) {
+        const c: number = tetris.matrix.length - tetris.active.position.y + y
+        const r: number = tetris.active.position.x + x
+        tetris.matrix[c][r] = 1
+      }
+    })
+  })
+}
+
+function checkCollisionX(params: { matrix: Matrix; dir?: number }): boolean {
+  const { matrix, dir } = params
+  for (let column = 0; column < matrix[0].length; column++) {
+    for (let row = 0; row < matrix.length; row++) {
+      const value: number = matrix[row][column]
       if (value === 1) {
         const board: Position = {
-          x: tetris.active.position.x + x,
-          y: tetris.matrix.length - tetris.active.position.y + y + 1,
+          x: tetris.active.position.x + column + (dir || 0),
+          y: tetris.matrix.length - tetris.active.position.y + row,
         }
 
         // collision
-        if (!tetris.matrix[board.y] || tetris.matrix[board.y][board.x] === 2) {
-          tetris.matrix.forEach((row, y) => {
-            row.forEach((value, x) => {
-              if (value === 1) {
-                tetris.matrix[y][x] = 2
-              }
-            })
-          })
-          tetris.active.piece = undefined
+        if (
+          board.x < 0 ||
+          board.x > tetris.matrix[0].length - 1 ||
+          tetris.matrix[board.y][board.x] === 2
+        )
+          return true
+      }
+    }
+  }
+  return false
+}
 
-          return
+function checkCollisionY(params: { matrix: Matrix; dir?: number }): boolean {
+  const { matrix, dir } = params
+  for (let y = 0; y < matrix.length; y++) {
+    const column: Array<number> = matrix[y]
+    for (let x = 0; x < column.length; x++) {
+      const value: number = matrix[y][x]
+      if (value === 1) {
+        const board: Position = {
+          x: tetris.active.position.x + x,
+          y: tetris.matrix.length - tetris.active.position.y + y + (dir || 0),
+        }
+        // collision
+        if (!tetris.matrix[board.y] || tetris.matrix[board.y][board.x] === 2) {
+          return true
         }
       }
     }
   }
-
-  tetris.active.position.y--
-
-  update()
+  return false
 }
 
 function getPiece(): Piece {
@@ -266,29 +301,7 @@ function getPiece(): Piece {
       ],
     },
   ]
-  console.log('Get piece')
   return pieces[Math.floor(Math.random() * pieces.length)]
-}
-
-function update() {
-  if (!tetris.active.piece) return
-
-  tetris.matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 2) tetris.matrix[y][x] = 0
-    })
-  })
-
-  tetris.active.piece.matrix.forEach((column, y) => {
-    column.forEach((value, x) => {
-      if (value === 1) {
-        const c: number = tetris.matrix.length - tetris.active.position.y + y
-        const r: number = tetris.active.position.x + x
-        console.log(c, r)
-        tetris.matrix[c][r] = 1
-      }
-    })
-  })
 }
 
 onBeforeUnmount(() => {
