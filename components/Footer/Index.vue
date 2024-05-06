@@ -1,6 +1,6 @@
 <template>
   <footer class="footer" id="contact-target">
-    <div class="footer__email" v-transition:in="{ callback: fadeIn }">
+    <!-- <div class="footer__email" v-transition:in="{ callback: fadeIn }">
       <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
       <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
       <div class="footer__email__christian">
@@ -52,7 +52,7 @@
       <div class="footer__location__year">
         <p>©2023</p>
       </div>
-    </div>
+    </div> -->
     <FooterTetris />
   </footer>
 </template>

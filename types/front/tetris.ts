@@ -7,12 +7,29 @@ export interface Size {
 }
 
 export interface Piece {
+  name: 'box' | 'bar' | 'el'
   matrix: Matrix
+}
+
+export interface Board {
+  columns: number
+  rows: number
+}
+
+export interface Position {
+  x: number
+  y: number
 }
 
 export interface Tetris {
   ctx: CanvasRenderingContext2D | null | undefined
-  size: Size
   matrix: Matrix
   points: number
+  size: Size
+  board: Board
+  active: {
+    piece?: Piece
+    position: Position
+  }
+  over: boolean
 }
