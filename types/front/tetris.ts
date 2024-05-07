@@ -31,5 +31,5 @@ export interface Tetris {
     piece?: Piece
     position: Position
   }
-  over: boolean
+  freezed: boolean
 }

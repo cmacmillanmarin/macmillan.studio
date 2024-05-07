@@ -13,6 +13,7 @@ const { keyPressed } = useKeyboard()
 const el = ref<HTMLCanvasElement>()
 const ready = ref<boolean>(false)
 const inView = ref<boolean>(false)
+const opacity = ref<number>(1)
 
 let to: any
 let logo: HTMLImageElement
@@ -26,10 +27,11 @@ const tetris: Tetris = {
     position: { x: 0, y: 0 },
   },
   points: 0,
-  over: false,
+  freezed: false,
 }
 
 watch(keyPressed, () => {
+  if (tetris.freezed) return
   if (keyPressed.value === ' ') rotate()
   else if (keyPressed.value === 'ArrowDown') drop()
   else if (keyPressed.value === 'ArrowLeft') move(-1)
@@ -75,10 +77,12 @@ function draw() {
   tetris.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value !== 0) {
+        if (value === 3 && tetris.ctx) tetris.ctx.globalAlpha = opacity.value
         drawLogo({
           x: tetris.size.piece * x,
           y: tetris.size.y - tetris.size.piece * (tetris.board.rows - y),
         })
+        if (tetris.ctx) tetris.ctx.globalAlpha = 1
       }
     })
   })
@@ -133,7 +137,7 @@ function reset() {
   gsap.set(el.value, { width: tetris.size.x, height: tetris.size.y })
 }
 
-function rotate() {
+async function rotate() {
   if (!tetris.active.piece) return
 
   const rotated: Matrix = []
@@ -147,6 +151,22 @@ function rotate() {
   if (!checkCollisionX({ matrix: rotated })) {
     tetris.active.piece.matrix = rotated
     update()
+  } else {
+    to && clearTimeout(to)
+    tetris.freezed = true
+    for (let x = tetris.matrix.length - 1; x >= 0; x--) {
+      for (let y = 0; y < tetris.matrix[x].length; y++) {
+        if (tetris.matrix[x][y] === 1) tetris.matrix[x][y] = 3
+      }
+    }
+    await animate()
+    for (let x = tetris.matrix.length - 1; x >= 0; x--) {
+      for (let y = 0; y < tetris.matrix[x].length; y++) {
+        if (tetris.matrix[x][y] === 3) tetris.matrix[x][y] = 1
+      }
+    }
+    tetris.freezed = false
+    drop()
   }
 }
 
@@ -159,7 +179,7 @@ function move(dir: number) {
   }
 }
 
-function drop() {
+async function drop() {
   to && clearTimeout(to)
   to = setTimeout(drop, 1000)
 
@@ -175,7 +195,7 @@ function drop() {
     }
   }
 
-  if (!checkCollisionY({ matrix: tetris.active.piece.matrix, dir: 1 })) {
+  if (!checkCollisionY({ matrix: tetris.active.piece.matrix })) {
     tetris.active.position.y--
     update()
   } else {
@@ -187,14 +207,42 @@ function drop() {
       })
     })
     tetris.active.piece = undefined
-    tetris.matrix.forEach((row, y) => {
+    let entireLine: boolean = false
+    tetris.matrix.forEach(async (row, y) => {
       if (checkEntireLine(row)) {
+        to && clearTimeout(to)
+        tetris.freezed = true
+        for (let i = 0; i < row.length; i++) row[i] = 3
+        await animate()
+        tetris.freezed = false
         tetris.matrix.splice(y, 1)
         tetris.matrix.unshift(new Array(tetris.board.columns).fill(0))
+        drop()
       }
     })
-    drop()
+    !tetris.freezed && drop()
   }
+}
+
+function animate() {
+  return new Promise(resolve => {
+    const duration = 0.2
+    gsap.set(opacity, { value: 1 })
+    gsap.to(opacity, { value: 0, duration, ease: 'power1.in' })
+    gsap.to(opacity, {
+      value: 1,
+      duration: duration * 0.5,
+      delay: duration,
+      ease: 'power1.out',
+    })
+    gsap.to(opacity, {
+      value: 0,
+      duration,
+      delay: duration * 1.5,
+      ease: 'power1.in',
+      onComplete: resolve,
+    })
+  })
 }
 
 function checkEntireLine(line: Array<number>): boolean {
@@ -245,8 +293,8 @@ function checkCollisionX(params: { matrix: Matrix; dir?: number }): boolean {
   return false
 }
 
-function checkCollisionY(params: { matrix: Matrix; dir?: number }): boolean {
-  const { matrix, dir } = params
+function checkCollisionY(params: { matrix: Matrix }): boolean {
+  const { matrix } = params
   for (let y = 0; y < matrix.length; y++) {
     const column: Array<number> = matrix[y]
     for (let x = 0; x < column.length; x++) {
@@ -254,7 +302,7 @@ function checkCollisionY(params: { matrix: Matrix; dir?: number }): boolean {
       if (value === 1) {
         const board: Position = {
           x: tetris.active.position.x + x,
-          y: tetris.matrix.length - tetris.active.position.y + y + (dir || 0),
+          y: tetris.matrix.length - tetris.active.position.y + y + 1,
         }
         // collision
         if (!tetris.matrix[board.y] || tetris.matrix[board.y][board.x] === 2) {
@@ -316,5 +364,6 @@ function getPiece(): Piece {
 onBeforeUnmount(() => {
   killTicker(draw)
   to && clearTimeout(to)
+  gsap.killTweensOf(opacity)
 })
 </script>
