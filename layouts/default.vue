@@ -1,6 +1,6 @@
 <template>
   <div ref="el" class="__layout">
-    <!-- <Header /> -->
+    <Header />
     <slot />
 
     <Three />

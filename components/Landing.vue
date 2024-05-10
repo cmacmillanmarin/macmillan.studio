@@ -15,13 +15,14 @@
       </ClientOnly>
 
       <div class="landing__content__hint">
-        <p>Delivering unique digital experiences implemented from the ground up.</p>
+        <p>{{ data.hint }}</p>
       </div>
 
       <video ref="videoEl" class="landing__content__video" width="1920" height="1080" muted loop>
         <source src="/assets/video/short.webm" type="video/webm" />
       </video>
     </div>
+    <div class="landing__bg" />
     <div class="landing__reel-target" id="reel-target" data-scroll-target-top />
   </section>
 </template>
@@ -32,6 +33,11 @@ import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { toPx } from '~/utils'
 import { fadeIn } from '~/utils/animations'
+import type { Landing } from '~/types/data'
+
+defineProps<{
+  data: Landing
+}>()
 
 const { $scene }: any = useNuxtApp()
 
@@ -108,6 +114,7 @@ watch(current, () => {
   gsap.set('.landing__content__macmillan', {
     y: toPx(current.value + scroll),
   })
+  gsap.set('.landing__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
 })
 
 watch(position, () => {
@@ -216,6 +223,12 @@ onUnmounted(() => {
     top: var(--vh);
     left: 0;
     width: 100%;
+  }
+
+  &__bg {
+    @include will-fade;
+    @include absolute-fill;
+    background-color: grey;
   }
 }
 </style>

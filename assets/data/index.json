@@ -1,0 +1,23 @@
+{
+  "head": {
+    "title": "MacMillan Studio",
+    "description": "",
+    "og:image": "",
+    "tw:image": ""
+  },
+  "landing": {
+    "hint": "Delivering unique digital experiences implemented from the ground up"
+  },
+  "services": {
+    "hint": "Joining your team as freelancer or taking care of full production",
+    "list": [
+      { "title": "Front End", "description": "Lorem ipsum dolor emet" },
+      { "title": "Back End", "description": "Lorem ipsum dolor emet" },
+      { "title": "WebGL", "description": "Lorem ipsum dolor emet" },
+      { "title": "Native", "description": "Lorem ipsum dolor emet" },
+      { "title": "AI", "description": "Lorem ipsum dolor emet" },
+      { "title": "Web 3", "description": "Lorem ipsum dolor emet" },
+      { "title": "Maintenance", "description": "Lorem ipsum dolor emet" }
+    ]
+  }
+}
