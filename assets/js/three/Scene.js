@@ -16,7 +16,9 @@ class Scene {
 
     this.z = 1000
 
-    this.size = { x: 0, y: 0 }
+    this.size = new THREE.Vector2()
+    this.mouse = new THREE.Vector2()
+    this.raycaster = new THREE.Raycaster()
 
     this.maxPixelRatio = 2
     this.rendering = false
@@ -56,8 +58,7 @@ class Scene {
     })
 
     this.updateSize({ size })
-
-    // this.generatePlanesBatch()
+    this.addListeners()
   }
 
   addObject(object) {
@@ -160,6 +161,7 @@ class Scene {
 
     if (this.needsUpdate) {
       this.log('render()')
+      console.log(this.mouse)
       this.renderer.render(this.scene, this.camera)
     }
   }
@@ -175,7 +177,6 @@ class Scene {
     if (!this.rendering) return
     this.log('stop()')
     this._stop(this._render)
-    this.render()
     this.rendering = false
   }
 
@@ -268,10 +269,29 @@ class Scene {
     )
   }
 
+  onMouseMovement(e) {
+    this.mouse.x = (e.clientX / this.size.x) * 2 - 1
+    this.mouse.y = (e.clientY / this.size.y) * 2 - 1
+    this.raycaster.setFromCamera(this.mouse, this.camera)
+  }
+
   bind() {
     this._play = this.play.bind(this)
     this._stop = this.stop.bind(this)
     this._render = this.render.bind(this)
+    this._onMouseMovement = this.onMouseMovement.bind(this)
+  }
+
+  addListeners() {
+    // window.addEventListener('focus', this._play)
+    // window.addEventListener('blur', this._stop)
+    window.addEventListener('mousemove', this._onMouseMovement)
+  }
+
+  removeListeners() {
+    // window.removeEventListener('focus', this._play)
+    // window.removeEventListener('blur', this._stop)
+    window.removeEventListener('mousemove', this._onMouseMovement)
   }
 
   log(msg) {
@@ -293,6 +313,8 @@ class Scene {
       this.planes[i] = null
       delete this.planes[i]
     }
+
+    this.removeListeners()
   }
 }
 
