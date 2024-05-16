@@ -7,7 +7,7 @@
   },
   "hero": {
     "title": "MacMillan Studio",
-    "hint": "Delivering unique digital experiences implemented from the ground up"
+    "hint": "Delivering unique digital experiences implemented from the ground up."
   },
   "services": {
     "title": "Services",
@@ -44,11 +44,25 @@
       { "label": "Tate Law", "link": "" },
       { "label": "The North Kingdom", "link": "" },
       { "label": "The Mortgage Expert", "link": "" },
+      { "label": "United Cities and Local Governments", "link": "" },
       { "label": "Universitat de Barcelona", "link": "" },
       { "label": "Vasava", "link": "" },
       { "label": "WWF", "link": "" }
     ],
-    "testimonials": [{ "quote": "", "author": "", "role": "", "thumbnail": "", "source": "" }],
+    "testimonials": [
+      {
+        "quote": "Working with Christian means happy clients. He’s an all-round developer with problem-solving and leadership skills. The cherry on top is his great eye for design and animation, a hard-to-find quality in a dev that always help our projects shine. Always on my team!",
+        "author": "Xavier Cussó",
+        "role": "Design Director @ Xavier Cussó Studio",
+        "thumbnail": ""
+      },
+      {
+        "quote": "The life of my business would end without my website. I trust Christian with my life. In addition to world-class developer skills, he brings a level of insight, empathy, and collaborative-ness that makes him the perfect partner on our projects.",
+        "author": "Stanley Tate",
+        "role": "Founder @ Student Loan Strategist",
+        "thumbnail": ""
+      }
+    ],
     "awards": {
       "hint": "Our work has been recognized in Cannes, Webby’s, Awwwards, FWA or WiReD.",
       "list": [{ "year": "2022", "list": [{ "label": "", "media": "", "link": "" }] }]
