@@ -12,7 +12,8 @@ export interface Head {
   'tw:image': string
 }
 
-export interface Landing {
+export interface Hero {
+  title: string
   hint: string
 }
 
@@ -22,14 +23,23 @@ export interface Service {
 }
 
 export interface Services {
+  title: string
   hint: string
   list: Array<Service>
 }
 
+export interface About {
+  title: string
+  hint: string
+  credit: string
+  detail: string
+}
+
 export interface Data {
   head: Head
-  landing: Landing
+  hero: Hero
   services: Services
+  about: About
 }
 
 export function parseHead(data?: Head): Head {
@@ -44,12 +54,20 @@ export function parseHead(data?: Head): Head {
 export function parseData(data?: Data): Data {
   return {
     head: parseHead(data?.head),
-    landing: {
-      hint: data?.landing.hint || '',
+    hero: {
+      title: data?.hero.title || '',
+      hint: data?.hero.hint || '',
     },
     services: {
+      title: data?.services.title || '',
       hint: data?.services.hint || '',
       list: data?.services.list || [],
+    },
+    about: {
+      title: data?.about.title || '',
+      hint: data?.about.hint || '',
+      credit: data?.about.credit || '',
+      detail: data?.about.detail || '',
     },
   }
 }

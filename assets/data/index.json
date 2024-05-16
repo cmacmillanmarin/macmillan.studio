@@ -5,19 +5,53 @@
     "og:image": "",
     "tw:image": ""
   },
-  "landing": {
+  "hero": {
+    "title": "MacMillan Studio",
     "hint": "Delivering unique digital experiences implemented from the ground up"
   },
   "services": {
-    "hint": "Joining your team as freelancer or taking care of full production",
+    "title": "Services",
+    "hint": "Joining you as freelancer or taking care of full digital production.",
     "list": [
       { "title": "Front End", "description": "Lorem ipsum dolor emet" },
       { "title": "Back End", "description": "Lorem ipsum dolor emet" },
-      { "title": "WebGL", "description": "Lorem ipsum dolor emet" },
-      { "title": "Native", "description": "Lorem ipsum dolor emet" },
-      { "title": "AI", "description": "Lorem ipsum dolor emet" },
-      { "title": "Web 3", "description": "Lorem ipsum dolor emet" },
-      { "title": "Maintenance", "description": "Lorem ipsum dolor emet" }
+      { "title": "Creative Development", "description": "Lorem ipsum dolor emet" },
+      { "title": "Native Development", "description": "Lorem ipsum dolor emet" },
+      { "title": "AI & Web 3", "description": "Lorem ipsum dolor emet" },
+      { "title": "Maintenance", "description": "Lorem ipsum dolor emet" },
+      { "title": "In-House Support", "description": "Lorem ipsum dolor emet" }
     ]
+  },
+  "about": {
+    "title": "About",
+    "hint": "Over a decade of experience delivering award-winning interactive experiences for leading brands and startups worldwide.",
+    "credit": "The Founder",
+    "detail": "I'm Christian MacMillan, I was born in Mallorca in 1990 and have always been fascinated by design and tech. I studied a BS in Software Engineering, but soon I realized I was drawn towards more creative ways of implementing software. Three years ago, after living in different cities and working in some of the most creative and recongnized agencies, like B-Reel or Vasava, I decided to go solo. After years of freelancing, I grow into a full-service development studio to meet with my clients needs. We are a remote team designed to scale on a project basis. Easygoing, open minded, easy to collaborate with, and always willing to learn new skills in different areas.",
+    "clients": [
+      { "label": "Ambia", "link": "" },
+      { "label": "B-Reel", "link": "" },
+      { "label": "Bulldog Studio", "link": "" },
+      { "label": "Carolina Herrera", "link": "" },
+      { "label": "Domestic Data Streamers", "link": "" },
+      { "label": "Feels Like", "link": "" },
+      { "label": "Fenty (Rihanna)", "link": "" },
+      { "label": "Hublot", "link": "" },
+      { "label": "Intorno Labs", "link": "" },
+      { "label": "Mango", "link": "" },
+      { "label": "Momentus Space", "link": "" },
+      { "label": "Roma Levin", "link": "" },
+      { "label": "Plastic", "link": "" },
+      { "label": "Tate Law", "link": "" },
+      { "label": "The North Kingdom", "link": "" },
+      { "label": "The Mortgage Expert", "link": "" },
+      { "label": "Universitat de Barcelona", "link": "" },
+      { "label": "Vasava", "link": "" },
+      { "label": "WWF", "link": "" }
+    ],
+    "testimonials": [{ "quote": "", "author": "", "role": "", "thumbnail": "", "source": "" }],
+    "awards": {
+      "hint": "Our work has been recognized in Cannes, Webby’s, Awwwards, FWA or WiReD.",
+      "list": [{ "year": "2022", "list": [{ "label": "", "media": "", "link": "" }] }]
+    }
   }
 }

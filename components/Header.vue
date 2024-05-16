@@ -12,8 +12,8 @@
           <CustomLink
             class="header__nav__list__item__anchor"
             type="referral"
-            to="/#reel"
-            label="Reel," />
+            to="/#projects"
+            label="Projects," />
         </li>
         <li class="header__nav__list__item">
           <CustomLink
@@ -45,7 +45,7 @@
       <div class="header__nav__logo">
         <CustomLink
           class="header__nav__list__item__anchor"
-          to="/#landing"
+          to="/#hero"
           type="referral"
           :content="true">
           <SvgLogo />

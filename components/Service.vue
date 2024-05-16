@@ -1,17 +1,17 @@
 <template>
-  <div class="landing__service">
-    <div class="landing__service__indicator">
-      <div class="landing__service__indicator__dot" />
+  <div class="service">
+    <div class="service__indicator">
+      <div class="service__indicator__dot" />
     </div>
-    <div class="landing__service__content">
-      <div class="landing__service__content__number">
-        <p class="landing__service__content__number__label" v-text="`{${index}}`" />
+    <div class="service__content">
+      <div class="service__content__number">
+        <p class="service__content__number__label" v-text="`{0${index + 1}}`" />
       </div>
-      <div class="landing__service__content__title">
-        <h3 class="landing__service__content__title__label">{{ data.title }}</h3>
+      <div class="service__content__title">
+        <h3 class="service__content__title__label">{{ data.title }}</h3>
       </div>
-      <div class="landing__service__content__description">
-        <p class="landing__service__content__description__label">{{ data.description }}</p>
+      <div class="service__content__description">
+        <p class="service__content__description__label">{{ data.description }}</p>
       </div>
     </div>
   </div>
@@ -27,15 +27,22 @@ defineProps<{
 </script>
 
 <style lang="scss">
-.landing__service {
+.service {
   position: relative;
+  width: var(--layout-max-width);
   padding-top: 6.4rem;
+  margin: auto;
 
   &__indicator {
+    --width: calc(
+      min(100vw, var(--layout-max-width)) - var(--layout-indent) * 2 - var(--layout-gap) * 11
+    );
+    --column-width: calc(var(--width) / 12);
+
     position: absolute;
     top: 6.4rem;
-    left: 0;
-    width: 100%;
+    left: calc(var(--column-width) * 2 + var(--layout-gap) * 3);
+    width: calc(var(--column-width) * 10 + var(--layout-gap) * 9);
     border-top: 1px solid black;
 
     &__dot {
@@ -57,6 +64,7 @@ defineProps<{
 
     &__number {
       @include columns(2, 'desktop');
+      @include t-number;
     }
     &__title {
       @include columns(4, 'desktop');
@@ -64,7 +72,7 @@ defineProps<{
     }
     &__description {
       @include columns(6, 'desktop');
-      @include t-b2;
+      @include t-b1;
     }
   }
 }

@@ -1,29 +1,30 @@
 <template>
-  <section class="landing" id="landing-target" data-scroll-target-top>
-    <div class="landing__content" v-transition:in="{ callback: enter }">
+  <section class="hero" id="hero-target" data-scroll-target-top>
+    <h1 class="hero__title">{{ data.title }}</h1>
+    <div class="hero__content" v-transition:in="{ callback: enter }">
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
-      <div class="landing__content__macmillan">
+      <div class="hero__content__macmillan">
         <SvgMacMillan />
       </div>
       <ClientOnly>
         <Teleport to="#top-layer">
-          <div class="landing__content__studio">
+          <div class="hero__content__studio">
             <SvgStudio />
           </div>
         </Teleport>
       </ClientOnly>
 
-      <div class="landing__content__hint">
+      <div class="hero__content__hint">
         <p>{{ data.hint }}</p>
       </div>
 
-      <video ref="videoEl" class="landing__content__video" width="1920" height="1080" muted loop>
+      <video ref="videoEl" class="hero__content__video" width="1920" height="1080" muted loop>
         <source src="/assets/video/short.webm" type="video/webm" />
       </video>
     </div>
-    <div class="landing__bg" />
-    <div class="landing__reel-target" id="reel-target" data-scroll-target-top />
+    <div class="hero__bg" />
+    <div class="hero__reel-target" id="reel-target" data-scroll-target-top />
   </section>
 </template>
 
@@ -33,10 +34,10 @@ import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { toPx } from '~/utils'
 import { fadeIn } from '~/utils/animations'
-import type { Landing } from '~/types/data'
+import type { Hero } from '~/types/data'
 
 defineProps<{
-  data: Landing
+  data: Hero
 }>()
 
 const { $scene }: any = useNuxtApp()
@@ -59,11 +60,10 @@ const scrollProgress = computed<number>(() =>
   Math.min(1, current.value / (vh.value * scrollGap.value))
 )
 const scrollThreshold = computed<number>(() => verticalGap.value * 2.5)
-const scrollThresholdPx = computed<string>(() => toPx(verticalGap.value * 2.5))
 
 const size = computed<{ x: number; y: number; z: number }>(() => {
   const initWidth = lvw.value * 0.666666 - layoutIndent.value
-  const finalWidth = lvw.value
+  const finalWidth = vw.value
   const incrementWidth = finalWidth - initWidth
 
   const initHeight = vh.value * 0.666666 - verticalGap.value
@@ -78,10 +78,16 @@ const size = computed<{ x: number; y: number; z: number }>(() => {
 })
 
 const position = computed<{ x: number; y: number }>(() => {
-  const gap = Math.min(0, lvw.value - vw.value) * -0.5
+  const initGap = Math.min(0, lvw.value - vw.value) * -0.5
+  const finalGap = 0
+  const incrementGap = finalGap - initGap
 
   const x =
-    vw.value - layoutIndent.value - size.value.x - gap + layoutIndent.value * scrollProgress.value
+    vw.value -
+    layoutIndent.value -
+    size.value.x -
+    incrementGap * (scrollProgress.value - 1) +
+    layoutIndent.value * scrollProgress.value
 
   const initY = verticalGap.value
   const finalY = 0
@@ -107,20 +113,20 @@ watch(current, () => {
   const opacity = 1 - (1 * current.value) / (vh.value * 0.4)
 
   gsap.set('.svg__macmillan, .svg__studio', { scale })
-  gsap.set('.landing__content__hint', { opacity, y: toPx(current.value * 0.2) })
-  gsap.set('.landing__content__studio', {
+  gsap.set('.hero__content__hint', { opacity, y: toPx(current.value * 0.2) })
+  gsap.set('.hero__content__studio', {
     y: toPx(current.value - (verticalGap.value + titleMargin.value) * scaleProgress + scroll),
   })
-  gsap.set('.landing__content__macmillan', {
+  gsap.set('.hero__content__macmillan', {
     y: toPx(current.value + scroll),
   })
-  gsap.set('.landing__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
+  gsap.set('.hero__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
 })
 
 watch(position, () => {
   if (videoPlaying.value) {
     $scene.updateObject({
-      id: 'landing-reel',
+      id: 'hero-reel',
       size: size.value,
       position: position.value,
     })
@@ -133,7 +139,7 @@ function enter(params: { el: HTMLElement }) {
 
 function onPlay() {
   $scene.addObject({
-    id: 'landing-reel',
+    id: 'hero-reel',
     type: 'plane',
     video: videoEl.value,
     position: position.value,
@@ -148,15 +154,19 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  $scene.removeObject('landing-reel')
+  $scene.removeObject('hero-reel')
 })
 </script>
 
 <style lang="scss">
-.landing {
+.hero {
   position: relative;
   background-color: var(--lime);
   padding-bottom: calc(var(--vh) * v-bind(scrollGap));
+
+  &__title {
+    @include t-seo;
+  }
 
   &__content {
     @include will-fade;
@@ -181,9 +191,12 @@ onUnmounted(() => {
 
     &__studio {
       pointer-events: auto;
-      width: 33.333333%;
+      width: calc(min(100vw, var(--layout-max-width)) * 0.333333);
       padding-top: v-bind(verticalGapPx);
       padding-left: var(--layout-indent);
+      @include from__desktop--x-large {
+        margin-left: calc((100vw - var(--layout-max-width)) * 0.5);
+      }
       svg {
         width: 127.9%;
         will-change: transform;
@@ -202,7 +215,7 @@ onUnmounted(() => {
       p {
         @include t-b1;
         color: var(--black);
-        padding-right: 30%;
+        padding-right: 24%;
         height: max-content;
       }
     }

@@ -2,11 +2,13 @@
   <div v-if="data" class="page page--home">
     <CustomHead :head="data.head" />
 
-    <Landing data-scroll data-scroll-continuous :data="data.landing" />
+    <Hero data-scroll data-scroll-continuous :data="data.hero" />
+
+    <!-- <Projects data-scroll /> -->
 
     <Services data-scroll :data="data.services" />
 
-    <About data-scroll />
+    <About data-scroll :data="data.about" />
 
     <Footer data-scroll />
   </div>

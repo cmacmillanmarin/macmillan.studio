@@ -22,7 +22,7 @@ export default defineNuxtPlugin(async nuxtApp => {
       families: [
         // 'HelveticaNowTextBold',
         // 'HelveticaNowTextMedium',
-        // 'HelveticaNowDisplayBold',
+        'HelveticaNowDisplayBold',
         'HelveticaNowDisplayMedium',
         // 'NeuePixelRegular',
       ],
