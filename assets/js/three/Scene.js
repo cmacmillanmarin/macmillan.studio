@@ -124,17 +124,19 @@ class Scene {
           }
           gsap.killTweensOf(object.mesh.material.uniforms.uOpacity)
           gsap.to(object.mesh.material.uniforms.uOpacity, { value: 1.0, duration: 1 })
-          gsap.to(object.mesh.material.uniforms.uPixel, { value: 600, duration: 4, delay: 0.25 })
+          // gsap.to(object.mesh.material.uniforms.uPixel, { value: 600, duration: 4, delay: 0.25 })
         }
         const position = this.fromDomToCanvas({
           x: object.position.x,
           y: object.position.y,
         })
+
         object.mesh.position.x = position.x + object.size.x * 0.5
         object.mesh.position.y = position.y - object.size.y * 0.5
         object.mesh.scale.x = object.size.x
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
+        object.mesh.material.uniforms.uTime.value += 0.05
         object.mesh.material.uniforms.uPlaneSize.value.x = object.size.x
         object.mesh.material.uniforms.uPlaneSize.value.y = object.size.y
         object.mesh.material.uniforms.uTexture.value.needsUpdate =
@@ -214,8 +216,9 @@ class Scene {
           vertexShader: VS,
           fragmentShader: FS,
           uniforms: {
+            uTime: { type: 'f', value: 0.0 },
             uOpacity: { type: 'f', value: 0.0 },
-            uPixel: { type: 'f', value: 0.0 },
+            uPixel: { type: 'f', value: 40.0 },
             uTexture: { type: 't', value: texture },
             uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
