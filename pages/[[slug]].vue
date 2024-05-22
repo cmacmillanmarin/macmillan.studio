@@ -1,8 +1,8 @@
 <template>
-  <div v-if="data" class="page page--home">
+  <div v-if="data" class="home">
     <CustomHead :head="data.head" />
 
-    <Hero data-scroll data-scroll-continuous :data="data.hero" />
+    <HomeHero data-scroll data-scroll-continuous :data="data.hero" />
 
     <!-- <Projects data-scroll /> -->
 
@@ -25,7 +25,7 @@ definePageMeta({
 </script>
 
 <style lang="scss">
-.page--home {
+.home {
   @include page;
 }
 </style>

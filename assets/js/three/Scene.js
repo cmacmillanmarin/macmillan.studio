@@ -1,6 +1,7 @@
 import VS from './glsl/vs.glsl'
 import FS from './glsl/fs.glsl'
 import * as THREE from 'three'
+import { round } from '~/utils'
 
 class Scene {
   constructor() {
@@ -137,6 +138,10 @@ class Scene {
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
         object.mesh.material.uniforms.uTime.value += 0.05
+        const xPixelRatio = object.size.x / round(object.size.x / 18)
+        const yPixelRatio = object.size.y / round(object.size.y / 18)
+        object.mesh.material.uniforms.uPixelSize.value.x = object.size.x / xPixelRatio
+        object.mesh.material.uniforms.uPixelSize.value.y = object.size.y / yPixelRatio
         object.mesh.material.uniforms.uPlaneSize.value.x = object.size.x
         object.mesh.material.uniforms.uPlaneSize.value.y = object.size.y
         object.mesh.material.uniforms.uTexture.value.needsUpdate =
@@ -163,7 +168,6 @@ class Scene {
 
     if (this.needsUpdate) {
       this.log('render()')
-      console.log(this.mouse)
       this.renderer.render(this.scene, this.camera)
     }
   }
@@ -218,7 +222,8 @@ class Scene {
           uniforms: {
             uTime: { type: 'f', value: 0.0 },
             uOpacity: { type: 'f', value: 0.0 },
-            uPixel: { type: 'f', value: 40.0 },
+            uPixel: { type: 'f', value: 0.0 },
+            uPixelSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uTexture: { type: 't', value: texture },
             uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },

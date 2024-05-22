@@ -1,30 +1,32 @@
 <template>
-  <section class="hero" id="hero-target" data-scroll-target-top>
-    <h1 class="hero__title">{{ data.title }}</h1>
-    <div class="hero__content" v-transition:in="{ callback: enter }">
+  <section class="home__hero" id="hero-target" data-scroll-target-top>
+    <h1 class="home__hero__title">{{ data.title }}</h1>
+    <div class="home__hero__content" v-transition:in="{ callback: enter }">
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
-      <div class="hero__content__macmillan">
+      <div class="test" />
+
+      <div class="home__hero__content__macmillan">
         <SvgMacMillan />
       </div>
       <ClientOnly>
         <Teleport to="#top-layer">
-          <div class="hero__content__studio">
+          <div class="home__hero__content__studio">
             <SvgStudio />
           </div>
         </Teleport>
       </ClientOnly>
 
-      <div class="hero__content__hint">
+      <div class="home__hero__content__hint">
         <p>{{ data.hint }}</p>
       </div>
 
-      <video ref="videoEl" class="hero__content__video" width="1920" height="1080" muted loop>
+      <video ref="videoEl" class="home__hero__content__video" width="1920" height="1080" muted loop>
         <source src="/assets/video/short.webm" type="video/webm" />
       </video>
     </div>
-    <div class="hero__bg" />
-    <div class="hero__reel-target" id="reel-target" data-scroll-target-top />
+    <div class="home__hero__bg" />
+    <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
   </section>
 </template>
 
@@ -32,7 +34,7 @@
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { toPx } from '~/utils'
+import { toPx, round } from '~/utils'
 import { fadeIn } from '~/utils/animations'
 import type { Hero } from '~/types/data'
 
@@ -71,8 +73,8 @@ const size = computed<{ x: number; y: number; z: number }>(() => {
   const incrementHeight = finalHeight - initHeight
 
   return {
-    x: initWidth + incrementWidth * scrollProgress.value,
-    y: initHeight + incrementHeight * scrollProgress.value,
+    x: round(initWidth + incrementWidth * scrollProgress.value, 2),
+    y: round(initHeight + incrementHeight * scrollProgress.value, 2),
     z: 1,
   }
 })
@@ -113,14 +115,14 @@ watch(current, () => {
   const opacity = 1 - (1 * current.value) / (vh.value * 0.4)
 
   gsap.set('.svg__macmillan, .svg__studio', { scale })
-  gsap.set('.hero__content__hint', { opacity, y: toPx(current.value * 0.2) })
-  gsap.set('.hero__content__studio', {
+  gsap.set('.home__hero__content__hint', { opacity, y: toPx(current.value * 0.2) })
+  gsap.set('.home__hero__content__studio', {
     y: toPx(current.value - (verticalGap.value + titleMargin.value) * scaleProgress + scroll),
   })
-  gsap.set('.hero__content__macmillan', {
+  gsap.set('.home__hero__content__macmillan', {
     y: toPx(current.value + scroll),
   })
-  gsap.set('.hero__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
+  gsap.set('.home__hero__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
 })
 
 watch(position, () => {
@@ -155,14 +157,25 @@ onMounted(() => {
 
 onUnmounted(() => {
   $scene.removeObject('hero-reel')
+  $scene.destroy()
 })
 </script>
 
 <style lang="scss">
-.hero {
+.home__hero {
   position: relative;
   background-color: var(--lime);
   padding-bottom: calc(var(--vh) * v-bind(scrollGap));
+
+  .test {
+    position: absolute;
+    top: 19%;
+    z-index: 9;
+    right: var(--layout-indent);
+    width: 1.7rem;
+    height: 1.7rem;
+    background-color: magenta;
+  }
 
   &__title {
     @include t-seo;
