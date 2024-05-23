@@ -6,9 +6,9 @@
 
     <!-- <Projects data-scroll /> -->
 
-    <Services data-scroll :data="data.services" />
+    <HomeServices data-scroll :data="data.services" />
 
-    <About data-scroll :data="data.about" />
+    <HomeAbout data-scroll :data="data.about" />
 
     <Footer data-scroll />
   </div>

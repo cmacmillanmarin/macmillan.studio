@@ -1,11 +1,11 @@
 <template>
-  <div class="projects" id="projects-target" data-scroll-target-top>
+  <div class="home__projects" id="projects-target" data-scroll-target-top>
     <p>Projects</p>
   </div>
 </template>
 
 <style lang="scss">
-.projects {
+.home__projects {
   min-height: var(--vh);
   background-color: darkgrey;
 }

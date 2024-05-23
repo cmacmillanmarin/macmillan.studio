@@ -1,17 +1,17 @@
 <template>
-  <div class="service">
-    <div class="service__indicator">
-      <div class="service__indicator__dot" />
+  <div class="home__services__service">
+    <div class="home__services__service__indicator">
+      <div class="home__services__service__indicator__dot" />
     </div>
-    <div class="service__content">
-      <div class="service__content__number">
-        <p class="service__content__number__label" v-text="`{0${index + 1}}`" />
+    <div class="home__services__service__content">
+      <div class="home__services__service__content__number">
+        <p class="home__services__service__content__number__label" v-text="`{0${index + 1}}`" />
       </div>
-      <div class="service__content__title">
-        <h3 class="service__content__title__label">{{ data.title }}</h3>
+      <div class="home__services__service__content__title">
+        <h3 class="home__services__service__content__title__label">{{ data.title }}</h3>
       </div>
-      <div class="service__content__description">
-        <p class="service__content__description__label">{{ data.description }}</p>
+      <div class="home__services__service__content__description">
+        <p class="home__services__service__content__description__label">{{ data.description }}</p>
       </div>
     </div>
   </div>
@@ -27,7 +27,7 @@ defineProps<{
 </script>
 
 <style lang="scss">
-.service {
+.home__services__service {
   position: relative;
   width: var(--layout-max-width);
   padding-top: 6.4rem;

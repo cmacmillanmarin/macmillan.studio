@@ -1,17 +1,17 @@
 <template>
-  <div class="about" id="about-target">
-    <h2 class="about__title">{{ data.title }}</h2>
-    <div class="about__hint">
-      <h3 class="about__hint__label">
-        <span class="about__hint__label__indent" /><span v-html="data.hint" />
+  <div class="home__about" id="about-target">
+    <h2 class="home__about__title">{{ data.title }}</h2>
+    <div class="home__about__hint">
+      <h3 class="home__about__hint__label">
+        <span class="home__about__hint__label__indent" /><span v-html="data.hint" />
       </h3>
     </div>
-    <div class="about__content">
-      <div class="about__content__thumbnail">
-        <p class="about__content__thumbnail__credit">{{ data.credit }}</p>
+    <div class="home__about__content">
+      <div class="home__about__content__thumbnail">
+        <p class="home__about__content__thumbnail__credit">{{ data.credit }}</p>
       </div>
-      <div class="about__content__detail">
-        <p class="about__content__detail__text">{{ data.detail }}</p>
+      <div class="home__about__content__detail">
+        <p class="home__about__content__detail__text">{{ data.detail }}</p>
       </div>
     </div>
   </div>
@@ -26,7 +26,7 @@ defineProps<{
 </script>
 
 <style lang="scss">
-.about {
+.home__about {
   padding: 8rem 0 12rem;
   background-color: var(--lime);
 

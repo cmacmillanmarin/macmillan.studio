@@ -4,8 +4,6 @@
     <div class="home__hero__content" v-transition:in="{ callback: enter }">
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
-      <div class="test" />
-
       <div class="home__hero__content__macmillan">
         <SvgMacMillan />
       </div>
@@ -166,16 +164,6 @@ onUnmounted(() => {
   position: relative;
   background-color: var(--lime);
   padding-bottom: calc(var(--vh) * v-bind(scrollGap));
-
-  .test {
-    position: absolute;
-    top: 19%;
-    z-index: 9;
-    right: var(--layout-indent);
-    width: 1.7rem;
-    height: 1.7rem;
-    background-color: magenta;
-  }
 
   &__title {
     @include t-seo;
