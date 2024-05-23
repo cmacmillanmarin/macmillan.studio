@@ -11,7 +11,10 @@ uniform vec2 uTextureSize;
 uniform vec2 uPlaneSize;    
 
 void main() {
-  float time = 0.5 * sin(uTime) + 0.5; // from 0 to 1
+  float time = 0.5 * sin(uTime * 0.25) + 0.5; // from 0 to 1
+
+  float gradient = smoothstep(0.0, 1.0, vUv.x);
+  float distanceFromCenter = 1.0 - max(distance(vUv, vec2(0.5)) * 8.0, 1.0);
 
   // Texture cover
   vec2 s = uPlaneSize;         
@@ -25,6 +28,7 @@ void main() {
   uv -= vec2(0.5);
   uv += vec2(0.5);
 
+  // vec2 pixel = floor(vUv * (uPixelSize - (uPixelSize - 1.0) * time)) / (uPixelSize - (uPixelSize - 1.0) * time);
   vec2 pixel = floor(vUv * uPixelSize) / uPixelSize;
   pixel = pixel * s / new + offset;
   pixel -= vec2(0.5);
@@ -32,7 +36,7 @@ void main() {
 
   vec4 coveredTexture = texture2D(uTexture, uv);
   vec4 pixelatedTexture = texture2D(uTexture, pixel);
-  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, time);
+  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, 1.0);
 
   gl_FragColor = vec4(mixedTexture.xyz, uOpacity);
 }

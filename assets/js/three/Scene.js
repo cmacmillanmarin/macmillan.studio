@@ -48,7 +48,7 @@ class Scene {
 
     this.scene = new THREE.Scene()
 
-    this.camera = new THREE.PerspectiveCamera(75, size.x / size.y, 0.1, 1250)
+    this.camera = new THREE.PerspectiveCamera(75, size.x / size.y, 100, 1250)
     this.camera.position.z = this.z
 
     this.renderer = new THREE.WebGLRenderer({
@@ -138,8 +138,8 @@ class Scene {
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
         object.mesh.material.uniforms.uTime.value += 0.05
-        const xPixelRatio = object.size.x / round(object.size.x / 18)
-        const yPixelRatio = object.size.y / round(object.size.y / 18)
+        const xPixelRatio = object.size.x / round(object.size.x / this.toScale(18))
+        const yPixelRatio = object.size.y / round(object.size.y / this.toScale(18))
         object.mesh.material.uniforms.uPixelSize.value.x = object.size.x / xPixelRatio
         object.mesh.material.uniforms.uPixelSize.value.y = object.size.y / yPixelRatio
         object.mesh.material.uniforms.uPlaneSize.value.x = object.size.x
@@ -241,7 +241,6 @@ class Scene {
   updateSize({ size }) {
     this.size = size
     this.camera.aspect = size.x / size.y
-    this.camera.fov = 2 * Math.atan(size.y / (2 * this.z)) * (180 / Math.PI)
     this.camera.fov = 2 * Math.atan((size.y * 0.5) / this.z) * (180 / Math.PI)
     this.camera.updateProjectionMatrix()
 
@@ -275,6 +274,11 @@ class Scene {
         transparent: true,
       })
     )
+  }
+
+  toScale(n) {
+    const mvw = Math.min(this.size.x, 1920) // Check layout max width
+    return (n * mvw) / 1440
   }
 
   onMouseMovement(e) {
