@@ -43,7 +43,7 @@ void main() {
   vec4 lime = vec4(197.0/255.0, 255.0/255.0, 32.0/255.0, 1.0);
   vec4 coveredTexture = texture2D(uVideoTexture, uv);
   vec4 pixelatedTexture = texture2D(uVideoTexture, pixel) * lime;
-  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, time);
+  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, 1.0);
   
 
   gl_FragColor = vec4(mixedTexture.xyz, uOpacity);

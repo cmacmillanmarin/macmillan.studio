@@ -14,6 +14,39 @@
         <p class="home__about__content__detail__text">{{ data.detail }}</p>
       </div>
     </div>
+    <div class="home__about__clients">
+      <div class="home__about__clients__headline">
+        <p class="home__about__clients__headline__title">Featured Clients</p>
+      </div>
+      <div class="home__about__clients__list">
+        <p class="home__about__clients__list__title">& More</p>
+        <p v-for="client in data.clients" class="home__about__clients__list__client">
+          {{ client.label }}
+        </p>
+      </div>
+      <div class="home__about__clients__featured">
+        <div class="home__about__clients__featured__client--center"></div>
+      </div>
+      <div class="home__about__clients__featured">
+        <div class="home__about__clients__featured__client">
+          <SvgNike />
+        </div>
+        <div class="home__about__clients__featured__client"></div>
+      </div>
+      <div class="home__about__clients__featured">
+        <div class="home__about__clients__featured__client--center">
+          <SvgNetflix />
+        </div>
+      </div>
+      <div class="home__about__clients__featured">
+        <div class="home__about__clients__featured__client">
+          <SvgGoogle />
+        </div>
+        <div class="home__about__clients__featured__client">
+          <SvgSLS />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -71,6 +104,59 @@ defineProps<{
         @include t-b1;
         column-count: 2;
         column-gap: var(--layout-gap);
+      }
+    }
+  }
+
+  &__clients {
+    @include grid;
+
+    &__headline {
+      @include columns(6, 'desktop');
+      @include gap(6, 'left', 'desktop');
+      &__title {
+        @include t-b1;
+      }
+    }
+
+    &__list {
+      @include columns(4, 'desktop');
+      align-self: end;
+      &__title {
+        @include t-b1;
+      }
+      &__client {
+        @include t-b1;
+      }
+    }
+
+    &__featured {
+      @include columns(2, 'desktop');
+      aspect-ratio: 1 / 3;
+      display: flex;
+      flex-wrap: wrap;
+
+      &__client {
+        width: 100%;
+        aspect-ratio: 1;
+        height: max-content;
+        align-self: start;
+
+        background-color: var(--dark-grey);
+        border-radius: 1.6rem;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &:last-child {
+          align-self: end;
+        }
+
+        &--center {
+          @extend .home__about__clients__featured__client;
+          align-self: center !important;
+        }
       }
     }
   }

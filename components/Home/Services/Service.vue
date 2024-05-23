@@ -35,7 +35,7 @@ defineProps<{
 
   &:last-child {
     .home__services__service__content {
-      padding-bottom: 4rem;
+      padding-bottom: 18rem;
     }
   }
 
