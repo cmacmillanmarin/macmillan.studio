@@ -12,10 +12,8 @@ uniform sampler2D uVideoTexture;
 uniform vec2 uTextureSize;  
 uniform vec2 uPlaneSize;  
 
-float random (vec2 st) {
-    return fract(sin(dot(st.xy,
-                         vec2(12.9898,78.233)))*
-        43758.5453123);
+float noise(vec2 st) {
+  return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
 void main() {
@@ -51,6 +49,6 @@ void main() {
   gl_FragColor = vec4(mixedTexture.xyz, uOpacity);
 
   if (uNoise == 1) {
-    gl_FragColor = vec4(vec3(0.0), random(vec2(time) * vUv) * 0.2);
+    gl_FragColor = vec4(vec3(0.0), noise(vec2(time) * vUv) * 0.2);
   }
 }
