@@ -25,13 +25,17 @@
         </p>
       </div>
       <div class="home__about__clients__featured">
-        <div class="home__about__clients__featured__client--center"></div>
+        <div class="home__about__clients__featured__client--center">
+          <SvgSLS />
+        </div>
       </div>
       <div class="home__about__clients__featured">
         <div class="home__about__clients__featured__client">
           <SvgNike />
         </div>
-        <div class="home__about__clients__featured__client"></div>
+        <div class="home__about__clients__featured__client">
+          <SvgBuff />
+        </div>
       </div>
       <div class="home__about__clients__featured">
         <div class="home__about__clients__featured__client--center">
@@ -43,7 +47,7 @@
           <SvgGoogle />
         </div>
         <div class="home__about__clients__featured__client">
-          <SvgSLS />
+          <SvgGorillaz />
         </div>
       </div>
     </div>
