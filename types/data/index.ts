@@ -33,6 +33,10 @@ export interface About {
   hint: string
   credit: string
   detail: string
+  clients: Array<{
+    label: string
+    link?: string
+  }>
 }
 
 export interface Data {
@@ -68,6 +72,7 @@ export function parseData(data?: Data): Data {
       hint: data?.about.hint || '',
       credit: data?.about.credit || '',
       detail: data?.about.detail || '',
+      clients: data?.about.clients || [],
     },
   }
 }

@@ -2,47 +2,53 @@ precision highp float;
 
 varying vec2 vUv;
 
+uniform int uNoise;
 uniform float uTime;
 uniform float uOpacity;
 uniform float uPixel;
-uniform sampler2D uTexture;
+uniform vec2 uPixelSize;
+uniform sampler2D uImageTexture;
+uniform sampler2D uVideoTexture;
 uniform vec2 uTextureSize;  
-uniform vec2 uPlaneSize;    
+uniform vec2 uPlaneSize;  
+
+float noise(vec2 st) {
+  return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
 
 void main() {
-  vec2 uv = vUv;
+  float time = 0.5 * sin(uTime) + 0.5; // from 0 to 1
 
-  vec2 s = uPlaneSize;          // Plane size
-  vec2 i = uTextureSize;        // Texture size cropped
+  float gradient = smoothstep(0.0, 1.0, vUv.x);
+  float distanceFromCenter = 1.0 - max(distance(vUv, vec2(0.5)) * 8.0, 1.0);
+
+  // Texture cover
+  vec2 s = uPlaneSize;         
+  vec2 i = uTextureSize;        
   float rs = s.x / s.y;
   float ri = i.x / i.y;
   vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
   vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
-  uv = vUv * s / new + offset;
+  
+  vec2 uv = vUv * s / new + offset;
   uv -= vec2(0.5);
   uv += vec2(0.5);
 
-  
-  float pct = distance(uv, vec2(0.5)) * 2.0;
+  // vec2 pixel = floor(vUv * (uPixelSize - (uPixelSize - 1.0) * time)) / (uPixelSize - (uPixelSize - 1.0) * time);
+  vec2 pixel = floor(vUv * uPixelSize) / uPixelSize;
+  pixel = pixel * s / new + offset;
+  pixel -= vec2(0.5);
+  pixel += vec2(0.5);
 
-  // vec2 grid_uv = round(uv * float(uPixel)) / float(uPixel);
-  // float x = 1.0 - smoothstep(0.0, 0.5, uv.x);
-  // if (uv.x > .5) x = smoothstep(0.5, 1.0, uv.x);
-  // float y = 1.0 - smoothstep(0.0, 0.5, uv.y);
-  // if (uv.y > .5) y = smoothstep(0.5, 1.0, uv.y);
-  // float maxPixelRatio = 20.0;
-  // float pixelRatio = maxPixelRatio + (uPlaneSize.x - maxPixelRatio) * pct ;
-  // vec2 grid_uv = round(uv * pixelRatio) / pixelRatio;
+  vec4 lime = vec4(197.0/255.0, 255.0/255.0, 32.0/255.0, 1.0);
+  vec4 coveredTexture = texture2D(uVideoTexture, uv);
+  vec4 pixelatedTexture = texture2D(uVideoTexture, pixel) * lime;
+  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, 1.0);
   
-  vec2 grid_uv = round(uv * uPixel) / uPixel;
-  
-  float time = 0.5 * sin(uTime) + 0.5; // from 0 to 1
 
-  vec4 texColor1 = texture2D(uTexture, grid_uv);
-  vec4 texColor2 = texture2D(uTexture, uv);
-  vec4 texColor = mix(texColor1, texColor2, time);
-  gl_FragColor = vec4(texColor.xyz, uOpacity);
-  // gl_FragColor = vec4(vec3(y), uOpacity);
-  // gl_FragColor = vec4(vec3(pct), uOpacity);
-  // gl_FragColor = vec4(vec3(0.5 * sin(uTime) + 0.5), uOpacity);
+  gl_FragColor = vec4(mixedTexture.xyz, uOpacity);
+
+  if (uNoise == 1) {
+    gl_FragColor = vec4(vec3(0.0), noise(vec2(time) * vUv) * 0.2);
+  }
 }

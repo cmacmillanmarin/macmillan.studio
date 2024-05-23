@@ -1,12 +1,16 @@
 <template>
-  <div class="services" id="services-target" data-scroll-target-top>
-    <h2 class="services__title">{{ data.title }}</h2>
-    <div class="services__hint">
-      <h3 class="services__hint__label">
-        <span class="services__hint__label__indent" /><span v-html="data.hint" />
+  <div class="home__services" id="services-target" data-scroll-target-top>
+    <h2 class="home__services__title">{{ data.title }}</h2>
+    <div class="home__services__hint">
+      <h3 class="home__services__hint__label">
+        <span class="home__services__hint__label__indent" /><span v-html="data.hint" />
       </h3>
     </div>
-    <Service v-for="(service, i) in data.list" :index="i" :data="service" data-scroll-sticky />
+    <HomeServicesService
+      v-for="(service, i) in data.list"
+      :index="i"
+      :data="service"
+      data-scroll-sticky />
   </div>
 </template>
 
@@ -19,9 +23,9 @@ defineProps<{
 </script>
 
 <style lang="scss">
-.services {
-  background-color: grey;
-  padding: 4rem 0;
+.home__services {
+  background-color: var(--light-grey);
+  padding: 4rem 0 0;
 
   &__title {
     @include t-seo;

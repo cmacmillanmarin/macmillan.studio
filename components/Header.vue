@@ -102,7 +102,7 @@ watch(current, () => {
       @include t-b1;
     }
     .svg__pixel-arrow {
-      width: 2rem;
+      width: toScale(2rem);
     }
   }
 
