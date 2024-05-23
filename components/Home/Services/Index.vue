@@ -24,8 +24,8 @@ defineProps<{
 
 <style lang="scss">
 .home__services {
-  background-color: grey;
-  padding: 4rem 0;
+  background-color: var(--light-grey);
+  padding: 4rem 0 0;
 
   &__title {
     @include t-seo;

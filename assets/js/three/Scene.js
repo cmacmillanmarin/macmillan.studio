@@ -30,7 +30,6 @@ class Scene {
     }
 
     this.maxPlanes = 10
-    this.planes = []
     this.batch = []
 
     this.objects = []
@@ -110,14 +109,20 @@ class Scene {
         if (!object.mesh) {
           if (object.type === 'plane') {
             const availablePlane = this.getAvailablePlane(object.id)
-            if (!availablePlane) continue
+            if (!availablePlane) {
+              console.warn(`No available planes for ${object.id}`)
+              continue
+            }
             object.mesh = availablePlane.mesh
             object.meshId = availablePlane.id
+            object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0
             if (object.video) {
-              object.mesh.material.uniforms.uTexture.value.image = object.video
+              object.mesh.material.uniforms.uVideoTexture.value.image = object.video
               object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
               object.mesh.material.uniforms.uTextureSize.value.y =
                 (object.size.x * object.video.height) / object.video.width
+            } else if (object.img) {
+              console.log('Set image')
             }
           } else {
             object.mesh = this.getMesh(object.type)
@@ -144,8 +149,8 @@ class Scene {
         object.mesh.material.uniforms.uPixelSize.value.y = object.size.y / yPixelRatio
         object.mesh.material.uniforms.uPlaneSize.value.x = object.size.x
         object.mesh.material.uniforms.uPlaneSize.value.y = object.size.y
-        object.mesh.material.uniforms.uTexture.value.needsUpdate =
-          object.video.readyState >= object.video.HAVE_CURRENT_DATA
+        object.mesh.material.uniforms.uVideoTexture.value.needsUpdate =
+          object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
       } else if (object.mesh && object.type === 'plane') {
         this.releasePlane(object.meshId)
         object.mesh = null
@@ -190,6 +195,12 @@ class Scene {
     if (this.batch.length === 0) {
       this.generatePlanesBatch()
     }
+    if (id === 'noise') {
+      const plane = this.batch[this.batch.length - 1]
+      plane.available = false
+      plane.mesh.visible = true
+      return plane
+    }
     for (const plane of this.batch) {
       if (plane.available) {
         this.log(`Object ${id} gets available plane ${plane.id}`)
@@ -209,6 +220,7 @@ class Scene {
   }
 
   generatePlanesBatch() {
+    const img = document.createElement('img')
     const video = document.createElement('video')
     let texture = new THREE.VideoTexture(video)
 
@@ -220,11 +232,13 @@ class Scene {
           vertexShader: VS,
           fragmentShader: FS,
           uniforms: {
+            uNoise: { type: 'i', value: 0 },
             uTime: { type: 'f', value: 0.0 },
             uOpacity: { type: 'f', value: 0.0 },
             uPixel: { type: 'f', value: 0.0 },
             uPixelSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
-            uTexture: { type: 't', value: texture },
+            uImageTexture: { type: 't', value: new THREE.Texture(img) },
+            uVideoTexture: { type: 't', value: texture },
             uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
           },
@@ -321,9 +335,9 @@ class Scene {
     this.renderer = null
     this.camera = null
     this.objects = []
-    for (const i in this.planes) {
-      this.planes[i] = null
-      delete this.planes[i]
+    for (const i in this.batch) {
+      this.batch[i] = null
+      delete this.batch[i]
     }
 
     this.removeListeners()

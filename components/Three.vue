@@ -17,10 +17,21 @@ onMounted((): void => {
     play: addTicker,
     stop: killTicker,
   })
+  $scene.addObject({
+    id: 'noise',
+    type: 'plane',
+    size: { x: vw.value, y: vh.value, z: 1 },
+    position: { x: 0, y: 0 },
+  })
 })
 
 watch(onResize, (): void => {
   $scene.updateSize({ size: { x: vw.value, y: vh.value } })
+  $scene.updateObject({
+    id: 'noise',
+    size: { x: vw.value, y: vh.value, z: 1 },
+    position: { x: 0, y: 0 },
+  })
 })
 
 onUnmounted((): void => {

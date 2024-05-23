@@ -29,9 +29,15 @@ defineProps<{
 <style lang="scss">
 .home__services__service {
   position: relative;
-  width: var(--layout-max-width);
-  padding-top: 6.4rem;
-  margin: auto;
+  max-width: var(--layout-max-width);
+  padding-top: 4rem;
+  margin: 0 auto;
+
+  &:last-child {
+    .home__services__service__content {
+      padding-bottom: 4rem;
+    }
+  }
 
   &__indicator {
     --width: calc(
@@ -40,7 +46,9 @@ defineProps<{
     --column-width: calc(var(--width) / 12);
 
     position: absolute;
-    top: 6.4rem;
+    z-index: 2;
+
+    top: 4rem;
     left: calc(var(--column-width) * 2 + var(--layout-gap) * 3);
     width: calc(var(--column-width) * 10 + var(--layout-gap) * 9);
     border-top: 1px solid black;
@@ -48,7 +56,7 @@ defineProps<{
     &__dot {
       position: absolute;
       top: 0;
-      left: 0;
+      left: calc(var(--column-width) * 4 + var(--layout-gap) * 4);
       width: 0.8rem;
       height: 0.8rem;
       background-color: black;
@@ -58,9 +66,22 @@ defineProps<{
 
   &__content {
     @include grid;
-    background-color: grey;
-    padding-top: 2rem;
-    padding-bottom: 4rem;
+    position: relative;
+    z-index: 1;
+
+    background-color: var(--light-grey);
+    padding-top: 0.8rem;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      transform: translateY(100%);
+      height: 10.4rem;
+      background-color: var(--light-grey);
+    }
 
     &__number {
       @include columns(2, 'desktop');

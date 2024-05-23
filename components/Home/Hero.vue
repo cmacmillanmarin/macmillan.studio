@@ -126,7 +126,7 @@ watch(current, () => {
 watch(position, () => {
   if (videoPlaying.value) {
     $scene.updateObject({
-      id: 'hero-reel',
+      id: 'reel',
       size: size.value,
       position: position.value,
     })
@@ -139,7 +139,7 @@ function enter(params: { el: HTMLElement }) {
 
 function onPlay() {
   $scene.addObject({
-    id: 'hero-reel',
+    id: 'reel',
     type: 'plane',
     video: videoEl.value,
     position: position.value,
@@ -154,7 +154,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  $scene.removeObject('hero-reel')
+  $scene.removeObject('reel')
   $scene.destroy()
 })
 </script>
@@ -242,7 +242,7 @@ onUnmounted(() => {
   &__bg {
     @include will-fade;
     @include absolute-fill;
-    background-color: grey;
+    background-color: var(--light-grey);
   }
 }
 </style>

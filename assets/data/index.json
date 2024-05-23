@@ -11,15 +11,37 @@
   },
   "services": {
     "title": "Services",
-    "hint": "Joining you as freelancer or taking care of full digital production.",
+    "hint": "Joining your team or taking care of full digital production.",
     "list": [
-      { "title": "Front End", "description": "Lorem ipsum dolor emet" },
-      { "title": "Back End", "description": "Lorem ipsum dolor emet" },
-      { "title": "Creative Development", "description": "Lorem ipsum dolor emet" },
-      { "title": "Native Development", "description": "Lorem ipsum dolor emet" },
+      {
+        "title": "Front–End",
+        "description": "Even though we have a technological background, we care about design equally. We implement designs from scratch. With a keen interest in motion and interaction, our focus is implementing high performance experiences with great attention to detail."
+      },
+      {
+        "title": "Back–End",
+        "description": "Fully customizable experiences. Always as headless solution, selecting the most appropriate platform for each project. Properly documented so you, and your team, can work independently saving costs and time. We work with WordPress, Strapi, Contentful, Contentstack, Prismic, Storyblok or Shopify. We do not offer back–end as a single service."
+      },
+      {
+        "title": "WebGL",
+        "description": "An innovative experience can increase your perceived brand value and, consequently, your conversions. We help you throughout the process, from concept to implementation."
+      },
       { "title": "AI & Web 3", "description": "Lorem ipsum dolor emet" },
-      { "title": "Maintenance", "description": "Lorem ipsum dolor emet" },
-      { "title": "In-House Support", "description": "Lorem ipsum dolor emet" }
+      {
+        "title": "E–Commerce",
+        "description": "A headless e–commerce means a faster site, better scalability and more conversions. If a full stack solution can’t give your customer the experience your business wants, we help you. Improving loading times, increasing your SEO scores and, above all, providing a fully personalized experience to your customers. We work with Shopify, Square, WooCommerce, etc."
+      },
+      {
+        "title": "Native Apps",
+        "description": "Fully native apps using React Native. React Native is being used in thousands of apps, but it's likely you've already used it in apps like Facebook, Skype, Outlook or Discord."
+      },
+      {
+        "title": "Maintenance",
+        "description": "We aim to build long term relationships with our clients. We do not ship and forget. We offer year based packages to help you manage your site once it has been published. From updates, to downsides or new features. You are covered."
+      },
+      {
+        "title": "In-House Support",
+        "description": "We collaborate individually, as freelancer, with other studios and agencies on a project basis. We aim to build open collaborations to reach mutual ambitions. Always adapted to the contractor schedule. Working one-on-one with us to build your project from the ground up. Specially efficient if you work with Nuxt/Vue, Next/React, Vanilla JS and WebGL."
+      }
     ]
   },
   "about": {

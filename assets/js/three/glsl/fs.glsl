@@ -2,13 +2,21 @@ precision highp float;
 
 varying vec2 vUv;
 
+uniform int uNoise;
 uniform float uTime;
 uniform float uOpacity;
 uniform float uPixel;
 uniform vec2 uPixelSize;
-uniform sampler2D uTexture;
+uniform sampler2D uImageTexture;
+uniform sampler2D uVideoTexture;
 uniform vec2 uTextureSize;  
-uniform vec2 uPlaneSize;    
+uniform vec2 uPlaneSize;  
+
+float random (vec2 st) {
+    return fract(sin(dot(st.xy,
+                         vec2(12.9898,78.233)))*
+        43758.5453123);
+}
 
 void main() {
   float time = 0.5 * sin(uTime) + 0.5; // from 0 to 1
@@ -35,10 +43,14 @@ void main() {
   pixel += vec2(0.5);
 
   vec4 lime = vec4(197.0/255.0, 255.0/255.0, 32.0/255.0, 1.0);
-  vec4 coveredTexture = texture2D(uTexture, uv);
-  vec4 pixelatedTexture = texture2D(uTexture, pixel) * lime;
+  vec4 coveredTexture = texture2D(uVideoTexture, uv);
+  vec4 pixelatedTexture = texture2D(uVideoTexture, pixel) * lime;
   vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, time);
   
 
   gl_FragColor = vec4(mixedTexture.xyz, uOpacity);
+
+  if (uNoise == 1) {
+    gl_FragColor = vec4(vec3(0.0), random(vec2(time) * vUv) * 0.2);
+  }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="home__about" id="about-target">
+  <div class="home__about" id="about-target" data-scroll-target-top>
     <h2 class="home__about__title">{{ data.title }}</h2>
     <div class="home__about__hint">
       <h3 class="home__about__hint__label">
