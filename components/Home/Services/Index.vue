@@ -10,7 +10,8 @@
       v-for="(service, i) in data.list"
       :index="i"
       :data="service"
-      data-scroll-sticky />
+      data-scroll-sticky
+      data-scroll-sticky-top="24" />
   </div>
 </template>
 

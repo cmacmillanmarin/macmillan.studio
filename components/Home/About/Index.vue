@@ -8,49 +8,31 @@
     </div>
     <div class="home__about__content">
       <div class="home__about__content__thumbnail">
+        <div class="home__about__content__thumbnail__image" />
         <p class="home__about__content__thumbnail__credit">{{ data.credit }}</p>
       </div>
       <div class="home__about__content__detail">
         <p class="home__about__content__detail__text">{{ data.detail }}</p>
       </div>
     </div>
-    <div class="home__about__clients">
-      <div class="home__about__clients__headline">
-        <p class="home__about__clients__headline__title">Featured Clients</p>
+
+    <HomeAboutClients :data="data.clients" />
+
+    <div class="home__about__collaborator">
+      <Separator />
+      <div class="home__about__collaborator__title">
+        <p class="home__about__collaborator__title__label">{{ data.collaborator.title }}</p>
       </div>
-      <div class="home__about__clients__list">
-        <p class="home__about__clients__list__title">& More</p>
-        <p v-for="client in data.clients" class="home__about__clients__list__client">
-          {{ client.label }}
-        </p>
+      <div class="home__about__collaborator__content">
+        <p class="home__about__collaborator__content__label">{{ data.collaborator.description }}</p>
       </div>
-      <div class="home__about__clients__featured">
-        <div class="home__about__clients__featured__client--center">
-          <SvgSLS />
-        </div>
-      </div>
-      <div class="home__about__clients__featured">
-        <div class="home__about__clients__featured__client">
-          <SvgNike />
-        </div>
-        <div class="home__about__clients__featured__client">
-          <SvgBuff />
-        </div>
-      </div>
-      <div class="home__about__clients__featured">
-        <div class="home__about__clients__featured__client--center">
-          <SvgNetflix />
-        </div>
-      </div>
-      <div class="home__about__clients__featured">
-        <div class="home__about__clients__featured__client">
-          <SvgGoogle />
-        </div>
-        <div class="home__about__clients__featured__client">
-          <SvgGorillaz />
-        </div>
+      <div class="home__about__collaborator__thumbnail">
+        <div class="home__about__collaborator__thumbnail__image" />
+        <p class="home__about__collaborator__thumbnail__credit">{{ data.collaborator.credit }}</p>
       </div>
     </div>
+
+    <HomeAboutTestimonials :data="data.testimonials" />
   </div>
 </template>
 
@@ -96,6 +78,12 @@ defineProps<{
     &__thumbnail {
       @include columns(2, 'desktop');
       @include gap(2, 'left', 'desktop');
+      &__image {
+        aspect-ratio: 1;
+        background-color: black;
+        border-radius: 1.6rem;
+        margin-bottom: 1.2rem;
+      }
       &__credit {
         @include t-b1;
       }
@@ -112,55 +100,40 @@ defineProps<{
     }
   }
 
-  &__clients {
+  &__collaborator {
     @include grid;
-
-    &__headline {
-      @include columns(6, 'desktop');
-      @include gap(6, 'left', 'desktop');
-      &__title {
-        @include t-b1;
-      }
+    margin-top: 18rem;
+    position: relative;
+    .separator {
+      margin-left: calc(var(--layout-column-width) * 4 + var(--layout-gap) * 5);
+      width: calc(var(--layout-column-width) * 5 + var(--layout-gap) * 4);
     }
-
-    &__list {
-      @include columns(4, 'desktop');
-      align-self: end;
-      &__title {
-        @include t-b1;
-      }
-      &__client {
-        @include t-b1;
-      }
-    }
-
-    &__featured {
+    &__title {
+      @include gap(4, 'left', 'desktop');
       @include columns(2, 'desktop');
-      aspect-ratio: 1 / 3;
-      display: flex;
-      flex-wrap: wrap;
-
-      &__client {
-        width: 100%;
+      &__label {
+        @include t-b1;
+        margin-top: 1.2rem;
+      }
+    }
+    &__content {
+      @include columns(3, 'desktop');
+      @include gap(1, 'right', 'desktop');
+      &__label {
+        @include t-b1;
+        margin-top: 1.2rem;
+      }
+    }
+    &__thumbnail {
+      @include columns(2, 'desktop');
+      &__image {
         aspect-ratio: 1;
-        height: max-content;
-        align-self: start;
-
-        background-color: var(--dark-grey);
+        background-color: black;
         border-radius: 1.6rem;
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        &:last-child {
-          align-self: end;
-        }
-
-        &--center {
-          @extend .home__about__clients__featured__client;
-          align-self: center !important;
-        }
+        margin-bottom: 1.2rem;
+      }
+      &__credit {
+        @include t-b1;
       }
     }
   }

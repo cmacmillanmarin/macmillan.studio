@@ -46,65 +46,116 @@
   },
   "about": {
     "title": "About",
-    "hint": "Over a decade of experience delivering award-winning interactive experiences for leading brands and startups worldwide.",
+    "hint": "Over a decade of experience delivering award-winning interactive experiences for leading brands and companies worldwide.",
     "credit": "The Founder",
     "detail": "I'm Christian MacMillan, I was born in Mallorca in 1990 and have always been fascinated by design and tech. I studied a BS in Software Engineering, but soon I realized I was drawn towards more creative ways of implementing software. Three years ago, after living in different cities and working in some of the most creative and recongnized agencies, like B-Reel or Vasava, I decided to go solo. After years of freelancing, I grow into a full-service development studio to meet with my clients needs. We are a remote team designed to scale on a project basis. Easygoing, open minded, easy to collaborate with, and always willing to learn new skills in different areas.",
-    "clients": [
-      { "label": "Ambia", "link": "" },
-      { "label": "B-Reel", "link": "" },
-      { "label": "Bulldog Studio", "link": "" },
-      { "label": "Carolina Herrera", "link": "" },
-      { "label": "Domestic Data Streamers", "link": "" },
-      { "label": "Feels Like", "link": "" },
-      { "label": "Fenty (Rihanna)", "link": "" },
-      { "label": "Hublot", "link": "" },
-      { "label": "Intorno Labs", "link": "" },
-      { "label": "Mango", "link": "" },
-      { "label": "Momentus Space", "link": "" },
-      { "label": "Roma Levin", "link": "" },
-      { "label": "Plastic", "link": "" },
-      { "label": "Tate Law", "link": "" },
-      { "label": "The North Kingdom", "link": "" },
-      { "label": "The Mortgage Expert", "link": "" },
-      { "label": "Universitat de Barcelona", "link": "" },
-      { "label": "Vasava", "link": "" },
-      { "label": "WWF", "link": "" }
-    ],
+    "clients": {
+      "title": "Featured Clients",
+      "hint": "& More",
+      "list": [
+        { "label": "Ambia", "link": "" },
+        { "label": "B-Reel", "link": "" },
+        { "label": "Bulldog Studio", "link": "" },
+        { "label": "Carolina Herrera", "link": "" },
+        { "label": "Domestic Data Streamers", "link": "" },
+        { "label": "Feels Like", "link": "" },
+        { "label": "Fenty (Rihanna)", "link": "" },
+        { "label": "Hublot", "link": "" },
+        { "label": "Intorno Labs", "link": "" },
+        { "label": "LVMH", "link": "" },
+        { "label": "Mango", "link": "" },
+        { "label": "Momentus Space", "link": "" },
+        { "label": "Roma Levin", "link": "" },
+        { "label": "Plastic", "link": "" },
+        { "label": "Tate Law", "link": "" },
+        { "label": "The North Kingdom", "link": "" },
+        { "label": "The Mortgage Expert", "link": "" },
+        { "label": "Universitat de Barcelona", "link": "" },
+        { "label": "Vasava", "link": "" },
+        { "label": "WWF", "link": "" }
+      ]
+    },
+    "collaborator": {
+      "title": "Our sister studio",
+      "description": "Any good web production needs a solid UX & UI design partner. For this reason, we’ve been partnering up with Xavier Cussó and our extended team of creative and technologists for 8 years now. A proven approach that allows us to scale on-demand to match any brief in a highly-optimised process.",
+      "credit": "Xavier Cussó Studio"
+    },
     "testimonials": [
       {
         "quote": "I had the privilege to work with Christian in many projects, and I can say it has always been a pleasure to have him as part of the team. As a reliable and collaborative Tech Lead, he is very keen to push for the quality on every single detail, working fully integrated with the Creative team, and adding a lot to the final output.",
-        "author": "Rodrigo Alberini",
-        "role": "Director of Operations @ B-Reel and Feels Like",
+        "credit": "Rodrigo Alberini—Director of Operations @ B-Reel and Feels Like",
         "thumbnail": ""
       },
       {
         "quote": "The life of my business would end without my website. I trust Christian with my life. In addition to world-class developer skills, he brings a level of insight, empathy, and collaborative-ness that makes him the perfect partner on our projects.",
-        "author": "Stanley Tate",
-        "role": "Founder @ Student Loan Strategist",
+        "credit": "Stanley Tate—Founder @ Student Loan Strategist",
         "thumbnail": ""
       },
       {
-        "quote": "When best quality meets deadlines! He has a really good eye for detail which makes it a pleasure for designers to work with him. Also, he delivers full solid projects with the latest tech and features always in time with the smoothest workflow, efficiency to the max!",
-        "author": "Xavier Escala",
-        "role": "Brand Design Manager @ BUFF®",
+        "quote": "When quality meets deadlines! He has a great eye for detail, making it a pleasure for designers to work with him. He consistently delivers solid projects with the latest tech and features, always on time, ensuring the smoothest workflow and maximum efficiency!",
+        "credit": "Xavier Escala—Brand Design Manager @ BUFF®",
         "thumbnail": ""
       },
       {
-        "quote": "Working with Christian is always a pleasure. He is very detail-oriented and ensures that the design is elevated with high-quality animations. His keen eye for design consistently brings our projects to life, and communication with him is effortless. He takes the time to thoroughly understand the project and asks the right questions, which is incredibly important and helpful. Collaborating with him has always been a smooth and enjoyable experience",
-        "author": "Esteban Piacentino",
-        "role": "Tech Director @ Domestic Data Streamers",
+        "quote": "Working with Christian is always a pleasure. He is very detail-oriented and ensures that the design is elevated with high-quality animations. His keen eye for design consistently brings our projects to life, and communication with him is effortless. He takes the time to thoroughly understand the project and asks the right questions, which is incredibly important and helpful. Collaborating with him has always been a smooth and enjoyable experience.",
+        "credit": "Esteban Piacentino—Tech Director @ Domestic Data Streamers",
         "thumbnail": ""
       },
       {
         "quote": "Working with Christian means happy clients. He’s an all-round developer with problem-solving and leadership skills. The cherry on top is his great eye for design and animation, a hard-to-find quality in a dev that always help our projects shine. Always on my team!",
-        "author": "Xavier Cussó",
-        "role": "Design Director @ Xavier Cussó Studio",
+        "credit": "Xavier Cussó—Design Director @ Xavier Cussó Studio",
         "thumbnail": ""
       }
     ],
     "awards": {
       "hint": "Our work has been recognized in Cannes, Webby’s, Awwwards, FWA or WiReD.",
-      "list": [{ "year": "2022", "list": [{ "label": "", "media": "", "link": "" }] }]
+      "list": [
+        {
+          "year": "2022",
+          "list": [
+            {
+              "title": "Awwwards",
+              "list": [
+                {
+                  "award": "Independent of the Year Nominee—Christian MacMillan",
+                  "link": "",
+                  "thumbnail": ""
+                },
+                {
+                  "award": "Developer Site of the Year Nominee—Plastic Studio",
+                  "link": "",
+                  "thumbnail": ""
+                },
+                {
+                  "award": "Site of the Day—Plastic Studio",
+                  "link": "",
+                  "thumbnail": ""
+                },
+                {
+                  "award": "Developer Award—Plastic Studio",
+                  "link": "",
+                  "thumbnail": ""
+                },
+                {
+                  "award": "Honorable Mention—Tate Law",
+                  "link": "",
+                  "thumbnail": ""
+                }
+              ]
+            },
+            {
+              "title": "The FWA",
+              "list": [
+                {
+                  "award": "Featured of the Day—Plastic Studio",
+                  "link": "",
+                  "thumbnail": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   }
 }

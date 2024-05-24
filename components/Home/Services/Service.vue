@@ -1,8 +1,6 @@
 <template>
   <div class="home__services__service">
-    <div class="home__services__service__indicator">
-      <div class="home__services__service__indicator__dot" />
-    </div>
+    <Separator />
     <div class="home__services__service__content">
       <div class="home__services__service__content__number">
         <p class="home__services__service__content__number__label" v-text="`{0${index + 1}}`" />
@@ -39,29 +37,11 @@ defineProps<{
     }
   }
 
-  &__indicator {
-    --width: calc(
-      min(100vw, var(--layout-max-width)) - var(--layout-indent) * 2 - var(--layout-gap) * 11
-    );
-    --column-width: calc(var(--width) / 12);
-
-    position: absolute;
+  .separator {
     z-index: 2;
-
     top: 4rem;
-    left: calc(var(--column-width) * 2 + var(--layout-gap) * 3);
-    width: calc(var(--column-width) * 10 + var(--layout-gap) * 9);
-    border-top: 1px solid black;
-
-    &__dot {
-      position: absolute;
-      top: 0;
-      left: calc(var(--column-width) * 4 + var(--layout-gap) * 4);
-      width: 0.8rem;
-      height: 0.8rem;
-      background-color: black;
-      transform: translate(0, -100%);
-    }
+    left: calc(var(--layout-column-width) * 2 + var(--layout-gap) * 3);
+    width: calc(var(--layout-column-width) * 10 + var(--layout-gap) * 9);
   }
 
   &__content {

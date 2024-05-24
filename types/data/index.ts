@@ -28,15 +28,36 @@ export interface Services {
   list: Array<Service>
 }
 
+export interface AboutClient {
+  label: string
+  link?: string
+}
+export interface AboutClients {
+  title: string
+  hint: string
+  list: Array<AboutClient>
+}
+
+export interface AboutTestimonial {
+  quote: string
+  credit: string
+  thumbnail: string
+}
+
+export type AboutTestimonials = Array<AboutTestimonial>
+
 export interface About {
   title: string
   hint: string
   credit: string
   detail: string
-  clients: Array<{
-    label: string
-    link?: string
-  }>
+  clients: AboutClients
+  collaborator: {
+    title: string
+    description: string
+    credit: string
+  }
+  testimonials: AboutTestimonials
 }
 
 export interface Data {
@@ -72,7 +93,17 @@ export function parseData(data?: Data): Data {
       hint: data?.about.hint || '',
       credit: data?.about.credit || '',
       detail: data?.about.detail || '',
-      clients: data?.about.clients || [],
+      clients: {
+        title: data?.about.clients.title || '',
+        hint: data?.about.clients.hint || '',
+        list: data?.about.clients.list || [],
+      },
+      collaborator: {
+        title: data?.about.collaborator.title || '',
+        description: data?.about.collaborator.description || '',
+        credit: data?.about.collaborator.credit || '',
+      },
+      testimonials: data?.about.testimonials || [],
     },
   }
 }
