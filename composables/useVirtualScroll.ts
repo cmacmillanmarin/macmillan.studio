@@ -13,6 +13,7 @@ export default function virtualScroll() {
   const { vh } = useResize()
   const { safari, hasWheelEvent } = useDevice()
   const { addTicker, killTicker } = useRaf()
+  const { $scene }: any = useNuxtApp()
   const {
     init: initPan,
     destroy: destroyPan,
@@ -354,6 +355,8 @@ export default function virtualScroll() {
         child.el.dataset.scrollCurrent = _getCurrentScroll(child)
       }
     }
+
+    $scene.updateY(round(current.value) * -1)
 
     _previous = current.value
     _updateCallback({

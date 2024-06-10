@@ -11,7 +11,7 @@
   },
   "services": {
     "title": "Services",
-    "hint": "Joining your team or taking care of full digital production.",
+    "hint": "Joining you as a freelancer or taking care of full digital production.",
     "list": [
       {
         "title": "Front–End",
@@ -55,14 +55,12 @@
       "list": [
         { "label": "Ambia", "link": "" },
         { "label": "B-Reel", "link": "" },
-        { "label": "Bulldog Studio", "link": "" },
         { "label": "Carolina Herrera", "link": "" },
         { "label": "Domestic Data Streamers", "link": "" },
         { "label": "Feels Like", "link": "" },
         { "label": "Fenty (Rihanna)", "link": "" },
         { "label": "Hublot", "link": "" },
         { "label": "Intorno Labs", "link": "" },
-        { "label": "LVMH", "link": "" },
         { "label": "Mango", "link": "" },
         { "label": "Momentus Space", "link": "" },
         { "label": "Roma Levin", "link": "" },
@@ -83,7 +81,7 @@
     "testimonials": [
       {
         "quote": "I had the privilege to work with Christian in many projects, and I can say it has always been a pleasure to have him as part of the team. As a reliable and collaborative Tech Lead, he is very keen to push for the quality on every single detail, working fully integrated with the Creative team, and adding a lot to the final output.",
-        "credit": "Rodrigo Alberini—Director of Operations @ B-Reel and Feels Like",
+        "credit": "Rodrigo Alberini—Director of Operations @ Feels Like",
         "thumbnail": ""
       },
       {
@@ -99,6 +97,11 @@
       {
         "quote": "Working with Christian is always a pleasure. He is very detail-oriented and ensures that the design is elevated with high-quality animations. His keen eye for design consistently brings our projects to life, and communication with him is effortless. He takes the time to thoroughly understand the project and asks the right questions, which is incredibly important and helpful. Collaborating with him has always been a smooth and enjoyable experience.",
         "credit": "Esteban Piacentino—Tech Director @ Domestic Data Streamers",
+        "thumbnail": ""
+      },
+      {
+        "quote": "I highly recommend Christian for any development project. He is a super talented developer with a strong focus on problem-solving and possesses an exceptional eye for design and animation. His unique combination of technical expertise and creative skills ensures high-quality, innovative solutions.",
+        "credit": "Martin Schvartzman—Producer @ The North Kingdom",
         "thumbnail": ""
       },
       {
