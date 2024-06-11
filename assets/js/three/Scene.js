@@ -5,7 +5,7 @@ import { round } from '~/utils'
 
 class Scene {
   constructor() {
-    this.debug = true
+    this.debug = false
 
     this.canvas = null
     this.scene = null
@@ -15,7 +15,6 @@ class Scene {
     this._play = null
     this._stop = null
 
-    this.y = 0
     this.z = 1000
 
     this.size = new THREE.Vector2()
@@ -102,11 +101,6 @@ class Scene {
     this.rendering && this.objects.length === 0 && this.stop()
   }
 
-  updateY(y) {
-    this.y = y
-    this.camera.position.y = this.y
-  }
-
   updateObjects() {
     this.needsUpdate = false
     for (const object of this.objects) {
@@ -144,7 +138,7 @@ class Scene {
         })
 
         object.mesh.position.x = position.x + object.size.x * 0.5
-        // object.mesh.position.y = position.y - object.size.y * 0.5
+        object.mesh.position.y = position.y - object.size.y * 0.5
         object.mesh.scale.x = object.size.x
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
