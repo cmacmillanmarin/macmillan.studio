@@ -93,11 +93,9 @@ const position = computed<{ x: number; y: number }>(() => {
   const finalY = 0
   const incrementY = finalY - initY
 
-  const scroll = Math.min(0, vh.value * scrollGap.value - current.value)
-
   return {
     x: x,
-    y: initY + incrementY * scrollProgress.value + scroll,
+    y: initY + incrementY * scrollProgress.value,
   }
 })
 
@@ -120,13 +118,17 @@ watch(current, () => {
   gsap.set('.home__hero__content__macmillan', {
     y: toPx(current.value + scroll),
   })
-  gsap.set('.home__hero__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
+  // gsap.set('.home__hero__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
 })
 
 watch(position, () => {
   if (videoPlaying.value) {
     $scene.updateObject({
       id: 'reel',
+      fixed: {
+        from: 0,
+        to: vh.value * scrollGap.value,
+      },
       size: size.value,
       position: position.value,
     })
@@ -141,6 +143,10 @@ function onPlay() {
   $scene.addObject({
     id: 'reel',
     type: 'plane',
+    fixed: {
+      from: 0,
+      to: vh.value * scrollGap.value,
+    },
     video: videoEl.value,
     position: position.value,
     size: size.value,

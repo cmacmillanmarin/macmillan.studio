@@ -70,8 +70,6 @@ export default function virtualScroll() {
   const current = ref<number>(0)
   const direction = ref<Direction>('down')
 
-  watch(target, _startRaf)
-
   watch(panVertical, (): void => {
     if (_disabled || Math.abs(panVertical.value) < 20) return
     if (_panTarget === -1) _panTarget = target.value
@@ -80,6 +78,10 @@ export default function virtualScroll() {
 
   watch([panStart, panEnd], (): void => {
     _panTarget = target.value
+  })
+
+  onMounted(() => {
+    _startRaf()
   })
 
   interface CreateParams {
@@ -307,7 +309,7 @@ export default function virtualScroll() {
   }
 
   function _startRaf(): void {
-    if (!_inRaf && !_inTarget()) {
+    if (!_inRaf) {
       _log(`_startRaf()`)
       _inRaf = true
       addTicker(_raf)
@@ -324,7 +326,7 @@ export default function virtualScroll() {
   function _raf(): void {
     current.value += (target.value - current.value) * _elasticity
     _run()
-    _inTarget() && _stopRaf()
+    // _inTarget() && _stopRaf()
   }
 
   interface RunParams {

@@ -7,9 +7,11 @@ uniform float uTime;
 uniform float uOpacity;
 uniform float uPixel;
 uniform vec2 uPixelSize;
-uniform sampler2D uImageTexture;
-uniform sampler2D uVideoTexture;
+uniform int uTextureType;
 uniform vec2 uTextureSize;  
+uniform sampler2D uTextureImage;
+uniform sampler2D uTextureVideo;
+
 uniform vec2 uPlaneSize;  
 
 float noise(vec2 st) {
@@ -40,9 +42,16 @@ void main() {
   pixel -= vec2(0.5);
   pixel += vec2(0.5);
 
-  vec4 lime = vec4(197.0/255.0, 255.0/255.0, 32.0/255.0, 1.0);
-  vec4 coveredTexture = texture2D(uVideoTexture, uv);
-  vec4 pixelatedTexture = texture2D(uVideoTexture, pixel) * lime;
+  vec4 lime = vec4(197.0/255.0, 255.0/255.0, 32.0/255.0, 1.0);  
+  vec4 coveredTexture = texture2D(uTextureVideo, uv);
+  if (uTextureType == 1) {
+    coveredTexture = vec4(1.0, 0.0, 0.0, 1.0);
+    coveredTexture = texture2D(uTextureImage, uv);
+  }
+  vec4 pixelatedTexture = texture2D(uTextureVideo, pixel) * lime;
+  if (uTextureType == 1) {
+    pixelatedTexture = texture2D(uTextureImage, pixel) * lime;
+  }
   vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, 1.0);
   
 

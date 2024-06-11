@@ -20,6 +20,7 @@ class Scene {
     this.size = new THREE.Vector2()
     this.mouse = new THREE.Vector2()
     this.raycaster = new THREE.Raycaster()
+    this.loader = new THREE.TextureLoader()
 
     this.maxPixelRatio = 2
     this.rendering = false
@@ -71,12 +72,13 @@ class Scene {
     return this.objects.find(obj => obj.id === id)
   }
 
-  updateObject({ id, position, size }) {
+  updateObject({ id, fixed, position, size }) {
     this.log(`updateObject() ${JSON.stringify(position)}, ${JSON.stringify(size)}`)
     const object = this.getObject(id)
     if (object) {
       object.position = position || object.position
       object.size = size || object.size
+      object.fixed = fixed || object.fixed
     }
   }
 
@@ -101,6 +103,11 @@ class Scene {
     this.rendering && this.objects.length === 0 && this.stop()
   }
 
+  updateY(y) {
+    this.y = y
+    this.camera.position.y = this.y * -1
+  }
+
   updateObjects() {
     this.needsUpdate = false
     for (const object of this.objects) {
@@ -117,12 +124,16 @@ class Scene {
             object.meshId = availablePlane.id
             object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0
             if (object.video) {
-              object.mesh.material.uniforms.uVideoTexture.value.image = object.video
+              object.mesh.material.uniforms.uTextureType.value = 0
+              object.mesh.material.uniforms.uTextureVideo.value.image = object.video
               object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
               object.mesh.material.uniforms.uTextureSize.value.y =
                 (object.size.x * object.video.height) / object.video.width
             } else if (object.img) {
-              console.log('Set image')
+              object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
+              object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
+              object.mesh.material.uniforms.uTextureImage.value = this.loader.load(object.img.src)
+              object.mesh.material.uniforms.uTextureType.value = 1
             }
           } else {
             object.mesh = this.getMesh(object.type)
@@ -130,11 +141,11 @@ class Scene {
           }
           gsap.killTweensOf(object.mesh.material.uniforms.uOpacity)
           gsap.to(object.mesh.material.uniforms.uOpacity, { value: 1.0, duration: 1 })
-          // gsap.to(object.mesh.material.uniforms.uPixel, { value: 600, duration: 4, delay: 0.25 })
         }
+
         const position = this.fromDomToCanvas({
           x: object.position.x,
-          y: object.position.y,
+          y: object.position.y + this.getFixedY(object.fixed),
         })
 
         object.mesh.position.x = position.x + object.size.x * 0.5
@@ -149,9 +160,10 @@ class Scene {
         object.mesh.material.uniforms.uPixelSize.value.y = object.size.y / yPixelRatio
         object.mesh.material.uniforms.uPlaneSize.value.x = object.size.x
         object.mesh.material.uniforms.uPlaneSize.value.y = object.size.y
-        object.mesh.material.uniforms.uVideoTexture.value.needsUpdate =
+        object.mesh.material.uniforms.uTextureVideo.value.needsUpdate =
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
       } else if (object.mesh && object.type === 'plane') {
+        object.mesh.material.uniforms.uOpacity.value = 0.0
         this.releasePlane(object.meshId)
         object.mesh = null
       }
@@ -159,13 +171,22 @@ class Scene {
     }
   }
 
-  inView({ position, size }) {
-    const limitTop = position.y >= size.y * -1
+  inView({ fixed, position, size }) {
+    const y = position.y + this.getFixedY(fixed)
+    const limitTop = y - this.y >= size.y * -1
     const limitRight = position.x < this.size.x
-    const limitBottom = position.y < this.size.y
+    const limitBottom = y - this.y < this.size.y
     const limitLeft = position.x + size.x > size.x * -1
 
     return limitTop && limitRight && limitBottom && limitLeft
+  }
+
+  getFixedY(fixed) {
+    if (fixed && this.y >= fixed.from) {
+      const { from, to } = fixed
+      return Math.min(this.y - from, to - from)
+    }
+    return 0
   }
 
   render() {
@@ -180,14 +201,14 @@ class Scene {
   play() {
     if (this.rendering) return
     this.log('play()')
-    this._play(this._render)
+    // this._play(this._render)
     this.rendering = true
   }
 
   stop() {
     if (!this.rendering) return
     this.log('stop()')
-    this._stop(this._render)
+    // this._stop(this._render)
     this.rendering = false
   }
 
@@ -220,9 +241,8 @@ class Scene {
   }
 
   generatePlanesBatch() {
-    const img = document.createElement('img')
     const video = document.createElement('video')
-    let texture = new THREE.VideoTexture(video)
+    const videoTexture = new THREE.VideoTexture(video)
 
     for (let id = 0; id < this.maxPlanes; id++) {
       const available = true
@@ -237,8 +257,9 @@ class Scene {
             uOpacity: { type: 'f', value: 0.0 },
             uPixel: { type: 'f', value: 0.0 },
             uPixelSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
-            uImageTexture: { type: 't', value: new THREE.Texture(img) },
-            uVideoTexture: { type: 't', value: texture },
+            uTextureType: { type: 'i', value: 0 }, // 0 Video, 1 Image
+            uTextureImage: { type: 't', value: null },
+            uTextureVideo: { type: 't', value: videoTexture },
             uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
           },

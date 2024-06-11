@@ -8,7 +8,15 @@
     </div>
     <div class="home__about__content">
       <div class="home__about__content__thumbnail">
-        <div class="home__about__content__thumbnail__image" />
+        <img
+          ref="imgEl"
+          src="/assets/img/thumbnail.jpg"
+          alt="thumbnail"
+          width="2560"
+          height="2560"
+          @load="onLoaded"
+          data-scroll-set-position
+          class="home__about__content__thumbnail__image" />
         <p class="home__about__content__thumbnail__credit">{{ data.credit }}</p>
       </div>
       <div class="home__about__content__detail">
@@ -42,6 +50,41 @@ import type { About } from '~/types/data'
 defineProps<{
   data: About
 }>()
+
+const { $scene }: any = useNuxtApp()
+const { onResize } = useResize()
+
+const imgEl = ref<HTMLImageElement>()
+
+watch(onResize, () => {
+  if (!imgEl.value) return
+  const bounding = imgEl.value?.getBoundingClientRect()
+  console.log(bounding)
+  $scene.updateObject({
+    id: 'about-thumbnail',
+    position: {
+      x: parseFloat(imgEl.value?.dataset.positionLeft || '0'),
+      y: parseFloat(imgEl.value?.dataset.positionTop || '0'),
+    },
+    size: { x: bounding.width, y: bounding.height, z: 1 },
+  })
+})
+
+onMounted(() => {
+  imgEl.value?.complete && onLoaded()
+})
+
+function onLoaded() {
+  if (!imgEl.value) return
+  const bounding = imgEl.value?.getBoundingClientRect()
+  $scene.addObject({
+    id: 'about-thumbnail',
+    type: 'plane',
+    img: imgEl.value,
+    position: { x: bounding.left, y: bounding.top },
+    size: { x: bounding.width, y: bounding.height, z: 1 },
+  })
+}
 </script>
 
 <style lang="scss">
@@ -80,9 +123,11 @@ defineProps<{
       @include gap(2, 'left', 'desktop');
       &__image {
         aspect-ratio: 1;
-        background-color: black;
-        border-radius: 1.6rem;
+        display: block;
+        // background-color: black;
+        // border-radius: 1.6rem;
         margin-bottom: 1.2rem;
+        opacity: 0;
       }
       &__credit {
         @include t-b1;

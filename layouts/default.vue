@@ -193,6 +193,9 @@ function onNativeScrollRaf(): void {
 }
 
 function onSmoothScroll(data: Data): void {
+  const { $scene }: any = useNuxtApp()
+  $scene.updateY(data.current)
+  $scene.render()
   scrollStore.updateScrollData(data)
 }
 
