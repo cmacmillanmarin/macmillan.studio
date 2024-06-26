@@ -1,12 +1,12 @@
 <template>
-  <div class="home__about__testimonial">
+  <div class="home__about__testimonials__testimonial">
     <SvgQuote />
-    <p class="home__about__testimonial__quote">{{ data.quote }}</p>
-    <div class="home__about__testimonial__credit">
-      <div class="home__about__testimonial__credit__thumbnail">
-        <div class="home__about__testimonial__credit__thumbnail__image" />
+    <p class="home__about__testimonials__testimonial__quote">{{ data.quote }}</p>
+    <div class="home__about__testimonials__testimonial__credit">
+      <div class="home__about__testimonials__testimonial__credit__thumbnail">
+        <div class="home__about__testimonials__testimonial__credit__thumbnail__image" />
       </div>
-      <p class="home__about__testimonial__credit__role">{{ data.credit }}</p>
+      <p class="home__about__testimonials__testimonial__credit__role">{{ data.credit }}</p>
     </div>
   </div>
 </template>
@@ -20,7 +20,7 @@ defineProps<{
 </script>
 
 <style lang="scss">
-.home__about__testimonial {
+.home__about__testimonials__testimonial {
   &__quote {
     @include t-h2;
   }

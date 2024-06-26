@@ -89,7 +89,7 @@ function onLoaded() {
 
 <style lang="scss">
 .home__about {
-  padding: 8rem 0 12rem;
+  padding: 8rem 0 0;
   background-color: var(--lime);
 
   &__title {
@@ -148,6 +148,7 @@ function onLoaded() {
   &__collaborator {
     @include grid;
     margin-top: 18rem;
+    padding-bottom: 12rem;
     position: relative;
     .separator {
       margin-left: calc(var(--layout-column-width) * 4 + var(--layout-gap) * 5);

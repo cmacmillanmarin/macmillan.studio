@@ -4,7 +4,7 @@
 
     <HomeHero data-scroll data-scroll-continuous :data="data.hero" />
 
-    <!-- <Projects data-scroll /> -->
+    <HomeProjects :data="data.projects" data-scroll />
 
     <HomeServices data-scroll :data="data.services" />
 

@@ -14,7 +14,8 @@ defineProps<{
 
 <style lang="scss">
 .home__about__testimonials {
-  margin-top: 12rem;
+  padding-top: 12rem;
+  padding-bottom: 12rem;
   background-color: var(--dark-grey);
 }
 </style>

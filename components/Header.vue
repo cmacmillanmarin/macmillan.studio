@@ -13,21 +13,24 @@
             class="header__nav__list__item__anchor"
             type="referral"
             to="/#projects"
-            label="Projects," />
+            label="Projects,"
+            data-tab-fixed />
         </li>
         <li class="header__nav__list__item">
           <CustomLink
             class="header__nav__list__item__anchor"
             type="referral"
             to="/#services"
-            label="Services," />
+            label="Services,"
+            data-tab-fixed />
         </li>
         <li class="header__nav__list__item">
           <CustomLink
             class="header__nav__list__item__anchor"
             type="referral"
             to="/#about"
-            label="About" />
+            label="About"
+            data-tab-fixed />
         </li>
       </ul>
     </nav>
@@ -39,7 +42,8 @@
             class="header__nav__list__item__anchor"
             to="/#contact"
             type="referral"
-            label="Contact" />
+            label="Contact"
+            data-tab-fixed />
         </li>
       </ul>
       <div class="header__nav__logo">
@@ -47,7 +51,8 @@
           class="header__nav__list__item__anchor"
           to="/#hero"
           type="referral"
-          :content="true">
+          :content="true"
+          data-tab-fixed>
           <SvgLogo />
         </CustomLink>
       </div>

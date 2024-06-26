@@ -17,6 +17,11 @@ export interface Hero {
   hint: string
 }
 
+export type Projects = { [key: string]: Project }
+export interface Project {
+  title: string
+}
+
 export interface Service {
   title: string
   description: string
@@ -63,6 +68,7 @@ export interface About {
 export interface Data {
   head: Head
   hero: Hero
+  projects: Projects
   services: Services
   about: About
 }
@@ -83,6 +89,7 @@ export function parseData(data?: Data): Data {
       title: data?.hero.title || '',
       hint: data?.hero.hint || '',
     },
+    projects: data?.projects || {},
     services: {
       title: data?.services.title || '',
       hint: data?.services.hint || '',

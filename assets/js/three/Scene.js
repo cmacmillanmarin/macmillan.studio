@@ -222,7 +222,8 @@ class Scene {
       plane.mesh.visible = true
       return plane
     }
-    for (const plane of this.batch) {
+    for (let i = this.batch.length - 1; i >= 0; i--) {
+      const plane = this.batch[i]
       if (plane.available) {
         this.log(`Object ${id} gets available plane ${plane.id}`)
         plane.available = false
@@ -230,6 +231,7 @@ class Scene {
         return plane
       }
     }
+
     this.log('Error! NO PLANES AVAILABLE')
   }
 

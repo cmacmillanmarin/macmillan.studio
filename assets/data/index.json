@@ -9,6 +9,20 @@
     "title": "MacMillan Studio",
     "hint": "Delivering unique digital experiences implemented from the ground up."
   },
+  "projects": {
+    "student-loan-strategist": {
+      "title": "Student Loan Strategist"
+    },
+    "a-gamified-geo-fenced-experience-for-nike": {
+      "title": "Nike Experience"
+    },
+    "the-mortgage-expert": {
+      "title": "The Mortgage Expert"
+    },
+    "plastic": {
+      "title": "Plastic"
+    }
+  },
   "services": {
     "title": "Services",
     "hint": "Joining you as a freelancer or taking care of full digital production.",

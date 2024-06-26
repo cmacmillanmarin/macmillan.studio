@@ -240,7 +240,9 @@ export default function virtualScroll() {
       }
       if (child.setPosition) {
         child.el.dataset.positionTop = childBounding.top.toString()
+        child.el.dataset.positionBottom = (childBounding.top + childBounding.height).toString()
         child.el.dataset.positionLeft = childBounding.left.toString()
+        child.el.dataset.positionRight = (childBounding.left + childBounding.width).toString()
       }
       child.inView = _inView(childBounding)
       if (child.setProgress) {
