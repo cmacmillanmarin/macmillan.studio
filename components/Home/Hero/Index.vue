@@ -5,12 +5,12 @@
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
       <div class="home__hero__content__macmillan">
-        <SvgMacMillan />
+        <SvgMacMillan v-if="!hideComponents" />
       </div>
       <ClientOnly>
         <Teleport to="#top-layer">
           <div
-            v-if="!inProject"
+            v-if="!hideComponents"
             data-scroll
             data-scroll-continuous
             class="home__hero__content__studio">
@@ -54,6 +54,8 @@ const { current } = storeToRefs(useScrollStore())
 
 const { layoutIndent } = useCss()
 const { lvw, vw, vh } = useResize()
+
+const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && props.inProject)
 
 const videoEl = ref<HTMLVideoElement>()
 const videoPlaying = ref<boolean>(false)
