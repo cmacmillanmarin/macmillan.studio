@@ -2,6 +2,7 @@ import VS from './glsl/vs.glsl'
 import FS from './glsl/fs.glsl'
 import * as THREE from 'three'
 import { round } from '~/utils'
+import { gsap } from 'gsap'
 
 class Scene {
   constructor() {

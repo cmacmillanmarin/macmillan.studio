@@ -35,6 +35,7 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
@@ -42,20 +43,19 @@ import { toPx, round } from '~/utils'
 import { fadeIn } from '~/utils/animations'
 import type { Hero } from '~/types/data'
 
-const props = defineProps<{
+defineProps<{
   data: Hero
-  inProject: boolean
 }>()
 
 const { $scene }: any = useNuxtApp()
 
-const { gridType } = storeToRefs(useStore())
+const { gridType, isInProjectEntered } = storeToRefs(useStore())
 const { current } = storeToRefs(useScrollStore())
 
 const { layoutIndent } = useCss()
 const { lvw, vw, vh } = useResize()
 
-const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && props.inProject)
+const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && isInProjectEntered.value)
 
 const videoEl = ref<HTMLVideoElement>()
 const videoPlaying = ref<boolean>(false)
@@ -108,12 +108,9 @@ const position = computed<{ x: number; y: number }>(() => {
   }
 })
 
-watch(
-  () => props.inProject,
-  v => {
-    v ? videoEl.value?.pause() : videoEl.value?.play()
-  }
-)
+watch(isInProjectEntered, v => {
+  v ? videoEl.value?.pause() : videoEl.value?.play()
+})
 
 watch(current, () => {
   const initScale = 1
@@ -138,27 +135,18 @@ watch(current, () => {
 })
 
 watch([position, videoPlaying], () => {
-  if (videoPlaying.value) {
-    console.log('update object position')
-    $scene.updateObject({
-      id: 'reel',
-      fixed: {
-        from: 0,
-        to: vh.value * scrollGap.value,
-      },
-      size: size.value,
-      position: position.value,
-    })
-  } else {
-    console.log('Update object zero')
-    $scene.updateObject({
-      id: 'reel',
-      position: {
-        ...position.value,
-        x: -10000,
-      },
-    })
-  }
+  $scene.updateObject({
+    id: 'reel',
+    fixed: {
+      from: 0,
+      to: vh.value * scrollGap.value,
+    },
+    size: size.value,
+    position: {
+      x: videoPlaying.value ? position.value.x : -10000,
+      y: videoPlaying.value ? position.value.y : 0,
+    },
+  })
 })
 
 function enter(params: { el: HTMLElement }) {
@@ -176,7 +164,7 @@ function onPause() {
 onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
-  !props.inProject && videoEl.value?.play()
+  isInProjectEntered.value && videoEl.value?.play()
   $scene.addObject({
     id: 'reel',
     type: 'plane',
@@ -209,13 +197,12 @@ onUnmounted(() => {
   }
 
   &__content {
-    @include will-fade;
-
     position: relative;
     height: var(--vh);
 
-    @include grid('rule-of-thirds');
     align-content: flex-start;
+    @include grid('rule-of-thirds');
+    @include will-fade;
 
     &__macmillan {
       width: calc(var(--col) * 2);
@@ -234,13 +221,14 @@ onUnmounted(() => {
       width: calc(min(100vw, var(--layout-max-width)) * 0.333333);
       padding-top: v-bind(verticalGapPx);
       padding-left: var(--layout-indent);
-      @include from__desktop--x-large {
-        margin-left: calc((100vw - var(--layout-max-width)) * 0.5);
-      }
+
       svg {
         width: 127.9%;
         will-change: transform;
         transform-origin: top left;
+      }
+      @include from__desktop--x-large {
+        margin-left: calc((100vw - var(--layout-max-width)) * 0.5);
       }
     }
 
@@ -253,10 +241,10 @@ onUnmounted(() => {
       display: flex;
       will-change: opacity;
       p {
-        @include t-b1;
         color: var(--black);
         padding-right: 24%;
         height: max-content;
+        @include t-b1;
       }
     }
 
@@ -279,9 +267,9 @@ onUnmounted(() => {
   }
 
   &__bg {
+    background-color: var(--light-grey);
     @include will-fade;
     @include absolute-fill;
-    background-color: var(--light-grey);
   }
 }
 </style>

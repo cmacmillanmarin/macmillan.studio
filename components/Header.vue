@@ -1,5 +1,5 @@
 <template>
-  <header ref="el" class="header" v-transition:in="{ callback: fadeIn }">
+  <header ref="el" class="header" v-transition:in="{ callback: enter }">
     <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
     <div class="header__hint">
@@ -62,13 +62,14 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { fadeIn } from '~/utils/animations'
+import { shuffleElsIn, shuffleElsOut } from '~/utils/animations'
 import { toPx, toPercentage } from '~/utils'
 
-const { gridType } = storeToRefs(useStore())
+const { gridType, isInProject } = storeToRefs(useStore())
 const { current, bounding } = storeToRefs(useScrollStore())
 
 const { vh } = useResize()
@@ -77,6 +78,7 @@ const { layoutIndent } = useCss()
 const el = ref<HTMLElement>()
 
 watch(current, () => {
+  if (!el.value) return
   const y = Math.min(0, bounding.value - vh.value - current.value)
 
   const threshold = vh.value - layoutIndent.value * 2
@@ -86,15 +88,33 @@ watch(current, () => {
   gsap.set('.header__nav__logo', { y: toPx(threshold * progress * -1) })
   gsap.set('.header__nav__logo svg', { y: toPercentage(100 * progress), scale: 1 - 0.8 * progress })
 })
+
+watch(isInProject, () => {
+  isInProject.value ? leave() : enter()
+})
+
+function enter() {
+  if (!el.value) return
+  gsap.set(el.value, { pointerEvents: 'auto' })
+  const els = el.value.querySelectorAll('.header__hint ,.header__nav__list__item__anchor')
+  shuffleElsIn({ els })
+}
+
+function leave() {
+  if (!el.value) return
+  gsap.set(el.value, { pointerEvents: 'none' })
+  const els = el.value.querySelectorAll('.header__hint ,.header__nav__list__item__anchor')
+  shuffleElsOut({ els })
+}
 </script>
 
 <style lang="scss">
 .header {
-  @include will-fade;
   @include grid('rule-of-thirds');
 
   align-items: flex-end;
   padding-bottom: var(--layout-indent);
+  pointer-events: none;
 
   &__hint,
   &__nav {
@@ -106,6 +126,7 @@ watch(current, () => {
     align-items: center;
     column-gap: 0.8rem;
     padding-left: var(--layout-indent);
+    @include will-fade;
     p {
       @include t-b1;
     }
@@ -130,6 +151,7 @@ watch(current, () => {
         &__anchor {
           color: var(--black);
           @include t-b1;
+          @include will-fade;
         }
       }
     }

@@ -15,13 +15,16 @@
   --layout-column-width: calc(var(--layout-width) / 12);
 
   // supports
-  --vh: 100vh;
   @supports (height: 1svh) {
     --vh: 100svh;
   }
-
-  --overflow--hidden: hidden;
+  @supports (not (height: 1vh)) {
+    --vh: 100vh;
+  }
   @supports (overflow: clip) {
     --overflow--hidden: clip;
+  }
+  @supports (not (overflow: clip)) {
+    --overflow--hidden: hidden;
   }
 }

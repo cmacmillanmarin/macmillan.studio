@@ -22,5 +22,7 @@ export interface State {
   loading: boolean
   preview: boolean
   grid: GridType
+  inProject: boolean
+  inProjectEntered: boolean
   routes: Routes
 }

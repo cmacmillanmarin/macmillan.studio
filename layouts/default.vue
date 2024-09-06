@@ -12,6 +12,7 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
@@ -120,6 +121,7 @@ watch(scrollTargetId, (): void => {
     const target: HTMLElement | null = document.getElementById(targetId)
     const offset: number = parseFloat(target?.dataset.scrollTargetOffset || '0')
     target &&
+      el.value &&
       gsap.to(el.value, {
         scrollTo: { y: target, offsetY: offset },
       })

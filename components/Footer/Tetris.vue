@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import type { Tetris, Matrix, Piece, Position } from '~/types/front/tetris'
 
 const { maxWidth } = useCss()

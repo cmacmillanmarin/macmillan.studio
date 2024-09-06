@@ -6,31 +6,30 @@
   }
 }
 
-@mixin t-white() {
+@mixin t-white {
   color: var(--white);
 }
 
-@mixin t-black() {
+@mixin t-black {
   color: var(--black);
 }
 
-@mixin t-h() {
+@mixin t-h {
   font-family: 'HelveticaNowDisplayBold';
   font-stretch: normal;
   font-style: normal;
 
   font-weight: 400;
-
   @include from__desktop {
     font-weight: 700;
   }
 }
 
-@mixin t-h1() {
-  @include t-h();
-
+@mixin t-h1 {
   font-size: toScaleUp(6rem);
   line-height: toScaleUp(4.8rem);
+
+  @include t-h;
 
   @include from__desktop {
     font-size: toScale(12.2rem);
@@ -38,11 +37,11 @@
   }
 }
 
-@mixin t-h2() {
-  @include t-h();
-
+@mixin t-h2 {
   font-size: toScaleUp(4.5rem);
   line-height: toScaleUp(3.8rem);
+
+  @include t-h;
 
   @include from__desktop {
     font-size: toScale(5.2rem);
@@ -51,12 +50,12 @@
   }
 }
 
-@mixin t-h3() {
-  @include t-h;
-
+@mixin t-h3 {
   font-size: toScaleUp(3.2rem);
   line-height: toScaleUp(2.8rem);
   letter-spacing: toScaleUp(0.023rem);
+
+  @include t-h;
 
   @include from__desktop {
     font-size: toScale(4.6rem);
@@ -65,15 +64,15 @@
   }
 }
 
-@mixin t-b() {
+@mixin t-b {
   font-family: 'HelveticaNowDisplayMedium';
 }
 
-@mixin t-b1() {
-  @include t-b();
-
+@mixin t-b1 {
   font-size: toScaleUp(1.5rem);
   line-height: toScaleUp(1.8rem);
+
+  @include t-b;
 
   @include from__desktop {
     font-size: toScale(2.2rem);
@@ -81,11 +80,11 @@
   }
 }
 
-@mixin t-b2() {
-  @include t-b();
-
+@mixin t-b2 {
   font-size: toScaleUp(1.2rem);
   line-height: toScaleUp(1.6rem);
+
+  @include t-b;
 
   @include from__desktop {
     font-size: toScale(1.6rem);
@@ -93,11 +92,11 @@
   }
 }
 
-@mixin t-b3() {
-  @include t-b();
-
+@mixin t-b3 {
   font-size: toScaleUp(1.1rem);
   line-height: toScaleUp(1.3rem);
+
+  @include t-b;
 
   @include from__desktop {
     font-size: toScale(1.2rem);
@@ -105,13 +104,13 @@
   }
 }
 
-@mixin t-number() {
-  @include t-b();
-
+@mixin t-number {
   font-variant-numeric: tabular-nums;
 
   font-size: toScaleUp(1.1rem);
   line-height: toScaleUp(1.3rem);
+
+  @include t-b;
 
   @include from__desktop {
     font-size: toScale(2.2rem);
@@ -119,18 +118,18 @@
   }
 }
 
-@mixin t-input() {
-  @include t-b();
-
+@mixin t-input {
   font-size: toScaleUp(1.6rem);
   line-height: 1;
+
+  @include t-b;
 
   @include from__desktop {
     font-size: toScale(1.9rem);
   }
 }
 
-@mixin t-seo() {
+@mixin t-seo {
   position: fixed;
   top: -10000rem;
 }

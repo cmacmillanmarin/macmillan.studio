@@ -55,35 +55,34 @@ defineProps<{
 
 <style lang="scss">
 .home__about__clients {
-  @include grid;
   margin-top: 12rem;
+  @include grid;
 
   &__headline {
     position: relative;
-
     @include columns(6, 'desktop');
     @include gap(6, 'left', 'desktop');
 
     &__title {
-      @include t-b1;
       padding-top: 1.2rem;
       margin-bottom: 1.6rem;
+      @include t-b1;
     }
   }
 
   &__list {
     position: relative;
 
-    @include columns(4, 'desktop');
     align-self: end;
-
     display: flex;
     column-gap: var(--layout-gap);
 
+    @include columns(4, 'desktop');
+
     &__title {
-      @include t-b1;
       padding-top: 1.2rem;
       width: var(--layout-column-width);
+      @include t-b1;
     }
 
     &__content {
@@ -95,10 +94,10 @@ defineProps<{
   }
 
   &__featured {
-    @include columns(2, 'desktop');
     aspect-ratio: 1 / 3;
     display: flex;
     flex-wrap: wrap;
+    @include columns(2, 'desktop');
 
     &__client {
       width: 100%;
@@ -118,8 +117,8 @@ defineProps<{
       }
 
       &--center {
-        @extend .home__about__clients__featured__client;
         align-self: center !important;
+        @extend .home__about__clients__featured__client;
       }
     }
   }

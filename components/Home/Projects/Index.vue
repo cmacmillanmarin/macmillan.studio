@@ -11,8 +11,7 @@
       :data="project"
       :top="top"
       :bottom="bottom"
-      :side="i % 2 === 0 ? -1 : 1"
-      :inProject="inProject" />
+      :side="i % 2 === 0 ? -1 : 1" />
   </div>
 </template>
 
@@ -21,7 +20,6 @@ import { type Projects } from '~/types/data'
 
 defineProps<{
   data: Projects
-  inProject: boolean
 }>()
 
 const { vh } = useResize()

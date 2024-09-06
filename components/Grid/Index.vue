@@ -22,16 +22,16 @@ const columns = computed(() => 12)
   height: 100%;
   z-index: 999999;
   &__columns {
-    @include grid();
     height: 100%;
     border-left: 1px solid magenta;
     border-right: 1px solid magenta;
+    @include grid();
     &__column {
-      @include columns('1');
-      @include columns('1', 'tablet--landscape');
       height: 100%;
       background: magenta;
       opacity: 0.2;
+      @include columns('1');
+      @include columns('1', 'tablet--landscape');
     }
   }
 }

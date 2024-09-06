@@ -111,19 +111,21 @@ function playTetris() {
 
   &__email,
   &__credits {
-    @include will-fade;
     z-index: 2;
 
     max-width: var(--layout-max-width);
 
     left: 50%;
     transform: translateX(-50%);
+
+    @include will-fade;
   }
 
   &__email {
+    left: 50% !important;
+    height: 100% !important;
+
     @include grid('golden-ratio');
-    left: 50%;
-    height: 100%;
 
     &__christian,
     &__domain,
@@ -156,7 +158,6 @@ function playTetris() {
   &__location {
     z-index: 2;
     pointer-events: none;
-    @include will-fade;
 
     position: absolute;
     bottom: 0;
@@ -167,21 +168,23 @@ function playTetris() {
     left: 50%;
     transform: translateX(-50%);
 
+    @include will-fade;
+
     a,
     p {
-      @include t-b1;
       color: var(--lime);
+      @include t-b1;
     }
   }
 
   &__nav {
-    @include grid('golden-ratio');
-    top: auto;
-    left: 50%;
+    top: auto !important;
+    left: 50% !important;
+    align-items: flex-end !important;
 
     padding-bottom: 1.6rem;
 
-    align-items: flex-end;
+    @include grid('golden-ratio');
 
     &__social,
     &__credits {
@@ -191,9 +194,9 @@ function playTetris() {
           stroke: var(--lime);
         }
         &__btn {
-          @include t-b1;
           color: var(--lime);
           padding: 0;
+          @include t-b1;
         }
       }
     }
@@ -218,8 +221,8 @@ function playTetris() {
   }
 
   .footer__tetris {
-    @include absolute-center;
     z-index: 1;
+    @include absolute-center;
   }
 }
 </style>

@@ -36,10 +36,12 @@ defineProps<{
     @include grid;
 
     &__label {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+      @include t-h2;
       @include columns(10, 'desktop');
       @include gap(2, 'left', 'desktop');
-      @include t-h2;
-      padding: 2rem 0;
+
       &__indent {
         --width: calc(
           min(100vw, var(--layout-max-width)) - var(--layout-indent) * 2 - var(--layout-gap) * 11

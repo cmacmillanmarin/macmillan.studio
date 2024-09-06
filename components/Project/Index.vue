@@ -13,6 +13,7 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { type Project } from '~/types/data'
 import useScrollStore from '~/store/useScrollStore'
 import { transitionFadeOut } from '~/utils/animations'
@@ -28,21 +29,27 @@ const transition = ref<boolean>(true)
 
 onMounted(() => {
   disableScroll(true)
+  emit('mounted')
 })
 
-async function enter() {
+function enter() {
   if (!el.value) return
   emit('entered')
-  await nextTick()
-  await nextTick()
-  gsap.set(el.value, { opacity: 1, delay: 0.1, onComplete: () => (transition.value = false) })
+
+  gsap.set(el.value, {
+    opacity: 1,
+    delay: 0.1,
+    onComplete: () => {
+      transition.value = false
+    },
+  })
 }
 
 onBeforeUnmount(() => {
   disableScroll(false)
 })
 
-const emit = defineEmits(['entered'])
+const emit = defineEmits(['mounted', 'entered'])
 </script>
 
 <style lang="scss">

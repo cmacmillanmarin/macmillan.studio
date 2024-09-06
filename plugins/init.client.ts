@@ -1,6 +1,9 @@
 import WebFont from 'webfontloader'
 import useStore from '~/store/useStore'
-import { ease } from '~/utils/animations'
+
+import { gsap } from 'gsap'
+import { CustomEase } from 'gsap/CustomEase'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
 export default defineNuxtPlugin(async nuxtApp => {
   console.log(
@@ -12,9 +15,11 @@ export default defineNuxtPlugin(async nuxtApp => {
   const route = useRoute()
   store.defineEntryRoute(route.fullPath)
 
+  gsap.registerPlugin(CustomEase, ScrollToPlugin)
+
   gsap.defaults({
     duration: 0.8,
-    ease: ease(),
+    ease: CustomEase.create('custom', 'M0,0 C0.53,0.24 0.08,0.99 1,1'),
   })
 
   WebFont.load({

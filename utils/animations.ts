@@ -1,4 +1,6 @@
 import { shuffle } from '~/utils'
+import { gsap } from 'gsap'
+import { CustomEase } from 'gsap/CustomEase'
 
 export function ease(): string {
   return CustomEase.create('custom', 'M0,0 C0.53,0.24 0.08,0.99 1,1')
@@ -83,5 +85,39 @@ export function shuffleIn(params: { el: HTMLElement }) {
       ease: 'power1.out',
     })
     gsap.to(path, { opacity: 1, duration, delay: delay + duration * 1.5, ease: 'power1.in' })
+  }
+}
+
+export function shuffleElsIn(params: { els?: NodeListOf<Element> }) {
+  const { els } = params
+  for (const el of els || []) {
+    const delay = Math.random() * 1.2
+    const duration = 0.2
+    gsap.killTweensOf(el)
+    gsap.to(el, { opacity: 1, duration, delay, ease: 'power1.in' })
+    gsap.to(el, {
+      opacity: 0,
+      duration: duration * 0.5,
+      delay: delay + duration,
+      ease: 'power1.out',
+    })
+    gsap.to(el, { opacity: 1, duration, delay: delay + duration * 1.5, ease: 'power1.in' })
+  }
+}
+
+export function shuffleElsOut(params: { els?: NodeListOf<Element> }) {
+  const { els } = params
+  for (const el of els || []) {
+    const delay = Math.random() * 1.2
+    const duration = 0.2
+    gsap.killTweensOf(el)
+    gsap.to(el, { opacity: 0, duration, delay, ease: 'power1.out' })
+    gsap.to(el, {
+      opacity: 1,
+      duration: duration * 0.5,
+      delay: delay + duration,
+      ease: 'power1.in',
+    })
+    gsap.to(el, { opacity: 0, duration, delay: delay + duration * 1.5, ease: 'power1.out' })
   }
 }

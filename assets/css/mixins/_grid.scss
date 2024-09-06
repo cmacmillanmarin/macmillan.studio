@@ -17,8 +17,10 @@ $layouts: (
   grid-gap: 0;
   column-gap: var(--layout-gap);
 
-  padding: 0 var(--layout-indent);
-  margin: 0 auto;
+  padding-left: var(--layout-indent);
+  padding-right: var(--layout-indent);
+  margin-left: auto;
+  margin-right: auto;
 
   @if $type == 'centered' {
     align-items: center;

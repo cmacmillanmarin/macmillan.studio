@@ -30,8 +30,8 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   pre {
-    @include t-b1;
     @include t-black;
+    @include t-b1;
   }
 }
 </style>

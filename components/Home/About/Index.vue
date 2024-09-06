@@ -45,25 +45,27 @@
 </template>
 
 <script lang="ts" setup>
+import { storeToRefs } from 'pinia'
+import useStore from '~/store/useStore'
 import type { About } from '~/types/data'
 
-const props = defineProps<{
+defineProps<{
   data: About
-  inProject: boolean
 }>()
 
 const { $scene }: any = useNuxtApp()
 const { onResize } = useResize()
+const { isInProjectEntered } = storeToRefs(useStore())
 
 const imgEl = ref<HTMLImageElement>()
 
-watch([onResize, () => props.inProject], () => {
+watch([onResize, isInProjectEntered], () => {
   if (!imgEl.value) return
   const bounding = imgEl.value?.getBoundingClientRect()
   $scene.updateObject({
     id: 'about-thumbnail',
     position: {
-      x: props.inProject ? -10000 : parseFloat(imgEl.value?.dataset.positionLeft || '0'),
+      x: isInProjectEntered.value ? -10000 : parseFloat(imgEl.value?.dataset.positionLeft || '0'),
       y: parseFloat(imgEl.value?.dataset.positionTop || '0'),
     },
     size: { x: bounding.width, y: bounding.height, z: 1 },
@@ -100,10 +102,12 @@ function onLoaded() {
     @include grid;
 
     &__label {
+      padding-bottom: 8rem;
+
+      @include t-h2;
       @include columns(10, 'desktop');
       @include gap(2, 'left', 'desktop');
-      @include t-h2;
-      padding-bottom: 8rem;
+
       &__indent {
         --width: calc(
           min(100vw, var(--layout-max-width)) - var(--layout-indent) * 2 - var(--layout-gap) * 11
@@ -138,18 +142,18 @@ function onLoaded() {
       @include columns(6, 'desktop');
       @include gap(2, 'left', 'desktop');
       &__text {
-        @include t-b1;
         column-count: 2;
         column-gap: var(--layout-gap);
+        @include t-b1;
       }
     }
   }
 
   &__collaborator {
-    @include grid;
     margin-top: 18rem;
     padding-bottom: 12rem;
     position: relative;
+    @include grid;
     .separator {
       margin-left: calc(var(--layout-column-width) * 4 + var(--layout-gap) * 5);
       width: calc(var(--layout-column-width) * 5 + var(--layout-gap) * 4);
@@ -158,16 +162,16 @@ function onLoaded() {
       @include gap(4, 'left', 'desktop');
       @include columns(2, 'desktop');
       &__label {
-        @include t-b1;
         margin-top: 1.2rem;
+        @include t-b1;
       }
     }
     &__content {
       @include columns(3, 'desktop');
       @include gap(1, 'right', 'desktop');
       &__label {
-        @include t-b1;
         margin-top: 1.2rem;
+        @include t-b1;
       }
     }
     &__thumbnail {

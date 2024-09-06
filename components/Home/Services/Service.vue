@@ -45,12 +45,13 @@ defineProps<{
   }
 
   &__content {
-    @include grid;
     position: relative;
     z-index: 1;
 
     background-color: var(--light-grey);
     padding-top: 0.8rem;
+
+    @include grid;
 
     &::after {
       content: '';
@@ -64,16 +65,16 @@ defineProps<{
     }
 
     &__number {
-      @include columns(2, 'desktop');
       @include t-number;
+      @include columns(2, 'desktop');
     }
     &__title {
-      @include columns(4, 'desktop');
       @include t-b1;
+      @include columns(4, 'desktop');
     }
     &__description {
-      @include columns(6, 'desktop');
       @include t-b1;
+      @include columns(6, 'desktop');
     }
   }
 }

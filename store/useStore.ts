@@ -7,6 +7,8 @@ export default defineStore('use-store', {
     loading: true,
     preview: false,
     grid: 'none',
+    inProject: false,
+    inProjectEntered: false,
     routes: {
       entry: '',
       history: [],
@@ -30,6 +32,12 @@ export default defineStore('use-store', {
     },
     gridType(): GridType {
       return this.grid
+    },
+    isInProject(): boolean {
+      return this.inProject
+    },
+    isInProjectEntered(): boolean {
+      return this.inProjectEntered
     },
     entryRoute(): string {
       return this.routes.entry
@@ -68,6 +76,12 @@ export default defineStore('use-store', {
     },
     updateGrid(state: GridType): void {
       this.grid = state
+    },
+    updateInProject(state: boolean): void {
+      this.inProject = state
+    },
+    updateInProjectEntered(state: boolean): void {
+      this.inProjectEntered = state
     },
     defineEntryRoute(value: string): void {
       this.routes.entry = value

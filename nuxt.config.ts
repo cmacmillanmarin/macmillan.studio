@@ -2,7 +2,7 @@ require('dotenv').config({ path: `./config/env/.env.${process.env.ENV}` })
 
 import glsl from 'vite-plugin-glsl'
 
-const { PRODUCTION, FE_PROTOCOL, FE_BASE_URL } = process.env
+const { PRODUCTION, FE_PROTOCOL, FE_BASE_URL, VITE_CJS_IGNORE_WARNING } = process.env
 
 const IS_DEV: boolean = PRODUCTION != '1'
 const IS_PRODUCTION: boolean = PRODUCTION == '1'
@@ -19,7 +19,9 @@ const robotsRules: Array<any> = [
 export default defineNuxtConfig({
   ssr: true,
   runtimeConfig: {
+    VITE_CJS_IGNORE_WARNING,
     public: {
+      VITE_CJS_IGNORE_WARNING,
       IS_DEV,
       IS_PRODUCTION,
       DEPLOY_DATE,
@@ -34,22 +36,6 @@ export default defineNuxtConfig({
       meta: [{ name: 'theme-color', content: '#FFF' }],
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/assets/img/favicon.ico' }],
       script: [
-        {
-          src: `/assets/js/gsap/gsap.min.js`,
-          defer: true,
-        },
-        {
-          src: `/assets/js/gsap/CustomEase.min.js`,
-          defer: true,
-        },
-        {
-          src: `/assets/js/gsap/ScrollToPlugin.min.js`,
-          defer: true,
-        },
-        {
-          src: `/assets/js/gsap/SplitText.min.js`,
-          defer: true,
-        },
         {
           src: `/assets/js/es-module-shims.js`,
           defer: true,
@@ -79,9 +65,9 @@ export default defineNuxtConfig({
 
   modules: ['@pinia/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap'],
 
-  robots: {
-    rules: robotsRules,
-  },
+  // robots: {
+  //   rules: robotsRules,
+  // },
 
   sitemap: {
     defaults: {
@@ -124,4 +110,8 @@ export default defineNuxtConfig({
       crawlLinks: true,
     },
   },
+
+  devtools: { enabled: false },
+
+  compatibilityDate: '2024-09-06',
 })

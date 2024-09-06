@@ -81,18 +81,18 @@ $desktop--large__limit: 1921px; //      desktop large ->     1441px >= 1920px
 }
 
 @mixin tablet-only() {
-  display: none;
   @include from__tablet {
     display: block;
   }
   @include from__desktop {
     display: none;
   }
+  display: none;
 }
 
 @mixin desktop-only() {
-  display: none;
   @include from__desktop {
     display: block;
   }
+  display: none;
 }

@@ -5,6 +5,7 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { toPx, shuffle, splitArray } from '~/utils'
 
 defineProps<{
