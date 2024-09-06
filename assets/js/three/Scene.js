@@ -7,6 +7,7 @@ class Scene {
   constructor() {
     this.debug = false
 
+    this.ready = false
     this.canvas = null
     this.scene = null
     this.camera = null
@@ -60,6 +61,7 @@ class Scene {
 
     this.updateSize({ size })
     this.addListeners()
+    this.ready = true
   }
 
   addObject(object) {
@@ -351,6 +353,7 @@ class Scene {
   destroy() {
     this.log('destroy()')
 
+    this.ready = false
     this.stop()
     this.canvas.remove()
     this.canvas = null

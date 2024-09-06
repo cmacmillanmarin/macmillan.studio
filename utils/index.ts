@@ -219,6 +219,19 @@ export function shuffle(array: Array<any>): Array<any> {
   return array
 }
 
+export function splitArray<T>(array: T[], n: number): T[][] {
+  const result: T[][] = []
+  const chunkSize = Math.ceil(array.length / n)
+
+  for (let i = 0; i < n; i++) {
+    const start = i * chunkSize
+    const end = start + chunkSize
+    result.push(array.slice(start, end))
+  }
+
+  return result
+}
+
 export function formattedDate(d: Date): string {
   const year =
     ('0' + d.getUTCDate()).slice(-2) +

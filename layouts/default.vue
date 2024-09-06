@@ -6,7 +6,7 @@
     <Three />
 
     <ClientOnly>
-      <div data-scroll data-scroll-continuous class="__layout__top-layer" id="top-layer" />
+      <div class="__layout__top-layer" id="top-layer" />
     </ClientOnly>
   </div>
 </template>
@@ -194,8 +194,10 @@ function onNativeScrollRaf(): void {
 
 function onSmoothScroll(data: Data): void {
   const { $scene }: any = useNuxtApp()
-  $scene.updateY(data.current)
-  $scene.render()
+  if ($scene.ready) {
+    $scene.updateY(data.current)
+    $scene.render()
+  }
   scrollStore.updateScrollData(data)
 }
 

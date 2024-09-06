@@ -20,6 +20,7 @@ export interface Hero {
 export type Projects = { [key: string]: Project }
 export interface Project {
   title: string
+  color: string
 }
 
 export interface Service {

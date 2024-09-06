@@ -9,8 +9,14 @@
       </div>
       <ClientOnly>
         <Teleport to="#top-layer">
-          <div class="home__hero__content__studio">
-            <SvgStudio />
+          <div
+            v-if="!inProject"
+            data-scroll
+            data-scroll-continuous
+            class="home__hero__content__studio">
+            <div class="home__hero__content__studio__content">
+              <SvgStudio />
+            </div>
           </div>
         </Teleport>
       </ClientOnly>
@@ -36,8 +42,9 @@ import { toPx, round } from '~/utils'
 import { fadeIn } from '~/utils/animations'
 import type { Hero } from '~/types/data'
 
-defineProps<{
+const props = defineProps<{
   data: Hero
+  inProject: boolean
 }>()
 
 const { $scene }: any = useNuxtApp()
@@ -99,6 +106,13 @@ const position = computed<{ x: number; y: number }>(() => {
   }
 })
 
+watch(
+  () => props.inProject,
+  v => {
+    v ? videoEl.value?.pause() : videoEl.value?.play()
+  }
+)
+
 watch(current, () => {
   const initScale = 1
   const finalScale = 0.885
@@ -112,7 +126,7 @@ watch(current, () => {
 
   gsap.set('.svg__macmillan, .svg__studio', { scale })
   gsap.set('.home__hero__content__hint', { opacity, y: toPx(current.value * 0.2) })
-  gsap.set('.home__hero__content__studio', {
+  gsap.set('.home__hero__content__studio__content', {
     y: toPx(current.value - (verticalGap.value + titleMargin.value) * scaleProgress + scroll),
   })
   gsap.set('.home__hero__content__macmillan', {
@@ -121,8 +135,9 @@ watch(current, () => {
   // gsap.set('.home__hero__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
 })
 
-watch(position, () => {
+watch([position, videoPlaying], () => {
   if (videoPlaying.value) {
+    console.log('update object position')
     $scene.updateObject({
       id: 'reel',
       fixed: {
@@ -132,6 +147,15 @@ watch(position, () => {
       size: size.value,
       position: position.value,
     })
+  } else {
+    console.log('Update object zero')
+    $scene.updateObject({
+      id: 'reel',
+      position: {
+        ...position.value,
+        x: -10000,
+      },
+    })
   }
 })
 
@@ -140,6 +164,17 @@ function enter(params: { el: HTMLElement }) {
 }
 
 function onPlay() {
+  videoPlaying.value = true
+}
+
+function onPause() {
+  videoPlaying.value = false
+}
+
+onMounted(() => {
+  videoEl.value?.addEventListener('play', onPlay)
+  videoEl.value?.addEventListener('pause', onPause)
+  !props.inProject && videoEl.value?.play()
   $scene.addObject({
     id: 'reel',
     type: 'plane',
@@ -148,18 +183,14 @@ function onPlay() {
       to: vh.value * scrollGap.value,
     },
     video: videoEl.value,
-    position: position.value,
-    size: size.value,
+    position: { x: 0, y: 0 },
+    size: { x: 0, y: 0, z: 0 },
   })
-  videoPlaying.value = true
-}
-
-onMounted(() => {
-  videoEl.value?.addEventListener('play', onPlay)
-  videoEl.value?.play()
 })
 
 onUnmounted(() => {
+  videoEl.value?.removeEventListener('play', onPlay)
+  videoEl.value?.removeEventListener('pause', onPause)
   $scene.removeObject('reel')
   $scene.destroy()
 })

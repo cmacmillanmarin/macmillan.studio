@@ -47,8 +47,9 @@
 <script lang="ts" setup>
 import type { About } from '~/types/data'
 
-defineProps<{
+const props = defineProps<{
   data: About
+  inProject: boolean
 }>()
 
 const { $scene }: any = useNuxtApp()
@@ -56,14 +57,13 @@ const { onResize } = useResize()
 
 const imgEl = ref<HTMLImageElement>()
 
-watch(onResize, () => {
+watch([onResize, () => props.inProject], () => {
   if (!imgEl.value) return
   const bounding = imgEl.value?.getBoundingClientRect()
-  console.log(bounding)
   $scene.updateObject({
     id: 'about-thumbnail',
     position: {
-      x: parseFloat(imgEl.value?.dataset.positionLeft || '0'),
+      x: props.inProject ? -10000 : parseFloat(imgEl.value?.dataset.positionLeft || '0'),
       y: parseFloat(imgEl.value?.dataset.positionTop || '0'),
     },
     size: { x: bounding.width, y: bounding.height, z: 1 },

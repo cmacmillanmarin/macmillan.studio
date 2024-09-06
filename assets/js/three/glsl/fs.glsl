@@ -58,6 +58,6 @@ void main() {
   gl_FragColor = vec4(mixedTexture.xyz, uOpacity);
 
   if (uNoise == 1) {
-    gl_FragColor = vec4(vec3(0.0), noise(vec2(time) * vUv) * 0.2);
+    gl_FragColor = vec4(vec3(0.0), noise(vec2(time) * vUv) * 0.1);
   }
 }

@@ -18,6 +18,7 @@ const props = defineProps<{
   top: number
   bottom: number
   side: number
+  inProject: boolean
 }>()
 
 const { $scene }: any = useNuxtApp()
@@ -42,7 +43,7 @@ watch(current, () => {
   leaveProgress.value = Math.min(Math.max(0, (current.value - bottom) / (leaveBottom - bottom)), 1)
 })
 
-watch([() => props.top, () => props.bottom, progress, leaveProgress], () => {
+watch([() => props.top, () => props.bottom, () => props.inProject, progress, leaveProgress], () => {
   const sizeX = size.value.x * progress.value
   const sizeY = size.value.y * progress.value
 
@@ -52,7 +53,7 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress], () => {
 
   $scene.updateObject({
     id: projectId.value,
-    position: { x: positionX, y: positionY },
+    position: { x: props.inProject ? -10000 : positionX, y: positionY },
     size: { x: sizeX, y: sizeY, z: 1 },
     fixed: { from: props.top, to: props.bottom },
   })

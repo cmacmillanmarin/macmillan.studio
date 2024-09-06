@@ -3,7 +3,8 @@
     <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
     <div class="header__hint">
-      <p><SvgPixelArrow /> Independent Development Studio</p>
+      <SvgPixelArrow />
+      <p class="header__hint__label">Independent Tech Lead ~ Developer</p>
     </div>
 
     <nav class="header__nav header__nav--main">
@@ -90,10 +91,9 @@ watch(current, () => {
 <style lang="scss">
 .header {
   @include will-fade;
-
   @include grid('rule-of-thirds');
-  align-items: flex-end;
 
+  align-items: flex-end;
   padding-bottom: var(--layout-indent);
 
   &__hint,
@@ -102,6 +102,9 @@ watch(current, () => {
   }
 
   &__hint {
+    display: flex;
+    align-items: center;
+    column-gap: 0.8rem;
     padding-left: var(--layout-indent);
     p {
       @include t-b1;
@@ -125,15 +128,19 @@ watch(current, () => {
       column-gap: 0.8rem;
       &__item {
         &__anchor {
+          color: var(--black);
           @include t-b1;
-          color: black;
         }
       }
     }
 
     &__logo {
+      position: relative;
       will-change: transform;
       .svg__logo {
+        position: absolute;
+        bottom: 0;
+        right: 0;
         width: 16rem;
 
         will-change: transform;

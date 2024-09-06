@@ -11,7 +11,8 @@
       :data="project"
       :top="top"
       :bottom="bottom"
-      :side="i % 2 === 0 ? -1 : 1" />
+      :side="i % 2 === 0 ? -1 : 1"
+      :inProject="inProject" />
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import { type Projects } from '~/types/data'
 
 defineProps<{
   data: Projects
+  inProject: boolean
 }>()
 
 const { vh } = useResize()
@@ -36,3 +38,9 @@ watch(onReset, () => {
   bottom.value = bounding.bottom - vh.value
 })
 </script>
+
+<style lang="scss">
+.home__projects {
+  padding-bottom: calc(var(--vh) * 0.8);
+}
+</style>

@@ -11,16 +11,20 @@
   },
   "projects": {
     "student-loan-strategist": {
-      "title": "Student Loan Strategist"
+      "title": "Student Loan Strategist",
+      "color": "#c09"
     },
     "a-gamified-geo-fenced-experience-for-nike": {
-      "title": "Nike Experience"
+      "title": "Nike Experience",
+      "color": "#000"
     },
     "the-mortgage-expert": {
-      "title": "The Mortgage Expert"
+      "title": "The Mortgage Expert",
+      "color": "#f00"
     },
     "plastic": {
-      "title": "Plastic"
+      "title": "Plastic",
+      "color": "#0f0"
     }
   },
   "services": {
