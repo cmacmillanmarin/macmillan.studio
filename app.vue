@@ -52,6 +52,10 @@ watch(keyPressed, () => {
     .__layout {
       height: var(--vh);
       overflow: scroll;
+      &::-webkit-scrollbar {
+        width: default;
+        height: default;
+      }
       .c-page {
         height: max-content;
       }
