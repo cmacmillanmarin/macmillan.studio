@@ -17,9 +17,9 @@
 
     <HomeHero data-scroll data-scroll-continuous :data="data.hero" />
 
-    <HomeProjects data-scroll :data="data.projects" />
+    <HomeProjects v-if="data.projects.list.length" data-scroll :data="data.projects" />
 
-    <HomeServices data-scroll :data="data.services" />
+    <HomeServices v-if="data.services.list.length" data-scroll :data="data.services" />
 
     <HomeAbout data-scroll :data="data.about" />
 
@@ -28,22 +28,22 @@
 </template>
 
 <script lang="ts" setup>
-import { type Data } from '~/types/data'
-import { type Project } from '~/types/data'
+import { type Homepage } from '~/types/wordpress/homepage'
+import { type Project } from '~/types/wordpress/project'
 import { transitionFadeOut } from '~/utils/animations'
 import useStore from '~/store/useStore'
 
 const route = useRoute()
-const { data } = await useFetch<Data>('/api/data')
+const { data } = await useFetch<Homepage>('/api/data')
 
 const { updateInProject, updateInProjectEntered } = useStore()
 
 const inProject = ref<boolean>(false)
 const inProjectEntered = ref<boolean>(false)
 const projectSlug = computed<string>(() => `${route.params.slug}`)
-const project = computed<Project | undefined>(() =>
-  projectSlug.value ? data.value?.projects[projectSlug.value] : undefined
-)
+const project = computed<Project | undefined>(() => {
+  return data.value?.projects.list.find(project => project.slug === projectSlug.value)
+})
 
 watch(inProject, () => {
   updateInProject(inProject.value)

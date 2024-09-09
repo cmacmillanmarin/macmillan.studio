@@ -14,10 +14,10 @@ export default function useKeyboard() {
       getComputedStyle(document.documentElement).getPropertyValue('--layout-max-width')
     )
     layoutIndent.value =
-      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-indent')) *
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
       10
     layoutGap.value =
-      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-indent')) *
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
       10
   }
 

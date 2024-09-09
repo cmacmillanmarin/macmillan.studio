@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
 import { gsap } from 'gsap'
-import { type Project } from '~/types/data'
+import { type Project } from '~/types/wordpress/project'
 import useScrollStore from '~/store/useScrollStore'
 import { transitionFadeOut } from '~/utils/animations'
 

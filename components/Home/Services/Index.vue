@@ -16,10 +16,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Services } from '~/types/data'
+import type { HomepageServices } from '~/types/wordpress/homepage'
 
 defineProps<{
-  data: Services
+  data: HomepageServices
 }>()
 </script>
 
@@ -44,10 +44,10 @@ defineProps<{
 
       &__indent {
         --width: calc(
-          min(100vw, var(--layout-max-width)) - var(--layout-indent) * 2 - var(--layout-gap) * 11
+          min(100vw, var(--layout-max-width)) - var(--layout-margin) * 2 - var(--layout-gutter) * 11
         );
         --column-width: calc(var(--width) / 12);
-        width: calc(var(--column-width) * 4 + var(--layout-gap) * 4);
+        width: calc(var(--column-width) * 4 + var(--layout-gutter) * 4);
         display: inline-block;
       }
     }

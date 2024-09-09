@@ -47,10 +47,10 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
-import type { About } from '~/types/data'
+import type { HomepageAbout } from '~/types/wordpress/homepage'
 
 defineProps<{
-  data: About
+  data: HomepageAbout
 }>()
 
 const { $scene }: any = useNuxtApp()
@@ -110,10 +110,10 @@ function onLoaded() {
 
       &__indent {
         --width: calc(
-          min(100vw, var(--layout-max-width)) - var(--layout-indent) * 2 - var(--layout-gap) * 11
+          min(100vw, var(--layout-max-width)) - var(--layout-margin) * 2 - var(--layout-gutter) * 11
         );
         --column-width: calc(var(--width) / 12);
-        width: calc(var(--column-width) * 4 + var(--layout-gap) * 4);
+        width: calc(var(--column-width) * 4 + var(--layout-gutter) * 4);
         display: inline-block;
       }
     }
@@ -143,7 +143,7 @@ function onLoaded() {
       @include gap(2, 'left', 'desktop');
       &__text {
         column-count: 2;
-        column-gap: var(--layout-gap);
+        column-gap: var(--layout-gutter);
         @include t-b1;
       }
     }
@@ -155,8 +155,8 @@ function onLoaded() {
     position: relative;
     @include grid;
     .separator {
-      margin-left: calc(var(--layout-column-width) * 4 + var(--layout-gap) * 5);
-      width: calc(var(--layout-column-width) * 5 + var(--layout-gap) * 4);
+      margin-left: calc(var(--layout-column-width) * 4 + var(--layout-gutter) * 5);
+      width: calc(var(--layout-column-width) * 5 + var(--layout-gutter) * 4);
     }
     &__title {
       @include gap(4, 'left', 'desktop');

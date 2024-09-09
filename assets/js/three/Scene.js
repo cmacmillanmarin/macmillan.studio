@@ -142,8 +142,7 @@ class Scene {
             object.mesh = this.getMesh(object.type)
             this.scene.add(object.mesh)
           }
-          gsap.killTweensOf(object.mesh.material.uniforms.uOpacity)
-          gsap.to(object.mesh.material.uniforms.uOpacity, { value: 1.0, duration: 1 })
+          this.planeIn(object.mesh.material.uniforms.uOpacity)
         }
 
         const position = this.fromDomToCanvas({
@@ -319,6 +318,12 @@ class Scene {
   toScale(n) {
     const mvw = Math.min(this.size.x, 1920) // Check layout max width
     return (n * mvw) / 1440
+  }
+
+  planeIn(prop) {
+    gsap.killTweensOf(prop)
+    const duration = 1
+    gsap.to(prop, { value: 1, duration, ease: 'power1.in' })
   }
 
   onMouseMovement(e) {

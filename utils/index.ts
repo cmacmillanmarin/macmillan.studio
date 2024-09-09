@@ -1,3 +1,4 @@
+import he from 'he'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 
@@ -103,35 +104,6 @@ export function slugify(str: string): string {
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '')
-}
-
-export function numberToMonth(number: string): string {
-  switch (number) {
-    case '01':
-      return 'Jan'
-    case '02':
-      return 'Feb'
-    case '03':
-      return 'Mar'
-    case '04':
-      return 'Apr'
-    case '05':
-      return 'May'
-    case '06':
-      return 'Jun'
-    case '07':
-      return 'Jul'
-    case '08':
-      return 'Ago'
-    case '09':
-      return 'Sep'
-    case '10':
-      return 'Oct'
-    case '11':
-      return 'Nov'
-    default:
-      return 'Dec'
-  }
 }
 
 export function validateEmail(email: string): boolean {
@@ -241,4 +213,80 @@ export function formattedDate(d: Date): string {
     d.getUTCFullYear()
   const hour = ('0' + d.getUTCHours()).slice(-2) + ':' + ('0' + d.getUTCMinutes()).slice(-2)
   return hour + ' ' + year
+}
+
+export function removeHtmlTags(input?: string) {
+  let output: string = input || ''
+  output = output.replace(/<[^>]*>/g, '')
+  output = output.replace(/\/[^\/]*\//g, '')
+  return decodeHtmlEntity(he.decode(he.decode(output)))
+}
+
+export function decodeHtmlEntity(str: string): string {
+  return str
+    .replaceAll(/&amp;/g, '&')
+    .replaceAll(/&lt;/g, '<')
+    .replaceAll(/&gt;/g, '>')
+    .replaceAll(/&quot;/g, '"')
+    .replaceAll(/&#039;/g, "'")
+    .replaceAll(/&apos;/g, "'")
+    .replaceAll(/&#8217;/g, "'")
+}
+
+export function numberToMonth(number: string): string {
+  switch (number) {
+    case '01':
+      return 'January'
+    case '02':
+      return 'February'
+    case '03':
+      return 'March'
+    case '04':
+      return 'April'
+    case '05':
+      return 'May'
+    case '06':
+      return 'June'
+    case '07':
+      return 'July'
+    case '08':
+      return 'August'
+    case '09':
+      return 'September'
+    case '10':
+      return 'October'
+    case '11':
+      return 'November'
+    default:
+      return 'December'
+  }
+}
+
+export function numberToShortMonth(number: string): string {
+  switch (number) {
+    case '01':
+      return 'Jan'
+    case '02':
+      return 'Feb'
+    case '03':
+      return 'Mar'
+    case '04':
+      return 'Apr'
+    case '05':
+      return 'May'
+    case '06':
+      return 'Jun'
+    case '07':
+      return 'Jul'
+    case '08':
+      return 'Aug'
+    case '09':
+      return 'Sept'
+    case '10':
+      return 'Oct'
+    case '11':
+      return 'Nov'
+    default:
+      return 'Dec'
+  }
 }

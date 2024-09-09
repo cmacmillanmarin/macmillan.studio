@@ -12,10 +12,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { AboutTestimonial } from '~/types/data'
+import type { Testimonial } from '~/types/wordpress/testimonial'
 
 defineProps<{
-  data: AboutTestimonial
+  data: Testimonial
 }>()
 </script>
 

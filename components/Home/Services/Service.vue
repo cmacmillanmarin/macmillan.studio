@@ -8,15 +8,13 @@
       <div class="home__services__service__content__title">
         <h3 class="home__services__service__content__title__label">{{ data.title }}</h3>
       </div>
-      <div class="home__services__service__content__description">
-        <p class="home__services__service__content__description__label">{{ data.description }}</p>
-      </div>
+      <div class="home__services__service__content__description" v-html="data.description" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { Service } from '~/types/data'
+import type { Service } from '~/types/wordpress/service'
 
 defineProps<{
   index: number
@@ -40,8 +38,8 @@ defineProps<{
   .separator {
     z-index: 2;
     top: 4rem;
-    left: calc(var(--layout-column-width) * 2 + var(--layout-gap) * 3);
-    width: calc(var(--layout-column-width) * 10 + var(--layout-gap) * 9);
+    left: calc(var(--layout-column-width) * 2 + var(--layout-gutter) * 3);
+    width: calc(var(--layout-column-width) * 10 + var(--layout-gutter) * 9);
   }
 
   &__content {

@@ -22,7 +22,7 @@
       </ClientOnly>
 
       <div class="home__hero__content__hint">
-        <p>{{ data.hint }}</p>
+        <p class="home__hero__content__hint__label" v-html="data.hint" />
       </div>
 
       <video ref="videoEl" class="home__hero__content__video" width="1920" height="1080" muted loop>
@@ -41,10 +41,10 @@ import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { toPx, round } from '~/utils'
 import { fadeIn } from '~/utils/animations'
-import type { Hero } from '~/types/data'
+import type { HomepageHero } from '~/types/wordpress/homepage'
 
 defineProps<{
-  data: Hero
+  data: HomepageHero
 }>()
 
 const { $scene }: any = useNuxtApp()
@@ -164,7 +164,7 @@ function onPause() {
 onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
-  isInProjectEntered.value && videoEl.value?.play()
+  !isInProjectEntered.value && videoEl.value?.play()
   $scene.addObject({
     id: 'reel',
     type: 'plane',
@@ -207,7 +207,7 @@ onUnmounted(() => {
     &__macmillan {
       width: calc(var(--col) * 2);
       margin-left: var(--col);
-      padding-right: var(--layout-indent);
+      padding-right: var(--layout-margin);
       margin-bottom: v-bind(titleMarginPx);
       will-change: transform;
       svg {
@@ -220,7 +220,7 @@ onUnmounted(() => {
       pointer-events: auto;
       width: calc(min(100vw, var(--layout-max-width)) * 0.333333);
       padding-top: v-bind(verticalGapPx);
-      padding-left: var(--layout-indent);
+      padding-left: var(--layout-margin);
 
       svg {
         width: 127.9%;
@@ -234,7 +234,7 @@ onUnmounted(() => {
 
     &__hint {
       position: absolute;
-      top: calc(var(--col) * 3 - #{toScale(16rem)} - var(--layout-indent));
+      top: calc(var(--col) * 3 - #{toScale(16rem)} - var(--layout-margin));
       left: var(--col);
       height: var(--col);
       width: var(--col);

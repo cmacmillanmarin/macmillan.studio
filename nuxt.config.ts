@@ -1,19 +1,27 @@
-require('dotenv').config({ path: `./config/env/.env.${process.env.ENV}` })
-
 import glsl from 'vite-plugin-glsl'
 
-const { PRODUCTION, FE_PROTOCOL, FE_BASE_URL, VITE_CJS_IGNORE_WARNING } = process.env
+const {
+  OFFLINE,
+  PRODUCTION,
+  FE_PROTOCOL,
+  FE_BASE_URL,
+  BE_PROTOCOL,
+  BE_BASE_URL,
+  BE_BASE_API_URL,
+  VITE_CJS_IGNORE_WARNING,
+} = process.env
 
 const IS_DEV: boolean = PRODUCTION != '1'
+const IS_OFFLINE: boolean = OFFLINE == '1'
 const IS_PRODUCTION: boolean = PRODUCTION == '1'
 const DEPLOY_DATE: string = Date.now().toString()
 
-const robotsRules: Array<any> = [
-  { UserAgent: '*' },
-  { Disallow: '/' },
-  { BlankLine: true },
-  { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
-]
+// const robotsRules: Array<any> = [
+//   { UserAgent: '*' },
+//   { Disallow: '/' },
+//   { BlankLine: true },
+//   { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
+// ]
 
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
@@ -21,11 +29,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     VITE_CJS_IGNORE_WARNING,
     public: {
-      VITE_CJS_IGNORE_WARNING,
       IS_DEV,
+      IS_OFFLINE,
       IS_PRODUCTION,
       DEPLOY_DATE,
       FE_BASE_URL: `${FE_PROTOCOL}${FE_BASE_URL}`,
+      BE_BASE_URL: `${BE_PROTOCOL}${BE_BASE_URL}`,
+      BE_API_URL: `${BE_PROTOCOL}${BE_BASE_URL}${BE_BASE_API_URL}`,
     },
   },
   app: {

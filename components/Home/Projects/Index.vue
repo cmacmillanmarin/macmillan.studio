@@ -6,8 +6,7 @@
     data-scroll-target-top
     data-scroll-set-position>
     <HomeProjectsProject
-      v-for="(project, slug, i) in data"
-      :slug="slug"
+      v-for="(project, i) in data.list"
       :data="project"
       :top="top"
       :bottom="bottom"
@@ -16,10 +15,10 @@
 </template>
 
 <script lang="ts" setup>
-import { type Projects } from '~/types/data'
+import { type HomepageProjects } from '~/types/wordpress/homepage'
 
 defineProps<{
-  data: Projects
+  data: HomepageProjects
 }>()
 
 const { vh } = useResize()

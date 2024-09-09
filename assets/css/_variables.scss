@@ -7,10 +7,10 @@
 
   // layout
   --layout-max-width: 1920px;
-  --layout-indent: 1.6rem;
-  --layout-gap: 1.6rem;
+  --layout-margin: 1.6rem;
+  --layout-gutter: 1.6rem;
   --layout-width: calc(
-    min(100vw, var(--layout-max-width)) - var(--layout-indent) * 2 - var(--layout-gap) * 11
+    min(100vw, var(--layout-max-width)) - var(--layout-margin) * 2 - var(--layout-gutter) * 11
   );
   --layout-column-width: calc(var(--layout-width) / 12);
 

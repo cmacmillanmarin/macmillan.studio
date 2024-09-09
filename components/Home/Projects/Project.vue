@@ -1,6 +1,6 @@
 <template>
   <div ref="el" class="home__projects__project" data-scroll-set-position>
-    <CustomLink :to="`/${slug}`" class="home__projects__project__" :content="true">{{
+    <CustomLink :to="`/${data.slug}`" class="home__projects__project__" :content="true">{{
       data.title
     }}</CustomLink>
   </div>
@@ -10,11 +10,10 @@
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import type { Project } from '~/types/data'
+import type { Project } from '~/types/wordpress/project'
 import { slugify } from '~/utils'
 
 const props = defineProps<{
-  slug: string | number
   data: Project
   top: number
   bottom: number

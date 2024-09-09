@@ -163,7 +163,7 @@ function playTetris() {
     bottom: 0;
     width: 100%;
     max-width: var(--layout-max-width);
-    padding: var(--layout-indent);
+    padding: var(--layout-margin);
 
     left: 50%;
     transform: translateX(-50%);

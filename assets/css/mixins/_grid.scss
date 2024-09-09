@@ -15,10 +15,10 @@ $layouts: (
   display: flex;
   flex-wrap: wrap;
   grid-gap: 0;
-  column-gap: var(--layout-gap);
+  column-gap: var(--layout-gutter);
 
-  padding-left: var(--layout-indent);
-  padding-right: var(--layout-indent);
+  padding-left: var(--layout-margin);
+  padding-right: var(--layout-margin);
   margin-left: auto;
   margin-right: auto;
 
@@ -27,11 +27,12 @@ $layouts: (
     justify-content: center;
   } @else if $type == 'rule-of-thirds' {
     column-gap: 0;
-    padding: 0;
+    padding-left: 0;
+    padding-right: 0;
 
     --col: 33.3333%;
   } @else if $type == 'golden-ratio' {
-    --layout-indent: 3.1%;
+    --layout-margin: 3.1%;
     --col-xs: 2.65%;
     --col-s: 10%;
     --col-m: 10.65%;
@@ -51,7 +52,7 @@ $layouts: (
 @mixin columns($i, $device: 'mobile') {
   $columns: map-get($layouts, $device);
   $col_width: calc((#{$i} / #{$columns}) * 100%);
-  $gap_width: calc(var(--layout-gap) * (1 - (1 / (#{$columns} / #{$i}))));
+  $gap_width: calc(var(--layout-gutter) * (1 - (1 / (#{$columns} / #{$i}))));
   $width_value: calc($col_width - $gap_width);
   @include from__($device) {
     width: $width_value;
@@ -61,8 +62,8 @@ $layouts: (
 @mixin gap($i, $side: '', $device: 'mobile') {
   $columns: map-get($layouts, $device);
   $col_width: calc((#{$i} / #{$columns}) * 100%);
-  $gap_margin: calc(var(--layout-gap) * (#{$i} - (1 / (#{$columns} / #{$i}))));
-  $margin_value: calc($col_width - $gap_margin + $i * var(--layout-gap));
+  $gap_margin: calc(var(--layout-gutter) * (#{$i} - (1 / (#{$columns} / #{$i}))));
+  $margin_value: calc($col_width - $gap_margin + $i * var(--layout-gutter));
   @include from__($device) {
     @if $side == 'left' {
       margin-left: $margin_value;

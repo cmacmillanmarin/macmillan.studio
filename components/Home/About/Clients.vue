@@ -11,7 +11,7 @@
       <p class="home__about__clients__list__title">{{ data.hint }}</p>
       <div class="home__about__clients__list__content">
         <p v-for="client in data.list" class="home__about__clients__list__content__client">
-          {{ client.label }}
+          {{ client.name }}
         </p>
       </div>
     </div>
@@ -46,10 +46,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { AboutClients } from '~/types/data'
+import type { HomepageAboutClients } from '~/types/wordpress/homepage'
 
 defineProps<{
-  data: AboutClients
+  data: HomepageAboutClients
 }>()
 </script>
 
@@ -75,7 +75,7 @@ defineProps<{
 
     align-self: end;
     display: flex;
-    column-gap: var(--layout-gap);
+    column-gap: var(--layout-gutter);
 
     @include columns(4, 'desktop');
 

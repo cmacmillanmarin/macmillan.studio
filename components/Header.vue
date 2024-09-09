@@ -110,11 +110,11 @@ function leave() {
 
 <style lang="scss">
 .header {
-  @include grid('rule-of-thirds');
-
   align-items: flex-end;
-  padding-bottom: var(--layout-indent);
+  padding-bottom: var(--layout-margin);
   pointer-events: none;
+
+  @include grid('rule-of-thirds');
 
   &__hint,
   &__nav {
@@ -125,11 +125,14 @@ function leave() {
     display: flex;
     align-items: center;
     column-gap: 0.8rem;
-    padding-left: var(--layout-indent);
+    padding-left: var(--layout-margin);
+
     @include will-fade;
+
     p {
       @include t-b1;
     }
+
     .svg__pixel-arrow {
       width: toScale(2rem);
     }
@@ -141,17 +144,18 @@ function leave() {
       align-items: flex-end;
       justify-content: space-between;
 
-      padding-right: var(--layout-indent);
+      padding-right: var(--layout-margin);
     }
 
     &__list {
       display: flex;
       column-gap: 0.8rem;
+
       &__item {
         &__anchor {
           color: var(--black);
-          @include t-b1;
           @include will-fade;
+          @include t-b1;
         }
       }
     }
@@ -159,6 +163,7 @@ function leave() {
     &__logo {
       position: relative;
       will-change: transform;
+
       .svg__logo {
         position: absolute;
         bottom: 0;
