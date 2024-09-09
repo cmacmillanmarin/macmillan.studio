@@ -134,7 +134,7 @@ export function parseHomepage(params: {
     },
     projects: {
       title: parseText(homepage?.acf.projects.title),
-      list: parseProjects({ projects }),
+      list: parseProjects({ projects, clients }),
     },
     services: {
       title: parseText(homepage?.acf.services.title),

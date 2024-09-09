@@ -52,7 +52,7 @@ const { $scene }: any = useNuxtApp()
 const { gridType, isInProjectEntered } = storeToRefs(useStore())
 const { current } = storeToRefs(useScrollStore())
 
-const { layoutIndent } = useCss()
+const { layoutMargin } = useCss()
 const { lvw, vw, vh } = useResize()
 
 const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && isInProjectEntered.value)
@@ -71,7 +71,7 @@ const scrollProgress = computed<number>(() =>
 const scrollThreshold = computed<number>(() => verticalGap.value * 2.5)
 
 const size = computed<{ x: number; y: number; z: number }>(() => {
-  const initWidth = lvw.value * 0.666666 - layoutIndent.value
+  const initWidth = lvw.value * 0.666666 - layoutMargin.value
   const finalWidth = vw.value
   const incrementWidth = finalWidth - initWidth
 
@@ -93,10 +93,10 @@ const position = computed<{ x: number; y: number }>(() => {
 
   const x =
     vw.value -
-    layoutIndent.value -
+    layoutMargin.value -
     size.value.x -
     incrementGap * (scrollProgress.value - 1) +
-    layoutIndent.value * scrollProgress.value
+    layoutMargin.value * scrollProgress.value
 
   const initY = verticalGap.value
   const finalY = 0

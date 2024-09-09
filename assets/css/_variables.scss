@@ -1,18 +1,24 @@
 :root {
   // colors
   --black: #000;
+  --white: #fff;
   --lime: #c5ff20;
   --light-grey: #d3d6da;
   --dark-grey: #818388;
 
   // layout
   --layout-max-width: 1920px;
+  --layout-columns: 8;
   --layout-margin: 1.6rem;
   --layout-gutter: 1.6rem;
   --layout-width: calc(
     min(100vw, var(--layout-max-width)) - var(--layout-margin) * 2 - var(--layout-gutter) * 11
   );
   --layout-column-width: calc(var(--layout-width) / 12);
+
+  @include from__desktop {
+    --layout-columns: 12;
+  }
 
   // supports
   @supports (height: 1svh) {

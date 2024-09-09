@@ -7,7 +7,7 @@ export function ease(): string {
 }
 
 export async function fadeIn(params: {
-  el: Element | HTMLElement | Array<HTMLElement>
+  el: Element | HTMLElement | Array<HTMLElement> | undefined
   delay?: number
   duration?: number
   ease?: string
@@ -16,6 +16,10 @@ export async function fadeIn(params: {
 }): Promise<void> {
   return new Promise(resolve => {
     const { el, delay, duration, translate, done } = params
+    if (!el) {
+      resolve()
+      return
+    }
     const opacity = {
       duration: duration || 1.2,
       ease: params.ease || ease(),
@@ -36,7 +40,7 @@ export async function fadeIn(params: {
 }
 
 export async function fadeOut(params: {
-  el: Element | HTMLElement | Array<HTMLElement>
+  el: Element | HTMLElement | Array<HTMLElement> | undefined
   delay?: number
   duration?: number
   ease?: string
@@ -45,6 +49,10 @@ export async function fadeOut(params: {
 }): Promise<void> {
   return new Promise(resolve => {
     const { el, delay, duration, translate, done } = params
+    if (!el) {
+      resolve()
+      return
+    }
     const opacity = {
       duration: duration || 0.5,
       ease: params.ease || ease(),

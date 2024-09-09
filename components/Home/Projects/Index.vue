@@ -7,10 +7,12 @@
     data-scroll-set-position>
     <HomeProjectsProject
       v-for="(project, i) in data.list"
+      :i="i"
       :data="project"
       :top="top"
       :bottom="bottom"
-      :side="i % 2 === 0 ? -1 : 1" />
+      :side-x="i % 4 === 0 || i % 4 === 3 ? -1 : 1"
+      :side-y="i % 4 <= 1 ? -1 : 1" />
   </div>
 </template>
 
@@ -38,6 +40,7 @@ watch(onReset, () => {
 
 <style lang="scss">
 .home__projects {
+  // padding-top: calc(var(--vh) * 0.5);
   padding-bottom: calc(var(--vh) * 0.25);
 }
 </style>
