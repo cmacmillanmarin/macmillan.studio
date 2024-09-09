@@ -38,6 +38,6 @@ watch(onReset, () => {
 
 <style lang="scss">
 .home__projects {
-  padding-bottom: calc(var(--vh) * 0.8);
+  padding-bottom: calc(var(--vh) * 0.25);
 }
 </style>

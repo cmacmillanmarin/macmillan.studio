@@ -4,21 +4,44 @@ varying vec2 vUv;
 
 uniform int uNoise;
 uniform float uTime;
+uniform float uFade;
 uniform float uOpacity;
 uniform float uPixel;
 uniform vec2 uPixelSize;
+uniform vec2 uPlaneSize;  
 uniform int uTextureType;
 uniform vec2 uTextureSize;  
 uniform sampler2D uTextureImage;
 uniform sampler2D uTextureVideo;
-
-uniform vec2 uPlaneSize;  
+uniform float uBorderRadius;
 
 float noise(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
+float roundedBoxSDF(vec2 p, vec2 b, float r) {
+  vec2 q = abs(p) - b + vec2(r);
+  return length(max(q, 0.0)) - r;
+}
+
 void main() {
+  // Convert UV coordinates to pixel coordinates
+  vec2 bruv = vUv * uPlaneSize;
+
+  // Calculate the center position relative to the plane
+  vec2 center = bruv - uPlaneSize * 0.5;
+
+  // Calculate the half size of the plane
+  vec2 halfSize = uPlaneSize * 0.5;
+
+  // Calculate the SDF for the rounded rectangle
+  float sdf = roundedBoxSDF(center, halfSize, uBorderRadius);
+
+  // Discard fragments outside the rounded corners
+  if (sdf > 0.0) {
+    discard;
+  }
+
   float time = 0.5 * sin(uTime) + 0.5; // from 0 to 1
 
   float gradient = smoothstep(0.0, 1.0, vUv.x);
@@ -53,9 +76,8 @@ void main() {
     pixelatedTexture = texture2D(uTextureImage, pixel) * lime;
   }
   vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, 1.0);
-  
 
-  gl_FragColor = vec4(mixedTexture.xyz, uOpacity);
+  gl_FragColor = vec4(mixedTexture.xyz, uOpacity * uFade);
 
   if (uNoise == 1) {
     gl_FragColor = vec4(vec3(0.0), noise(vec2(time) * vUv) * 0.1);

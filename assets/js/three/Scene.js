@@ -67,6 +67,12 @@ class Scene {
 
   addObject(object) {
     this.log('addObject()')
+    object.border = object.border || 0
+    object.fade = object.fade || false
+    object.opacity = object.opacity || 1
+    object.position = object.position || { x: 0, y: 0 }
+    object.size = object.size || { x: 1, y: 1, z: 1 }
+    object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
     this.objects.push(object)
     !this.rendering && this.play()
   }
@@ -75,11 +81,14 @@ class Scene {
     return this.objects.find(obj => obj.id === id)
   }
 
-  updateObject({ id, fixed, position, size }) {
+  updateObject({ id, fixed, position, rotate, opacity, size, border }) {
     this.log(`updateObject() ${JSON.stringify(position)}, ${JSON.stringify(size)}`)
     const object = this.getObject(id)
     if (object) {
+      object.border = border !== undefined ? border : object.border
+      object.opacity = opacity !== undefined ? opacity : 1
       object.position = position || object.position
+      object.rotate = rotate || object.rotate
       object.size = size || object.size
       object.fixed = fixed || object.fixed
     }
@@ -142,7 +151,8 @@ class Scene {
             object.mesh = this.getMesh(object.type)
             this.scene.add(object.mesh)
           }
-          this.planeIn(object.mesh.material.uniforms.uOpacity)
+          if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
+          else object.mesh.material.uniforms.uFade.value = 1
         }
 
         const position = this.fromDomToCanvas({
@@ -150,8 +160,13 @@ class Scene {
           y: object.position.y + this.getFixedY(object.fixed),
         })
 
+        object.mesh.material.uniforms.uBorderRadius.value = object.border
+        object.mesh.material.uniforms.uOpacity.value = object.opacity
         object.mesh.position.x = position.x + object.size.x * 0.5
         object.mesh.position.y = position.y - object.size.y * 0.5
+        object.mesh.rotation.x = object.rotate.x
+        object.mesh.rotation.y = object.rotate.y
+        object.mesh.rotation.z = object.rotate.z
         object.mesh.scale.x = object.size.x
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
@@ -173,14 +188,16 @@ class Scene {
     }
   }
 
-  inView({ fixed, position, size }) {
+  inView({ opacity, fixed, position, size }) {
     const y = position.y + this.getFixedY(fixed)
     const limitTop = y - this.y >= size.y * -1
     const limitRight = position.x < this.size.x
     const limitBottom = y - this.y < this.size.y
     const limitLeft = position.x + size.x > size.x * -1
 
-    return limitTop && limitRight && limitBottom && limitLeft
+    return (
+      limitTop && limitRight && limitBottom && limitLeft && size.x > 0 && size.y > 0 && opacity > 0
+    )
   }
 
   getFixedY(fixed) {
@@ -258,8 +275,10 @@ class Scene {
           uniforms: {
             uNoise: { type: 'i', value: 0 },
             uTime: { type: 'f', value: 0.0 },
+            uFade: { type: 'f', value: 0.0 },
             uOpacity: { type: 'f', value: 0.0 },
             uPixel: { type: 'f', value: 0.0 },
+            uBorderRadius: { type: 'f', value: 16.0 },
             uPixelSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uTextureType: { type: 'i', value: 0 }, // 0 Video, 1 Image
             uTextureImage: { type: 't', value: null },

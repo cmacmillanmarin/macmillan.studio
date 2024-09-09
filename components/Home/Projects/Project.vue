@@ -43,16 +43,26 @@ watch(current, () => {
   leaveProgress.value = Math.min(Math.max(0, (current.value - bottom) / (leaveBottom - bottom)), 1)
 })
 
-watch([() => props.top, () => props.bottom, isInProjectEntered, progress, leaveProgress], () => {
-  const sizeX = size.value.x * progress.value
-  const sizeY = size.value.y * progress.value
+watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProjectEntered], () => {
+  const sizeX = size.value.x * (progress.value + leaveProgress.value)
+  const sizeY = size.value.y * (progress.value + leaveProgress.value)
 
-  const positionX = vw.value * 0.5 - sizeX * 0.5 + sizeX * props.side * leaveProgress.value
+  const positionX =
+    vw.value * 0.5 -
+    sizeX * 0.5 +
+    sizeX * props.side * leaveProgress.value +
+    sizeX * leaveProgress.value * props.side
   const positionY =
-    props.top + vh.value * 0.5 - sizeY * 0.5 + sizeY * props.side * leaveProgress.value
+    props.top + vh.value * 0.5 - sizeY * 0.5 + sizeY * props.side * leaveProgress.value * 0
+
+  const rotateY = (Math.PI / 180) * 90 * props.side * leaveProgress.value
+
+  const opacity = leaveProgress.value === 1 ? 0 : 1
 
   $scene.updateObject({
     id: projectId.value,
+    opacity,
+    rotate: { x: 0, y: rotateY, z: 0 },
     position: { x: isInProjectEntered.value ? -10000 : positionX, y: positionY },
     size: { x: sizeX, y: sizeY, z: 1 },
     fixed: { from: props.top, to: props.bottom },
@@ -66,6 +76,7 @@ onMounted(() => {
     size: { x: 1, y: 1, z: 1 },
     position: { x: 0, y: 0 },
     fixed: { from: props.top, to: props.bottom },
+    border: 16,
   })
 })
 

@@ -168,6 +168,7 @@ onMounted(() => {
   $scene.addObject({
     id: 'reel',
     type: 'plane',
+    fade: true,
     fixed: {
       from: 0,
       to: vh.value * scrollGap.value,

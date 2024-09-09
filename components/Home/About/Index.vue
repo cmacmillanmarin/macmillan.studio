@@ -14,6 +14,7 @@
           alt="thumbnail"
           width="2560"
           height="2560"
+          loading="lazy"
           @load="onLoaded"
           data-scroll-set-position
           class="home__about__content__thumbnail__image" />
@@ -82,9 +83,10 @@ function onLoaded() {
   $scene.addObject({
     id: 'about-thumbnail',
     type: 'plane',
-    img: imgEl.value,
+    // img: imgEl.value,
     position: { x: bounding.left, y: bounding.top },
     size: { x: bounding.width, y: bounding.height, z: 1 },
+    border: 16,
   })
 }
 </script>
