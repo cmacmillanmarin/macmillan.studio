@@ -53,7 +53,7 @@ export default defineNuxtConfig({
         {
           children: `{
             "imports":{
-              "three": "./assets/js/three/three.module.min.js",
+              "three": "/assets/js/three/three.module.min.js",
               "three/addons/": "./jsm/"
             }
           }`,
