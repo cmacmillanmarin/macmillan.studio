@@ -117,7 +117,7 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
       x: size.value.x * progress.value * 0.5 - 14,
       y:
         size.value.y * progress.value * 0.5 -
-        32 +
+        12 +
         (props.i === 0 ? vh.value - vh.value * progress.value : 0),
     })
 
@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
 
   &__collaborator {
     &__name {
-      transform: translate(-100%, 0.4rem);
+      transform: translate(-100%, -100%);
     }
   }
 
