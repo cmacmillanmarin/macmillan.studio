@@ -37,6 +37,8 @@ class Scene {
 
     this.objects = []
 
+    this.intersects = []
+
     this.bind()
   }
 
@@ -147,9 +149,6 @@ class Scene {
               object.mesh.material.uniforms.uTextureImage.value = this.loader.load(object.img.src)
               object.mesh.material.uniforms.uTextureType.value = 1
             }
-          } else {
-            object.mesh = this.getMesh(object.type)
-            this.scene.add(object.mesh)
           }
           if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
           else object.mesh.material.uniforms.uFade.value = 1
@@ -185,6 +184,10 @@ class Scene {
         object.mesh = null
       }
       object.inView = this.inView(object)
+      if (object.inView && this.intersects.includes(object.mesh)) {
+        console.log('Intersected', object.id)
+        object.mesh.material.uniforms.uPixel.value = 1
+      }
     }
   }
 
@@ -209,6 +212,8 @@ class Scene {
   }
 
   render() {
+    this.intersects = this.raycaster.intersectObjects(this.scene.children).map(i => i.object)
+
     this.updateObjects()
 
     if (this.needsUpdate) {
@@ -316,22 +321,6 @@ class Scene {
     const _x = x - this.size.x * 0.5
     const _y = -y + this.size.y * 0.5
     return { x: _x, y: _y }
-  }
-
-  getMesh(type) {
-    this.log(`getMesh(${type})`)
-    return new THREE.Mesh(
-      this.geometries[type],
-      new THREE.ShaderMaterial({
-        vertexShader: VS,
-        fragmentShader: FS,
-        uniforms: {
-          uOpacity: { type: 'f', value: 0.0 },
-        },
-        wireframe: true,
-        transparent: true,
-      })
-    )
   }
 
   toScale(n) {

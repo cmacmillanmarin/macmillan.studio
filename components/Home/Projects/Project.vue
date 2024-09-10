@@ -15,6 +15,7 @@
             {{ data.collaborator.name }}
           </div>
         </div>
+        <div ref="clickableEl" class="home__projects__project__clickable" @click="openProject" />
       </Teleport>
     </ClientOnly>
 
@@ -40,6 +41,8 @@ const props = defineProps<{
   sideY: number
 }>()
 
+const router = useRouter()
+
 const { $scene }: any = useNuxtApp()
 const { getColumnWidth } = useCss()
 const { vw, vh } = useResize()
@@ -53,6 +56,7 @@ const projectColor = ref<string>(props.data.color)
 const el = ref<HTMLElement>()
 const clientEl = ref<HTMLElement>()
 const collaboratorEl = ref<HTMLElement>()
+const clickableEl = ref<HTMLElement>()
 
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
@@ -94,37 +98,42 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
   const sizeX = size.value.x * (progress.value + leaveProgress.value)
   const sizeY = size.value.y * (progress.value + leaveProgress.value)
 
-  const positionX = vw.value * 0.5 - sizeX * 0.5 + sizeX * props.sideX * leaveProgress.value
-  const positionY =
-    props.top + vh.value * 0.5 - sizeY * 0.5 + sizeY * props.sideY * leaveProgress.value
+  const leaveX = sizeX * props.sideX * leaveProgress.value
+  const leaveY = sizeY * props.sideY * leaveProgress.value
 
-  const rotateY = (Math.PI / 180) * 45 * props.sideX * leaveProgress.value
-  const rotateX = (Math.PI / 180) * 45 * props.sideY * leaveProgress.value
+  const positionX = vw.value * 0.5 - sizeX * 0.5 + leaveX
+  const positionY = props.top + vh.value * 0.5 - sizeY * 0.5 + leaveY
+
+  const rotateX = 45 * props.sideY * leaveProgress.value
+  const rotateY = 45 * props.sideX * leaveProgress.value
+  const rotateRadX = (Math.PI / 180) * rotateX
+  const rotateRadY = (Math.PI / 180) * rotateY
 
   const opacity = leaveProgress.value < 1 ? 1 : 0
 
-  clientEl.value &&
-    gsap.set(clientEl.value, {
-      x: size.value.x * progress.value * -0.5 + 12,
-      y:
-        size.value.y * progress.value * -0.5 +
-        12 +
-        (props.i === 0 ? vh.value - vh.value * progress.value : 0),
-    })
+  const htmlx = size.value.x * progress.value * 0.5
+  const htmly = size.value.y * progress.value * 0.5
+  const htmlextra = props.i === 0 ? vh.value - vh.value * progress.value : 0
+
+  clientEl.value && gsap.set(clientEl.value, { x: -htmlx + 12, y: -htmly + 12 + htmlextra })
 
   collaboratorEl.value &&
-    gsap.set(collaboratorEl.value, {
-      x: size.value.x * progress.value * 0.5 - 14,
-      y:
-        size.value.y * progress.value * 0.5 -
-        12 +
-        (props.i === 0 ? vh.value - vh.value * progress.value : 0),
+    gsap.set(collaboratorEl.value, { x: htmlx - 14, y: htmly - 12 + htmlextra })
+
+  clickableEl.value &&
+    gsap.set(clickableEl.value, {
+      scaleX: sizeX,
+      scaleY: sizeY,
+      x: leaveX,
+      y: leaveY + htmlextra,
+      rotateX,
+      rotateY,
     })
 
   $scene.updateObject({
     id: projectId.value,
     opacity,
-    rotate: { x: rotateX, y: rotateY, z: 0 },
+    rotate: { x: rotateRadX, y: rotateRadY, z: 0 },
     position: { x: isInProjectEntered.value ? -10000 : positionX, y: positionY },
     size: { x: sizeX, y: sizeY, z: 1 },
     fixed: { from: props.top, to: props.bottom },
@@ -143,6 +152,10 @@ onMounted(() => {
   })
 })
 
+function openProject() {
+  router.push(`/${props.data.slug}`)
+}
+
 onBeforeUnmount(() => {
   $scene.removeObject({ id: projectId.value })
 })
@@ -155,6 +168,19 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  &__clickable {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.1rem;
+    height: 0.1rem;
+    will-change: transform;
+    background-color: v-bind(projectColor);
+    opacity: 0.3;
+    pointer-events: auto;
+  }
 
   &__client,
   &__collaborator {
@@ -188,6 +214,7 @@ onBeforeUnmount(() => {
   }
 
   &__anchor {
+    pointer-events: none;
     width: calc(var(--layout-column-width) * 3 + var(--layout-gutter) * 2);
     aspect-ratio: 5/7;
     border-radius: 1.6rem;

@@ -228,6 +228,7 @@ onUnmounted((): void => {
     z-index: 8;
     pointer-events: none;
     overflow: var(--overflow--hidden);
+    perspective: 70rem;
   }
 }
 </style>
