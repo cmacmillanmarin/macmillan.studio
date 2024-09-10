@@ -13,9 +13,13 @@ class Scene {
     this.scene = null
     this.camera = null
     this.renderer = null
+    this.bounding = null
+    this.main = null
 
     this._play = null
     this._stop = null
+    this._onClick = null
+    this._onMouseMovement = null
 
     this.z = 1000
 
@@ -45,6 +49,8 @@ class Scene {
   async create({ el, size, play, stop }) {
     this.log(`create()`)
 
+    this.main = document.querySelector('main')
+
     this.canvas = el
 
     this._play = play
@@ -69,6 +75,7 @@ class Scene {
 
   addObject(object) {
     this.log('addObject()')
+    object.onClick = object.onClick || null
     object.border = object.border || 0
     object.fade = object.fade || false
     object.opacity = object.opacity || 1
@@ -124,6 +131,7 @@ class Scene {
 
   updateObjects() {
     this.needsUpdate = false
+    this.main.classList.remove('__main--pointer')
     for (const object of this.objects) {
       if (object.inView) {
         this.needsUpdate = true
@@ -178,16 +186,15 @@ class Scene {
         object.mesh.material.uniforms.uPlaneSize.value.y = object.size.y
         object.mesh.material.uniforms.uTextureVideo.value.needsUpdate =
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
+
+        const hovered = this.intersects.includes(object.mesh)
+        if (hovered && object.onClick) this.main.classList.add('__main--pointer')
       } else if (object.mesh && object.type === 'plane') {
         object.mesh.material.uniforms.uOpacity.value = 0.0
         this.releasePlane(object.meshId)
         object.mesh = null
       }
       object.inView = this.inView(object)
-      if (object.inView && this.intersects.includes(object.mesh)) {
-        console.log('Intersected', object.id)
-        object.mesh.material.uniforms.uPixel.value = 1
-      }
     }
   }
 
@@ -212,7 +219,7 @@ class Scene {
   }
 
   render() {
-    this.intersects = this.raycaster.intersectObjects(this.scene.children).map(i => i.object)
+    this.intersects = this.raycaster.intersectObjects(this.scene.children, false).map(i => i.object)
 
     this.updateObjects()
 
@@ -310,6 +317,8 @@ class Scene {
     this.renderer.setSize(size.x, size.y)
     this.renderer.setPixelRatio(this.getDevicePixelRatio())
 
+    this.bounding = this.renderer.domElement.getBoundingClientRect()
+
     this.log(`updateSize() w: ${size.x}, h: ${size.y}`)
   }
 
@@ -334,9 +343,23 @@ class Scene {
     gsap.to(prop, { value: 1, duration, ease: 'power1.in' })
   }
 
+  onClick(e) {
+    for (const mesh of this.intersects) {
+      const object = this.objects.find(obj => obj.mesh === mesh)
+      if (object && object.onClick) {
+        object.onClick()
+        return
+      }
+    }
+  }
+
   onMouseMovement(e) {
-    this.mouse.x = (e.clientX / this.size.x) * 2 - 1
-    this.mouse.y = (e.clientY / this.size.y) * 2 - 1
+    if (!this.bounding) return
+    this.mouse.x =
+      ((e.clientX - this.bounding.left) / (this.bounding.right - this.bounding.left)) * 2 - 1
+    this.mouse.y =
+      -((e.clientY - this.bounding.top) / (this.bounding.bottom - this.bounding.top)) * 2 + 1
+
     this.raycaster.setFromCamera(this.mouse, this.camera)
   }
 
@@ -344,18 +367,21 @@ class Scene {
     this._play = this.play.bind(this)
     this._stop = this.stop.bind(this)
     this._render = this.render.bind(this)
+    this._onClick = this.onClick.bind(this)
     this._onMouseMovement = this.onMouseMovement.bind(this)
   }
 
   addListeners() {
     // window.addEventListener('focus', this._play)
     // window.addEventListener('blur', this._stop)
+    window.addEventListener('click', this._onClick)
     window.addEventListener('mousemove', this._onMouseMovement)
   }
 
   removeListeners() {
     // window.removeEventListener('focus', this._play)
     // window.removeEventListener('blur', this._stop)
+    window.removeEventListener('click', this._onClick)
     window.removeEventListener('mousemove', this._onMouseMovement)
   }
 

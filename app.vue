@@ -46,6 +46,12 @@ watch(keyPressed, () => {
     }
   }
 
+  &--pointer {
+    * {
+      cursor: pointer !important;
+    }
+  }
+
   &--native-scroll {
     height: var(--vh);
     overflow: hidden;

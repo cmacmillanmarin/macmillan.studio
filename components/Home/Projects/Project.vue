@@ -15,7 +15,6 @@
             {{ data.collaborator.name }}
           </div>
         </div>
-        <div ref="clickableEl" class="home__projects__project__clickable" @click="openProject" />
       </Teleport>
     </ClientOnly>
 
@@ -56,7 +55,6 @@ const projectColor = ref<string>(props.data.color)
 const el = ref<HTMLElement>()
 const clientEl = ref<HTMLElement>()
 const collaboratorEl = ref<HTMLElement>()
-const clickableEl = ref<HTMLElement>()
 
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
@@ -120,16 +118,6 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
   collaboratorEl.value &&
     gsap.set(collaboratorEl.value, { x: htmlx - 14, y: htmly - 12 + htmlextra })
 
-  clickableEl.value &&
-    gsap.set(clickableEl.value, {
-      scaleX: sizeX,
-      scaleY: sizeY,
-      x: leaveX,
-      y: leaveY + htmlextra,
-      rotateX,
-      rotateY,
-    })
-
   $scene.updateObject({
     id: projectId.value,
     opacity,
@@ -149,6 +137,7 @@ onMounted(() => {
     position: { x: 0, y: 0 },
     fixed: { from: props.top, to: props.bottom },
     border: 16,
+    onClick: openProject,
   })
 })
 
@@ -168,19 +157,6 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-
-  &__clickable {
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0.1rem;
-    height: 0.1rem;
-    will-change: transform;
-    background-color: v-bind(projectColor);
-    opacity: 0.3;
-    pointer-events: auto;
-  }
 
   &__client,
   &__collaborator {
