@@ -86,7 +86,10 @@ watch(current, () => {
 
   gsap.set(el.value, { y: toPx(y) })
   gsap.set('.header__nav__logo', { y: toPx(threshold * progress * -1) })
-  gsap.set('.header__nav__logo svg', { y: toPercentage(100 * progress), scale: 1 - 0.8 * progress })
+  gsap.set('.header__nav__logo .custom-link', {
+    y: toPercentage(100 * progress),
+    scale: 1 - 0.8 * progress,
+  })
 })
 
 watch(isInProject, () => {
@@ -163,15 +166,18 @@ function leave() {
     &__logo {
       position: relative;
       will-change: transform;
-
-      .svg__logo {
+      .custom-link {
         position: absolute;
         bottom: 0;
         right: 0;
+        display: block;
         width: 16rem;
-
+        height: 16rem;
         will-change: transform;
         transform-origin: top right;
+        .svg__logo {
+          width: 16rem;
+        }
       }
     }
   }

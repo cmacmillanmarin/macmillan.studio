@@ -96,7 +96,7 @@ export function shuffleIn(params: { el: HTMLElement }) {
   }
 }
 
-export function shuffleElsIn(params: { els?: NodeListOf<Element> }) {
+export function shuffleElsIn(params: { els?: NodeListOf<Element> | Array<HTMLElement> }) {
   const { els } = params
   for (const el of els || []) {
     const delay = Math.random() * 1.2
@@ -113,7 +113,7 @@ export function shuffleElsIn(params: { els?: NodeListOf<Element> }) {
   }
 }
 
-export function shuffleElsOut(params: { els?: NodeListOf<Element> }) {
+export function shuffleElsOut(params: { els?: NodeListOf<Element> | Array<HTMLElement> }) {
   const { els } = params
   for (const el of els || []) {
     const delay = Math.random() * 1.2

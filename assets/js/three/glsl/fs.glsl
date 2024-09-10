@@ -75,7 +75,7 @@ void main() {
   if (uTextureType == 1) {
     pixelatedTexture = texture2D(uTextureImage, pixel) * lime;
   }
-  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, 1.0);
+  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, 0.0);
 
   gl_FragColor = vec4(mixedTexture.xyz, uOpacity * uFade);
 

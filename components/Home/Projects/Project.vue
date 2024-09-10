@@ -2,9 +2,18 @@
   <div ref="el" class="home__projects__project" data-scroll-set-position>
     <ClientOnly>
       <Teleport to="#top-layer">
-        <div ref="clientEl" class="home__projects__project__client">
+        <div v-if="data.client.name" ref="clientEl" class="home__projects__project__client">
           <div class="home__projects__project__client__logo"></div>
           <div class="home__projects__project__client__name">{{ data.client.name }}</div>
+        </div>
+        <div
+          v-if="data.collaborator.name"
+          ref="collaboratorEl"
+          class="home__projects__project__collaborator">
+          <div class="home__projects__project__collaborator__name">
+            {{ data.freelance ? 'w/ ' : 'at ' }}
+            {{ data.collaborator.name }}
+          </div>
         </div>
       </Teleport>
     </ClientOnly>
@@ -43,6 +52,7 @@ const projectColor = ref<string>(props.data.color)
 
 const el = ref<HTMLElement>()
 const clientEl = ref<HTMLElement>()
+const collaboratorEl = ref<HTMLElement>()
 
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
@@ -56,10 +66,19 @@ const size = computed<{ x: number; y: number }>(() => {
 })
 
 watch(active, () => {
-  clientEl.value && gsap.killTweensOf(clientEl.value)
-  active.value
-    ? fadeIn({ el: clientEl.value, duration: 0.4 })
-    : fadeOut({ el: clientEl.value, duration: 0.1 })
+  if (clientEl.value) {
+    gsap.killTweensOf(clientEl.value)
+    active.value
+      ? fadeIn({ el: clientEl.value, duration: 0.4 })
+      : fadeOut({ el: clientEl.value, duration: 0.1 })
+  }
+
+  if (collaboratorEl.value) {
+    gsap.killTweensOf(collaboratorEl.value)
+    active.value
+      ? fadeIn({ el: collaboratorEl.value, duration: 0.4 })
+      : fadeOut({ el: collaboratorEl.value, duration: 0.1 })
+  }
 })
 
 watch(current, () => {
@@ -90,6 +109,15 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
       y:
         size.value.y * progress.value * -0.5 +
         12 +
+        (props.i === 0 ? vh.value - vh.value * progress.value : 0),
+    })
+
+  collaboratorEl.value &&
+    gsap.set(collaboratorEl.value, {
+      x: size.value.x * progress.value * 0.5 - 14,
+      y:
+        size.value.y * progress.value * 0.5 -
+        32 +
         (props.i === 0 ? vh.value - vh.value * progress.value : 0),
     })
 
@@ -128,7 +156,8 @@ onBeforeUnmount(() => {
   justify-content: center;
   align-items: center;
 
-  &__client {
+  &__client,
+  &__collaborator {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -149,6 +178,12 @@ onBeforeUnmount(() => {
     &__name {
       @include t-white;
       @include t-b2;
+    }
+  }
+
+  &__collaborator {
+    &__name {
+      transform: translate(-100%, 0.4rem);
     }
   }
 

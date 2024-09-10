@@ -1,10 +1,7 @@
 <template>
-  <div class="home__services__service">
+  <div ref="el" class="home__services__service">
     <Separator />
     <div class="home__services__service__content">
-      <div class="home__services__service__content__number">
-        <p class="home__services__service__content__number__label" v-text="`{0${index + 1}}`" />
-      </div>
       <div class="home__services__service__content__title">
         <h3 class="home__services__service__content__title__label">{{ data.title }}</h3>
       </div>
@@ -47,7 +44,7 @@ defineProps<{
     z-index: 1;
 
     background-color: var(--light-grey);
-    padding-top: 0.8rem;
+    padding-top: 1.2rem;
 
     @include grid;
 
@@ -62,12 +59,9 @@ defineProps<{
       background-color: var(--light-grey);
     }
 
-    &__number {
-      @include t-number;
-      @include columns(2, 'desktop');
-    }
     &__title {
       @include t-b1;
+      @include gap(2, 'left', 'desktop');
       @include columns(4, 'desktop');
     }
     &__description {

@@ -21,7 +21,7 @@
         <p class="home__about__content__thumbnail__credit">{{ data.credit }}</p>
       </div>
       <div class="home__about__content__detail">
-        <p class="home__about__content__detail__text">{{ data.detail }}</p>
+        <div class="home__about__content__detail__text" v-html="data.detail" />
       </div>
     </div>
 
@@ -33,7 +33,9 @@
         <p class="home__about__collaborator__title__label">{{ data.collaborator.title }}</p>
       </div>
       <div class="home__about__collaborator__content">
-        <p class="home__about__collaborator__content__label">{{ data.collaborator.description }}</p>
+        <div
+          class="home__about__collaborator__content__label"
+          v-html="data.collaborator.description" />
       </div>
       <div class="home__about__collaborator__thumbnail">
         <div class="home__about__collaborator__thumbnail__image" />
@@ -59,35 +61,36 @@ const { onResize } = useResize()
 const { isInProjectEntered } = storeToRefs(useStore())
 
 const imgEl = ref<HTMLImageElement>()
+const loaded = ref<boolean>(false)
 
-watch([onResize, isInProjectEntered], () => {
+watch([loaded, onResize, isInProjectEntered], () => {
   if (!imgEl.value) return
-  const bounding = imgEl.value?.getBoundingClientRect()
+  const { positionLeft, positionTop } = imgEl.value.dataset
+  const width = imgEl.value.clientWidth
+  const height = imgEl.value.clientHeight
   $scene.updateObject({
     id: 'about-thumbnail',
     position: {
-      x: isInProjectEntered.value ? -10000 : parseFloat(imgEl.value?.dataset.positionLeft || '0'),
-      y: parseFloat(imgEl.value?.dataset.positionTop || '0'),
+      x: isInProjectEntered.value ? -10000 : parseFloat(positionLeft || '0'),
+      y: parseFloat(positionTop || '0'),
     },
-    size: { x: bounding.width, y: bounding.height, z: 1 },
+    size: { x: width, y: height, z: 1 },
   })
 })
 
 onMounted(() => {
-  imgEl.value?.complete && onLoaded()
-})
-
-function onLoaded() {
-  if (!imgEl.value) return
-  const bounding = imgEl.value?.getBoundingClientRect()
   $scene.addObject({
     id: 'about-thumbnail',
     type: 'plane',
-    // img: imgEl.value,
-    position: { x: bounding.left, y: bounding.top },
-    size: { x: bounding.width, y: bounding.height, z: 1 },
+    img: imgEl.value,
+    position: { x: 0, y: 0 },
+    size: { x: 0, y: 0, z: 1 },
     border: 16,
   })
+})
+
+function onLoaded() {
+  loaded.value = true
 }
 </script>
 

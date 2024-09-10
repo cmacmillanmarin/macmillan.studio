@@ -227,6 +227,7 @@ onUnmounted((): void => {
     @include absolute-fill();
     z-index: 8;
     pointer-events: none;
+    overflow: var(--overflow--hidden);
   }
 }
 </style>

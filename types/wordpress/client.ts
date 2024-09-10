@@ -12,6 +12,7 @@ export interface WP_Client {
     rendered: string
   }
   acf: {
+    featured: boolean
     name: string
   }
 }
@@ -20,6 +21,7 @@ export type Clients = Array<Client>
 export interface Client {
   slug: string
   name: string
+  featured: boolean
 }
 
 export function parseClients(params: { clients?: WP_Clients }): Clients {
@@ -35,5 +37,6 @@ export function parseClient(params: { client?: WP_Client }): Client {
   return {
     slug: parseText(client?.slug),
     name: parseText(client?.acf.name),
+    featured: !!client?.acf.featured,
   }
 }

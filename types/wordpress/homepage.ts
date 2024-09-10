@@ -126,6 +126,10 @@ export function parseHomepage(params: {
 }): Homepage {
   const { homepage, projects, services, clients, testimonials } = params
 
+  const listedClients = clients?.filter(
+    client => !!homepage?.acf.about.clients.list.find(c => c.post_name === client.slug)
+  )
+
   return {
     head: parseHead(homepage?.acf.seo),
     hero: {
@@ -150,7 +154,7 @@ export function parseHomepage(params: {
       clients: {
         title: parseText(homepage?.acf.about.clients.title),
         hint: parseText(homepage?.acf.about.clients.hint),
-        list: parseClients({ clients }),
+        list: parseClients({ clients: listedClients }),
       },
       collaborator: {
         title: parseText(homepage?.acf.about.collaborator.title),

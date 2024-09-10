@@ -28,12 +28,7 @@ export default defineEventHandler(async (): Promise<Homepage> => {
       services.push(servicesFetch.find(s => s.slug === slug) as WP_Service)
     }
 
-    slugs = getPostNamesFrom(homepage.acf.about.clients.list)
-    const clientsFetch: WP_Clients = slugs ? await getList(`/client?slug=${slugs}`) : []
-    const clients: WP_Clients = []
-    for (const slug of slugs.split(',')) {
-      clients.push(clientsFetch.find(c => c.slug === slug) as WP_Client)
-    }
+    const clients: WP_Clients = slugs ? await getList(`/client`) : []
 
     slugs = getPostNamesFrom(homepage.acf.about.testimonials)
     const testimonialsFetch: WP_Testimonials = slugs
