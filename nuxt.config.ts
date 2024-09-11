@@ -45,21 +45,6 @@ export default defineNuxtConfig({
       },
       meta: [{ name: 'theme-color', content: '#FFF' }],
       link: [{ rel: 'icon', type: 'image/x-icon', href: '/assets/img/favicon.ico' }],
-      script: [
-        {
-          src: `/assets/js/es-module-shims.js`,
-          defer: true,
-        },
-        {
-          children: `{
-            "imports":{
-              "three": "./assets/js/three/three.module.min.js",
-              "three/addons/": "./jsm/"
-            }
-          }`,
-          type: 'importmap',
-        },
-      ],
     },
   },
 
@@ -96,11 +81,6 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [glsl()],
-    build: {
-      rollupOptions: {
-        external: ['three'],
-      },
-    },
     css: {
       preprocessorOptions: {
         scss: {

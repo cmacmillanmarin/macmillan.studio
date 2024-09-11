@@ -79,13 +79,16 @@ const active = ref<number>(1)
 
       &__item {
         position: relative;
-        &:not(:first-child) {
-          position: absolute;
-        }
-        @include t-number;
+
         @include will-fade;
+        @include t-number;
+
         &--active {
           opacity: 1;
+        }
+
+        &:not(:first-child) {
+          position: absolute;
         }
       }
     }

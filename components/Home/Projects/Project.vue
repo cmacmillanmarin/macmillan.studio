@@ -40,6 +40,8 @@ const props = defineProps<{
   sideY: number
 }>()
 
+const router = useRouter()
+
 const { $scene }: any = useNuxtApp()
 const { getColumnWidth } = useCss()
 const { vw, vh } = useResize()
@@ -94,37 +96,32 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
   const sizeX = size.value.x * (progress.value + leaveProgress.value)
   const sizeY = size.value.y * (progress.value + leaveProgress.value)
 
-  const positionX = vw.value * 0.5 - sizeX * 0.5 + sizeX * props.sideX * leaveProgress.value
-  const positionY =
-    props.top + vh.value * 0.5 - sizeY * 0.5 + sizeY * props.sideY * leaveProgress.value
+  const leaveX = sizeX * props.sideX * leaveProgress.value
+  const leaveY = sizeY * props.sideY * leaveProgress.value
 
-  const rotateY = (Math.PI / 180) * 45 * props.sideX * leaveProgress.value
-  const rotateX = (Math.PI / 180) * 45 * props.sideY * leaveProgress.value
+  const positionX = vw.value * 0.5 - sizeX * 0.5 + leaveX
+  const positionY = props.top + vh.value * 0.5 - sizeY * 0.5 + leaveY
+
+  const rotateX = 45 * props.sideY * leaveProgress.value
+  const rotateY = 45 * props.sideX * leaveProgress.value
+  const rotateRadX = (Math.PI / 180) * rotateX
+  const rotateRadY = (Math.PI / 180) * rotateY
 
   const opacity = leaveProgress.value < 1 ? 1 : 0
 
-  clientEl.value &&
-    gsap.set(clientEl.value, {
-      x: size.value.x * progress.value * -0.5 + 12,
-      y:
-        size.value.y * progress.value * -0.5 +
-        12 +
-        (props.i === 0 ? vh.value - vh.value * progress.value : 0),
-    })
+  const htmlx = size.value.x * progress.value * 0.5
+  const htmly = size.value.y * progress.value * 0.5
+  const htmlextra = props.i === 0 ? vh.value - vh.value * progress.value : 0
+
+  clientEl.value && gsap.set(clientEl.value, { x: -htmlx + 12, y: -htmly + 12 + htmlextra })
 
   collaboratorEl.value &&
-    gsap.set(collaboratorEl.value, {
-      x: size.value.x * progress.value * 0.5 - 14,
-      y:
-        size.value.y * progress.value * 0.5 -
-        12 +
-        (props.i === 0 ? vh.value - vh.value * progress.value : 0),
-    })
+    gsap.set(collaboratorEl.value, { x: htmlx - 14, y: htmly - 12 + htmlextra })
 
   $scene.updateObject({
     id: projectId.value,
     opacity,
-    rotate: { x: rotateX, y: rotateY, z: 0 },
+    rotate: { x: rotateRadX, y: rotateRadY, z: 0 },
     position: { x: isInProjectEntered.value ? -10000 : positionX, y: positionY },
     size: { x: sizeX, y: sizeY, z: 1 },
     fixed: { from: props.top, to: props.bottom },
@@ -140,8 +137,13 @@ onMounted(() => {
     position: { x: 0, y: 0 },
     fixed: { from: props.top, to: props.bottom },
     border: 16,
+    onClick: openProject,
   })
 })
+
+function openProject() {
+  router.push(`/${props.data.slug}`)
+}
 
 onBeforeUnmount(() => {
   $scene.removeObject({ id: projectId.value })
@@ -188,6 +190,7 @@ onBeforeUnmount(() => {
   }
 
   &__anchor {
+    pointer-events: none;
     width: calc(var(--layout-column-width) * 3 + var(--layout-gutter) * 2);
     aspect-ratio: 5/7;
     border-radius: 1.6rem;

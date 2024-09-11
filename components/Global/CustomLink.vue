@@ -7,6 +7,7 @@
     :rel="isInternal ? undefined : 'noreferrer noopener'"
     :aria-label="!to ? undefined : label"
     :data-tab-fixed="tabFixed ? '' : undefined"
+    class="custom-link"
     @click="onClick">
     <template v-if="content">
       <slot />
