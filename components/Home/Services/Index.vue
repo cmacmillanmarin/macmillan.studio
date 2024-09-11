@@ -1,39 +1,55 @@
 <template>
   <div class="home__services" id="services-target" data-scroll-target-top>
+    <ClientOnly>
+      <Teleport to=".header__top">
+        <transition
+          mode="out-in"
+          :css="false"
+          @enter="transitionShuffleIn"
+          @leave="transitionShuffleOut">
+          <p v-if="active !== 0" class="home__services__index">
+            <SvgSquare />
+            <span v-html="`{${startWithZero(active)}—${startWithZero(data.list.length)}}`" />
+          </p>
+        </transition>
+      </Teleport>
+    </ClientOnly>
+
     <h2 class="home__services__title">{{ data.title }}</h2>
     <div class="home__services__hint">
       <h3 class="home__services__hint__label">
         <span class="home__services__hint__label__indent" /><span v-html="data.hint" />
       </h3>
     </div>
+
     <div class="home__services__list">
-      <div data-scroll-sticky data-scroll-sticky-top="24" class="home__services__list__active">
-        <p
-          v-for="i in data.list.length"
-          :class="[
-            'home__services__list__active__item',
-            { 'home__services__list__active__item--active': active === i },
-          ]"
-          v-text="`{0${i}}`" />
-      </div>
       <HomeServicesService
         v-for="(service, i) in data.list"
-        :index="i"
+        :i="i"
+        :of="data.list.length - 1"
+        :active="active"
         :data="service"
         data-scroll-sticky
-        data-scroll-sticky-top="24" />
+        data-scroll-sticky-top="24"
+        @update-active="updateActive" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { startWithZero } from '~/utils'
+import { transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
 import type { HomepageServices } from '~/types/wordpress/homepage'
 
 defineProps<{
   data: HomepageServices
 }>()
 
-const active = ref<number>(1)
+const active = ref<number>(0)
+
+function updateActive(i: number) {
+  active.value = i + 1
+}
 </script>
 
 <style lang="scss">
@@ -41,6 +57,17 @@ const active = ref<number>(1)
   position: relative;
   background-color: var(--light-grey);
   padding: 4rem 0 0;
+
+  &__index {
+    position: absolute;
+    width: max-content;
+    display: flex;
+    align-items: center;
+    column-gap: 0.8rem;
+    padding-top: 6rem;
+    @include will-fade;
+    @include t-number;
+  }
 
   &__title {
     @include t-seo;

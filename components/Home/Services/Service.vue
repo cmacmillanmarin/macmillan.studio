@@ -1,6 +1,17 @@
 <template>
-  <div ref="el" class="home__services__service">
+  <div
+    ref="el"
+    data-scroll-sticky-state="false"
+    :class="['home__services__service', { 'home__services__service--hidden': hidden }]">
     <Separator />
+    <div
+      v-if="i === of"
+      class="home__services__service__observer--in"
+      v-intersect="{ callback: onIntersectIn }" />
+    <div
+      v-if="i === of"
+      class="home__services__service__observer--out"
+      v-intersect="{ callback: onIntersectOut }" />
     <div class="home__services__service__content">
       <div class="home__services__service__content__title">
         <h3 class="home__services__service__content__title__label">{{ data.title }}</h3>
@@ -11,11 +22,60 @@
 </template>
 
 <script lang="ts" setup>
+import { storeToRefs } from 'pinia'
+import useScrollStore from '~/store/useScrollStore'
 import type { Service } from '~/types/wordpress/service'
 
-defineProps<{
-  index: number
+const props = defineProps<{
+  i: number
+  of: number
+  active: number
   data: Service
+}>()
+
+const { direction } = storeToRefs(useScrollStore())
+
+const el = ref<HTMLElement>()
+const sticky = ref<boolean>(false)
+const hidden = computed<boolean>(() => props.active > props.i + 1)
+
+let _observer: MutationObserver | null = null
+
+watch(sticky, () => {
+  if (sticky.value) emit('update-active', props.i)
+  else if (direction.value === 'up') emit('update-active', props.i - 1)
+})
+
+onMounted(() => {
+  if (!el.value) return
+  _observer = new MutationObserver(mutationsList => {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'attributes') {
+        sticky.value = el.value?.dataset.scrollStickyState === 'true'
+      }
+    }
+  })
+  _observer.observe(el.value, {
+    attributes: true,
+  })
+})
+
+function onIntersectIn(el: HTMLElement, visible: boolean) {
+  if (props.active !== 0 && !visible && direction.value === 'down') emit('update-active', props.i)
+  else if (visible && direction.value === 'up') emit('update-active', props.i - 1)
+}
+
+function onIntersectOut(el: HTMLElement, visible: boolean) {
+  if (!visible && direction.value === 'down') emit('update-active', -1)
+  if (visible && direction.value === 'up') emit('update-active', props.i)
+}
+
+onBeforeUnmount(() => {
+  _observer?.disconnect()
+})
+
+const emit = defineEmits<{
+  (e: 'update-active', value: number): void
 }>()
 </script>
 
@@ -25,6 +85,12 @@ defineProps<{
   max-width: var(--layout-max-width);
   padding-top: 4rem;
   margin: 0 auto;
+
+  will-change: opacity;
+
+  &--hidden {
+    opacity: 0;
+  }
 
   &:last-child {
     .home__services__service__content {
@@ -37,6 +103,25 @@ defineProps<{
     top: 4rem;
     left: calc(var(--layout-column-width) * 2 + var(--layout-gutter) * 3);
     width: calc(var(--layout-column-width) * 10 + var(--layout-gutter) * 9);
+  }
+
+  &__observer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+
+    &--in,
+    &--out {
+      @extend .home__services__service__observer;
+    }
+    &--in  {
+      transform: translateY(-2.5rem);
+    }
+    &--out {
+      transform: translateY(8.5rem);
+    }
   }
 
   &__content {

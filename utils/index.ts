@@ -53,6 +53,10 @@ export function toUSD(n: number): string {
   return `$${n.toLocaleString('en-US')}`
 }
 
+export function startWithZero(n: number): string {
+  return n < 10 ? `0${n}` : n.toString()
+}
+
 export function round(n: number, decimals?: number): number {
   return parseFloat(n.toFixed(decimals || 0))
 }

@@ -347,7 +347,12 @@ export default function virtualScroll() {
         const stickyPosition = _stickyPositionOf(child)
         y = stickyPosition.y
         if (y > 0 && y <= stickyPosition.bottomLimit) {
+          if (child.el.dataset.scrollStickyState !== 'true') {
+            child.el.dataset.scrollStickyState = 'true'
+          }
           _currentSticky.push(y)
+        } else if (child.el.dataset.scrollStickyState !== 'false') {
+          child.el.dataset.scrollStickyState = 'false'
         }
       } else if ((scrollable && child.inView) || continuous) y = round(current.value) * -1
       else if (scrollable && current.value > top) y = Math.ceil(top + height) * -1

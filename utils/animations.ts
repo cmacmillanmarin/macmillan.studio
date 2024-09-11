@@ -79,6 +79,14 @@ export function transitionFadeOut(el: Element, done: Function): void {
   fadeOut({ el, done })
 }
 
+export function transitionShuffleIn(el: Element, done: Function): void {
+  shuffleElsIn({ els: [el], done })
+}
+
+export function transitionShuffleOut(el: Element, done: Function): void {
+  shuffleElsOut({ els: [el], done })
+}
+
 export function shuffleIn(params: { el: HTMLElement }) {
   const { el } = params
   const paths = shuffle(Array.from(el.querySelectorAll('path')))
@@ -97,7 +105,10 @@ export function shuffleIn(params: { el: HTMLElement }) {
   }
 }
 
-export function shuffleElsIn(params: { els?: NodeListOf<Element> | Array<HTMLElement> }) {
+export function shuffleElsIn(params: {
+  els?: NodeListOf<Element> | Array<HTMLElement | Element>
+  done?: Function
+}) {
   const els = shuffle(Array.from(params.els || []))
   for (let i = 0; i < els.length; i++) {
     const el = els[i]
@@ -111,11 +122,22 @@ export function shuffleElsIn(params: { els?: NodeListOf<Element> | Array<HTMLEle
       delay: delay + duration,
       ease: 'power1.out',
     })
-    gsap.to(el, { opacity: 1, duration, delay: delay + duration * 1.5, ease: 'power1.in' })
+    gsap.to(el, {
+      opacity: 1,
+      duration,
+      delay: delay + duration * 1.5,
+      ease: 'power1.in',
+      onComplete: () => {
+        if (i === els.length - 1 && params.done) params.done()
+      },
+    })
   }
 }
 
-export function shuffleElsOut(params: { els?: NodeListOf<Element> | Array<HTMLElement> }) {
+export function shuffleElsOut(params: {
+  els?: NodeListOf<Element> | Array<HTMLElement | Element>
+  done?: Function
+}) {
   const els = shuffle(Array.from(params.els || []))
   for (let i = 0; i < els.length; i++) {
     const el = els[i]
@@ -129,6 +151,14 @@ export function shuffleElsOut(params: { els?: NodeListOf<Element> | Array<HTMLEl
       delay: delay + duration,
       ease: 'power1.in',
     })
-    gsap.to(el, { opacity: 0, duration, delay: delay + duration * 1.5, ease: 'power1.out' })
+    gsap.to(el, {
+      opacity: 0,
+      duration,
+      delay: delay + duration * 1.5,
+      ease: 'power1.out',
+      onComplete: () => {
+        if (i === els.length - 1 && params.done) params.done()
+      },
+    })
   }
 }

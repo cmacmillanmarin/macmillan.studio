@@ -23,16 +23,16 @@ const x = ref<number>(0)
 const active = ref<number>(0)
 
 watch(x, () => {
-  contentEl.value && gsap.set(contentEl.value, { x: x.value })
+  const items = contentEl.value?.querySelectorAll('.home__about__testimonials__testimonial')
+  items?.length && gsap.set(items, { x: x.value })
 })
 
 watch(active, () => {
   const item = el.value?.querySelectorAll('.home__about__testimonials__testimonial')[active.value]
-  if (!el.value || !item) return
+  if (!contentEl.value || !item) return
   const { left } = item.getBoundingClientRect()
-  const { left: parentLeft } = el.value.getBoundingClientRect()
+  const { left: parentLeft } = contentEl.value.getBoundingClientRect()
   const dif = left - parentLeft
-  console.log(dif)
   gsap.to(x, { value: x.value - dif })
 })
 
@@ -55,8 +55,8 @@ onMounted(() => {
   background-color: var(--dark-grey);
 
   &__content {
-    margin: auto;
     max-width: var(--layout-max-width);
+    margin: auto;
     padding: 12rem 0;
     white-space: nowrap;
     will-change: transform;

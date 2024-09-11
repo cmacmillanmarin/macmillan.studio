@@ -2,12 +2,14 @@
   <header ref="el" class="header" v-transition:in="{ callback: enter }">
     <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
+    <div class="header__top" />
+
     <div class="header__hint">
       <SvgPixelArrow />
       <p class="header__hint__label">Independent Tech Lead ~ Developer</p>
     </div>
 
-    <nav class="header__nav header__nav--main">
+    <nav class="header__nav--main">
       <ul class="header__nav__list">
         <li class="header__nav__list__item">
           <CustomLink
@@ -36,7 +38,7 @@
       </ul>
     </nav>
 
-    <nav class="header__nav header__nav--sub">
+    <nav class="header__nav--sub">
       <ul>
         <li class="header__nav__list__item">
           <CustomLink
@@ -53,6 +55,8 @@
         </CustomLink>
       </div>
     </nav>
+
+    <div class="header__bottom" />
   </header>
 </template>
 
@@ -73,7 +77,18 @@ const { layoutMargin } = useCss()
 const el = ref<HTMLElement>()
 
 watch(current, () => {
-  update()
+  if (!el.value) return
+  const y = Math.min(0, bounding.value - vh.value - current.value)
+
+  const threshold = vh.value - layoutMargin.value * 2
+  const progress = Math.min(1, current.value / vh.value)
+
+  gsap.set(el.value, { y: toPx(y) })
+  gsap.set('.header__nav__logo', { y: toPx(threshold * progress * -1) })
+  gsap.set('.header__nav__logo .custom-link', {
+    y: toPercentage(100 * progress),
+    scale: 1 - 0.75 * progress,
+  })
 })
 
 watch(isInProject, () => {
@@ -82,42 +97,20 @@ watch(isInProject, () => {
 
 function enter() {
   if (!el.value) return
-  update()
   gsap.set(el.value, { pointerEvents: 'auto' })
-  const els = el.value.querySelectorAll('.header__hint ,.header__nav__list__item__anchor')
+  const els = el.value.querySelectorAll(
+    '.header__hint, .header__top, .header__bottom, .header__nav__list__item__anchor, .svg__logo'
+  )
   shuffleElsIn({ els })
 }
 
 function leave() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'none' })
-  const els = el.value.querySelectorAll('.header__hint ,.header__nav__list__item__anchor')
+  const els = el.value.querySelectorAll(
+    '.header__hint, .header__top, .header__bottom, .header__nav__list__item__anchor, .svg__logo'
+  )
   shuffleElsOut({ els })
-}
-
-function update() {
-  if (!el.value) return
-  const y = Math.min(0, bounding.value - vh.value - current.value)
-
-  const threshold = vh.value - layoutMargin.value * 2
-  const progress = Math.min(1, current.value / vh.value)
-
-  const target = Math.min(vw.value, vh.value)
-
-  const targetWidth = 160
-  const targetScale = targetWidth / (target * 0.8)
-
-  const lx = (vw.value * -0.5 + target * 0.4) * progress
-  const ly = (vh.value * -0.5 + target * 0.4) * progress
-
-  gsap.set(el.value, { y: toPx(y) })
-  // gsap.set('.header__nav__logo', { y: toPx(threshold * progress * -1) })
-  gsap.set('.header__nav__logo .custom-link', {
-    // y: toPercentage(100 * progress),
-    x: lx,
-    y: ly,
-    scale: targetScale + (1 - targetScale) * progress,
-  })
 }
 </script>
 
@@ -152,7 +145,11 @@ function update() {
   }
 
   &__nav {
+    &--main {
+      @extend .header__nav;
+    }
     &--sub {
+      @extend .header__nav;
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
@@ -181,15 +178,34 @@ function update() {
         bottom: 0;
         right: 0;
         display: block;
-        width: calc(var(--vh) * 0.8);
-        height: calc(var(--vh) * 0.8);
+        width: 16rem;
+        height: 16rem;
         will-change: transform;
-        transform-origin: bottom right;
+        transform-origin: top right;
         .svg__logo {
-          width: 100%;
+          @include will-fade;
+          width: 16rem;
         }
       }
     }
+  }
+
+  &__top,
+  &__bottom {
+    position: absolute;
+    padding: var(--layout-margin);
+    @include will-fade;
+  }
+
+  &__top {
+    left: 0;
+    bottom: 0;
+    height: var(--vh);
+  }
+
+  &__bottom {
+    right: 0;
+    bottom: 0;
   }
 }
 </style>

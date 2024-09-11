@@ -16,7 +16,7 @@
   .svg__square {
     position: absolute;
     top: 0.1rem;
-    left: 0;
+    left: calc(var(--layout-column-width) * 4 + var(--layout-gutter) * 4);
     transform: translate(0, -100%);
 
     width: 1.2rem;

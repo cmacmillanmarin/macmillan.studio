@@ -52,6 +52,7 @@ import CustomImage from '~/components/Global/CustomImage.vue'
 
 const props = defineProps<{
   i: number
+  of: number
   data: Project
   top: number
   bottom: number
@@ -63,9 +64,9 @@ const router = useRouter()
 
 const { $scene }: any = useNuxtApp()
 const { getColumnWidth } = useCss()
-const { vw, vh } = useResize()
+const { vw, vh, lvw } = useResize()
 const { isInProject, isInProjectEntered } = storeToRefs(useStore())
-const { current } = storeToRefs(useScrollStore())
+const { current, direction } = storeToRefs(useScrollStore())
 const { getBounding } = useVirtualScrollAndThreeTools()
 
 const projectId = computed<string>(() => `project-${slugify(props.data.title)}`)
@@ -103,6 +104,14 @@ watch(active, () => {
       ? fadeIn({ el: collaboratorEl.value, duration: 0.4 })
       : fadeOut({ el: collaboratorEl.value, duration: 0.1 })
   }
+
+  active.value && emit('update-active', props.i)
+  if (
+    !active.value &&
+    ((direction.value === 'up' && props.i === 0) ||
+      (direction.value === 'down' && props.i === props.of))
+  )
+    emit('update-active', -1)
 })
 
 watch(current, () => {
@@ -124,8 +133,8 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
   const positionX = vw.value * 0.5 - sizeX * 0.5 + leaveX
   const positionY = props.top + vh.value * 0.5 - sizeY * 0.5 + leaveY
 
-  const rotateX = 45 * props.sideY * leaveProgress.value
-  const rotateY = 45 * props.sideX * leaveProgress.value
+  const rotateX = 33 * props.sideY * leaveProgress.value
+  const rotateY = 33 * props.sideX * leaveProgress.value
   const rotateRadX = (Math.PI / 180) * rotateX
   const rotateRadY = (Math.PI / 180) * rotateY
 
@@ -173,6 +182,10 @@ function openProject() {
 onBeforeUnmount(() => {
   $scene.removeObject({ id: projectId.value })
 })
+
+const emit = defineEmits<{
+  (e: 'update-active', value: number): void
+}>()
 </script>
 
 <style lang="scss">
