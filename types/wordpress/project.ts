@@ -1,4 +1,12 @@
-import { parseText } from '~/types/wordpress'
+import {
+  parseText,
+  type Image,
+  type WP_Image,
+  parseImage,
+  type Video,
+  type WP_Video,
+  parseVideo,
+} from '~/types/wordpress'
 import {
   type WP_Client_Object,
   type Client,
@@ -16,6 +24,11 @@ export interface WP_Project {
   acf: {
     freelance: boolean
     client?: Array<WP_Client_Object>
+    thumbnail: {
+      type: 'img' | 'vid'
+      image?: WP_Image
+      video?: WP_Video
+    }
     primary_color: string
     secondary_color: string
   }
@@ -34,6 +47,11 @@ export interface Project {
   client: Client
   collaborator: Client
   freelance: boolean
+  thumbnail: {
+    type: 'img' | 'vid'
+    image: Image
+    video: Video
+  }
 }
 
 export function parseProjects(params: { projects?: WP_Projects; clients?: WP_Clients }): Projects {
@@ -72,5 +90,10 @@ export function parseProject(params: {
     client: parseClient({ client }),
     collaborator: parseClient({ client: collaborator }),
     freelance: !!project?.acf.freelance,
+    thumbnail: {
+      type: project?.acf.thumbnail.type || 'img',
+      image: parseImage(project?.acf.thumbnail.image),
+      video: parseVideo(project?.acf.thumbnail.video),
+    },
   }
 }

@@ -9,8 +9,8 @@
 <style lang="scss">
 .svg__quote {
   fill: none;
-  width: 5.8rem;
-  height: 5.1rem;
+  width: toScale(5.8rem);
+  height: toScale(5.1rem);
   display: block;
   &__path {
     fill: black;

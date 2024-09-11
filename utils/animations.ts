@@ -82,8 +82,9 @@ export function transitionFadeOut(el: Element, done: Function): void {
 export function shuffleIn(params: { el: HTMLElement }) {
   const { el } = params
   const paths = shuffle(Array.from(el.querySelectorAll('path')))
-  for (const path of paths) {
-    const delay = Math.random() * 1.2
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i]
+    const delay = 0.2 * i
     const duration = 0.2
     gsap.to(path, { opacity: 1, duration, delay, ease: 'power1.in' })
     gsap.to(path, {
@@ -97,9 +98,10 @@ export function shuffleIn(params: { el: HTMLElement }) {
 }
 
 export function shuffleElsIn(params: { els?: NodeListOf<Element> | Array<HTMLElement> }) {
-  const { els } = params
-  for (const el of els || []) {
-    const delay = Math.random() * 1.2
+  const els = shuffle(Array.from(params.els || []))
+  for (let i = 0; i < els.length; i++) {
+    const el = els[i]
+    const delay = 0.2 * i
     const duration = 0.2
     gsap.killTweensOf(el)
     gsap.to(el, { opacity: 1, duration, delay, ease: 'power1.in' })
@@ -114,9 +116,10 @@ export function shuffleElsIn(params: { els?: NodeListOf<Element> | Array<HTMLEle
 }
 
 export function shuffleElsOut(params: { els?: NodeListOf<Element> | Array<HTMLElement> }) {
-  const { els } = params
-  for (const el of els || []) {
-    const delay = Math.random() * 1.2
+  const els = shuffle(Array.from(params.els || []))
+  for (let i = 0; i < els.length; i++) {
+    const el = els[i]
+    const delay = 0.2 * i
     const duration = 0.2
     gsap.killTweensOf(el)
     gsap.to(el, { opacity: 0, duration, delay, ease: 'power1.out' })

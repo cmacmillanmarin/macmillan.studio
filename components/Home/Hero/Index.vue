@@ -190,7 +190,7 @@ onUnmounted(() => {
 <style lang="scss">
 .home__hero {
   position: relative;
-  background-color: var(--light-grey);
+  background-color: var(--dark-grey);
   padding-bottom: calc(var(--vh) * v-bind(scrollGap));
 
   &__title {

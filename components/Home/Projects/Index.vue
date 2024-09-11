@@ -34,6 +34,7 @@
 </template>
 
 <script lang="ts" setup>
+import { shuffleElsIn } from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 
 defineProps<{
@@ -63,6 +64,7 @@ function titleIn(params: { el: HTMLElement }) {
 .home__projects {
   position: relative;
   padding-bottom: calc(var(--vh) * 0.25);
+  background-color: var(--light-grey);
 
   &__title,
   &__date {

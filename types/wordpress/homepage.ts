@@ -126,9 +126,9 @@ export function parseHomepage(params: {
 }): Homepage {
   const { homepage, projects, services, clients, testimonials } = params
 
-  const listedClients = clients?.filter(
-    client => !!homepage?.acf.about.clients.list.find(c => c.post_name === client.slug)
-  )
+  const listedClients = clients
+    ?.filter(client => !!homepage?.acf.about.clients.list.find(c => c.post_name === client.slug))
+    .sort((a, b) => (a.title > b.title ? 1 : -1))
 
   return {
     head: parseHead(homepage?.acf.seo),

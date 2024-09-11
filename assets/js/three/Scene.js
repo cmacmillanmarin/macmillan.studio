@@ -1,7 +1,7 @@
 import VS from './glsl/vs.glsl'
 import FS from './glsl/fs.glsl'
 import * as THREE from 'three'
-import { round } from '~/utils'
+import { slugify, round } from '~/utils'
 import { gsap } from 'gsap'
 
 class Scene {
@@ -27,6 +27,7 @@ class Scene {
     this.mouse = new THREE.Vector2()
     this.raycaster = new THREE.Raycaster()
     this.loader = new THREE.TextureLoader()
+    this.loadedTextures = {}
 
     this.maxPixelRatio = 2
     this.rendering = false
@@ -82,6 +83,9 @@ class Scene {
     object.position = object.position || { x: 0, y: 0 }
     object.size = object.size || { x: 1, y: 1, z: 1 }
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
+    if (object.img && !this.loadedTextures[object.id]) {
+      this.loadedTextures[object.id] = this.loader.load(object.img.src || object.img.currentSrc)
+    }
     this.objects.push(object)
     !this.rendering && this.play()
   }
@@ -154,7 +158,7 @@ class Scene {
             } else if (object.img) {
               object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
               object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
-              object.mesh.material.uniforms.uTextureImage.value = this.loader.load(object.img.src)
+              object.mesh.material.uniforms.uTextureImage.value = this.loadedTextures[object.id]
               object.mesh.material.uniforms.uTextureType.value = 1
             }
           }
@@ -171,6 +175,7 @@ class Scene {
         object.mesh.material.uniforms.uOpacity.value = object.opacity
         object.mesh.position.x = position.x + object.size.x * 0.5
         object.mesh.position.y = position.y - object.size.y * 0.5
+        object.mesh.position.z = object.position.z || 0
         object.mesh.rotation.x = object.rotate.x
         object.mesh.rotation.y = object.rotate.y
         object.mesh.rotation.z = object.rotate.z
@@ -275,7 +280,6 @@ class Scene {
 
   generatePlanesBatch() {
     const video = document.createElement('video')
-    const videoTexture = new THREE.VideoTexture(video)
 
     for (let id = 0; id < this.maxPlanes; id++) {
       const available = true
@@ -294,7 +298,7 @@ class Scene {
             uPixelSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uTextureType: { type: 'i', value: 0 }, // 0 Video, 1 Image
             uTextureImage: { type: 't', value: null },
-            uTextureVideo: { type: 't', value: videoTexture },
+            uTextureVideo: { type: 't', value: new THREE.VideoTexture(video) },
             uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
           },

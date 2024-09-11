@@ -1,5 +1,23 @@
 <template>
   <div ref="el" class="home__projects__project" data-scroll-set-position>
+    <video
+      v-if="data.thumbnail.type === 'vid' && data.thumbnail.video.src"
+      ref="videoEl"
+      :alt="data.thumbnail.video.alt"
+      :width="data.thumbnail.video.width"
+      :height="data.thumbnail.video.height"
+      muted
+      loop
+      crossorigin="anonymous"
+      class="home__projects__project__vid">
+      <source :src="data.thumbnail.video.src" :type="data.thumbnail.video.mime" />
+    </video>
+    <CustomImage
+      v-else-if="data.thumbnail.image.src"
+      ref="customImageEl"
+      :data="data.thumbnail.image"
+      class="home__projects__project__img" />
+
     <ClientOnly>
       <Teleport to="#top-layer">
         <div v-if="data.client.name" ref="clientEl" class="home__projects__project__client">
@@ -30,6 +48,7 @@ import useScrollStore from '~/store/useScrollStore'
 import type { Project } from '~/types/wordpress/project'
 import { slugify } from '~/utils'
 import { fadeIn, fadeOut } from '~/utils/animations'
+import CustomImage from '~/components/Global/CustomImage.vue'
 
 const props = defineProps<{
   i: number
@@ -53,8 +72,11 @@ const projectId = computed<string>(() => `project-${slugify(props.data.title)}`)
 const projectColor = ref<string>(props.data.color)
 
 const el = ref<HTMLElement>()
+
 const clientEl = ref<HTMLElement>()
 const collaboratorEl = ref<HTMLElement>()
+const videoEl = ref<HTMLVideoElement>()
+const customImageEl = ref<typeof CustomImage>()
 
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
@@ -130,9 +152,12 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
 })
 
 onMounted(() => {
+  !isInProjectEntered.value && videoEl.value?.play()
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
+    video: videoEl.value,
+    img: customImageEl.value?.el,
     size: { x: 1, y: 1, z: 1 },
     position: { x: 0, y: 0 },
     fixed: { from: props.top, to: props.bottom },
@@ -158,6 +183,14 @@ onBeforeUnmount(() => {
   justify-content: center;
   align-items: center;
 
+  &__vid,
+  &__img {
+    opacity: 0;
+    pointer-events: none;
+    @include absolute-center;
+    width: toColumns(3);
+  }
+
   &__client,
   &__collaborator {
     position: absolute;
@@ -178,6 +211,8 @@ onBeforeUnmount(() => {
     }
 
     &__name {
+      text-shadow: 0 0 1.2rem rgba(0, 0, 0, 0.8);
+
       @include t-white;
       @include t-b2;
     }
