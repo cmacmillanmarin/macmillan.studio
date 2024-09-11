@@ -48,12 +48,7 @@
         </li>
       </ul>
       <div class="header__nav__logo">
-        <CustomLink
-          class="header__nav__list__item__anchor"
-          to="/#hero"
-          type="referral"
-          :content="true"
-          data-tab-fixed>
+        <CustomLink to="/#hero" type="referral" :content="true" data-tab-fixed>
           <SvgLogo />
         </CustomLink>
       </div>
@@ -72,24 +67,13 @@ import { toPx, toPercentage } from '~/utils'
 const { gridType, isInProject } = storeToRefs(useStore())
 const { current, bounding } = storeToRefs(useScrollStore())
 
-const { vh } = useResize()
+const { vw, vh } = useResize()
 const { layoutMargin } = useCss()
 
 const el = ref<HTMLElement>()
 
 watch(current, () => {
-  if (!el.value) return
-  const y = Math.min(0, bounding.value - vh.value - current.value)
-
-  const threshold = vh.value - layoutMargin.value * 2
-  const progress = Math.min(1, current.value / vh.value)
-
-  gsap.set(el.value, { y: toPx(y) })
-  gsap.set('.header__nav__logo', { y: toPx(threshold * progress * -1) })
-  gsap.set('.header__nav__logo .custom-link', {
-    y: toPercentage(100 * progress),
-    scale: 1 - 0.8 * progress,
-  })
+  update()
 })
 
 watch(isInProject, () => {
@@ -98,6 +82,7 @@ watch(isInProject, () => {
 
 function enter() {
   if (!el.value) return
+  update()
   gsap.set(el.value, { pointerEvents: 'auto' })
   const els = el.value.querySelectorAll('.header__hint ,.header__nav__list__item__anchor')
   shuffleElsIn({ els })
@@ -108,6 +93,31 @@ function leave() {
   gsap.set(el.value, { pointerEvents: 'none' })
   const els = el.value.querySelectorAll('.header__hint ,.header__nav__list__item__anchor')
   shuffleElsOut({ els })
+}
+
+function update() {
+  if (!el.value) return
+  const y = Math.min(0, bounding.value - vh.value - current.value)
+
+  const threshold = vh.value - layoutMargin.value * 2
+  const progress = Math.min(1, current.value / vh.value)
+
+  const target = Math.min(vw.value, vh.value)
+
+  const targetWidth = 160
+  const targetScale = targetWidth / (target * 0.8)
+
+  const lx = (vw.value * -0.5 + target * 0.4) * progress
+  const ly = (vh.value * -0.5 + target * 0.4) * progress
+
+  gsap.set(el.value, { y: toPx(y) })
+  // gsap.set('.header__nav__logo', { y: toPx(threshold * progress * -1) })
+  gsap.set('.header__nav__logo .custom-link', {
+    // y: toPercentage(100 * progress),
+    x: lx,
+    y: ly,
+    scale: targetScale + (1 - targetScale) * progress,
+  })
 }
 </script>
 
@@ -171,12 +181,12 @@ function leave() {
         bottom: 0;
         right: 0;
         display: block;
-        width: 16rem;
-        height: 16rem;
+        width: calc(var(--vh) * 0.8);
+        height: calc(var(--vh) * 0.8);
         will-change: transform;
-        transform-origin: top right;
+        transform-origin: bottom right;
         .svg__logo {
-          width: 16rem;
+          width: 100%;
         }
       }
     }

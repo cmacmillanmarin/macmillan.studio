@@ -5,14 +5,6 @@
     class="home__projects"
     data-scroll-target-top
     data-scroll-set-position>
-    <div class="home__projects__title">
-      <p
-        data-scroll-sticky
-        class="home__projects__title__label"
-        v-transition:in="{ callback: titleIn, offset: 1 }">
-        Selected Work
-      </p>
-    </div>
     <div class="home__projects__date">
       <p
         class="home__projects__date__label"
@@ -22,14 +14,15 @@
         <span>{2024—2013}</span>
       </p>
     </div>
+
     <HomeProjectsProject
       v-for="(project, i) in data.list"
       :i="i"
       :data="project"
       :top="top"
       :bottom="bottom"
-      :side-x="i % 4 === 0 || i % 4 === 3 ? -1 : 1"
-      :side-y="i % 4 <= 1 ? -1 : 1" />
+      :side-x="i % 2 === 0 ? -1 : 1"
+      :side-y="-1" />
   </div>
 </template>
 
