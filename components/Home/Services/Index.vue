@@ -7,7 +7,7 @@
           :css="false"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
-          <p v-if="activeService !== 0 && section === 'services'" class="home__services__index">
+          <p v-if="activeService > 0 && section === 'services'" class="home__services__index">
             <SvgSquare />
             <span v-html="`{${startWithZero(activeService)}—${startWithZero(data.list.length)}}`" />
           </p>

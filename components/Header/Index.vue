@@ -13,7 +13,7 @@
       <ul class="header__nav__list">
         <HeaderLink label="Projects," to="/#projects" :active="section === 'projects'" />
         <HeaderLink label="Services," to="/#services" :active="section === 'services'" />
-        <HeaderLink label="About," to="/#about" :active="section.includes('about')" />
+        <HeaderLink label="About" to="/#about" :active="section.includes('about')" />
       </ul>
     </nav>
 

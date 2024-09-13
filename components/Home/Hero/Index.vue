@@ -31,7 +31,8 @@
     </div>
     <div class="home__hero__bg" />
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
-    <div class="home__hero__intersect" v-intersect="{ callback: onIntersect }" />
+    <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersect }" />
+    <div class="home__hero__intersect--bottom" v-intersect="{ callback: onIntersect }" />
   </section>
 </template>
 
@@ -53,7 +54,7 @@ const { $scene }: any = useNuxtApp()
 const store = useStore()
 const { updateSection } = store
 const { gridType, isInProjectEntered } = storeToRefs(store)
-const { current } = storeToRefs(useScrollStore())
+const { current, direction } = storeToRefs(useScrollStore())
 
 const { layoutMargin } = useCss()
 const { lvw, vw, vh } = useResize()
@@ -183,7 +184,8 @@ function onPause() {
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
-  visible && updateSection('hero')
+  if (visible && direction.value === 'down' && current.value > 0) updateSection('projects-bg')
+  else if (visible && direction.value === 'up') updateSection('hero')
 }
 
 onUnmounted(() => {
@@ -281,10 +283,19 @@ onUnmounted(() => {
 
   &__intersect {
     position: absolute;
-    bottom: 1px;
     left: 0;
     width: 100%;
     height: 1px;
+    &--top,
+    &--bottom {
+      @extend .home__hero__intersect;
+    }
+    &--top {
+      bottom: var(--vh);
+    }
+    &--bottom {
+      bottom: 1px;
+    }
   }
 }
 </style>

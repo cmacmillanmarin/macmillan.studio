@@ -2,19 +2,25 @@
   <div
     ref="el"
     data-scroll-sticky-state="false"
-    :class="['home__services__service', { 'home__services__service--hidden': hidden }]">
+    :class="[
+      'home__services__service',
+      { 'home__services__service--hidden': hidden },
+      { 'home__services__service--no-bg': (i === of && active === i + 1) || active === 0 },
+    ]">
     <Separator />
     <div
       v-if="i === of"
       class="home__services__service__observer--in"
       v-intersect="{ callback: onIntersectIn }" />
-    <div
+    <!-- <div
       v-if="i === of"
       class="home__services__service__observer--out"
-      v-intersect="{ callback: onIntersectOut }" />
+      v-intersect="{ callback: onIntersectOut }" /> -->
     <div class="home__services__service__content">
       <div class="home__services__service__content__title">
-        <h3 class="home__services__service__content__title__label">{{ data.title }}</h3>
+        <h3 class="home__services__service__content__title__label">
+          {{ data.title }}
+        </h3>
       </div>
       <div class="home__services__service__content__description" v-html="data.description" />
     </div>
@@ -23,6 +29,7 @@
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
+import useScroll from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import type { Service } from '~/types/wordpress/service'
 
@@ -33,11 +40,13 @@ const props = defineProps<{
   data: Service
 }>()
 
+const store = useScroll()
+const { section } = storeToRefs(store)
 const { direction } = storeToRefs(useScrollStore())
 
 const el = ref<HTMLElement>()
 const sticky = ref<boolean>(false)
-const hidden = computed<boolean>(() => props.active > props.i + 1)
+const hidden = computed<boolean>(() => props.active > props.i + 1 || section.value !== 'services')
 
 let _observer: MutationObserver | null = null
 
@@ -66,7 +75,7 @@ function onIntersectIn(el: HTMLElement, visible: boolean) {
 }
 
 function onIntersectOut(el: HTMLElement, visible: boolean) {
-  if (!visible && direction.value === 'down') emit('update-active', -1)
+  if (!visible && direction.value === 'down') emit('update-active', -2)
   if (visible && direction.value === 'up') emit('update-active', props.i)
 }
 
@@ -92,6 +101,15 @@ const emit = defineEmits<{
     opacity: 0;
   }
 
+  &--no-bg {
+    .home__services__service__content {
+      background-color: transparent;
+      &:after {
+        background-color: transparent;
+      }
+    }
+  }
+
   &:last-child {
     .home__services__service__content {
       padding-bottom: 18rem;
@@ -111,13 +129,14 @@ const emit = defineEmits<{
     left: 0;
     width: 100%;
     height: 1px;
+    // background-color: red;
 
     &--in,
     &--out {
       @extend .home__services__service__observer;
     }
-    &--in  {
-      transform: translateY(-2.5rem);
+    &--in {
+      transform: translateY(-2.4rem);
     }
     &--out {
       transform: translateY(8.5rem);

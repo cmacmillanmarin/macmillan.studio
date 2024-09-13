@@ -8,6 +8,7 @@ export type GridType = 'none' | 'default' | 'rule-of-thirds' | 'golden-ratio'
 
 export type Section =
   | 'hero'
+  | 'projects-bg'
   | 'projects'
   | 'services'
   | 'about'

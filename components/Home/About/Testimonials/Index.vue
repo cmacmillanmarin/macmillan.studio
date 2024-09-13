@@ -20,6 +20,7 @@ const props = defineProps<{
 
 const store = useStore()
 const { updateSection } = store
+const { section } = storeToRefs(store)
 const { direction } = storeToRefs(useScrollStore())
 
 const { init, swipeLeft, swipeRight } = useSwipe({})
@@ -44,8 +45,10 @@ watch(active, () => {
   gsap.to(x, { value: x.value - dif })
 })
 
-watch(swipeRight, () => {
-  active.value = Math.max(0, active.value - 1)
+watch(section, () => {
+  section.value === 'about-testimonials'
+    ? fadeIn({ el: el.value, delay: 0.2 })
+    : fadeOut({ el: el.value })
 })
 
 watch(swipeLeft, () => {
@@ -66,6 +69,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 .home__about__testimonials {
   position: relative;
   overflow: var(--overflow--hidden);
+  @include will-fade;
 
   &__content {
     max-width: var(--layout-max-width);

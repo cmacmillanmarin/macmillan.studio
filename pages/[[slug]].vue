@@ -47,7 +47,7 @@ const { updateInProject, updateInProjectEntered } = store
 const { section } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
-const bgColor = ref<string>('dark-grey')
+const bgColor = ref<string>('light-grey')
 const inProject = ref<boolean>(false)
 const inProjectEntered = ref<boolean>(false)
 const projectSlug = computed<string>(() => `${route.params.slug}`)
@@ -66,8 +66,8 @@ watch(inProjectEntered, () => {
 watch(section, () => {
   if (!el.value) return
 
-  let color = 'dark-grey'
-  if (section.value === 'projects') color = 'light-grey'
+  let color = 'light-grey'
+  if (section.value === 'projects' || section.value === 'projects-bg') color = 'dark-grey'
   else if (section.value === 'services') color = 'light-grey'
   else if (section.value === 'about') color = 'lime'
   else if (section.value === 'about-testimonials') color = 'dark-grey'
@@ -76,12 +76,12 @@ watch(section, () => {
 
 watch(bgColor, () => {
   if (!el.value) return
-  console.log(bgColor.value)
   const bgs = el.value.querySelectorAll(
     '.home__bg--lime, .home__bg--light-grey, .home__bg--dark-grey'
   )
   const active = `.home__bg--${bgColor.value}`
   const activeBg = el.value.querySelector(active)
+  // const duration = section.value === 'hero' || section.value === 'projects-bg' ? 0 : undefined
   gsap.set(bgs, { zIndex: 1 })
   fadeOut({ el: bgs })
   gsap.killTweensOf(activeBg)
@@ -145,11 +145,11 @@ definePageMeta({
       background-color: var(--lime);
     }
     &--light-grey {
+      opacity: 1;
       background-color: var(--light-grey);
     }
     &--dark-grey {
       background-color: var(--dark-grey);
-      opacity: 1;
     }
   }
 }
