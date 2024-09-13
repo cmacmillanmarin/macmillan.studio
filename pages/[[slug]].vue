@@ -1,5 +1,5 @@
 <template>
-  <div v-if="data" class="home">
+  <div v-if="data" ref="el" class="home">
     <CustomHead :head="data.head" />
 
     <transition
@@ -24,20 +24,30 @@
     <HomeAbout data-scroll :data="data.about" />
 
     <Footer data-scroll />
+
+    <div class="home__bg--lime" />
+    <div class="home__bg--dark-grey" />
+    <div class="home__bg--light-grey" />
   </div>
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { type Homepage } from '~/types/wordpress/homepage'
 import { type Project } from '~/types/wordpress/project'
 import { transitionFadeOut } from '~/utils/animations'
 import useStore from '~/store/useStore'
+import { storeToRefs } from 'pinia'
 
 const route = useRoute()
 const { data } = await useFetch<Homepage>('/api/data')
 
-const { updateInProject, updateInProjectEntered } = useStore()
+const store = useStore()
+const { updateInProject, updateInProjectEntered } = store
+const { section } = storeToRefs(store)
 
+const el = ref<HTMLElement>()
+const bgColor = ref<string>('dark-grey')
 const inProject = ref<boolean>(false)
 const inProjectEntered = ref<boolean>(false)
 const projectSlug = computed<string>(() => `${route.params.slug}`)
@@ -51,6 +61,31 @@ watch(inProject, () => {
 
 watch(inProjectEntered, () => {
   updateInProjectEntered(inProjectEntered.value)
+})
+
+watch(section, () => {
+  if (!el.value) return
+
+  let color = 'dark-grey'
+  if (section.value === 'projects') color = 'light-grey'
+  else if (section.value === 'services') color = 'light-grey'
+  else if (section.value === 'about') color = 'lime'
+  else if (section.value === 'about-testimonials') color = 'dark-grey'
+  bgColor.value = color
+})
+
+watch(bgColor, () => {
+  if (!el.value) return
+  console.log(bgColor.value)
+  const bgs = el.value.querySelectorAll(
+    '.home__bg--lime, .home__bg--light-grey, .home__bg--dark-grey'
+  )
+  const active = `.home__bg--${bgColor.value}`
+  const activeBg = el.value.querySelector(active)
+  gsap.set(bgs, { zIndex: 1 })
+  fadeOut({ el: bgs })
+  gsap.killTweensOf(activeBg)
+  gsap.set(activeBg, { zIndex: 0, opacity: 1 })
 })
 
 function onProjectMounted() {
@@ -74,13 +109,48 @@ definePageMeta({
 <style lang="scss">
 .home {
   @include page;
+
+  &__hero,
+  &__projects,
+  &__services,
+  &__about,
+  .footer {
+    position: relative;
+    z-index: 2;
+  }
+
   .project {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 99;
+    z-index: 3;
+  }
+
+  &__bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--vh);
+    z-index: 0;
+    &--lime,
+    &--light-grey,
+    &--dark-grey {
+      @extend .home__bg;
+      @include will-fade;
+    }
+    &--lime {
+      background-color: var(--lime);
+    }
+    &--light-grey {
+      background-color: var(--light-grey);
+    }
+    &--dark-grey {
+      background-color: var(--dark-grey);
+      opacity: 1;
+    }
   }
 }
 </style>

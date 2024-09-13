@@ -12,7 +12,7 @@
           :css="false"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
-          <p v-if="active !== 0" class="home__projects__index">
+          <p v-if="active !== 0 && section === 'projects'" class="home__projects__index">
             <SvgSquare />
             <span v-html="`{${startWithZero(active)}—${startWithZero(data.list.length)}}`" />
           </p>
@@ -24,7 +24,7 @@
           :css="false"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
-          <p v-if="active !== 0" class="home__projects__date">
+          <p v-if="active !== 0 && section === 'projects'" class="home__projects__date">
             <SvgSquare />
             <span>{2024—2013}</span>
           </p>
@@ -32,12 +32,7 @@
       </Teleport>
     </ClientOnly>
 
-    <!-- <div ref="logoEl" data-scroll-sticky class="home__projects__logo">
-      <SvgLogo />
-      <div
-        class="home__projects__logo__observer"
-        v-intersect="{ callback: onIntersect, offset: 1 }" />
-    </div> -->
+    <div class="home__projects__intersect" v-intersect="{ callback: onIntersect }" />
 
     <HomeProjectsProject
       v-for="(project, i) in data.list"
@@ -53,12 +48,18 @@
 </template>
 
 <script lang="ts" setup>
+import useStore from '~/store/useStore'
 import { transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
+import { storeToRefs } from 'pinia'
 
 defineProps<{
   data: HomepageProjects
 }>()
+
+const store = useStore()
+const { updateSection } = store
+const { section } = storeToRefs(store)
 
 const { vh } = useResize()
 
@@ -68,17 +69,8 @@ const top = ref<number>(0)
 const bottom = ref<number>(0)
 
 const el = ref<HTMLElement>()
-const logoEl = ref<HTMLElement>()
 
 const active = ref<number>(0)
-const logoIntersected = ref<boolean>(false)
-
-watch(logoIntersected, () => {
-  if (!logoEl.value) return
-  logoIntersected.value
-    ? shuffleElsIn({ els: [logoEl.value] })
-    : shuffleElsOut({ els: [logoEl.value] })
-})
 
 watch(onReset, () => {
   const bounding = getBounding(el.value as HTMLElement)
@@ -91,15 +83,16 @@ function updateActive(value: number) {
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
-  logoIntersected.value = visible
+  visible && updateSection('projects')
 }
+
+defineEmits(['update-active'])
 </script>
 
 <style lang="scss">
 .home__projects {
   position: relative;
   padding-bottom: calc(var(--vh) * 0.25);
-  background-color: var(--light-grey);
 
   &__index,
   &__date {
@@ -115,26 +108,11 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     width: max-content;
   }
 
-  &__logo {
+  &__intersect {
     position: absolute;
-    top: 0;
+    top: calc(var(--vh));
     left: 0;
     width: 100%;
-    height: var(--vh);
-    // @include will-fade;
-    .svg__logo {
-      width: calc(var(--vh) * 0.8);
-      height: auto;
-      @include absolute-center;
-    }
-    &__observer {
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      height: 0.1rem;
-      background-color: red;
-      width: 100%;
-    }
   }
 }
 </style>

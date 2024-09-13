@@ -1,5 +1,6 @@
 <template>
   <footer class="footer" id="contact-target">
+    <div class="footer__intersect" v-intersect="{ callback: onIntersect }" />
     <div v-show="!tetris" class="footer__email" v-transition:in="{ callback: fadeIn }">
       <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
       <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
@@ -57,9 +58,13 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
+import useScrollStore from '~/store/useScrollStore'
 import { fadeIn } from '~/utils/animations'
 
-const { gridType } = storeToRefs(useStore())
+const store = useStore()
+const { updateSection } = store
+const { gridType } = storeToRefs(store)
+const { direction } = storeToRefs(useScrollStore())
 
 const rrss = ref([
   {
@@ -93,6 +98,11 @@ const tetris = ref<boolean>(false)
 
 function playTetris() {
   tetris.value = true
+}
+
+function onIntersect(el: HTMLElement, visible: boolean) {
+  if (visible) updateSection('contact')
+  else if (direction.value === 'up') updateSection('about-awards')
 }
 </script>
 
@@ -220,9 +230,17 @@ function playTetris() {
     }
   }
 
-  .footer__tetris {
+  &__tetris {
     z-index: 1;
     @include absolute-center;
+  }
+
+  &__intersect {
+    position: absolute;
+    top: calc(var(--vh) * 0.5);
+    left: 0;
+    width: 100%;
+    height: 1px;
   }
 }
 </style>

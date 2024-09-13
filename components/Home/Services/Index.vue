@@ -1,5 +1,5 @@
 <template>
-  <div class="home__services" id="services-target" data-scroll-target-top>
+  <div ref="el" class="home__services" id="services-target" data-scroll-target-top>
     <ClientOnly>
       <Teleport to=".header__top">
         <transition
@@ -7,9 +7,9 @@
           :css="false"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
-          <p v-if="active !== 0" class="home__services__index">
+          <p v-if="activeService !== 0 && section === 'services'" class="home__services__index">
             <SvgSquare />
-            <span v-html="`{${startWithZero(active)}—${startWithZero(data.list.length)}}`" />
+            <span v-html="`{${startWithZero(activeService)}—${startWithZero(data.list.length)}}`" />
           </p>
         </transition>
       </Teleport>
@@ -27,36 +27,59 @@
         v-for="(service, i) in data.list"
         :i="i"
         :of="data.list.length - 1"
-        :active="active"
+        :active="activeService"
         :data="service"
         data-scroll-sticky
         data-scroll-sticky-top="24"
         @update-active="updateActive" />
     </div>
+
+    <div class="home__services__intersect" v-intersect="{ callback: onIntersect }" />
   </div>
 </template>
 
 <script lang="ts" setup>
+import useStore from '~/store/useStore'
+import useScrollStore from '~/store/useScrollStore'
 import { startWithZero } from '~/utils'
 import { transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
 import type { HomepageServices } from '~/types/wordpress/homepage'
+import { storeToRefs } from 'pinia'
 
 defineProps<{
   data: HomepageServices
 }>()
 
-const active = ref<number>(0)
+const store = useStore()
+const { updateSection } = store
+const { section } = storeToRefs(store)
+const { direction } = storeToRefs(useScrollStore())
+
+const activeService = ref<number>(0)
+
+const isActive = computed(() => section.value === 'services')
+
+const el = ref<HTMLElement>()
+
+watch(isActive, () => {
+  isActive.value ? fadeIn({ el: el.value }) : fadeOut({ el: el.value })
+})
 
 function updateActive(i: number) {
-  active.value = i + 1
+  activeService.value = i + 1
+}
+
+function onIntersect(el: HTMLElement, visible: boolean) {
+  if (visible) updateSection('services')
+  else if (direction.value === 'up') updateSection('projects')
 }
 </script>
 
 <style lang="scss">
 .home__services {
   position: relative;
-  background-color: var(--light-grey);
   padding: 4rem 0 0;
+  @include will-fade;
 
   &__index {
     position: absolute;
@@ -119,6 +142,14 @@ function updateActive(i: number) {
         }
       }
     }
+  }
+
+  &__intersect {
+    position: absolute;
+    top: calc(var(--vh) * 0.5);
+    left: 0;
+    width: 100%;
+    height: 1px;
   }
 }
 </style>

@@ -7,7 +7,7 @@ export function ease(): string {
 }
 
 export async function fadeIn(params: {
-  el: Element | HTMLElement | Array<HTMLElement> | undefined
+  el?: Element | HTMLElement | Array<HTMLElement> | Element | NodeListOf<Element>
   delay?: number
   duration?: number
   ease?: string
@@ -40,7 +40,7 @@ export async function fadeIn(params: {
 }
 
 export async function fadeOut(params: {
-  el: Element | HTMLElement | Array<HTMLElement> | undefined
+  el?: Element | HTMLElement | Array<HTMLElement> | Element | NodeListOf<Element>
   delay?: number
   duration?: number
   ease?: string

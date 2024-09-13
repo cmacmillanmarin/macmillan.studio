@@ -11,43 +11,15 @@
 
     <nav class="header__nav--main">
       <ul class="header__nav__list">
-        <li class="header__nav__list__item">
-          <CustomLink
-            class="header__nav__list__item__anchor"
-            type="referral"
-            to="/#projects"
-            label="Projects,"
-            data-tab-fixed />
-        </li>
-        <li class="header__nav__list__item">
-          <CustomLink
-            class="header__nav__list__item__anchor"
-            type="referral"
-            to="/#services"
-            label="Services,"
-            data-tab-fixed />
-        </li>
-        <li class="header__nav__list__item">
-          <CustomLink
-            class="header__nav__list__item__anchor"
-            type="referral"
-            to="/#about"
-            label="About"
-            data-tab-fixed />
-        </li>
+        <HeaderLink label="Projects," to="/#projects" :active="section === 'projects'" />
+        <HeaderLink label="Services," to="/#services" :active="section === 'services'" />
+        <HeaderLink label="About," to="/#about" :active="section.includes('about')" />
       </ul>
     </nav>
 
     <nav class="header__nav--sub">
-      <ul>
-        <li class="header__nav__list__item">
-          <CustomLink
-            class="header__nav__list__item__anchor"
-            to="/#contact"
-            type="referral"
-            label="Contact"
-            data-tab-fixed />
-        </li>
+      <ul class="header__nav__list">
+        <HeaderLink label="Contact" to="/#contact" :active="section === 'contact'" />
       </ul>
       <div class="header__nav__logo">
         <CustomLink to="/#hero" type="referral" :content="true" data-tab-fixed>
@@ -68,7 +40,7 @@ import useScrollStore from '~/store/useScrollStore'
 import { shuffleElsIn, shuffleElsOut } from '~/utils/animations'
 import { toPx, toPercentage } from '~/utils'
 
-const { gridType, isInProject } = storeToRefs(useStore())
+const { section, gridType, isInProject } = storeToRefs(useStore())
 const { current, bounding } = storeToRefs(useScrollStore())
 
 const { vw, vh } = useResize()
@@ -99,7 +71,7 @@ function enter() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'auto' })
   const els = el.value.querySelectorAll(
-    '.header__hint, .header__top, .header__bottom, .header__nav__list__item__anchor, .svg__logo'
+    '.header__hint, .header__top, .header__bottom, .header__link__anchor, .svg__logo'
   )
   shuffleElsIn({ els })
 }
@@ -108,7 +80,7 @@ function leave() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'none' })
   const els = el.value.querySelectorAll(
-    '.header__hint, .header__top, .header__bottom, .header__nav__list__item__anchor, .svg__logo'
+    '.header__hint, .header__top, .header__bottom, .header__link__anchor, .svg__logo'
   )
   shuffleElsOut({ els })
 }
@@ -161,11 +133,9 @@ function leave() {
       display: flex;
       column-gap: 0.8rem;
 
-      &__item {
+      .header__link {
         &__anchor {
-          color: var(--black);
           @include will-fade;
-          @include t-b1;
         }
       }
     }
@@ -173,6 +143,7 @@ function leave() {
     &__logo {
       position: relative;
       will-change: transform;
+
       .custom-link {
         position: absolute;
         bottom: 0;
@@ -182,9 +153,10 @@ function leave() {
         height: 16rem;
         will-change: transform;
         transform-origin: top right;
+
         .svg__logo {
-          @include will-fade;
           width: 16rem;
+          @include will-fade;
         }
       }
     }

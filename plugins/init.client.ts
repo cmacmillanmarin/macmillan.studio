@@ -5,15 +5,13 @@ import { gsap } from 'gsap'
 import { CustomEase } from 'gsap/CustomEase'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
-export default defineNuxtPlugin(async nuxtApp => {
+export default defineNuxtPlugin(async () => {
   console.log(
     '%cDeveloped at https://macmillan.studio',
     'background: black; color: white; padding: 16px 24px; line-height: 1.4'
   )
 
   const store = useStore()
-  const route = useRoute()
-  store.defineEntryRoute(route.fullPath)
 
   gsap.registerPlugin(CustomEase, ScrollToPlugin)
 

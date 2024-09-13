@@ -1,5 +1,6 @@
 <template>
   <div class="home__about" id="about-target" data-scroll-target-top>
+    <div class="home__about__intersect" v-intersect="{ callback: onIntersect }" />
     <h2 class="home__about__title">{{ data.title }}</h2>
     <div class="home__about__hint">
       <h3 class="home__about__hint__label">
@@ -50,6 +51,7 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
+import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAbout } from '~/types/wordpress/homepage'
 
 defineProps<{
@@ -58,7 +60,11 @@ defineProps<{
 
 const { $scene }: any = useNuxtApp()
 const { onResize } = useResize()
-const { isInProjectEntered } = storeToRefs(useStore())
+
+const store = useStore()
+const { updateSection } = store
+const { isInProjectEntered } = storeToRefs(store)
+const { direction } = storeToRefs(useScrollStore())
 
 const imgEl = ref<HTMLImageElement>()
 const loaded = ref<boolean>(false)
@@ -92,12 +98,17 @@ onMounted(() => {
 function onLoaded() {
   loaded.value = true
 }
+
+function onIntersect(el: HTMLElement, visible: boolean) {
+  if (visible) updateSection('about')
+  else if (direction.value === 'up') updateSection('services')
+}
 </script>
 
 <style lang="scss">
 .home__about {
+  position: relative;
   padding: 8rem 0 0;
-  background-color: var(--lime);
 
   &__title {
     @include t-seo;
@@ -191,6 +202,14 @@ function onLoaded() {
         @include t-b1;
       }
     }
+  }
+
+  &__intersect {
+    position: absolute;
+    top: calc(var(--vh) * 0.5);
+    left: 0;
+    width: 100%;
+    height: 1px;
   }
 }
 </style>

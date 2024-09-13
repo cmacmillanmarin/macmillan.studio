@@ -31,6 +31,7 @@
     </div>
     <div class="home__hero__bg" />
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
+    <div class="home__hero__intersect" v-intersect="{ callback: onIntersect }" />
   </section>
 </template>
 
@@ -49,7 +50,9 @@ defineProps<{
 
 const { $scene }: any = useNuxtApp()
 
-const { gridType, isInProjectEntered } = storeToRefs(useStore())
+const store = useStore()
+const { updateSection } = store
+const { gridType, isInProjectEntered } = storeToRefs(store)
 const { current } = storeToRefs(useScrollStore())
 
 const { layoutMargin } = useCss()
@@ -149,18 +152,6 @@ watch([position, videoPlaying], () => {
   })
 })
 
-function enter(params: { el: HTMLElement }) {
-  fadeIn({ el: params.el })
-}
-
-function onPlay() {
-  videoPlaying.value = true
-}
-
-function onPause() {
-  videoPlaying.value = false
-}
-
 onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
@@ -179,6 +170,22 @@ onMounted(() => {
   })
 })
 
+function enter(params: { el: HTMLElement }) {
+  fadeIn({ el: params.el })
+}
+
+function onPlay() {
+  videoPlaying.value = true
+}
+
+function onPause() {
+  videoPlaying.value = false
+}
+
+function onIntersect(el: HTMLElement, visible: boolean) {
+  visible && updateSection('hero')
+}
+
 onUnmounted(() => {
   videoEl.value?.removeEventListener('play', onPlay)
   videoEl.value?.removeEventListener('pause', onPause)
@@ -190,7 +197,6 @@ onUnmounted(() => {
 <style lang="scss">
 .home__hero {
   position: relative;
-  background-color: var(--dark-grey);
   padding-bottom: calc(var(--vh) * v-bind(scrollGap));
 
   &__title {
@@ -271,6 +277,14 @@ onUnmounted(() => {
     background-color: var(--light-grey);
     @include will-fade;
     @include absolute-fill;
+  }
+
+  &__intersect {
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
   }
 }
 </style>

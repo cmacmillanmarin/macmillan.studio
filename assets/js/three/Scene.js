@@ -1,5 +1,6 @@
 import VS from './glsl/vs.glsl'
 import FS from './glsl/fs.glsl'
+import LoaderFS from './glsl/loader-fs.glsl'
 import * as THREE from 'three'
 import { slugify, round } from '~/utils'
 import { gsap } from 'gsap'
@@ -71,6 +72,7 @@ class Scene {
 
     this.updateSize({ size })
     this.addListeners()
+    this.generatePlanesBatch()
     this.ready = true
   }
 
@@ -85,6 +87,7 @@ class Scene {
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
     if (object.img && !this.loadedTextures[object.id]) {
       this.loadedTextures[object.id] = this.loader.load(object.img.src || object.img.currentSrc)
+      this.loaderMesh.material.uniforms.uTxt.value = this.loadedTextures[object.id]
     }
     this.objects.push(object)
     !this.rendering && this.play()
@@ -137,6 +140,7 @@ class Scene {
     this.needsUpdate = false
     this.main.classList.remove('__main--pointer')
     for (const object of this.objects) {
+      object.inView = this.inView(object)
       if (object.inView) {
         this.needsUpdate = true
         if (!object.mesh) {
@@ -199,7 +203,6 @@ class Scene {
         this.releasePlane(object.meshId)
         object.mesh = null
       }
-      object.inView = this.inView(object)
     }
   }
 
@@ -280,6 +283,25 @@ class Scene {
 
   generatePlanesBatch() {
     const video = document.createElement('video')
+
+    this.loaderMesh = new THREE.Mesh(
+      this.geometries.plane,
+      new THREE.ShaderMaterial({
+        vertexShader: VS,
+        fragmentShader: LoaderFS,
+        uniforms: {
+          uTxt: { type: 't', value: null },
+        },
+      })
+    )
+    const position = this.fromDomToCanvas({ x: -200, y: -200 })
+    this.loaderMesh.position.x = position.x
+    this.loaderMesh.position.y = position.y
+    this.loaderMesh.position.z = 1
+    this.loaderMesh.scale.x = 400
+    this.loaderMesh.scale.y = 400
+    this.loaderMesh.scale.z = 1
+    this.scene.add(this.loaderMesh)
 
     for (let id = 0; id < this.maxPlanes; id++) {
       const available = true
