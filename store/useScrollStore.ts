@@ -56,22 +56,22 @@ export default defineStore('use-scroll-store', {
     },
   },
   actions: {
-    updateEl(el?: HTMLElement): void {
+    updateEl(el?: HTMLElement) {
       this.el = el
     },
-    updateScroll(): void {
+    updateScroll() {
       this.update++
     },
-    disableScroll(value: boolean): void {
+    disableScroll(value: boolean) {
       this.disabled = value
     },
-    updateActiveMode(value: Active): void {
+    updateActiveMode(value: Active) {
       this.active = value
     },
-    updateScrollMode(value: Mode): void {
+    updateScrollMode(value: Mode) {
       this.mode = value
     },
-    updateScrollData(data: Data): void {
+    updateScrollData(data: Data) {
       this.current = data.current
       this.currentVertical = data.currentVertical
       this.direction = data.direction

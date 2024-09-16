@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { State, Transition, GridType, Section } from '~/types/front/store'
+import type { State, Transition, GridType, Section, Cursor } from '~/types/front/store'
 
 export default defineStore('use-store', {
   state: (): State => ({
@@ -8,6 +8,7 @@ export default defineStore('use-store', {
     preview: false,
     grid: 'none',
     section: 'hero',
+    cursor: 'default',
     inProject: false,
     inProjectEntered: false,
   }),
@@ -32,25 +33,28 @@ export default defineStore('use-store', {
     },
   },
   actions: {
-    updatePreloaded(value: boolean): void {
+    updatePreloaded(value: boolean) {
       this.preloaded = value
     },
-    updateLoading(value: boolean): void {
+    updateLoading(value: boolean) {
       this.loading = value
     },
-    updatePreview(state: boolean): void {
+    updatePreview(state: boolean) {
       this.preview = state
     },
-    updateGrid(state: GridType): void {
+    updateGrid(state: GridType) {
       this.grid = state
     },
-    updateSection(state: Section): void {
+    updateSection(state: Section) {
       this.section = state
     },
-    updateInProject(state: boolean): void {
+    updateCursor(state: Cursor) {
+      this.cursor = state
+    },
+    updateInProject(state: boolean) {
       this.inProject = state
     },
-    updateInProjectEntered(state: boolean): void {
+    updateInProjectEntered(state: boolean) {
       this.inProjectEntered = state
     },
   },

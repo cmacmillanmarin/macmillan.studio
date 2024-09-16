@@ -7,6 +7,7 @@
       <div class="home__hero__content__macmillan">
         <SvgMacMillan v-if="!hideComponents" />
       </div>
+
       <ClientOnly>
         <Teleport to="#top-layer">
           <div
@@ -49,12 +50,18 @@ defineProps<{
   data: HomepageHero
 }>()
 
+const route = useRoute()
+const router = useRouter()
+
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
 const { updateSection } = store
 const { gridType, isInProjectEntered } = storeToRefs(store)
-const { current, direction } = storeToRefs(useScrollStore())
+
+const scrollStore = useScrollStore()
+const { updateScrollTargetId } = scrollStore
+const { current, direction } = storeToRefs(scrollStore)
 
 const { layoutMargin } = useCss()
 const { lvw, vw, vh } = useResize()
@@ -168,11 +175,17 @@ onMounted(() => {
     video: videoEl.value,
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 0 },
+    onClick: goToVideo,
   })
 })
 
 function enter(params: { el: HTMLElement }) {
   fadeIn({ el: params.el })
+}
+
+async function goToVideo() {
+  if (route.hash === '#reel') updateScrollTargetId('reel')
+  else router.push('/#reel')
 }
 
 function onPlay() {

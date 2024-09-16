@@ -47,7 +47,7 @@ const el = ref<HTMLElement>()
 
 watch(
   () => route.hash,
-  (): void => {
+  () => {
     updateScrollTargetId(route.hash?.substring(1))
   }
 )
@@ -69,16 +69,16 @@ watch(onResize, async (): Promise<void> => {
 
 watch(touch, resetScroll)
 
-watch(isPreloaded, (): void => {
+watch(isPreloaded, () => {
   scrollStore.disableScroll(false)
   el.value && init()
 })
 
-watch(isLoading, (): void => {
+watch(isLoading, () => {
   IS_PREVIEW && !isLoading.value && nextTick(scroll.reset)
 })
 
-watch(scrollMode, (): void => {
+watch(scrollMode, () => {
   if (!scrollMode.value) return
   if ((scrollMode.value === 'auto' && !touch.value) || scrollMode.value === 'virtual') {
     scrollStore.updateActiveMode('virtual')
@@ -97,13 +97,13 @@ watch(scrollMode, (): void => {
   }
 })
 
-watch(scrollDisabled, (): void => {
+watch(scrollDisabled, () => {
   scroll.disable(scrollDisabled.value)
   if (scrollDisabled.value) createScrollLock({ el: el.value as HTMLElement })
   else destroyScrollLock()
 })
 
-watch(scrollTarget, (): void => {
+watch(scrollTarget, () => {
   if (scrollTarget.value === -1 || scrollDisabled.value) return
   if (scroll.active.value) {
     scroll.to(scrollTarget.value)
@@ -112,7 +112,7 @@ watch(scrollTarget, (): void => {
   }
 })
 
-watch(scrollTargetId, (): void => {
+watch(scrollTargetId, () => {
   if (scrollTargetId.value === '' || scrollDisabled.value) return
   const targetId = `${scrollTargetId.value}-target`
   if (scroll.active.value) {
@@ -145,11 +145,11 @@ onMounted(async (): Promise<void> => {
   }
 })
 
-function init(): void {
+function init() {
   initScroll()
 }
 
-function initScroll(): void {
+function initScroll() {
   scrollStore.updateScrollMode('auto')
 }
 
@@ -159,16 +159,16 @@ async function resetScroll(): Promise<void> {
   initScroll()
 }
 
-function addScrollListeners(): void {
+function addScrollListeners() {
   el.value?.addEventListener('scroll', onNativeScroll, { passive: false })
 }
 
-function removeScrollListeners(): void {
+function removeScrollListeners() {
   killTicker(onNativeScrollRaf)
   el.value?.removeEventListener('scroll', onNativeScroll)
 }
 
-function onNativeScroll(): void {
+function onNativeScroll() {
   _target = el.value?.scrollTop || 0
   _direction = _target < _previous ? 'up' : 'down'
   _bounding = (el.value?.scrollHeight || vh.value) - vh.value
@@ -180,7 +180,7 @@ function onNativeScrollInTarget() {
   return Math.abs(_target - _current) < 0.01
 }
 
-function onNativeScrollRaf(): void {
+function onNativeScrollRaf() {
   _current += (_target - _current) * 0.175
   scrollStore.updateScrollData({
     current: round(_current),
@@ -194,7 +194,7 @@ function onNativeScrollRaf(): void {
   }
 }
 
-function onSmoothScroll(data: Data): void {
+function onSmoothScroll(data: Data) {
   const { $scene }: any = useNuxtApp()
   if ($scene.ready) {
     $scene.updateY(data.current)
@@ -203,7 +203,7 @@ function onSmoothScroll(data: Data): void {
   scrollStore.updateScrollData(data)
 }
 
-onUnmounted((): void => {
+onUnmounted(() => {
   scroll.destroy()
   removeScrollListeners()
 })

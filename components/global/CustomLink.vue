@@ -19,6 +19,8 @@
 </template>
 
 <script lang="ts" setup>
+import useScrollStore from '~/store/useScrollStore'
+
 const props = defineProps<{
   to?: string
   label?: string
@@ -26,6 +28,8 @@ const props = defineProps<{
   tabFixed?: boolean
   content?: boolean
 }>()
+
+const { updateScrollTargetId } = useScrollStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -40,12 +44,8 @@ const componentType = computed(() => {
 
 async function onClick(): Promise<void> {
   if (props.type === 'referral') {
-    if (props.to === route.fullPath) {
-      router.push({ hash: '#_' })
-      setTimeout(() => {
-        router.push({ hash: props.to && props.to.substring(1) })
-      }, 0)
-    }
+    if (props.to === route.fullPath) updateScrollTargetId(props.to.replace('/#', ''))
+    else if (props.to) router.push(props.to)
   }
   if (route.fullPath === props.to) emit('active-clicked')
 }

@@ -16,12 +16,15 @@ export type Section =
   | 'about-awards'
   | 'contact'
 
+export type Cursor = 'default' | 'video' | 'close' | 'pointer'
+
 export interface State {
   preloaded: boolean
   loading: boolean
   preview: boolean
   grid: GridType
   section: Section
+  cursor: Cursor
   inProject: boolean
   inProjectEntered: boolean
 }
