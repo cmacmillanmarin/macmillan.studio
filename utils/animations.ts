@@ -6,6 +6,10 @@ export function ease(): string {
   return CustomEase.create('custom', 'M0,0 C0.53,0.24 0.08,0.99 1,1')
 }
 
+export function prepareFadeIn(el: Element) {
+  gsap.set(el, { opacity: 0 })
+}
+
 export async function fadeIn(params: {
   el?: Element | HTMLElement | Array<HTMLElement> | Element | NodeListOf<Element>
   delay?: number
@@ -31,7 +35,7 @@ export async function fadeIn(params: {
     gsap.to(el, {
       ...opacity,
       delay,
-      onComplete: (): void => {
+      onComplete: () => {
         done && done()
         resolve()
       },
@@ -63,7 +67,7 @@ export async function fadeOut(params: {
     gsap.to(el, {
       ...opacity,
       delay,
-      onComplete: (): void => {
+      onComplete: () => {
         done && done()
         resolve()
       },
@@ -71,19 +75,19 @@ export async function fadeOut(params: {
   })
 }
 
-export function transitionFadeIn(el: Element, done: Function): void {
+export function transitionFadeIn(el: Element, done: Function) {
   fadeIn({ el, done })
 }
 
-export function transitionFadeOut(el: Element, done: Function): void {
+export function transitionFadeOut(el: Element, done: Function) {
   fadeOut({ el, done })
 }
 
-export function transitionShuffleIn(el: Element, done: Function): void {
+export function transitionShuffleIn(el: Element, done: Function) {
   shuffleElsIn({ els: [el], done })
 }
 
-export function transitionShuffleOut(el: Element, done: Function): void {
+export function transitionShuffleOut(el: Element, done: Function) {
   shuffleElsOut({ els: [el], done })
 }
 
@@ -161,4 +165,14 @@ export function shuffleElsOut(params: {
       },
     })
   }
+}
+
+export function transitionDone(el: Element, done: Function) {
+  gsap.to(el, {
+    opacity: 0,
+    duration: 0.01,
+    onComplete: () => {
+      done()
+    },
+  })
 }

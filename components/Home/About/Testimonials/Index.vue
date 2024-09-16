@@ -1,7 +1,11 @@
 <template>
   <div ref="el" class="home__about__testimonials">
     <div class="home__about__testimonials__intersect" v-intersect="{ callback: onIntersect }" />
-    <div ref="contentEl" class="home__about__testimonials__content">
+    <div
+      ref="contentEl"
+      class="home__about__testimonials__content"
+      @mouseenter="onMouseEnter"
+      @mouseleave="onMouseLeave">
       <HomeAboutTestimonialsTestimonial v-for="testimonial in data" :data="testimonial" />
     </div>
   </div>
@@ -19,10 +23,11 @@ const props = defineProps<{
 }>()
 
 const store = useStore()
-const { updateSection } = store
-const { section } = storeToRefs(store)
+const { updateCursor, updateSection } = store
+const { cursor, section } = storeToRefs(store)
 const { direction } = storeToRefs(useScrollStore())
-
+const { vw } = useResize()
+const { x: mouseX } = useMouse()
 const { init, swipeLeft, swipeRight } = useSwipe({})
 
 const el = ref<HTMLElement>()
@@ -51,8 +56,18 @@ watch(section, () => {
     : fadeOut({ el: el.value })
 })
 
+watch(swipeRight, () => {
+  active.value = Math.max(0, active.value - 1)
+})
+
 watch(swipeLeft, () => {
   active.value = Math.min(props.data.length - 1, active.value + 1)
+})
+
+watch(mouseX, () => {
+  if (section.value === 'about-testimonials' && cursor.value !== 'default') {
+    mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
+  }
 })
 
 onMounted(() => {
@@ -62,6 +77,14 @@ onMounted(() => {
 function onIntersect(el: HTMLElement, visible: boolean) {
   if (visible) updateSection('about-testimonials')
   else if (direction.value === 'up') updateSection('about')
+}
+
+function onMouseEnter() {
+  mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
+}
+
+function onMouseLeave() {
+  updateCursor('default')
 }
 </script>
 

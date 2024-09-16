@@ -165,7 +165,7 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
 })
 
 watch(intersect, () => {
-  updateCursor(intersect.value ? 'pointer' : 'default')
+  updateCursor(intersect.value ? 'plus' : 'default')
 })
 
 onMounted(() => {
@@ -185,11 +185,12 @@ onMounted(() => {
 })
 
 function openProject() {
+  intersect.value = false
   router.push(`/${props.data.slug}`)
 }
 
 function onProjectIntersect(state: boolean) {
-  intersect.value = state
+  intersect.value = !isInProject.value && state
 }
 
 onBeforeUnmount(() => {

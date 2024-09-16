@@ -11,15 +11,27 @@
 
     <nav class="header__nav--main">
       <ul class="header__nav__list">
-        <HeaderLink label="Projects," to="/#projects" :active="section === 'projects'" />
-        <HeaderLink label="Services," to="/#services" :active="section === 'services'" />
-        <HeaderLink label="About" to="/#about" :active="section.includes('about')" />
+        <HeaderLink
+          label="Projects,"
+          to="/#projects"
+          :active="section === 'projects' && !isInProject" />
+        <HeaderLink
+          label="Services,"
+          to="/#services"
+          :active="section === 'services' && !isInProject" />
+        <HeaderLink
+          label="About"
+          to="/#about"
+          :active="section.includes('about') && !isInProject" />
       </ul>
     </nav>
 
     <nav class="header__nav--sub">
       <ul class="header__nav__list">
-        <HeaderLink label="Contact" to="/#contact" :active="section === 'contact'" />
+        <HeaderLink
+          label="Contact"
+          to="/#contact"
+          :active="section === 'contact' && !isInProject" />
       </ul>
       <div class="header__nav__logo">
         <CustomLink to="/#hero" type="referral" :content="true" data-tab-fixed>

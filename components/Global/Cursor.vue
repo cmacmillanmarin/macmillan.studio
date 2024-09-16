@@ -1,6 +1,15 @@
 <template>
   <div ref="el" class="cursor">
-    <div class="cursor__dot"></div>
+    <div class="cursor__dot">
+      <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
+        <div v-if="cursor !== 'default'" :key="cursor" class="cursor__dot__icon">
+          <SvgPlay v-if="cursor === 'video'" />
+          <SvgPlus v-else-if="cursor === 'plus'" />
+          <SvgArrowBig v-else-if="cursor === 'arrow-left'" key="left-arrow" :side="1" />
+          <SvgArrowBig v-else-if="cursor === 'arrow-right'" key="right-arrow" :side="-1" />
+        </div>
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -8,6 +17,7 @@
 import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
+import { transitionShuffleIn, transitionDone } from '~/utils/animations'
 
 const { cursor } = storeToRefs(useStore())
 
@@ -22,9 +32,9 @@ let _y: number = 0
 watch(cursor, () => {
   if (!el.value) return
   if (cursor.value !== 'default') {
-    gsap.to(el.value, { scale: 1 })
+    gsap.to(el.value, { scale: 1, duration: 0.4 })
   } else {
-    gsap.to(el.value, { scale: 0 })
+    gsap.to(el.value, { scale: 0, duration: 0.4 })
   }
 })
 
@@ -45,6 +55,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .cursor {
+  pointer-events: none;
   transform: scale(0);
   will-change: transform;
 
@@ -56,6 +67,11 @@ onBeforeUnmount(() => {
     border-radius: 50%;
 
     will-change: transform;
+
+    &__icon {
+      @include will-fade;
+      @include absolute-center;
+    }
   }
 }
 </style>
