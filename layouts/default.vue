@@ -6,6 +6,8 @@
     <Three />
 
     <ClientOnly>
+      <Cursor />
+
       <div class="__layout__top-layer" id="top-layer" />
     </ClientOnly>
   </div>
@@ -23,12 +25,12 @@ const config = useRuntimeConfig()
 const { IS_PREVIEW } = config.public
 
 const route = useRoute()
-const store = useStore()
-const { isPreloaded, isLoading } = storeToRefs(store)
 
 const { touch } = useDevice()
 const { vh, onResize } = useResize()
 const { addTicker, killTicker } = useRaf()
+const store = useStore()
+const { isPreloaded, isLoading } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollTarget, updateScrollTargetId } = scrollStore
@@ -222,6 +224,12 @@ onUnmounted(() => {
   .three {
     @include absolute-fill();
     z-index: 7;
+  }
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9;
   }
   &__top-layer {
     @include absolute-fill();

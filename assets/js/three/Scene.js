@@ -2,7 +2,7 @@ import VS from './glsl/vs.glsl'
 import FS from './glsl/fs.glsl'
 import LoaderFS from './glsl/loader-fs.glsl'
 import * as THREE from 'three'
-import { slugify, round } from '~/utils'
+import { round } from '~/utils'
 import { gsap } from 'gsap'
 
 class Scene {
@@ -25,7 +25,7 @@ class Scene {
     this.z = 1000
 
     this.size = new THREE.Vector2()
-    this.mouse = new THREE.Vector2()
+    this.mouse = new THREE.Vector2(-1000, -1000)
     this.raycaster = new THREE.Raycaster()
     this.loader = new THREE.TextureLoader()
     this.loadedTextures = {}
@@ -79,6 +79,7 @@ class Scene {
   addObject(object) {
     this.log('addObject()')
     object.onClick = object.onClick || null
+    object.onIntersect = object.onIntersect || null
     object.border = object.border || 0
     object.fade = object.fade || false
     object.opacity = object.opacity || 1
@@ -197,6 +198,9 @@ class Scene {
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
 
         const hovered = this.intersects.includes(object.mesh)
+        if (object.onIntersect) {
+          if (hovered || (!hovered && this.intersects.length <= 1)) object.onIntersect(hovered)
+        }
         if (hovered && object.onClick) this.main.classList.add('__main--pointer')
       } else if (object.mesh && object.type === 'plane') {
         object.mesh.material.uniforms.uOpacity.value = 0.0
@@ -227,7 +231,10 @@ class Scene {
   }
 
   render() {
-    this.intersects = this.raycaster.intersectObjects(this.scene.children, false).map(i => i.object)
+    if (this.mouse.x !== -1000)
+      this.intersects = this.raycaster
+        .intersectObjects(this.scene.children, false)
+        .map(i => i.object)
 
     this.updateObjects()
 

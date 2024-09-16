@@ -65,7 +65,10 @@ const router = useRouter()
 const { $scene }: any = useNuxtApp()
 const { getColumnWidth } = useCss()
 const { vw, vh, lvw } = useResize()
-const { isInProject, isInProjectEntered } = storeToRefs(useStore())
+
+const store = useStore()
+const { updateCursor } = store
+const { isInProject, isInProjectEntered } = storeToRefs(store)
 const { current, direction } = storeToRefs(useScrollStore())
 const { getBounding } = useVirtualScrollAndThreeTools()
 
@@ -81,6 +84,7 @@ const customImageEl = ref<typeof CustomImage>()
 
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
+const intersect = ref<boolean>(false)
 const active = computed<boolean>(
   () => leaveProgress.value === 0 && progress.value > 0.55 && !isInProject.value
 )
@@ -160,6 +164,10 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
   })
 })
 
+watch(intersect, () => {
+  updateCursor(intersect.value ? 'pointer' : 'default')
+})
+
 onMounted(() => {
   !isInProjectEntered.value && videoEl.value?.play()
   $scene.addObject({
@@ -172,11 +180,16 @@ onMounted(() => {
     fixed: { from: props.top, to: props.bottom },
     border: 16,
     onClick: openProject,
+    onIntersect: onProjectIntersect,
   })
 })
 
 function openProject() {
   router.push(`/${props.data.slug}`)
+}
+
+function onProjectIntersect(state: boolean) {
+  intersect.value = state
 }
 
 onBeforeUnmount(() => {

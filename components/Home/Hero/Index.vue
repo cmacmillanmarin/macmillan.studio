@@ -56,7 +56,7 @@ const router = useRouter()
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateSection } = store
+const { updateCursor, updateSection } = store
 const { gridType, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -67,6 +67,8 @@ const { layoutMargin } = useCss()
 const { lvw, vw, vh } = useResize()
 
 const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && isInProjectEntered.value)
+
+const intersect = ref<boolean>(false)
 
 const videoEl = ref<HTMLVideoElement>()
 const videoPlaying = ref<boolean>(false)
@@ -160,6 +162,10 @@ watch([position, videoPlaying], () => {
   })
 })
 
+watch(intersect, () => {
+  updateCursor(intersect.value ? 'video' : 'default')
+})
+
 onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
@@ -176,6 +182,7 @@ onMounted(() => {
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 0 },
     onClick: goToVideo,
+    onIntersect: onReelIntersect,
   })
 })
 
@@ -186,6 +193,10 @@ function enter(params: { el: HTMLElement }) {
 async function goToVideo() {
   if (route.hash === '#reel') updateScrollTargetId('reel')
   else router.push('/#reel')
+}
+
+function onReelIntersect(state: boolean) {
+  intersect.value = state
 }
 
 function onPlay() {
