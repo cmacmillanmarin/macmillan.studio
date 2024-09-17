@@ -17,8 +17,6 @@ class Scene {
     this.bounding = null
     this.main = null
 
-    this._play = null
-    this._stop = null
     this._onClick = null
     this._onMouseMovement = null
 
@@ -38,6 +36,12 @@ class Scene {
       plane: new THREE.PlaneGeometry(1, 1, 32, 32),
     }
 
+    this.colors = {
+      lime: new THREE.Vector4(197.0 / 255.0, 255.0 / 255.0, 32.0 / 255.0, 1.0),
+      lightGrey: new THREE.Vector4(211.0 / 255.0, 214.0 / 255.0, 218.0 / 255.0, 1.0),
+      darkGrey: new THREE.Vector4(129.0 / 255.0, 131.0 / 255.0, 136.0 / 255.0, 1.0),
+    }
+
     this.maxPlanes = 10
     this.batch = []
 
@@ -54,9 +58,6 @@ class Scene {
     this.main = document.querySelector('main')
 
     this.canvas = el
-
-    this._play = play
-    this._stop = stop
 
     this.scene = new THREE.Scene()
 
@@ -78,63 +79,67 @@ class Scene {
 
   addObject(object) {
     this.log('addObject()')
+    object.multiplyColor = object.multiplyColor || null
     object.onClick = object.onClick || null
     object.onIntersect = object.onIntersect || null
     object.border = object.border || 0
     object.fade = object.fade || false
-    object.opacity = object.opacity || 1
     object.position = object.position || { x: 0, y: 0 }
     object.size = object.size || { x: 1, y: 1, z: 1 }
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
+    object.zoom = object.zoom || 1
     if (object.img && !this.loadedTextures[object.id]) {
       this.loadedTextures[object.id] = this.loader.load(object.img.src || object.img.currentSrc)
       this.loaderMesh.material.uniforms.uTxt.value = this.loadedTextures[object.id]
     }
     this.objects.push(object)
-    !this.rendering && this.play()
   }
 
   getObject(id) {
     return this.objects.find(obj => obj.id === id)
   }
 
-  updateObject({ id, fixed, position, rotate, opacity, size, border }) {
+  updateObject({ id, fixed, position, rotate, zoom, size, border, onClick, onIntersect }) {
     this.log(`updateObject() ${JSON.stringify(position)}, ${JSON.stringify(size)}`)
     const object = this.getObject(id)
     if (object) {
+      object.zoom = zoom !== undefined ? zoom : object.zoom
       object.border = border !== undefined ? border : object.border
-      object.opacity = opacity !== undefined ? opacity : 1
       object.position = position || object.position
       object.rotate = rotate || object.rotate
       object.size = size || object.size
       object.fixed = fixed || object.fixed
+      object.onClick = onClick !== undefined ? onClick : object.onClick
+      object.onIntersect = onIntersect !== undefined ? onIntersect : object.onIntersect
     }
   }
 
-  removeObject(id) {
+  removeObject({ id }) {
+    if (!this.objects) return
     const index = this.objects.findIndex(object => object.id === id)
     const object = this.objects[index]
     if (object?.mesh) {
-      gsap.killTweensOf(object.mesh.material.uniforms.uOpacity)
-      gsap.to(object.mesh.material.uniforms.uOpacity, {
+      gsap.killTweensOf(object.mesh.material.uniforms.uFade)
+      gsap.to(object.mesh.material.uniforms.uFade, {
         value: 0.0,
         duration: 0.2,
         ease: 'power1.out',
         onComplete: () => {
-          object.mesh.geometry.dispose()
-          object.mesh.material.dispose()
-          this.scene.remove(object.mesh)
-          this.renderer.renderLists.dispose()
+          const index = this.objects.findIndex(object => object.id === id)
+          const object = this.objects[index]
+          this.releasePlane(object.meshId)
           this.objects.splice(index, 1)
         },
       })
+    } else {
+      this.objects.splice(index, 1)
     }
-    this.rendering && this.objects.length === 0 && this.stop()
   }
 
   updateY(y) {
     this.y = y
     this.camera.position.y = this.y * -1
+    this.raycaster.setFromCamera(this.mouse, this.camera)
   }
 
   updateObjects() {
@@ -167,17 +172,15 @@ class Scene {
               object.mesh.material.uniforms.uTextureType.value = 1
             }
           }
-          if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
-          else object.mesh.material.uniforms.uFade.value = 1
+          if (object.fade) {
+            this.planeIn(object.mesh.material.uniforms.uFade)
+          } else object.mesh.material.uniforms.uFade.value = 1
         }
 
         const position = this.fromDomToCanvas({
           x: object.position.x,
           y: object.position.y + this.getFixedY(object.fixed),
         })
-
-        object.mesh.material.uniforms.uBorderRadius.value = object.border
-        object.mesh.material.uniforms.uOpacity.value = object.opacity
         object.mesh.position.x = position.x + object.size.x * 0.5
         object.mesh.position.y = position.y - object.size.y * 0.5
         object.mesh.position.z = object.position.z || 0
@@ -187,39 +190,50 @@ class Scene {
         object.mesh.scale.x = object.size.x
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
-        object.mesh.material.uniforms.uTime.value += 0.05
+
+        const { uniforms } = object.mesh.material
+        uniforms.uZoom.value = object.zoom
+        uniforms.uBorderRadius.value = object.border
+        uniforms.uTime.value += 0.05
         const xPixelRatio = object.size.x / round(object.size.x / this.toScale(18))
         const yPixelRatio = object.size.y / round(object.size.y / this.toScale(18))
-        object.mesh.material.uniforms.uPixelSize.value.x = object.size.x / xPixelRatio
-        object.mesh.material.uniforms.uPixelSize.value.y = object.size.y / yPixelRatio
-        object.mesh.material.uniforms.uPlaneSize.value.x = object.size.x
-        object.mesh.material.uniforms.uPlaneSize.value.y = object.size.y
-        object.mesh.material.uniforms.uTextureVideo.value.needsUpdate =
+        uniforms.uPixelSize.value.x = object.size.x / xPixelRatio
+        uniforms.uPixelSize.value.y = object.size.y / yPixelRatio
+        uniforms.uPlaneSize.value.x = object.size.x
+        uniforms.uPlaneSize.value.y = object.size.y
+        uniforms.uTextureVideo.value.needsUpdate =
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
 
         const hovered = this.intersects.includes(object.mesh)
         if (object.onIntersect) {
           if (hovered || (!hovered && this.intersects.length <= 1)) object.onIntersect(hovered)
         }
-        if (hovered && object.onClick) this.main.classList.add('__main--pointer')
+        const clickable = hovered && object.onClick
+        if (
+          (clickable && uniforms.uPixel.value === 0) ||
+          (!clickable && uniforms.uPixel.value === 1)
+        ) {
+          uniforms.uMultiplyColor.value = this.colors[object.multiplyColor] || this.colors.lightGrey
+          gsap.killTweensOf(uniforms.uPixel)
+          gsap.to(uniforms.uPixel, { value: clickable ? 1 : 0, duration: clickable ? 0.4 : 0.3 })
+        }
+        if (clickable) this.main.classList.add('__main--pointer')
       } else if (object.mesh && object.type === 'plane') {
-        object.mesh.material.uniforms.uOpacity.value = 0.0
+        object.mesh.material.uniforms.uFade.value = 0.0
         this.releasePlane(object.meshId)
         object.mesh = null
       }
     }
   }
 
-  inView({ opacity, fixed, position, size }) {
+  inView({ fixed, position, size }) {
     const y = position.y + this.getFixedY(fixed)
     const limitTop = y - this.y >= size.y * -1
     const limitRight = position.x < this.size.x
     const limitBottom = y - this.y < this.size.y
     const limitLeft = position.x + size.x > size.x * -1
 
-    return (
-      limitTop && limitRight && limitBottom && limitLeft && size.x > 0 && size.y > 0 && opacity > 0
-    )
+    return limitTop && limitRight && limitBottom && limitLeft && size.x > 0 && size.y > 0
   }
 
   getFixedY(fixed) {
@@ -242,20 +256,6 @@ class Scene {
       this.log('render()')
       this.renderer.render(this.scene, this.camera)
     }
-  }
-
-  play() {
-    if (this.rendering) return
-    this.log('play()')
-    // this._play(this._render)
-    this.rendering = true
-  }
-
-  stop() {
-    if (!this.rendering) return
-    this.log('stop()')
-    // this._stop(this._render)
-    this.rendering = false
   }
 
   getAvailablePlane(id) {
@@ -321,7 +321,7 @@ class Scene {
             uNoise: { type: 'i', value: 0 },
             uTime: { type: 'f', value: 0.0 },
             uFade: { type: 'f', value: 0.0 },
-            uOpacity: { type: 'f', value: 0.0 },
+            uZoom: { type: 'f', value: 1.0 },
             uPixel: { type: 'f', value: 0.0 },
             uBorderRadius: { type: 'f', value: 16.0 },
             uPixelSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
@@ -330,6 +330,7 @@ class Scene {
             uTextureVideo: { type: 't', value: new THREE.VideoTexture(video) },
             uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
+            uMultiplyColor: { type: 'v4', value: this.colors.lime },
           },
           wireframe: false,
           transparent: true,
@@ -372,8 +373,8 @@ class Scene {
 
   planeIn(prop) {
     gsap.killTweensOf(prop)
-    const duration = 1
-    gsap.to(prop, { value: 1, duration, ease: 'power1.in' })
+    const duration = 1.2
+    gsap.fromTo(prop, { value: 0 }, { value: 1, duration })
   }
 
   onClick(e) {
@@ -397,23 +398,17 @@ class Scene {
   }
 
   bind() {
-    this._play = this.play.bind(this)
-    this._stop = this.stop.bind(this)
     this._render = this.render.bind(this)
     this._onClick = this.onClick.bind(this)
     this._onMouseMovement = this.onMouseMovement.bind(this)
   }
 
   addListeners() {
-    // window.addEventListener('focus', this._play)
-    // window.addEventListener('blur', this._stop)
     window.addEventListener('click', this._onClick)
     window.addEventListener('mousemove', this._onMouseMovement)
   }
 
   removeListeners() {
-    // window.removeEventListener('focus', this._play)
-    // window.removeEventListener('blur', this._stop)
     window.removeEventListener('click', this._onClick)
     window.removeEventListener('mousemove', this._onMouseMovement)
   }
@@ -427,7 +422,6 @@ class Scene {
     this.log('destroy()')
 
     this.ready = false
-    this.stop()
     this.canvas.remove()
     this.canvas = null
     this.scene = null

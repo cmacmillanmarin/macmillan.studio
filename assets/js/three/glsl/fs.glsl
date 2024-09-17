@@ -5,7 +5,6 @@ varying vec2 vUv;
 uniform int uNoise;
 uniform float uTime;
 uniform float uFade;
-uniform float uOpacity;
 uniform float uPixel;
 uniform vec2 uPixelSize;
 uniform vec2 uPlaneSize;  
@@ -14,6 +13,8 @@ uniform vec2 uTextureSize;
 uniform sampler2D uTextureImage;
 uniform sampler2D uTextureVideo;
 uniform float uBorderRadius;
+uniform vec4 uMultiplyColor;
+uniform float uZoom;
 
 float noise(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -55,7 +56,9 @@ void main() {
   vec2 new = rs < ri ? vec2(i.x * s.y / i.y, s.y) : vec2(s.x, i.y * s.x / i.x);
   vec2 offset = (rs < ri ? vec2((new.x - s.x) / 2.0, 0.0) : vec2(0.0, (new.y - s.y) / 2.0)) / new;
   
-  vec2 uv = vUv * s / new + offset;
+  // Apply zoom
+  vec2 uv = (vUv - 0.5) / uZoom + 0.5;
+  uv = uv * s / new + offset;
   uv -= vec2(0.5);
   uv += vec2(0.5);
 
@@ -65,19 +68,18 @@ void main() {
   pixel -= vec2(0.5);
   pixel += vec2(0.5);
 
-  vec4 lime = vec4(197.0/255.0, 255.0/255.0, 32.0/255.0, 1.0);  
   vec4 coveredTexture = texture2D(uTextureVideo, uv);
   if (uTextureType == 1) {
     coveredTexture = vec4(1.0, 0.0, 0.0, 1.0);
     coveredTexture = texture2D(uTextureImage, uv);
   }
-  vec4 pixelatedTexture = texture2D(uTextureVideo, pixel) * lime;
+  vec4 pixelatedTexture = texture2D(uTextureVideo, pixel) * uMultiplyColor;
   if (uTextureType == 1) {
-    pixelatedTexture = texture2D(uTextureImage, pixel) * lime;
+    pixelatedTexture = texture2D(uTextureImage, pixel) * uMultiplyColor;
   }
-  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, 0.0);
+  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, uPixel);
 
-  gl_FragColor = vec4(mixedTexture.xyz, uOpacity * uFade);
+  gl_FragColor = vec4(mixedTexture.xyz, uFade);
 
   if (uNoise == 1) {
     gl_FragColor = vec4(vec3(0.0), noise(vec2(time) * vUv) * 0.1);

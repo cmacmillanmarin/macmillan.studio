@@ -16,6 +16,7 @@ export default defineStore('use-scroll-store', {
     progress: 0,
     target: -1,
     targetId: '',
+    inTarget: true,
   }),
   getters: {
     isVirtualScroll(): boolean {
@@ -77,6 +78,7 @@ export default defineStore('use-scroll-store', {
       this.direction = data.direction
       this.bounding = data.bounding
       this.progress = round(data.current / data.bounding, 2)
+      this.inTarget = data.inTarget
     },
     async updateScrollTarget(value: number): Promise<void> {
       this.target = value

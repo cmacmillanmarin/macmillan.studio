@@ -22,6 +22,7 @@ export interface WP_Project {
     rendered: string
   }
   acf: {
+    selected_project?: boolean
     freelance: boolean
     client?: Array<WP_Client_Object>
     thumbnail: {
@@ -43,6 +44,7 @@ export type Projects = Array<Project>
 export interface Project {
   slug: string
   title: string
+  selected: boolean
   color: string
   client: Client
   collaborator: Client
@@ -86,6 +88,7 @@ export function parseProject(params: {
   return {
     slug: parseText(project?.slug),
     title: parseText(project?.title.rendered),
+    selected: !!project?.acf.selected_project,
     color: parseText(project?.acf.primary_color),
     client: parseClient({ client }),
     collaborator: parseClient({ client: collaborator }),

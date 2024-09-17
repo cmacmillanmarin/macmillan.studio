@@ -30,7 +30,6 @@
         :active="activeService"
         :data="service"
         data-scroll-sticky
-        data-scroll-sticky-top="24"
         @update-active="updateActive" />
     </div>
 
@@ -79,7 +78,8 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 .home__services {
   position: relative;
   padding: 4rem 0 0;
-  @include will-fade;
+  opacity: 0.000001;
+  will-change: opacity, transform;
 
   &__index {
     position: absolute;
@@ -119,28 +119,9 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
   &__list {
     position: relative;
-
-    &__active {
-      position: absolute;
-      z-index: 2;
-      top: 0;
-      margin-left: var(--layout-margin);
-      padding-top: 5.4rem;
-
-      &__item {
-        position: relative;
-
-        @include will-fade;
-        @include t-number;
-
-        &--active {
-          opacity: 1;
-        }
-
-        &:not(:first-child) {
-          position: absolute;
-        }
-      }
+    .home__services__service {
+      position: sticky;
+      top: 2.4rem;
     }
   }
 

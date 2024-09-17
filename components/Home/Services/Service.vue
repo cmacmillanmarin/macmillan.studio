@@ -74,11 +74,6 @@ function onIntersectIn(el: HTMLElement, visible: boolean) {
   else if (visible && direction.value === 'up') emit('update-active', props.i - 1)
 }
 
-function onIntersectOut(el: HTMLElement, visible: boolean) {
-  if (!visible && direction.value === 'down') emit('update-active', -2)
-  if (visible && direction.value === 'up') emit('update-active', props.i)
-}
-
 onBeforeUnmount(() => {
   _observer?.disconnect()
 })
@@ -95,7 +90,7 @@ const emit = defineEmits<{
   padding-top: 4rem;
   margin: 0 auto;
 
-  will-change: opacity;
+  will-change: opacity, transform;
 
   &--hidden {
     opacity: 0;

@@ -51,10 +51,11 @@ watch(active, () => {
   gsap.to(x, { value: x.value - dif })
 })
 
-watch(section, () => {
+watch(section, (to, from) => {
   section.value === 'about-testimonials'
     ? fadeIn({ el: el.value, delay: 0.2 })
     : fadeOut({ el: el.value })
+  if (from === 'about-testimonials') updateCursor('default')
 })
 
 watch(swipeRight, () => {

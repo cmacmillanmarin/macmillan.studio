@@ -51,6 +51,7 @@ import { fadeIn, fadeOut } from '~/utils/animations'
 import CustomImage from '~/components/Global/CustomImage.vue'
 
 const props = defineProps<{
+  list: string
   i: number
   of: number
   data: Project
@@ -68,11 +69,11 @@ const { vw, vh, lvw } = useResize()
 
 const store = useStore()
 const { updateCursor } = store
-const { isInProject, isInProjectEntered } = storeToRefs(store)
+const { section, isInProject, isInProjectEntered } = storeToRefs(store)
 const { current, direction } = storeToRefs(useScrollStore())
 const { getBounding } = useVirtualScrollAndThreeTools()
 
-const projectId = computed<string>(() => `project-${slugify(props.data.title)}`)
+const projectId = ref<string>(`${props.list}-${slugify(props.data.title)}`)
 const projectColor = ref<string>(props.data.color)
 
 const el = ref<HTMLElement>()
@@ -94,7 +95,9 @@ const size = computed<{ x: number; y: number }>(() => {
   return { x: width, y: (width * 7) / 5 }
 })
 
-watch(active, () => {
+watch([el, active], async () => {
+  await nextTick()
+
   if (clientEl.value) {
     gsap.killTweensOf(clientEl.value)
     active.value
@@ -118,7 +121,7 @@ watch(active, () => {
     emit('update-active', -1)
 })
 
-watch(current, () => {
+watch([el, current], () => {
   let { top, bottom } = getBounding(el.value as HTMLElement)
   top -= vh.value
   bottom -= vh.value
@@ -153,6 +156,8 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
   collaboratorEl.value &&
     gsap.set(collaboratorEl.value, { x: htmlx - 14, y: htmly - 12 + htmlextra })
 
+  const zoom = 0.4
+
   $scene.updateObject({
     id: projectId.value,
     opacity,
@@ -160,12 +165,17 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
     position: { x: isInProjectEntered.value ? -10000 : positionX, y: positionY },
     size: { x: sizeX, y: sizeY, z: 1 },
     fixed: { from: props.top, to: props.bottom },
-    border: 16 * progress.value,
+    border: 16 * (progress.value + leaveProgress.value),
+    zoom: 1 + zoom - zoom * progress.value,
   })
 })
 
 watch(intersect, () => {
   updateCursor(intersect.value ? 'plus' : 'default')
+})
+
+watch(section, () => {
+  if (section.value !== 'projects') intersect.value = false
 })
 
 onMounted(() => {
@@ -181,6 +191,8 @@ onMounted(() => {
     border: 16,
     onClick: openProject,
     onIntersect: onProjectIntersect,
+    multiplyColor: 'darkGrey',
+    fade: true,
   })
 })
 
@@ -190,7 +202,7 @@ function openProject() {
 }
 
 function onProjectIntersect(state: boolean) {
-  intersect.value = !isInProject.value && state
+  intersect.value = section.value.includes('project') && !isInProject.value && state
 }
 
 onBeforeUnmount(() => {

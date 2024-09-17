@@ -108,6 +108,7 @@ onMounted(() => {
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
     border: 16,
+    fade: true,
   })
 })
 

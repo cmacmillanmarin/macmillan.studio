@@ -15,6 +15,7 @@ export interface State {
   progress: number
   target: number
   targetId: string
+  inTarget: boolean
 }
 
 export interface Data {
@@ -22,4 +23,5 @@ export interface Data {
   currentVertical: number
   direction: Direction
   bounding: number
+  inTarget: boolean
 }

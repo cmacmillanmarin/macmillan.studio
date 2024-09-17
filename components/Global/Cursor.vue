@@ -7,6 +7,7 @@
           <SvgPlus v-else-if="cursor === 'plus'" />
           <SvgArrowBig v-else-if="cursor === 'arrow-left'" key="left-arrow" :side="1" />
           <SvgArrowBig v-else-if="cursor === 'arrow-right'" key="right-arrow" :side="-1" />
+          <SvgClose v-else-if="cursor === 'close'" />
         </div>
       </transition>
     </div>
@@ -31,11 +32,11 @@ let _y: number = 0
 
 watch(cursor, () => {
   if (!el.value) return
-  if (cursor.value !== 'default') {
-    gsap.to(el.value, { scale: 1, duration: 0.4 })
-  } else {
-    gsap.to(el.value, { scale: 0, duration: 0.4 })
-  }
+  const cursorIn = cursor.value !== 'default'
+  const scale = cursorIn ? 1 : 0
+  const duration = cursorIn ? 0.4 : 0.3
+  gsap.killTweensOf(el.value)
+  gsap.to(el.value, { scale, duration })
 })
 
 onMounted(() => {
