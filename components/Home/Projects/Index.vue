@@ -36,37 +36,55 @@
     </ClientOnly>
 
     <div class="home__projects__buttons" data-scroll-sticky>
-      <button class="home__projects__buttons__button" @click="updateActiveList('selected')">
-        <span class="home__projects__buttons__button__label">
-          <transition
-            mode="out-in"
-            :css="false"
-            @enter="transitionShuffleIn"
-            @leave="transitionShuffleOut">
-            <SvgSquare v-if="activeList === 'selected'" />
-          </transition>
-          Selected projects
-          <span
-            class="home__projects__buttons__button__label__count"
-            v-html="`{${startWithZero(selectedProjectsList.length)}}`" />
-        </span>
-      </button>
+      <transition
+        mode="out-in"
+        :css="false"
+        @enter="transitionShuffleIn"
+        @leave="transitionShuffleOut">
+        <button
+          v-if="section === 'projects'"
+          class="home__projects__buttons__button"
+          @click="updateActiveList('selected')">
+          <span class="home__projects__buttons__button__label">
+            <transition
+              mode="out-in"
+              :css="false"
+              @enter="transitionShuffleIn"
+              @leave="transitionShuffleOut">
+              <SvgSquare v-if="activeList === 'selected'" />
+            </transition>
+            Selected projects
+            <span
+              class="home__projects__buttons__button__label__count"
+              v-html="`{${startWithZero(selectedProjectsList.length)}}`" />
+          </span>
+        </button>
+      </transition>
       <div class="home__projects__buttons__separator" />
-      <button class="home__projects__buttons__button" @click="updateActiveList('all')">
-        <span class="home__projects__buttons__button__label">
-          <transition
-            mode="out-in"
-            :css="false"
-            @enter="transitionShuffleIn"
-            @leave="transitionShuffleOut">
-            <SvgSquare v-if="activeList === 'all'" />
-          </transition>
-          All projects
-          <span
-            class="home__projects__buttons__button__label__count"
-            v-html="`{${startWithZero(data.list.length)}}`" />
-        </span>
-      </button>
+      <transition
+        mode="out-in"
+        :css="false"
+        @enter="transitionShuffleIn"
+        @leave="transitionShuffleOut">
+        <button
+          v-if="section === 'projects'"
+          class="home__projects__buttons__button"
+          @click="updateActiveList('all')">
+          <span class="home__projects__buttons__button__label">
+            <transition
+              mode="out-in"
+              :css="false"
+              @enter="transitionShuffleIn"
+              @leave="transitionShuffleOut">
+              <SvgSquare v-if="activeList === 'all'" />
+            </transition>
+            All projects
+            <span
+              class="home__projects__buttons__button__label__count"
+              v-html="`{${startWithZero(data.list.length)}}`" />
+          </span>
+        </button>
+      </transition>
     </div>
 
     <div class="home__projects__intersect" v-intersect="{ callback: onIntersect }" />
@@ -206,8 +224,10 @@ defineEmits(['update-active'])
     z-index: 9;
     position: absolute;
     top: 0;
-    left: 0;
+    left: 50%;
     width: 100vw;
+    max-width: var(--layout-max-width);
+    transform: translate(-50%, 0);
     height: var(--vh);
     display: flex;
     justify-content: space-around;
@@ -217,6 +237,7 @@ defineEmits(['update-active'])
       width: max-content;
       width: 40rem;
       border: none;
+      @include will-fade;
       &__label {
         position: relative;
         @include t-black;
@@ -225,12 +246,13 @@ defineEmits(['update-active'])
           position: absolute;
           top: 50%;
           left: 0;
-          transform: translate(calc(-100% - 0.8rem), -50%);
+          transform: translate(calc(-100% - 0.4rem), -50%);
         }
         &__count {
           position: absolute;
-          transform: translate(0.4rem, 0);
-          @include t-b2;
+          transform: translate(0.8rem, -0.4rem);
+          font-family: 'HelveticaNowDisplayBold' !important;
+          @include t-b3;
         }
       }
     }

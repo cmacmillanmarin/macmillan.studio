@@ -53,6 +53,8 @@
 
     <HomeAboutTestimonials :data="data.testimonials" />
 
+    <HomeAboutGallery />
+
     <HomeAboutAwards />
   </div>
 </template>
@@ -73,13 +75,13 @@ const { onResize } = useResize()
 const store = useStore()
 const { updateSection } = store
 const { isInProjectEntered, section } = storeToRefs(store)
-const { direction } = storeToRefs(useScrollStore())
+const { direction, update } = storeToRefs(useScrollStore())
 
 const introEl = ref<HTMLElement>()
 const imgEl = ref<HTMLImageElement>()
 const loaded = ref<boolean>(false)
 
-watch([loaded, onResize, isInProjectEntered], () => {
+watch([update, loaded, onResize, isInProjectEntered], () => {
   if (!imgEl.value) return
   const { positionLeft, positionTop } = imgEl.value.dataset
   const width = imgEl.value.clientWidth

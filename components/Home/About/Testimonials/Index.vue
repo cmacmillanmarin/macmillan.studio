@@ -110,11 +110,12 @@ function onMouseLeave() {
     margin: auto;
     padding: 12rem 0;
     white-space: nowrap;
-    will-change: transform;
+
     .home__about__testimonials__testimonial {
       display: inline-block;
       vertical-align: top;
       white-space: normal;
+      will-change: transform;
       // margin-right: var(--layout-gutter);
     }
   }

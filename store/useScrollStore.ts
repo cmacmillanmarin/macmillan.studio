@@ -11,6 +11,7 @@ export default defineStore('use-scroll-store', {
     currentVertical: 0,
     direction: 'down',
     update: 0,
+    speed: 0,
     disabled: false,
     bounding: 0,
     progress: 0,
@@ -36,6 +37,9 @@ export default defineStore('use-scroll-store', {
     },
     scrollDirection(): Direction {
       return this.direction
+    },
+    scrollSpeed(): number {
+      return this.speed
     },
     scrollBounding(): number {
       return this.bounding
@@ -77,6 +81,7 @@ export default defineStore('use-scroll-store', {
       this.currentVertical = data.currentVertical
       this.direction = data.direction
       this.bounding = data.bounding
+      this.speed = data.speed
       this.progress = round(data.current / data.bounding, 2)
       this.inTarget = data.inTarget
     },

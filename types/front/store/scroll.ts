@@ -11,6 +11,7 @@ export interface State {
   direction: Direction
   update: number
   disabled: boolean
+  speed: number
   bounding: number
   progress: number
   target: number
@@ -22,6 +23,7 @@ export interface Data {
   current: number
   currentVertical: number
   direction: Direction
+  speed: number
   bounding: number
   inTarget: boolean
 }
