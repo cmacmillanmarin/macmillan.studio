@@ -1,8 +1,15 @@
 <template>
   <div class="separator">
-    <SvgSquare />
+    <SvgSquare :class="{ 'separator__dot--start': start }" />
   </div>
 </template>
+
+<script lang="ts" setup>
+defineProps<{
+  left?: number
+  start?: boolean
+}>()
+</script>
 
 <style lang="scss">
 .separator {
@@ -11,19 +18,24 @@
   left: 0;
   width: 100%;
   height: 0.2rem;
-  background-color: black;
+  background-color: var(--black);
 
   .svg__square {
     position: absolute;
     top: 0.1rem;
-    left: calc(var(--layout-column-width) * 4 + var(--layout-gutter) * 4);
-    transform: translate(0, -100%);
-
     width: 1.2rem;
+    background-color: var(--black);
 
-    background-color: black;
-
+    left: calc(
+      var(--layout-column-width) * v-bind(left) + var(--layout-gutter) * (v-bind(left) - 1)
+    );
+    transform: translate(-100%, -100%);
     will-change: transform;
+
+    &.separator__dot--start {
+      transform: translate(0%, -100%);
+      left: calc(var(--layout-column-width) * v-bind(left) + var(--layout-gutter) * v-bind(left));
+    }
   }
 }
 </style>

@@ -71,6 +71,16 @@ onBeforeUnmount(() => {
     &__icon {
       @include will-fade;
       @include absolute-center;
+
+      .svg__play,
+      .svg__arrow--big {
+        position: relative;
+        left: 15%;
+      }
+      .svg__arrow--big-left {
+        position: relative;
+        left: -15%;
+      }
     }
   }
 }

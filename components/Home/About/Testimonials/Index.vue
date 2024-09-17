@@ -5,7 +5,8 @@
       ref="contentEl"
       class="home__about__testimonials__content"
       @mouseenter="onMouseEnter"
-      @mouseleave="onMouseLeave">
+      @mouseleave="onMouseLeave"
+      @click="onClick">
       <HomeAboutTestimonialsTestimonial v-for="testimonial in data" :data="testimonial" />
     </div>
   </div>
@@ -66,12 +67,14 @@ watch(swipeLeft, () => {
 
 watch(mouseX, () => {
   if (section.value === 'about-testimonials' && cursor.value !== 'default') {
-    mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
+    if (active.value === 0) updateCursor('arrow-right')
+    else if (active.value === props.data.length - 1) updateCursor('arrow-left')
+    else mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
   }
 })
 
 onMounted(() => {
-  el.value && init({ el: el.value, cursor: true })
+  // el.value && init({ el: el.value, cursor: true })
 })
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -81,6 +84,12 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
 function onMouseEnter() {
   mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
+}
+
+function onClick() {
+  if (cursor.value === 'arrow-right')
+    active.value = Math.min(props.data.length - 1, active.value + 1)
+  else if (cursor.value === 'arrow-left') active.value = Math.max(0, active.value - 1)
 }
 
 function onMouseLeave() {
@@ -95,6 +104,7 @@ function onMouseLeave() {
   @include will-fade;
 
   &__content {
+    cursor: pointer;
     max-width: var(--layout-max-width);
     margin: auto;
     padding: 12rem 0;

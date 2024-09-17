@@ -7,7 +7,7 @@
       { 'home__services__service--hidden': hidden },
       { 'home__services__service--no-bg': (i === of && active === i + 1) || active === 0 },
     ]">
-    <Separator />
+    <Separator :left="4" :start="true" />
     <div
       v-if="i === of"
       class="home__services__service__observer--in"

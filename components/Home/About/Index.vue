@@ -31,7 +31,7 @@
       <HomeAboutClients :data="data.clients" />
 
       <div class="home__about__intro__collaborator">
-        <Separator />
+        <Separator :left="5" />
         <div class="home__about__intro__collaborator__title">
           <p class="home__about__intro__collaborator__title__label">
             {{ data.collaborator.title }}
