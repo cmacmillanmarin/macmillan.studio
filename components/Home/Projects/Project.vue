@@ -162,7 +162,13 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
     id: projectId.value,
     opacity,
     rotate: { x: rotateRadX, y: rotateRadY, z: 0 },
-    position: { x: isInProjectEntered.value ? -10000 : positionX, y: positionY },
+    position: {
+      x:
+        isInProjectEntered.value || (progress.value === 1 && leaveProgress.value === 1)
+          ? -10000
+          : positionX,
+      y: positionY,
+    },
     size: { x: sizeX, y: sizeY, z: 1 },
     fixed: { from: props.top, to: props.bottom },
     border: 16 * (progress.value + leaveProgress.value),

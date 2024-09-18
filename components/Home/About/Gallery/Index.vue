@@ -1,5 +1,5 @@
 <template>
-  <div class="home__about__gallery">
+  <div ref="el" class="home__about__gallery">
     <Ticker>
       <HomeAboutGalleryImage :pos="1" :columns="4" />
       <HomeAboutGalleryImage :pos="2" :columns="3" />
@@ -19,8 +19,24 @@
   </div>
 </template>
 
+<script lang="ts" setup>
+import { storeToRefs } from 'pinia'
+import useStore from '~/store/useStore'
+
+const store = useStore()
+const { section } = storeToRefs(store)
+
+const el = ref<HTMLElement>()
+
+watch(section, (to, from) => {
+  section.value === 'about-testimonials'
+    ? fadeIn({ el: el.value, delay: 0.2 })
+    : fadeOut({ el: el.value })
+})
+</script>
+
 <style lang="scss">
 .home__about__gallery {
-  margin: 2rem 0;
+  @include will-fade;
 }
 </style>

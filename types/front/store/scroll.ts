@@ -10,6 +10,7 @@ export interface State {
   currentVertical: number
   direction: Direction
   update: number
+  updated: number
   disabled: boolean
   speed: number
   bounding: number

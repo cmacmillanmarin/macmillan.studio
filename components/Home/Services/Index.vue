@@ -77,7 +77,8 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 <style lang="scss">
 .home__services {
   position: relative;
-  padding: 4rem 0 0;
+  min-height: var(--vh);
+  padding: toScale(4rem) 0 0;
   opacity: 0.000001;
   will-change: opacity, transform;
 
@@ -87,7 +88,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     display: flex;
     align-items: center;
     column-gap: 0.8rem;
-    padding-top: 6rem;
+    padding-top: toScale(6rem);
     @include will-fade;
     @include t-number;
   }
@@ -100,8 +101,8 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     @include grid;
 
     &__label {
-      padding-top: 2rem;
-      padding-bottom: 2rem;
+      padding-top: toScale(2rem);
+      padding-bottom: toScale(2rem);
       @include t-h2;
       @include columns(10, 'desktop');
       @include gap(2, 'left', 'desktop');
@@ -121,7 +122,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     position: relative;
     .home__services__service {
       position: sticky;
-      top: 2.4rem;
+      top: toScale(2.4rem);
     }
   }
 

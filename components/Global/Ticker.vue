@@ -13,7 +13,7 @@ import type { TickerItems, TickerItem } from '~/types/front'
 
 const scrollStore = useScrollStore()
 const { updateScroll } = scrollStore
-const { update: scrollUpdated, scrollDirection, scrollSpeed } = storeToRefs(scrollStore)
+const { scrollUpdated, scrollDirection, scrollSpeed } = storeToRefs(scrollStore)
 
 const { onResize } = useResize()
 const { onEnter } = useKeyboard()
@@ -34,7 +34,7 @@ const lastItem = computed<TickerItem | undefined>(() => items.value[items.value.
 
 let _current: number = 0
 let _target: number = 0
-let _direction: number = 1
+let _direction: number = -1
 let _speed: number = 2
 let _speedInit: number = _speed
 let _panInit: number = 0

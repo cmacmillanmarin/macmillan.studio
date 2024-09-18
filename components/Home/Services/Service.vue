@@ -87,7 +87,7 @@ const emit = defineEmits<{
 .home__services__service {
   position: relative;
   max-width: var(--layout-max-width);
-  padding-top: 4rem;
+  padding-top: toScale(4rem);
   margin: 0 auto;
 
   will-change: opacity, transform;
@@ -107,13 +107,13 @@ const emit = defineEmits<{
 
   &:last-child {
     .home__services__service__content {
-      padding-bottom: 18rem;
+      padding-bottom: toScale(18rem);
     }
   }
 
   .separator {
     z-index: 2;
-    top: 4rem;
+    top: toScale(4rem);
     left: calc(var(--layout-column-width) * 2 + var(--layout-gutter) * 3);
     width: calc(var(--layout-column-width) * 10 + var(--layout-gutter) * 9);
   }
@@ -131,7 +131,7 @@ const emit = defineEmits<{
       @extend .home__services__service__observer;
     }
     &--in {
-      transform: translateY(-2.4rem);
+      transform: translateY(toScale(-2.4rem));
     }
     &--out {
       transform: translateY(8.5rem);
@@ -143,7 +143,7 @@ const emit = defineEmits<{
     z-index: 1;
 
     background-color: var(--light-grey);
-    padding-top: 1.2rem;
+    padding-top: toScale(1.2rem);
 
     @include grid;
 
@@ -154,7 +154,7 @@ const emit = defineEmits<{
       left: 0;
       width: 100%;
       transform: translateY(100%);
-      height: 10.4rem;
+      height: toScale(10.4rem);
       background-color: var(--light-grey);
     }
 

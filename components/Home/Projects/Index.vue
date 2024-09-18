@@ -12,10 +12,7 @@
           :css="false"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
-          <p
-            v-if="active !== 0 && section === 'projects'"
-            :key="activeListProjects.length"
-            class="home__projects__index">
+          <p v-if="indicators" :key="activeListProjects.length" class="home__projects__index">
             <SvgSquare />
             <span
               v-html="`{${startWithZero(active)}—${startWithZero(activeListProjects.length)}}`" />
@@ -28,7 +25,7 @@
           :css="false"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
-          <p v-if="section === 'projects'" class="home__projects__date">
+          <p v-if="indicators" class="home__projects__date">
             <span>{2024—2013}</span>
           </p>
         </transition>
@@ -42,7 +39,7 @@
         @enter="transitionShuffleIn"
         @leave="transitionShuffleOut">
         <button
-          v-if="section === 'projects'"
+          v-if="indicators"
           class="home__projects__buttons__button"
           @click="updateActiveList('selected')">
           <span class="home__projects__buttons__button__label">
@@ -51,7 +48,7 @@
               :css="false"
               @enter="transitionShuffleIn"
               @leave="transitionShuffleOut">
-              <SvgSquare v-if="activeList === 'selected'" />
+              <SvgSquare v-if="indicators" />
             </transition>
             Selected projects
             <span
@@ -67,7 +64,7 @@
         @enter="transitionShuffleIn"
         @leave="transitionShuffleOut">
         <button
-          v-if="section === 'projects'"
+          v-if="indicators"
           class="home__projects__buttons__button"
           @click="updateActiveList('all')">
           <span class="home__projects__buttons__button__label">
@@ -134,6 +131,7 @@ const bottom = ref<number>(0)
 const el = ref<HTMLElement>()
 
 const active = ref<number>(0)
+const indicators = computed<boolean>(() => active.value !== 0 && section.value === 'projects')
 
 let _to: any
 let _current: number = 0

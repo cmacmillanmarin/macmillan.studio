@@ -50,6 +50,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   text-align: center;
   position: relative;
   @include will-fade;
+  padding-bottom: toScale(8rem);
 
   &__intersect {
     position: absolute;

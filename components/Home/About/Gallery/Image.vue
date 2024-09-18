@@ -16,6 +16,7 @@ defineProps<{
 <style lang="scss">
 .home__about__gallery__image {
   padding-right: var(--layout-gutter);
+
   &__content {
     width: toColumns(v-bind(columns));
     aspect-ratio: 1;

@@ -11,6 +11,7 @@ export default defineStore('use-scroll-store', {
     currentVertical: 0,
     direction: 'down',
     update: 0,
+    updated: 0,
     speed: 0,
     disabled: false,
     bounding: 0,
@@ -59,13 +60,19 @@ export default defineStore('use-scroll-store', {
     scrollUpdate(): number {
       return this.update
     },
+    scrollUpdated(): number {
+      return this.updated
+    },
   },
   actions: {
     updateEl(el?: HTMLElement) {
       this.el = el
     },
-    updateScroll() {
+    async updateScroll() {
       this.update++
+      await nextTick() // Updates layout
+      await nextTick() // Makes sure the scroll is updated
+      this.updated = this.update
     },
     disableScroll(value: boolean) {
       this.disabled = value

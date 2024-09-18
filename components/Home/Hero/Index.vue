@@ -218,6 +218,7 @@ function goToReel() {
 function closeReel() {
   updateInReel(false)
   disableScroll(false)
+  updateScrollTargetId('projects')
   if (videoEl.value) {
     videoEl.value.src = '/assets/video/short.webm'
     videoEl.value.setAttribute('type', 'video/webm')
