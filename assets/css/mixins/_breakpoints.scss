@@ -5,7 +5,7 @@ $tablet__limit: 769px; //               tablet ->            561px >= 768px
 $tablet--landscape__limit: 1024px; //   tablet landscape ->  769px >= 1023px
 $desktop__limit: 1280px; //             desktop ->           1024px >= 1279px
 $desktop--medium__limit: 1441px; //     desktop medium ->    1280px >= 1440px
-$desktop--large__limit: 1921px; //      desktop large ->     1441px >= 1920px
+$desktop--large__limit: 1800px; //      desktop large ->     1441px >= 1800px
 //                                      desktop x-large ->   1921px >
 
 @mixin from__tablet {

@@ -190,7 +190,7 @@ function onTestimonialMouseLeave() {
 
     &__buttons {
       display: flex;
-      column-gap: 0.6rem;
+      column-gap: 0.4rem;
       margin-right: calc(var(--layout-column-width) + var(--layout-gutter));
 
       &__button {

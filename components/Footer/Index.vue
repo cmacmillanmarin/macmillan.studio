@@ -5,6 +5,12 @@
       <SvgSquare />
       <p v-html="`${hour}h {CET}`" />
     </div>
+    <div class="footer__squares">
+      <SvgSquare />
+      <SvgSquare />
+      <SvgSquare />
+      <SvgSquare />
+    </div>
     <div
       v-show="!tetris"
       class="footer__email"
@@ -38,7 +44,10 @@
       </ul>
       <ul class="footer__nav__credits">
         <li class="footer__nav__credits__link">
-          <button class="footer__nav__credits__link__btn" @click="playTetris">Play Tetris</button>
+          <button class="footer__nav__credits__link__btn--tetris" @click="playTetris">
+            Play Tetris
+            <SvgPlaySmall />
+          </button>
         </li>
       </ul>
     </nav>
@@ -186,6 +195,24 @@ onBeforeUnmount(() => {
   p {
     color: var(--lime);
   }
+  .svg__square {
+    rect {
+      fill: var(--lime);
+    }
+  }
+
+  &__squares {
+    position: absolute;
+    bottom: 20%;
+    left: 3.1%;
+    height: 47%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    @include from__desktop--x-large {
+      left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-max-width) * 0.031);
+    }
+  }
 
   &__hour {
     position: absolute;
@@ -195,11 +222,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     column-gap: 0.6rem;
-    .svg__square {
-      rect {
-        fill: var(--lime);
-      }
-    }
+
     p {
       @include t-number;
     }
@@ -228,7 +251,7 @@ onBeforeUnmount(() => {
     &__domain,
     &__extension {
       width: max-content;
-      padding-bottom: toScale(1.2rem);
+      padding-bottom: toScale(1rem);
       pointer-events: auto;
       button {
         padding: 0;
@@ -300,6 +323,17 @@ onBeforeUnmount(() => {
           color: var(--lime);
           padding: 0;
           @include t-b1;
+          &--tetris {
+            display: flex;
+            align-items: center;
+            column-gap: 0.8rem;
+            line-height: 1 !important;
+            @extend .footer__nav__credits__link__btn;
+            .svg__play--small {
+              width: toScale(1.1rem);
+              transform: translateY(0.15rem);
+            }
+          }
         }
       }
     }
