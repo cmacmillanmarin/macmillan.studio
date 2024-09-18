@@ -1,12 +1,17 @@
 <template>
   <div ref="el" class="cursor">
     <div class="cursor__dot">
+      <transition mode="out-in" :css="false" @enter="limeEnter" @leave="limeLeave">
+        <div v-if="cursor === 'copy' || cursor === 'copied'" class="cursor__dot__lime" />
+      </transition>
       <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
         <div v-if="cursor !== 'default'" :key="cursor" class="cursor__dot__icon">
           <SvgPlay v-if="cursor === 'video'" />
           <SvgPlus v-else-if="cursor === 'plus'" />
           <SvgArrowBig v-else-if="cursor === 'arrow-left'" key="left-arrow" :side="1" />
           <SvgArrowBig v-else-if="cursor === 'arrow-right'" key="right-arrow" :side="-1" />
+          <SvgCopy v-else-if="cursor === 'copy'" />
+          <SvgTick v-else-if="cursor === 'copied'" />
         </div>
       </transition>
     </div>
@@ -48,6 +53,25 @@ function move() {
   el.value && gsap.set(el.value, { x: _x, y: _y })
 }
 
+function limeEnter(el: Element, done: Function) {
+  gsap.to(el, {
+    duration: 0.05,
+    onComplete: () => {
+      done()
+    },
+  })
+}
+
+function limeLeave(el: Element, done: Function) {
+  gsap.to(el, {
+    delay: 0.35,
+    duration: 0.05,
+    onComplete: () => {
+      done()
+    },
+  })
+}
+
 onBeforeUnmount(() => {
   killTicker(move)
 })
@@ -67,6 +91,14 @@ onBeforeUnmount(() => {
     border-radius: 50%;
 
     will-change: transform;
+
+    &__lime {
+      width: calc(100% - 0.4rem);
+      height: calc(100% - 0.4rem);
+      border-radius: 50%;
+      background-color: var(--lime);
+      @include absolute-center;
+    }
 
     &__icon {
       @include will-fade;

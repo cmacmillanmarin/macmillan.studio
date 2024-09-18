@@ -1,32 +1,33 @@
 <template>
-  <footer class="footer" id="contact-target">
+  <footer ref="el" class="footer" id="contact-target">
     <div class="footer__intersect" v-intersect="{ callback: onIntersect }" />
-    <div v-show="!tetris" class="footer__email" v-transition:in="{ callback: fadeIn }">
+    <div class="footer__hour">
+      <SvgSquare />
+      <p v-html="`${hour}h {CET}`" />
+    </div>
+    <div
+      v-show="!tetris"
+      class="footer__email"
+      v-transition:in="{ callback: fadeIn }"
+      @mouseenter="onEmailMouseEnter"
+      @mouseleave="onEmailMouseLeave"
+      @click="copyEmail">
       <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
       <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
       <div class="footer__email__christian">
-        <a
-          href="mailto:christian@macmillan.studio"
-          rel="noopener"
-          aria-label="christian@macmillan.studio">
+        <button>
           <SvgChristian />
-        </a>
+        </button>
       </div>
       <div class="footer__email__domain">
-        <a
-          href="mailto:christian@macmillan.studio"
-          rel="noopener"
-          aria-label="christian@macmillan.studio">
+        <button>
           <SvgDomain />
-        </a>
+        </button>
       </div>
       <div class="footer__email__extension">
-        <a
-          href="mailto:christian@macmillan.studio"
-          rel="noopener"
-          aria-label="christian@macmillan.studio">
+        <button>
           <SvgExtension />
-        </a>
+        </button>
       </div>
     </div>
     <nav v-show="!tetris" class="footer__nav" v-transition:in="{ callback: fadeIn }">
@@ -56,22 +57,18 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { fadeIn } from '~/utils/animations'
 
 const store = useStore()
-const { updateSection } = store
-const { gridType } = storeToRefs(store)
+const { updateSection, updateCursor } = store
+const { cursor, gridType } = storeToRefs(store)
 const { direction } = storeToRefs(useScrollStore())
 
 const rrss = ref([
-  {
-    label: 'Twitter',
-    to: 'https://www.twitter.com/cmacmillanmarin',
-    type: 'external',
-  },
   {
     label: 'GitHub',
     to: 'https://www.github.com/cmacmillanmarin',
@@ -82,9 +79,10 @@ const rrss = ref([
     to: 'https://www.linkedin.com/in/cmacmillanmarin/',
     type: 'external',
   },
+
   {
-    label: 'Instagram',
-    to: 'https://www.instagram.com/cmacmillanmarin',
+    label: 'Twitter',
+    to: 'https://www.twitter.com/cmacmillanmarin',
     type: 'external',
   },
   {
@@ -92,9 +90,28 @@ const rrss = ref([
     to: 'https://unsplash.com/@cmacmillanmarin',
     type: 'external',
   },
+  {
+    label: 'Strava',
+    to: 'https://www.strava.com/cmacmillanmarin',
+    type: 'external',
+  },
+  {
+    label: 'Instagram',
+    to: 'https://www.instagram.com/cmacmillanmarin',
+    type: 'external',
+  },
 ])
 
+const el = ref<HTMLElement>()
+const hour = ref<string>('')
+let _to: any
+let _to2: any
+
 const tetris = ref<boolean>(false)
+
+onMounted(() => {
+  updateHour()
+})
 
 function playTetris() {
   tetris.value = true
@@ -104,6 +121,57 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   if (visible) updateSection('contact')
   else if (direction.value === 'up') updateSection('about-awards')
 }
+
+function onEmailMouseEnter() {
+  updateCursor('copy')
+}
+
+function updateHour() {
+  if (!el.value) return
+  const square = el.value.querySelector('.footer__hour .svg__square')
+  gsap.fromTo(square, { opacity: 0 }, { opacity: 1 })
+  hour.value = getCurrentHourInCET()
+  _to = setTimeout(updateHour, 1000)
+}
+
+function getCurrentHourInCET() {
+  const now = new Date()
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Berlin',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  const formattedTime = formatter.format(now)
+
+  return formattedTime
+}
+
+function onEmailMouseLeave() {
+  updateCursor('default')
+  _to2 && clearTimeout(_to2)
+}
+
+function copyEmail() {
+  navigator.clipboard
+    .writeText('christian@macmillan.studio')
+    .then(() => {
+      updateCursor('copied')
+      _to2 && clearTimeout(_to2)
+      _to2 = setTimeout(() => {
+        cursor.value === 'copied' && updateCursor('copy')
+      }, 2000)
+    })
+    .catch(err => {
+      console.error('Failed to copy text: ', err)
+    })
+}
+
+onBeforeUnmount(() => {
+  clearTimeout(_to)
+  clearTimeout(_to2)
+})
 </script>
 
 <style lang="scss">
@@ -117,6 +185,24 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   a,
   p {
     color: var(--lime);
+  }
+
+  &__hour {
+    position: absolute;
+    top: var(--layout-margin);
+    right: var(--layout-margin);
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    column-gap: 0.6rem;
+    .svg__square {
+      rect {
+        fill: var(--lime);
+      }
+    }
+    p {
+      @include t-number;
+    }
   }
 
   &__email,
@@ -134,14 +220,21 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   &__email {
     left: 50% !important;
     height: 100% !important;
+    pointer-events: none;
 
     @include grid('golden-ratio');
 
     &__christian,
     &__domain,
     &__extension {
-      width: 100%;
-      margin-bottom: 1.2rem;
+      width: max-content;
+      padding-bottom: toScale(1.2rem);
+      pointer-events: auto;
+      button {
+        padding: 0;
+        margin: 0;
+        border: none;
+      }
     }
 
     &__christian {
@@ -215,6 +308,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       width: var(--col-m);
       margin-left: calc(var(--col-s) + var(--col-l) * 2 + var(--col-xs) + var(--col-m));
     }
+
     &__credits {
       height: max-content;
       margin-left: calc(var(--col-xs));

@@ -16,7 +16,7 @@ export type Section =
   | 'about-awards'
   | 'contact'
 
-export type Cursor = 'default' | 'video' | 'plus' | 'arrow-left' | 'arrow-right'
+export type Cursor = 'default' | 'video' | 'plus' | 'arrow-left' | 'arrow-right' | 'copy' | 'copied'
 
 export interface State {
   preloaded: boolean
