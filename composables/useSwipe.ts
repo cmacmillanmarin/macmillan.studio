@@ -12,6 +12,8 @@ export default (opts: Swipe) => {
   const debug: boolean = false
 
   const panHorizontal = ref<number>(0)
+  const panHorizontalDirection = ref<number>(0)
+  const panHorizontalSpeed = ref<number>(0)
   const panVertical = ref<number>(0)
   const panStart = ref<boolean>(false)
   const panEnd = ref<boolean>(false)
@@ -130,6 +132,8 @@ export default (opts: Swipe) => {
     timer = Date.now()
 
     panStart.value = !panStart.value
+    panHorizontal.value = 0
+    panVertical.value = 0
     onPan.value = true
 
     addDragListeners()
@@ -145,8 +149,8 @@ export default (opts: Swipe) => {
     const _x: number = touch.clientX
     const _y: number = touch.clientY
 
-    xDir = _x > x ? 1 : -1
-    yDir = _y > y ? 1 : -1
+    xDir = _x === x ? xDir : _x > x ? 1 : -1
+    yDir = _y === y ? yDir : _y > y ? 1 : -1
 
     const _xDiff: number = xDown - x
     const _yDiff: number = y - yDown
@@ -169,6 +173,7 @@ export default (opts: Swipe) => {
     yDiff = _yDiff
 
     panHorizontal.value = xDiff
+    panHorizontalDirection.value = xDir
     panVertical.value = yDiff
   }
 
@@ -186,6 +191,7 @@ export default (opts: Swipe) => {
     swipeLeft.value += isSwipeLeft()
     swipeRight.value += isSwipeRight()
     panEnd.value = !panEnd.value
+    panHorizontalSpeed.value = xVel
     onPan.value = false
 
     log('touchEnd', {
@@ -283,6 +289,8 @@ export default (opts: Swipe) => {
     swipeUp,
     swipeDown,
     panHorizontal,
+    panHorizontalDirection,
+    panHorizontalSpeed,
     panVertical,
     panStart,
     panEnd,

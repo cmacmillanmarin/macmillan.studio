@@ -12,6 +12,7 @@
           <SvgArrowBig v-else-if="cursor === 'arrow-right'" key="right-arrow" :side="-1" />
           <SvgCopy v-else-if="cursor === 'copy'" />
           <SvgTick v-else-if="cursor === 'copied'" />
+          <SvgClose v-else-if="cursor === 'close'" />
         </div>
       </transition>
     </div>
@@ -36,11 +37,11 @@ let _y: number = 0
 
 watch(cursor, () => {
   if (!el.value) return
-  if (cursor.value !== 'default') {
-    gsap.to(el.value, { scale: 1, duration: 0.4 })
-  } else {
-    gsap.to(el.value, { scale: 0, duration: 0.4 })
-  }
+  const cursorIn = cursor.value !== 'default'
+  const scale = cursorIn ? 1 : 0
+  const duration = cursorIn ? 0.4 : 0.3
+  gsap.killTweensOf(el.value)
+  gsap.to(el.value, { scale, duration })
 })
 
 onMounted(() => {
@@ -103,6 +104,17 @@ onBeforeUnmount(() => {
     &__icon {
       @include will-fade;
       @include absolute-center;
+
+      .svg__play,
+      .svg__arrow--big {
+        position: relative;
+        left: 15%;
+      }
+
+      .svg__arrow--big-left {
+        position: relative;
+        left: -15%;
+      }
     }
   }
 }

@@ -1,5 +1,9 @@
 <template>
-  <section class="home__hero" id="hero-target" data-scroll-target-top>
+  <section
+    id="hero-target"
+    :class="['home__hero', { 'home__hero--reel': reelVideoActive }]"
+    data-scroll-target-top
+    @click="reelVideoActive && closeReel()">
     <h1 class="home__hero__title">{{ data.title }}</h1>
     <div class="home__hero__content" v-transition:in="{ callback: enter }">
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
@@ -27,10 +31,9 @@
       </div>
 
       <video ref="videoEl" class="home__hero__content__video" width="1920" height="1080" muted loop>
-        <source src="/assets/video/short.webm" type="video/webm" />
+        <source ref="sourceEl" src="/assets/video/short.webm" type="video/webm" />
       </video>
     </div>
-    <div class="home__hero__bg" />
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
     <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersect }" />
     <div class="home__hero__intersect--bottom" v-intersect="{ callback: onIntersect }" />
@@ -56,21 +59,28 @@ const router = useRouter()
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateCursor, updateSection } = store
-const { gridType, isInProjectEntered } = storeToRefs(store)
+const { updateCursor, updateSection, updateInReel } = store
+const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
-const { updateScrollTargetId } = scrollStore
+const { disableScroll, updateScrollTargetId } = scrollStore
 const { current, direction } = storeToRefs(scrollStore)
 
 const { layoutMargin } = useCss()
 const { lvw, vw, vh } = useResize()
 
 const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && isInProjectEntered.value)
+const reelVideoActive = computed(
+  () =>
+    isInReel.value &&
+    ((direction.value === 'up' && section.value === 'hero') ||
+      (direction.value === 'down' && section.value === 'projects-bg'))
+)
 
 const intersect = ref<boolean>(false)
 
 const videoEl = ref<HTMLVideoElement>()
+const sourceEl = ref<HTMLSourceElement>()
 const videoPlaying = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
@@ -162,8 +172,8 @@ watch([position, videoPlaying], () => {
   })
 })
 
-watch(intersect, () => {
-  updateCursor(intersect.value ? 'video' : 'default')
+watch([intersect, isInReel], () => {
+  updateCursor(intersect.value ? (isInReel.value ? 'close' : 'video') : 'default')
 })
 
 onMounted(() => {
@@ -181,7 +191,7 @@ onMounted(() => {
     video: videoEl.value,
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 0 },
-    onClick: goToVideo,
+    onClick: goToReel,
     onIntersect: onReelIntersect,
   })
 })
@@ -190,9 +200,32 @@ function enter(params: { el: HTMLElement }) {
   fadeIn({ el: params.el })
 }
 
-async function goToVideo() {
+function goToReel() {
+  updateInReel(true)
+  disableScroll(true)
+  $scene.updateObject({ id: 'reel', onClick: null })
   if (route.hash === '#reel') updateScrollTargetId('reel')
   else router.push('/#reel')
+  if (videoEl.value) {
+    videoEl.value.src = '/assets/video/reel.mp4'
+    videoEl.value.setAttribute('type', 'video/mp4')
+    videoEl.value.muted = false
+    videoEl.value.loop = false
+    videoEl.value.play()
+  }
+}
+
+function closeReel() {
+  updateInReel(false)
+  disableScroll(false)
+  updateScrollTargetId('projects')
+  if (videoEl.value) {
+    videoEl.value.src = '/assets/video/short.webm'
+    videoEl.value.setAttribute('type', 'video/webm')
+    videoEl.value.muted = true
+    videoEl.value.loop = true
+    videoEl.value.play()
+  }
 }
 
 function onReelIntersect(state: boolean) {
@@ -201,6 +234,7 @@ function onReelIntersect(state: boolean) {
 
 function onPlay() {
   videoPlaying.value = true
+  if (!isInReel.value) $scene.updateObject({ id: 'reel', onClick: goToReel })
 }
 
 function onPause() {
@@ -225,8 +259,23 @@ onUnmounted(() => {
   position: relative;
   padding-bottom: calc(var(--vh) * v-bind(scrollGap));
 
+  &--reel {
+    cursor: pointer;
+  }
+
   &__title {
     @include t-seo;
+  }
+
+  &__reel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: var(--vh);
+    z-index: 2;
+    background-color: black;
+    opacity: 1;
   }
 
   &__content {
@@ -250,7 +299,9 @@ onUnmounted(() => {
     }
 
     &__studio {
-      pointer-events: auto;
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
       width: calc(min(100vw, var(--layout-max-width)) * 0.333333);
       padding-top: v-bind(verticalGapPx);
       padding-left: var(--layout-margin);
@@ -282,6 +333,7 @@ onUnmounted(() => {
     }
 
     &__video {
+      z-index: 9;
       position: absolute;
       top: 0;
       left: 0;
@@ -297,12 +349,6 @@ onUnmounted(() => {
     top: var(--vh);
     left: 0;
     width: 100%;
-  }
-
-  &__bg {
-    background-color: var(--light-grey);
-    @include will-fade;
-    @include absolute-fill;
   }
 
   &__intersect {

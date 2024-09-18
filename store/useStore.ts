@@ -9,6 +9,7 @@ export default defineStore('use-store', {
     grid: 'none',
     section: 'hero',
     cursor: 'default',
+    inReel: false,
     inProject: false,
     inProjectEntered: false,
   }),
@@ -24,6 +25,9 @@ export default defineStore('use-store', {
     },
     gridType(): GridType {
       return this.grid
+    },
+    isInReel(): boolean {
+      return this.inReel
     },
     isInProject(): boolean {
       return this.inProject
@@ -50,6 +54,9 @@ export default defineStore('use-store', {
     },
     updateCursor(state: Cursor) {
       this.cursor = state
+    },
+    updateInReel(state: boolean) {
+      this.inReel = state
     },
     updateInProject(state: boolean) {
       this.inProject = state

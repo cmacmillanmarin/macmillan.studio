@@ -4,6 +4,7 @@ import useStore from '~/store/useStore'
 import { gsap } from 'gsap'
 import { CustomEase } from 'gsap/CustomEase'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { ease } from '~/utils/animations'
 
 export default defineNuxtPlugin(async () => {
   console.log(
@@ -17,18 +18,12 @@ export default defineNuxtPlugin(async () => {
 
   gsap.defaults({
     duration: 0.8,
-    ease: CustomEase.create('custom', 'M0,0 C0.53,0.24 0.08,0.99 1,1'),
+    ease: ease(),
   })
 
   WebFont.load({
     custom: {
-      families: [
-        // 'HelveticaNowTextBold',
-        // 'HelveticaNowTextMedium',
-        'HelveticaNowDisplayBold',
-        'HelveticaNowDisplayMedium',
-        // 'NeuePixelRegular',
-      ],
+      families: ['HelveticaNowDisplayBold', 'HelveticaNowDisplayMedium'],
     },
     active: (): void => {
       store.updatePreloaded(true)

@@ -1,13 +1,12 @@
 <template>
-  <div class="home__about__clients">
+  <div ref="el" class="home__about__clients">
     <div class="home__about__clients__headline">
-      <Separator />
-
+      <Separator :left="6" />
       <p class="home__about__clients__headline__title">{{ data.title }}</p>
     </div>
-    <div class="home__about__clients__list">
-      <Separator />
 
+    <div class="home__about__clients__list">
+      <Separator :left="4" />
       <p class="home__about__clients__list__title">{{ data.hint }}</p>
       <div class="home__about__clients__list__content">
         <template v-for="client in data.list">
@@ -23,19 +22,24 @@
         <SvgSLS />
       </div>
     </div>
+
     <div class="home__about__clients__featured">
-      <div class="home__about__clients__featured__client">
+      <div
+        class="home__about__clients__featured__client"
+        v-transition:in="{ callback: enterLogos, offset: 0.1 }">
         <SvgNike />
       </div>
       <div class="home__about__clients__featured__client">
         <SvgBuff />
       </div>
     </div>
+
     <div class="home__about__clients__featured">
       <div class="home__about__clients__featured__client--center">
         <SvgNetflix />
       </div>
     </div>
+
     <div class="home__about__clients__featured">
       <div class="home__about__clients__featured__client">
         <SvgGoogle />
@@ -48,11 +52,18 @@
 </template>
 
 <script lang="ts" setup>
+import { shuffleElsIn } from '~/utils/animations'
 import type { HomepageAboutClients } from '~/types/wordpress/homepage'
 
 defineProps<{
   data: HomepageAboutClients
 }>()
+
+const el = ref<HTMLElement>()
+
+function enterLogos(params: { el: HTMLElement }) {
+  shuffleElsIn({ els: el.value?.querySelectorAll('.home__about__clients__featured svg') })
+}
 </script>
 
 <style lang="scss">
@@ -102,6 +113,7 @@ defineProps<{
     @include columns(2, 'desktop');
 
     &__client {
+      position: relative;
       width: 100%;
       aspect-ratio: 1;
       height: max-content;
@@ -113,6 +125,10 @@ defineProps<{
       display: flex;
       justify-content: center;
       align-items: center;
+
+      svg {
+        @include will-fade;
+      }
 
       &:last-child {
         align-self: end;

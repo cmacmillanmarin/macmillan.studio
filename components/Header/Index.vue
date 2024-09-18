@@ -52,10 +52,10 @@ import useScrollStore from '~/store/useScrollStore'
 import { shuffleElsIn, shuffleElsOut } from '~/utils/animations'
 import { toPx, toPercentage } from '~/utils'
 
-const { section, gridType, isInProject } = storeToRefs(useStore())
+const { section, gridType, isInProject, isInReel } = storeToRefs(useStore())
 const { current, bounding } = storeToRefs(useScrollStore())
 
-const { vw, vh } = useResize()
+const { vh } = useResize()
 const { layoutMargin } = useCss()
 
 const el = ref<HTMLElement>()
@@ -75,8 +75,8 @@ watch(current, () => {
   })
 })
 
-watch(isInProject, () => {
-  isInProject.value ? leave() : enter()
+watch([isInProject, isInReel], () => {
+  isInProject.value || isInReel.value ? leave() : enter()
 })
 
 function enter() {
@@ -124,7 +124,7 @@ function leave() {
     }
 
     .svg__pixel-arrow {
-      width: toScale(2rem);
+      width: toScale(2.4rem);
     }
   }
 

@@ -11,11 +11,14 @@ export default defineStore('use-scroll-store', {
     currentVertical: 0,
     direction: 'down',
     update: 0,
+    updated: 0,
+    speed: 0,
     disabled: false,
     bounding: 0,
     progress: 0,
     target: -1,
     targetId: '',
+    inTarget: true,
   }),
   getters: {
     isVirtualScroll(): boolean {
@@ -36,6 +39,9 @@ export default defineStore('use-scroll-store', {
     scrollDirection(): Direction {
       return this.direction
     },
+    scrollSpeed(): number {
+      return this.speed
+    },
     scrollBounding(): number {
       return this.bounding
     },
@@ -54,13 +60,19 @@ export default defineStore('use-scroll-store', {
     scrollUpdate(): number {
       return this.update
     },
+    scrollUpdated(): number {
+      return this.updated
+    },
   },
   actions: {
     updateEl(el?: HTMLElement) {
       this.el = el
     },
-    updateScroll() {
+    async updateScroll() {
       this.update++
+      await nextTick() // Updates layout
+      await nextTick() // Makes sure the scroll is updated
+      this.updated = this.update
     },
     disableScroll(value: boolean) {
       this.disabled = value
@@ -76,7 +88,9 @@ export default defineStore('use-scroll-store', {
       this.currentVertical = data.currentVertical
       this.direction = data.direction
       this.bounding = data.bounding
+      this.speed = data.speed
       this.progress = round(data.current / data.bounding, 2)
+      this.inTarget = data.inTarget
     },
     async updateScrollTarget(value: number): Promise<void> {
       this.target = value

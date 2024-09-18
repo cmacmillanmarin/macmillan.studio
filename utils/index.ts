@@ -2,6 +2,10 @@ import he from 'he'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 
+export function targetify(input: string): string {
+  return `${slugify(input)}-target`
+}
+
 export function sleep(time: number): Promise<void> {
   return new Promise(resolve => {
     setTimeout(resolve, time)

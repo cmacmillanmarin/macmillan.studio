@@ -31,7 +31,7 @@
       <HomeAboutClients :data="data.clients" />
 
       <div class="home__about__intro__collaborator">
-        <Separator />
+        <Separator :left="5" />
         <div class="home__about__intro__collaborator__title">
           <p class="home__about__intro__collaborator__title__label">
             {{ data.collaborator.title }}
@@ -51,7 +51,10 @@
       </div>
     </div>
 
-    <HomeAboutTestimonials :data="data.testimonials" />
+    <div class="home__about__testimonials-and-gallery">
+      <HomeAboutTestimonials :data="data.testimonials" />
+      <HomeAboutGallery />
+    </div>
 
     <HomeAboutAwards />
   </div>
@@ -73,17 +76,18 @@ const { onResize } = useResize()
 const store = useStore()
 const { updateSection } = store
 const { isInProjectEntered, section } = storeToRefs(store)
-const { direction } = storeToRefs(useScrollStore())
+const { direction, scrollUpdated } = storeToRefs(useScrollStore())
 
 const introEl = ref<HTMLElement>()
 const imgEl = ref<HTMLImageElement>()
 const loaded = ref<boolean>(false)
 
-watch([loaded, onResize, isInProjectEntered], () => {
+watch([scrollUpdated, loaded, onResize, isInProjectEntered], () => {
   if (!imgEl.value) return
   const { positionLeft, positionTop } = imgEl.value.dataset
   const width = imgEl.value.clientWidth
   const height = imgEl.value.clientHeight
+  console.log(positionTop)
   $scene.updateObject({
     id: 'about-thumbnail',
     position: {
@@ -108,6 +112,7 @@ onMounted(() => {
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
     border: 16,
+    fade: true,
   })
 })
 
@@ -124,9 +129,10 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 <style lang="scss">
 .home__about {
   position: relative;
-  padding: 8rem 0 0;
+  padding: toScale(8rem) 0 0;
 
   &__intro {
+    min-height: var(--vh);
     @include will-fade;
 
     &__title {
@@ -137,7 +143,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       @include grid;
 
       &__label {
-        padding-bottom: 8rem;
+        padding-bottom: toScale(8rem);
 
         @include t-h2;
         @include columns(10, 'desktop');
@@ -161,14 +167,16 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       &__thumbnail {
         @include columns(2, 'desktop');
         @include gap(2, 'left', 'desktop');
+
         &__image {
           aspect-ratio: 1;
           display: block;
           // background-color: black;
           // border-radius: 1.6rem;
-          margin-bottom: 1.2rem;
+          margin-bottom: toScale(1.2rem);
           opacity: 0;
         }
+
         &__credit {
           @include t-b1;
         }
@@ -186,43 +194,63 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     }
 
     &__collaborator {
-      margin-top: 18rem;
-      padding-bottom: 12rem;
+      margin-top: toScale(18rem);
+      padding-bottom: toScale(8rem);
       position: relative;
       @include grid;
+
       .separator {
         margin-left: calc(var(--layout-column-width) * 4 + var(--layout-gutter) * 5);
         width: calc(var(--layout-column-width) * 5 + var(--layout-gutter) * 4);
       }
+
       &__title {
         @include gap(4, 'left', 'desktop');
         @include columns(2, 'desktop');
+
         &__label {
-          margin-top: 1.2rem;
+          margin-top: toScale(1.2rem);
           @include t-b1;
         }
       }
+
       &__content {
         @include columns(3, 'desktop');
         @include gap(1, 'right', 'desktop');
         &__label {
-          margin-top: 1.2rem;
+          margin-top: toScale(1.2rem);
           @include t-b1;
         }
       }
+
       &__thumbnail {
         @include columns(2, 'desktop');
+
         &__image {
           aspect-ratio: 1;
           background-color: black;
           border-radius: 1.6rem;
-          margin-bottom: 1.2rem;
+          margin-bottom: toScale(1.2rem);
         }
+
         &__credit {
           @include t-b1;
         }
       }
     }
+  }
+
+  &__testimonials-and-gallery {
+    min-height: var(--vh);
+  }
+
+  &__testimonials {
+    padding-top: toScale(8rem);
+  }
+
+  &__gallery {
+    padding-top: toScale(12rem);
+    padding-bottom: toScale(12rem);
   }
 
   &__intersect {
@@ -231,6 +259,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     left: 0;
     width: 100%;
     height: 1px;
+    // background-color: red;
   }
 }
 </style>

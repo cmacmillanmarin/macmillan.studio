@@ -1,8 +1,10 @@
 <template>
   <div class="home__about__testimonials__testimonial">
     <div class="home__about__testimonials__testimonial__quote">
-      <SvgQuote />
-      <p class="home__about__testimonials__testimonial__quote__label">{{ data.quote }}</p>
+      <SvgQuote :data-pos="pos" />
+      <p class="home__about__testimonials__testimonial__quote__label" :data-pos="pos">
+        {{ data.quote }}
+      </p>
     </div>
     <div class="home__about__testimonials__testimonial__credit">
       <div class="home__about__testimonials__testimonial__credit__thumbnail">
@@ -17,6 +19,7 @@
 import type { Testimonial } from '~/types/wordpress/testimonial'
 
 defineProps<{
+  pos: number
   data: Testimonial
 }>()
 </script>
@@ -41,7 +44,13 @@ defineProps<{
       transform: translate(calc(-100% - var(--layout-gutter)), -5%);
     }
     &__label {
-      // line-height: 1.05 !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      line-clamp: 5;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      padding-bottom: toScale(1rem);
       @include t-h2;
     }
   }
@@ -49,11 +58,11 @@ defineProps<{
     display: flex;
     align-items: center;
     column-gap: 0.8rem;
-    margin-top: toScale(3.2rem);
+    margin-top: toScale(2.2rem);
     &__thumbnail {
       &__image {
-        width: 4.8rem;
-        height: 4.8rem;
+        width: toScale(4.8rem);
+        height: toScale(4.8rem);
         border-radius: 50%;
         background-color: black;
       }

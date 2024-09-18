@@ -34,3 +34,12 @@ export interface Button {
   type: 'internal-link' | 'external-link' | 'action'
   to?: string
 }
+
+export type TickerItems = Array<TickerItem>
+export interface TickerItem {
+  el: HTMLElement
+  width: number
+  position: number
+  init: number
+  reset: number
+}
