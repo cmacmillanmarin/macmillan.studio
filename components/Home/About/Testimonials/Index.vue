@@ -109,7 +109,6 @@ onMounted(() => {
 })
 
 function onIntersect(el: HTMLElement, visible: boolean) {
-  console.log(el, visible)
   if (visible) updateSection('about-testimonials')
   else if (direction.value === 'up') updateSection('about')
 }
@@ -164,7 +163,7 @@ function onTestimonialMouseLeave() {
         will-change: transform;
         pointer-events: none;
 
-        &__quote {
+        &__quote__label {
           pointer-events: auto;
         }
       }

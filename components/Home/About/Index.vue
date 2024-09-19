@@ -87,7 +87,6 @@ watch([scrollUpdated, loaded, onResize, isInProjectEntered], () => {
   const { positionLeft, positionTop } = imgEl.value.dataset
   const width = imgEl.value.clientWidth
   const height = imgEl.value.clientHeight
-  console.log(positionTop)
   $scene.updateObject({
     id: 'about-thumbnail',
     position: {

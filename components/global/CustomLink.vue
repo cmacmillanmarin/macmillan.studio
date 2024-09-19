@@ -12,6 +12,9 @@
     <template v-if="content">
       <slot />
     </template>
+    <template v-else-if="letters">
+      <span v-for="letter in label" class="custom-link__letter">{{ letter }}</span>
+    </template>
     <template v-else>
       {{ label }}
     </template>
@@ -27,6 +30,7 @@ const props = defineProps<{
   type?: any
   tabFixed?: boolean
   content?: boolean
+  letters?: boolean
 }>()
 
 const { updateScrollTargetId } = useScrollStore()
@@ -60,5 +64,8 @@ button {
   padding: 0;
   margin: 0;
   border: none;
+  &__letter {
+    will-change: opacity;
+  }
 }
 </style>

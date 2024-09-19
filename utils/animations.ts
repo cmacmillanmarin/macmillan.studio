@@ -111,6 +111,7 @@ export function shuffleIn(params: { el: HTMLElement }) {
 
 export function shuffleElsIn(params: {
   els?: NodeListOf<Element> | Array<HTMLElement | Element>
+  fast?: boolean
   done?: Function
 }) {
   const els = shuffle(Array.from(params.els || []))

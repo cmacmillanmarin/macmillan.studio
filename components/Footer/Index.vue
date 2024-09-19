@@ -1,67 +1,133 @@
 <template>
-  <footer ref="el" class="footer" id="contact-target">
+  <footer
+    ref="el"
+    :class="['footer', { 'footer--game-over': tetris && over }]"
+    id="contact-target"
+    @click="playClick && resetTetris()">
     <div class="footer__intersect" v-intersect="{ callback: onIntersect }" />
-    <div class="footer__hour">
-      <SvgSquare />
-      <p v-html="`${hour}h {CET}`" />
-    </div>
-    <div class="footer__squares">
-      <SvgSquare />
-      <SvgSquare />
-      <SvgSquare />
-      <SvgSquare />
-    </div>
-    <div
-      v-show="!tetris"
-      class="footer__email"
-      v-transition:in="{ callback: fadeIn }"
-      @mouseenter="onEmailMouseEnter"
-      @mouseleave="onEmailMouseLeave"
-      @click="copyEmail">
-      <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
-      <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
-      <div class="footer__email__christian">
-        <button>
-          <SvgChristian />
-        </button>
+
+    <transition
+      mode="out-in"
+      :css="false"
+      @enter="transitionShuffleIn"
+      @leave="transitionShuffleOut">
+      <div v-if="section === 'contact' && !tetris" class="footer__hour">
+        <SvgSquare />
+        <p v-html="`${hour}h {CET}`" />
       </div>
-      <div class="footer__email__domain">
-        <button>
-          <SvgDomain />
-        </button>
+    </transition>
+
+    <transition
+      mode="out-in"
+      :css="false"
+      @enter="transitionShuffleIn"
+      @leave="transitionShuffleOut">
+      <div v-if="!tetris" class="footer__squares">
+        <SvgSquare v-intersect="{ callback: squareIn }" />
+        <SvgSquare v-intersect="{ callback: squareIn }" />
+        <SvgSquare v-intersect="{ callback: squareIn }" />
+        <SvgSquare v-intersect="{ callback: squareIn }" />
       </div>
-      <div class="footer__email__extension">
-        <button>
-          <SvgExtension />
-        </button>
-      </div>
-    </div>
-    <nav v-show="!tetris" class="footer__nav" v-transition:in="{ callback: fadeIn }">
-      <ul class="footer__nav__social">
-        <li v-for="{ to, type, label } in rrss" class="footer__nav__social__link">
-          <DecorativeLink :label="label" :to="to" :type="type" />
-        </li>
-      </ul>
-      <ul class="footer__nav__credits">
-        <li class="footer__nav__credits__link">
-          <button class="footer__nav__credits__link__btn--tetris" @click="playTetris">
-            Play Tetris
-            <SvgPlaySmall />
+    </transition>
+
+    <transition mode="out-in" :css="false" @leave="transitionShuffleOut">
+      <div
+        v-if="!tetris"
+        class="footer__email"
+        v-transition:in="{ callback: fadeIn }"
+        @mouseenter="onEmailMouseEnter"
+        @mouseleave="onEmailMouseLeave"
+        @click="copyEmail">
+        <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
+        <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
+        <div class="footer__email__christian">
+          <button>
+            <SvgChristian />
           </button>
-        </li>
-      </ul>
-    </nav>
-    <div v-show="!tetris" class="footer__location" v-transition:in="{ callback: fadeIn }">
-      <div class="footer__location__coordinates">
-        <a href="https://maps.app.goo.gl/osjpdZpbnTjgLg7h7" target="__blank" rel="noopener"
-          >Cádiz—36.5282º N, 6.18892º W</a
-        >
+        </div>
+        <div class="footer__email__domain">
+          <button>
+            <SvgDomain />
+          </button>
+        </div>
+        <div class="footer__email__extension">
+          <button>
+            <SvgExtension />
+          </button>
+        </div>
       </div>
-      <div class="footer__location__year">
-        <p>©2023</p>
+    </transition>
+
+    <transition mode="out-in" :css="false" @leave="transitionShuffleOut">
+      <nav v-if="!tetris" class="footer__nav" v-transition:in="{ callback: fadeIn }">
+        <ul class="footer__nav__social">
+          <li v-for="{ to, type, label } in rrss" class="footer__nav__social__link">
+            <DecorativeLink :label="label" :to="to" :type="type" />
+          </li>
+        </ul>
+        <ul class="footer__nav__credits">
+          <li class="footer__nav__credits__link">
+            <button class="footer__nav__credits__link__btn--tetris" @click="playTetris">
+              Play Tetris
+              <SvgPlaySmall />
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </transition>
+
+    <transition mode="out-in" :css="false" @leave="transitionShuffleOut">
+      <div v-if="!tetris" class="footer__location" v-transition:in="{ callback: fadeIn }">
+        <div class="footer__location__coordinates">
+          <a href="https://maps.app.goo.gl/osjpdZpbnTjgLg7h7" target="__blank" rel="noopener"
+            >Cádiz—36.5282º N, 6.18892º W</a
+          >
+        </div>
+        <div class="footer__location__year">
+          <p>©2023</p>
+        </div>
       </div>
-    </div>
-    <FooterTetris />
+    </transition>
+
+    <transition
+      mode="out-in"
+      :css="false"
+      @enter="transitionShuffleIn"
+      @leave="transitionShuffleOut">
+      <div
+        v-if="tetris"
+        class="footer__close"
+        @mouseenter="onCloseMouseEnter"
+        @mouseleave="onCloseMouseLeave">
+        <button @click="closeTetris">CLOSE</button>
+      </div>
+    </transition>
+
+    <transition
+      mode="out-in"
+      :css="false"
+      @enter="transitionShuffleIn"
+      @leave="transitionShuffleOut">
+      <div v-if="tetris && !over" class="footer__score">
+        <p>score: {{ score }}</p>
+        <p>level: {{ level }}</p>
+        <p>next Piece: {{ nextPiece?.name }}</p>
+      </div>
+    </transition>
+
+    <transition
+      mode="out-in"
+      :css="false"
+      @enter="transitionShuffleIn"
+      @leave="transitionShuffleOut"
+      @after-enter="waitPlayClick"
+      @after-leave="ignorePlayClick">
+      <div v-if="tetris && over" class="footer__game-over">
+        <p>GAME OVERRRRR! {{ score }}</p>
+      </div>
+    </transition>
+
+    <Tetris ref="tetrisEl" :active="tetris" />
   </footer>
 </template>
 
@@ -70,12 +136,16 @@ import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { fadeIn } from '~/utils/animations'
+import { shuffleElsIn, fadeIn, fadeOut } from '~/utils/animations'
+import Tetris from '~/components/Footer/Tetris.vue'
+import type { Piece } from '~/types/front/tetris'
 
 const store = useStore()
 const { updateSection, updateCursor } = store
-const { cursor, gridType } = storeToRefs(store)
-const { direction } = storeToRefs(useScrollStore())
+const { cursor, section, gridType } = storeToRefs(store)
+const scrollStore = useScrollStore()
+const { disableScroll } = scrollStore
+const { direction } = storeToRefs(scrollStore)
 
 const rrss = ref([
   {
@@ -117,6 +187,21 @@ let _to: any
 let _to2: any
 
 const tetris = ref<boolean>(false)
+const tetrisEl = ref<typeof Tetris>()
+const score = computed<number>(() => tetrisEl.value?.score || 0)
+const level = computed<number>(() => tetrisEl.value?.level || 0)
+const nextPiece = computed<Piece | null>(() => tetrisEl.value?.nextPiece || null)
+const over = computed<boolean>(() => tetrisEl.value?.over || false)
+const playClick = ref<boolean>(false)
+
+watch(tetris, () => {
+  disableScroll(tetris.value)
+  tetris.value && over.value && updateCursor('play')
+})
+
+watch(over, () => {
+  updateCursor(over.value ? 'play' : 'default')
+})
 
 onMounted(() => {
   updateHour()
@@ -126,38 +211,21 @@ function playTetris() {
   tetris.value = true
 }
 
+function closeTetris() {
+  tetris.value = false
+}
+
 function onIntersect(el: HTMLElement, visible: boolean) {
   if (visible) updateSection('contact')
   else if (direction.value === 'up') updateSection('about-awards')
 }
 
 function onEmailMouseEnter() {
-  updateCursor('copy')
-}
-
-function updateHour() {
-  if (!el.value) return
-  const square = el.value.querySelector('.footer__hour .svg__square')
-  gsap.fromTo(square, { opacity: 0 }, { opacity: 1 })
-  hour.value = getCurrentHourInCET()
-  _to = setTimeout(updateHour, 1000)
-}
-
-function getCurrentHourInCET() {
-  const now = new Date()
-
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Europe/Berlin',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-  const formattedTime = formatter.format(now)
-
-  return formattedTime
+  !tetris.value && updateCursor('copy')
 }
 
 function onEmailMouseLeave() {
+  if (tetris.value) return
   updateCursor('default')
   _to2 && clearTimeout(_to2)
 }
@@ -177,6 +245,53 @@ function copyEmail() {
     })
 }
 
+function updateHour() {
+  const square = el.value?.querySelector('.footer__hour .svg__square')
+  square && gsap.fromTo(square, { opacity: 0 }, { opacity: 1 })
+  hour.value = getCurrentHourInCET()
+  _to = setTimeout(updateHour, 1000)
+}
+
+function getCurrentHourInCET() {
+  const now = new Date()
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Berlin',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  const formattedTime = formatter.format(now)
+
+  return formattedTime
+}
+
+function squareIn(el: HTMLElement, visible: boolean) {
+  visible ? shuffleElsIn({ els: [el] }) : fadeOut({ el })
+}
+
+function waitPlayClick() {
+  playClick.value = true
+}
+
+function ignorePlayClick() {
+  playClick.value = false
+}
+
+function resetTetris() {
+  tetrisEl.value?.reset()
+}
+
+function onCloseMouseEnter() {
+  playClick.value = false
+  updateCursor('default')
+}
+
+function onCloseMouseLeave() {
+  playClick.value = over.value
+  over.value ? updateCursor('play') : updateCursor('default')
+}
+
 onBeforeUnmount(() => {
   clearTimeout(_to)
   clearTimeout(_to2)
@@ -187,9 +302,13 @@ onBeforeUnmount(() => {
 .footer {
   position: relative;
 
-  height: var(--vh);
+  height: calc(var(--vh) + 0.1rem);
 
   background-color: black;
+
+  &--game-over {
+    cursor: pointer;
+  }
 
   a,
   p {
@@ -212,9 +331,14 @@ onBeforeUnmount(() => {
     @include from__desktop--x-large {
       left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-max-width) * 0.031);
     }
+    .svg__square {
+      @include will-fade;
+    }
   }
 
-  &__hour {
+  &__close,
+  &__hour,
+  &__score {
     position: absolute;
     top: var(--layout-margin);
     right: var(--layout-margin);
@@ -222,10 +346,30 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     column-gap: 0.6rem;
+    @include will-fade;
 
     p {
       @include t-number;
     }
+  }
+
+  &__close {
+    left: var(--layout-margin);
+    right: auto;
+    width: 20rem;
+    height: 20rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    button {
+      color: var(--lime);
+      padding: 0;
+    }
+  }
+
+  &__game-over {
+    z-index: 9;
+    @include absolute-center;
   }
 
   &__email,

@@ -7,7 +7,7 @@ export interface Size {
 }
 
 export interface Piece {
-  name: 'box' | 'bar' | 'el'
+  name: 'o' | 'i' | 's' | 'z' | 'l' | 'j' | 't'
   matrix: Matrix
 }
 
@@ -24,9 +24,9 @@ export interface Position {
 export interface Tetris {
   ctx: CanvasRenderingContext2D | null | undefined
   matrix: Matrix
-  points: number
   size: Size
   board: Board
+  linesInLevel: number
   active: {
     piece?: Piece
     position: Position

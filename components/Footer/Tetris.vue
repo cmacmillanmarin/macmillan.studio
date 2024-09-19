@@ -6,13 +6,22 @@
 import { gsap } from 'gsap'
 import type { Tetris, Matrix, Piece, Position } from '~/types/front/tetris'
 
+const props = defineProps<{
+  active: boolean
+}>()
+
 const { maxWidth } = useCss()
 const { vw, vh, onResize } = useResize()
 const { addTicker, killTicker } = useRaf()
 const { keyPressed } = useKeyboard()
 
 const el = ref<HTMLCanvasElement>()
+const score = ref<number>(0)
+const level = ref<number>(0)
+const nextPiece = ref<Piece>(getPiece())
+const over = ref<boolean>(false)
 const ready = ref<boolean>(false)
+
 const inView = ref<boolean>(false)
 const opacity = ref<number>(1)
 
@@ -23,16 +32,16 @@ const tetris: Tetris = {
   board: { columns: 0, rows: 0 },
   size: { x: 0, y: 0, piece: 0 },
   matrix: [],
+  linesInLevel: 0,
   active: {
     piece: undefined,
     position: { x: 0, y: 0 },
   },
-  points: 0,
   freezed: false,
 }
 
 watch(keyPressed, () => {
-  if (tetris.freezed) return
+  if (tetris.freezed || over.value) return
   if (keyPressed.value === ' ') rotate()
   else if (keyPressed.value === 'ArrowDown') drop()
   else if (keyPressed.value === 'ArrowLeft') move(-1)
@@ -43,8 +52,8 @@ watch(onResize, () => {
   reset()
 })
 
-watch([ready, inView], () => {
-  if (ready.value && inView.value) {
+watch([ready, inView, over, () => props.active], () => {
+  if (ready.value && inView.value && props.active && !over.value) {
     addTicker(draw)
     drop()
   } else {
@@ -115,6 +124,10 @@ function drawLogo(position: Position) {
 function reset() {
   if (!el.value) return
 
+  score.value = 0
+  level.value = 0
+  over.value = false
+
   tetris.size.x = Math.min(vw.value, maxWidth.value)
   tetris.size.y = vh.value
 
@@ -184,15 +197,21 @@ async function drop() {
   to && clearTimeout(to)
   to = setTimeout(drop, 1000)
 
+  score.value++
+
   if (!tetris.active.piece) {
-    tetris.active.piece = getPiece() as Piece
+    tetris.active.piece = nextPiece.value
+    nextPiece.value = getPiece()
+
     tetris.active.position = {
       x: Math.floor(tetris.board.columns / 2) - 1,
       y: tetris.board.rows - 4 + tetris.active.piece.matrix.length,
     }
     if (checkCollisionY({ matrix: tetris.active.piece.matrix })) {
-      reset()
-      drop()
+      over.value = true
+      // reset()
+      clearTimeout(to)
+      return
     }
   }
 
@@ -208,9 +227,10 @@ async function drop() {
       })
     })
     tetris.active.piece = undefined
-    let entireLine: boolean = false
+    let linesOut = 0
     tetris.matrix.forEach(async (row, y) => {
       if (checkEntireLine(row)) {
+        linesOut++
         to && clearTimeout(to)
         tetris.freezed = true
         for (let i = 0; i < row.length; i++) row[i] = 3
@@ -221,6 +241,16 @@ async function drop() {
         drop()
       }
     })
+    if (linesOut === 1) score.value += 40 * (level.value + 1)
+    else if (linesOut === 2) score.value += 100 * (level.value + 1)
+    else if (linesOut === 3) score.value += 300 * (level.value + 1)
+    else if (linesOut === 4) score.value += 1200 * (level.value + 1)
+    tetris.linesInLevel += linesOut
+    linesOut > 0 && console.log(linesOut, tetris.linesInLevel)
+    if (tetris.linesInLevel >= 10) {
+      level.value++
+      tetris.linesInLevel = 0
+    }
     !tetris.freezed && drop()
   }
 }
@@ -318,44 +348,51 @@ function checkCollisionY(params: { matrix: Matrix }): boolean {
 function getPiece(): Piece {
   const pieces: Array<Piece> = [
     {
-      name: 'box',
+      name: 'o',
       matrix: [
         [1, 1],
         [1, 1],
       ],
     },
     {
-      name: 'el',
-      matrix: [
-        [1, 0],
-        [1, 0],
-        [1, 1],
-      ],
-    },
-    {
-      name: 'bar',
+      name: 'i',
       matrix: [[1], [1], [1], [1]],
     },
     {
-      name: 'el',
+      name: 's',
       matrix: [
-        [1, 1, 1],
-        [0, 1, 0],
+        [0, 1, 1],
+        [1, 1, 0],
       ],
     },
     {
-      name: 'el',
+      name: 'z',
       matrix: [
         [1, 1, 0],
         [0, 1, 1],
       ],
     },
     {
-      name: 'el',
+      name: 'l',
       matrix: [
         [1, 0],
+        [1, 0],
         [1, 1],
+      ],
+    },
+    {
+      name: 'j',
+      matrix: [
         [0, 1],
+        [0, 1],
+        [1, 1],
+      ],
+    },
+    {
+      name: 't',
+      matrix: [
+        [1, 1, 1],
+        [0, 1, 0],
       ],
     },
   ]
@@ -366,5 +403,14 @@ onBeforeUnmount(() => {
   killTicker(draw)
   to && clearTimeout(to)
   gsap.killTweensOf(opacity)
+})
+
+defineExpose({
+  score,
+  level,
+  over,
+  nextPiece,
+  reset,
+  drop,
 })
 </script>

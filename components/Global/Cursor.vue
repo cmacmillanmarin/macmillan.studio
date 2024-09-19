@@ -1,12 +1,12 @@
 <template>
-  <div ref="el" class="cursor">
+  <div ref="el" :class="['cursor', { 'cursor--lime': section === 'contact' }]">
     <div class="cursor__dot">
       <transition mode="out-in" :css="false" @enter="limeEnter" @leave="limeLeave">
-        <div v-if="cursor === 'copy' || cursor === 'copied'" class="cursor__dot__lime" />
+        <div v-if="section === 'contact'" class="cursor__dot__lime" />
       </transition>
       <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
         <div v-if="cursor !== 'default'" :key="cursor" class="cursor__dot__icon">
-          <SvgPlay v-if="cursor === 'video'" />
+          <SvgPlay v-if="cursor === 'play'" />
           <SvgPlus v-else-if="cursor === 'plus'" />
           <SvgArrowBig v-else-if="cursor === 'arrow-left'" key="left-arrow" :side="1" />
           <SvgArrowBig v-else-if="cursor === 'arrow-right'" key="right-arrow" :side="-1" />
@@ -25,7 +25,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { transitionShuffleIn, transitionDone } from '~/utils/animations'
 
-const { cursor } = storeToRefs(useStore())
+const { cursor, section } = storeToRefs(useStore())
 
 const { addTicker, killTicker } = useRaf()
 const { x: targetX, y: targetY } = useMouse()
@@ -34,14 +34,24 @@ const el = ref<HTMLElement>()
 
 let _x: number = 0
 let _y: number = 0
+let _visible: boolean = false
 
 watch(cursor, () => {
   if (!el.value) return
   const cursorIn = cursor.value !== 'default'
+  cursorIn && (_visible = true)
   const scale = cursorIn ? 1 : 0
   const duration = cursorIn ? 0.4 : 0.3
   gsap.killTweensOf(el.value)
-  gsap.to(el.value, { scale, duration })
+  gsap.to(el.value, {
+    scale,
+    duration,
+    onComplete: () => {
+      if (!cursorIn) {
+        _visible = false
+      }
+    },
+  })
 })
 
 onMounted(() => {
@@ -51,7 +61,7 @@ onMounted(() => {
 function move() {
   _x += (targetX.value - _x) * 0.2
   _y += (targetY.value - _y) * 0.2
-  el.value && gsap.set(el.value, { x: _x, y: _y })
+  el.value && _visible && gsap.set(el.value, { x: _x, y: _y })
 }
 
 function limeEnter(el: Element, done: Function) {
@@ -78,11 +88,20 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .cursor {
   pointer-events: none;
   transform: scale(0);
   will-change: transform;
+
+  &--lime {
+    .cursor__dot__icon svg {
+      path,
+      rect {
+        fill: var(--black) !important;
+      }
+    }
+  }
 
   &__dot {
     @include absolute-center;

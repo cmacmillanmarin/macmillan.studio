@@ -7,11 +7,7 @@
     data-scroll-set-position>
     <ClientOnly>
       <Teleport to=".header__top">
-        <transition
-          mode="out-in"
-          :css="false"
-          @enter="transitionShuffleIn"
-          @leave="transitionShuffleOut">
+        <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
           <p v-if="indicators" :key="activeListProjects.length" class="home__projects__index">
             <SvgSquare />
             <span
@@ -40,7 +36,11 @@
         @leave="transitionShuffleOut">
         <button
           v-if="indicators"
-          class="home__projects__buttons__button"
+          :class="[
+            'home__projects__buttons__button',
+            { 'home__projects__buttons__button--active': activeList === 'selected' },
+          ]"
+          @mouseenter="onButtonMouseEnter"
           @click="updateActiveList('selected')">
           <span class="home__projects__buttons__button__label">
             <transition
@@ -48,9 +48,9 @@
               :css="false"
               @enter="transitionShuffleIn"
               @leave="transitionShuffleOut">
-              <SvgSquare v-if="indicators" />
+              <SvgSquare v-if="activeList === 'selected'" />
             </transition>
-            Selected projects
+            <span class="home__projects__buttons__button__label__el">Selected projects</span>
             <span
               class="home__projects__buttons__button__label__count"
               v-html="`{${startWithZero(selectedProjectsList.length)}}`" />
@@ -65,7 +65,11 @@
         @leave="transitionShuffleOut">
         <button
           v-if="indicators"
-          class="home__projects__buttons__button"
+          :class="[
+            'home__projects__buttons__button',
+            { 'home__projects__buttons__button--active': activeList === 'all' },
+          ]"
+          @mouseenter="onButtonMouseEnter"
           @click="updateActiveList('all')">
           <span class="home__projects__buttons__button__label">
             <transition
@@ -75,7 +79,7 @@
               @leave="transitionShuffleOut">
               <SvgSquare v-if="activeList === 'all'" />
             </transition>
-            All projects
+            <span class="home__projects__buttons__button__label__el">All projects</span>
             <span
               class="home__projects__buttons__button__label__count"
               v-html="`{${startWithZero(data.list.length)}}`" />
@@ -102,9 +106,10 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
+import { transitionShuffleIn, transitionShuffleOut, transitionDone } from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
@@ -181,6 +186,16 @@ async function updateActiveList(value: 'selected' | 'all') {
   activeList.value = value
 }
 
+function onButtonMouseEnter(e: MouseEvent) {
+  const el = e.target as HTMLElement
+  if (!el || el.classList.contains('clicked')) return
+  const labelEl = el.querySelector('.home__projects__buttons__button__label__el')
+  if (labelEl) {
+    gsap.set(labelEl, { opacity: 0 })
+    shuffleElsIn({ els: [labelEl] })
+  }
+}
+
 function updateActiveListProjects() {
   activeListProjects.value =
     activeList.value === 'selected' ? selectedProjectsList.value : props.data.list
@@ -236,16 +251,27 @@ defineEmits(['update-active'])
       width: 40rem;
       border: none;
       @include will-fade;
+
+      &--active {
+        pointer-events: none;
+      }
+
       &__label {
         position: relative;
         @include t-black;
         @include t-b1;
+
+        &__el {
+          will-change: opacity;
+        }
+
         .svg__square {
           position: absolute;
           top: 50%;
           left: 0;
           transform: translate(calc(-100% - 0.4rem), -50%);
         }
+
         &__count {
           position: absolute;
           transform: translate(0.8rem, -0.4rem);

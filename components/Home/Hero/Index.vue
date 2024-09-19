@@ -173,7 +173,7 @@ watch([position, videoPlaying], () => {
 })
 
 watch([intersect, isInReel], () => {
-  updateCursor(intersect.value ? (isInReel.value ? 'close' : 'video') : 'default')
+  updateCursor(intersect.value ? (isInReel.value ? 'close' : 'play') : 'default')
 })
 
 onMounted(() => {

@@ -1,10 +1,11 @@
 <template>
-  <li class="header__link">
+  <li ref="el" class="header__link">
     <CustomLink
       class="header__link__anchor"
       type="referral"
       :to="to"
       :label="label"
+      @mouseenter="onMouseEnter"
       data-tab-fixed />
     <transition
       mode="out-in"
@@ -17,13 +18,24 @@
 </template>
 
 <script lang="ts" setup>
-import { transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
+import { gsap } from 'gsap'
+import { shuffleElsIn, transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
 
 defineProps<{
   label: string
   to: string
   active: boolean
 }>()
+
+const el = ref<HTMLElement>()
+
+function onMouseEnter() {
+  const linkEl = el.value?.querySelector('.header__link__anchor')
+  if (linkEl) {
+    gsap.set(linkEl, { opacity: 0 })
+    shuffleElsIn({ els: [linkEl] })
+  }
+}
 </script>
 
 <style lang="scss">
@@ -31,6 +43,7 @@ defineProps<{
   position: relative;
   &__anchor {
     color: var(--black);
+    will-change: opacity;
     @include t-b1;
   }
   &__active {

@@ -144,8 +144,6 @@ function update(params?: { ignoreUpdateScroll: boolean }) {
   minHeight.value = maxHeight
   _containerWidth = el.value.clientWidth
 
-  console.log(items.value)
-
   !params?.ignoreUpdateScroll && updateScroll()
 }
 

@@ -18,7 +18,7 @@ export type Section =
 
 export type Cursor =
   | 'default'
-  | 'video'
+  | 'play'
   | 'plus'
   | 'arrow-left'
   | 'arrow-right'
