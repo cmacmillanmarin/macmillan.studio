@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import type { State, Transition, GridType, Section, Cursor } from '~/types/front/store'
 
+let _to: any
+
 export default defineStore('use-store', {
   state: (): State => ({
     preloaded: false,
@@ -50,7 +52,10 @@ export default defineStore('use-store', {
       this.grid = state
     },
     updateSection(state: Section) {
-      this.section = state
+      _to && clearTimeout(_to)
+      _to = setTimeout(() => {
+        this.section = state
+      }, 100)
     },
     updateCursor(state: Cursor) {
       this.cursor = state

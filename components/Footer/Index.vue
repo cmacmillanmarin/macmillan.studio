@@ -336,7 +336,6 @@ onBeforeUnmount(() => {
     }
   }
 
-  &__close,
   &__hour,
   &__score {
     position: absolute;
@@ -354,16 +353,20 @@ onBeforeUnmount(() => {
   }
 
   &__close {
+    position: absolute;
+    z-index: 9;
+    top: var(--layout-margin);
     left: var(--layout-margin);
-    right: auto;
-    width: 20rem;
-    height: 20rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 14rem;
+    height: 7rem;
+    border: 1px solid var(--lime);
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
     button {
       color: var(--lime);
       padding: 0;
+      width: max-content;
     }
   }
 

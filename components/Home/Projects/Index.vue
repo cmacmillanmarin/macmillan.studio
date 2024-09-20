@@ -151,25 +151,23 @@ watch(onReset, () => {
 })
 
 watch(activeList, () => {
-  _current = current.value
-  disableScroll(true)
+  // _current = current.value
+  // disableScroll(true)
   updateScrollTargetId('projects')
-  waitInTarget.value = true
-  _to = setTimeout(() => {
-    _current === current.value && updateActiveListProjects()
-  }, 10)
+  // waitInTarget.value = true
+  updateActiveListProjects()
 })
 
 watch(inTarget, () => {
-  if (inTarget.value && waitInTarget.value) {
-    updateActiveListProjects()
-  }
+  // if (inTarget.value && waitInTarget.value) {
+  //   updateActiveListProjects()
+  // }
 })
 
 watch(activeListProjects, async () => {
   await nextTick()
-  waitInTarget.value = false
-  disableScroll(false)
+  // waitInTarget.value = false
+  // disableScroll(false)
   updateScroll()
   updateBounding()
 })
