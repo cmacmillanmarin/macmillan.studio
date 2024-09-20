@@ -2,7 +2,7 @@
   <div
     ref="el"
     id="projects-target"
-    class="home__projects"
+    :class="['home__projects', { 'home__projects--all': activeList === 'all' }]"
     data-scroll-target-top
     data-scroll-set-position>
     <ClientOnly>
@@ -216,6 +216,16 @@ defineEmits(['update-active'])
 .home__projects {
   position: relative;
   padding-bottom: calc(var(--vh) * 0.25);
+
+  &--all {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    column-gap: var(--layout-gutter);
+    row-gap: var(--layout-gutter);
+    margin: toScale(12rem) auto;
+  }
 
   &__index,
   &__date {

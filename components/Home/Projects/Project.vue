@@ -1,5 +1,12 @@
 <template>
-  <div ref="el" class="home__projects__project" data-scroll-set-position>
+  <div
+    ref="el"
+    :class="[
+      'home__projects__project',
+      { 'home__projects__project--all': all },
+      { 'home__projects__project--all-and-selected': all && data.selected },
+    ]"
+    data-scroll-set-position>
     <video
       v-if="data.thumbnail.type === 'vid' && data.thumbnail.video.src"
       ref="videoEl"
@@ -20,12 +27,12 @@
 
     <ClientOnly>
       <Teleport to="#top-layer">
-        <div v-if="data.client.name" ref="clientEl" class="home__projects__project__client">
+        <div v-if="data.client.name && !all" ref="clientEl" class="home__projects__project__client">
           <div class="home__projects__project__client__logo"></div>
           <div class="home__projects__project__client__name">{{ data.client.name }}</div>
         </div>
         <div
-          v-if="data.collaborator.name"
+          v-if="data.collaborator.name && !all"
           ref="collaboratorEl"
           class="home__projects__project__collaborator">
           <div class="home__projects__project__collaborator__name">
@@ -51,7 +58,7 @@ import { fadeIn, fadeOut } from '~/utils/animations'
 import CustomImage from '~/components/Global/CustomImage.vue'
 
 const props = defineProps<{
-  list: string
+  list: 'all' | 'selected'
   i: number
   of: number
   data: Project
@@ -73,6 +80,8 @@ const { section, isInProject, isInProjectEntered } = storeToRefs(store)
 const { current, direction } = storeToRefs(useScrollStore())
 const { getBounding } = useVirtualScrollAndThreeTools()
 
+const all = computed<boolean>(() => props.list === 'all')
+
 const projectId = ref<string>(`${props.list}-${slugify(props.data.title)}`)
 const projectColor = ref<string>(props.data.color)
 
@@ -91,7 +100,7 @@ const active = computed<boolean>(
 )
 
 const size = computed<{ x: number; y: number }>(() => {
-  const width = getColumnWidth(3)
+  const width = getColumnWidth(all.value && props.data.selected ? 4 : 3)
   return { x: width, y: (width * 7) / 5 }
 })
 
@@ -156,24 +165,44 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
   collaboratorEl.value &&
     gsap.set(collaboratorEl.value, { x: htmlx - 14, y: htmly - 12 + htmlextra })
 
+  if (videoEl.value) {
+    progress.value > 0.25 && leaveProgress.value !== 1
+      ? videoEl.value.play()
+      : videoEl.value.pause()
+  }
+
   const zoom = 0.4
 
-  $scene.updateObject({
-    id: projectId.value,
-    opacity,
-    rotate: { x: rotateRadX, y: rotateRadY, z: 0 },
-    position: {
-      x:
-        isInProjectEntered.value || (progress.value === 1 && leaveProgress.value === 1)
-          ? -10000
-          : positionX,
-      y: positionY,
-    },
-    size: { x: sizeX, y: sizeY, z: 1 },
-    fixed: { from: props.top, to: props.bottom },
-    border: 16 * (progress.value + leaveProgress.value),
-    zoom: 1 + zoom - zoom * progress.value,
-  })
+  if (all.value) {
+    const { top, left } = getBounding(el.value as HTMLElement)
+    $scene.updateObject({
+      id: projectId.value,
+      opacity,
+      rotate: { x: 0, y: 0, z: 0 },
+      position: { x: left, y: top },
+      size: { x: size.value.x, y: size.value.y, z: 1 },
+      fixed: { from: 0, to: 0 },
+      border: 16,
+      zoom: 1,
+    })
+  } else {
+    $scene.updateObject({
+      id: projectId.value,
+      opacity,
+      rotate: { x: rotateRadX, y: rotateRadY, z: 0 },
+      position: {
+        x:
+          isInProjectEntered.value || (progress.value === 1 && leaveProgress.value === 1)
+            ? -10000
+            : positionX,
+        y: positionY,
+      },
+      size: { x: sizeX, y: sizeY, z: 1 },
+      fixed: { from: props.top, to: props.bottom },
+      border: 16 * (progress.value + leaveProgress.value),
+      zoom: 1 + zoom - zoom * progress.value,
+    })
+  }
 })
 
 watch(intersect, () => {
@@ -185,7 +214,7 @@ watch(section, () => {
 })
 
 onMounted(() => {
-  !isInProjectEntered.value && videoEl.value?.play()
+  // !isInProjectEntered.value && videoEl.value?.play()
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
@@ -228,6 +257,26 @@ const emit = defineEmits<{
   justify-content: center;
   align-items: center;
 
+  &--all {
+    min-height: auto;
+  }
+
+  &--all-and-selected {
+    .home__projects__project__anchor,
+    .home__projects__project__vid,
+    .home__projects__project__img {
+      width: toColumns(4);
+    }
+  }
+
+  &__anchor {
+    pointer-events: none;
+    width: toColumns(3);
+    aspect-ratio: 5/7;
+    border-radius: 1.6rem;
+    // border: 1px solid red;
+  }
+
   &__vid,
   &__img {
     opacity: 0;
@@ -267,13 +316,6 @@ const emit = defineEmits<{
     &__name {
       transform: translate(-100%, -100%);
     }
-  }
-
-  &__anchor {
-    pointer-events: none;
-    width: calc(var(--layout-column-width) * 3 + var(--layout-gutter) * 2);
-    aspect-ratio: 5/7;
-    border-radius: 1.6rem;
   }
 }
 </style>

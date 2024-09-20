@@ -55,7 +55,7 @@ export default defineStore('use-store', {
       _to && clearTimeout(_to)
       _to = setTimeout(() => {
         this.section = state
-      }, 100)
+      }, 200)
     },
     updateCursor(state: Cursor) {
       this.cursor = state
