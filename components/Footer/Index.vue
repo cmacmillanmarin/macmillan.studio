@@ -67,8 +67,11 @@
         </ul>
         <ul class="footer__nav__credits">
           <li class="footer__nav__credits__link">
-            <button class="footer__nav__credits__link__btn--tetris" @click="playTetris">
-              Play Tetris
+            <button
+              class="footer__nav__credits__link__btn--tetris"
+              @mouseenter="shuffle"
+              @click="playTetris">
+              <span>Play Tetris</span>
               <SvgPlaySmall />
             </button>
           </li>
@@ -79,9 +82,13 @@
     <transition mode="out-in" :css="false" @leave="transitionShuffleOut">
       <div v-if="!tetris" class="footer__location" v-transition:in="{ callback: fadeIn }">
         <div class="footer__location__coordinates">
-          <a href="https://maps.app.goo.gl/osjpdZpbnTjgLg7h7" target="__blank" rel="noopener"
-            >Cádiz—36.5282º N, 6.18892º W</a
-          >
+          <a
+            href="https://maps.app.goo.gl/osjpdZpbnTjgLg7h7"
+            target="__blank"
+            rel="noopener"
+            @mouseenter="shuffle">
+            Cádiz—36.5282º N, 6.18892º W
+          </a>
         </div>
         <div class="footer__location__year">
           <p>©2023</p>
@@ -213,6 +220,16 @@ function playTetris() {
 
 function closeTetris() {
   tetris.value = false
+}
+
+function shuffle(e: MouseEvent) {
+  const { target } = e
+  const span = target instanceof HTMLElement ? target.querySelector('span') : null
+  const shuffleEl = (span ? span : target) as HTMLElement
+  if (shuffleEl) {
+    gsap.set(shuffleEl, { opacity: 0 })
+    shuffleElsIn({ els: [shuffleEl] })
+  }
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
