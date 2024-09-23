@@ -104,7 +104,7 @@ function move() {
   const orderedItems = _direction === -1 ? [...items.value] : [...items.value].reverse()
   for (let i = 0; i < orderedItems.length; i++) {
     const item = orderedItems[i]
-    const x = item.init + _current
+    let x = item.init + _current
     if (_direction === -1) {
       if (x < item.width * -1) {
         const edge = lastItem.value.init + lastItem.value.width
@@ -115,8 +115,18 @@ function move() {
       const position = lastItem.value.reset - item.reset
       item.init = edge - position
     }
+    // if not in view
+    if (x < item.width * -1 || x > _containerWidth) {
+      x = _containerWidth
+    }
+    item.el.dataset.tickerX = x.toString()
     gsap.set(item.el, { x })
+    item.x = x
   }
+  emit(
+    'update-position',
+    items.value.map(item => item.x)
+  )
 }
 
 function update(params?: { ignoreUpdateScroll: boolean }) {
@@ -130,7 +140,7 @@ function update(params?: { ignoreUpdateScroll: boolean }) {
     const width = child.clientWidth
     const height = child.clientHeight
     if (height > maxHeight) maxHeight = height
-    items.value.push({ el: child, width: Math.ceil(width), position: 0, init: 0, reset: 0 })
+    items.value.push({ el: child, width: Math.ceil(width), position: 0, init: 0, reset: 0, x: 0 })
   }
   for (let i = 0; i < items.value.length; i++) {
     const item = items.value[i]
@@ -150,6 +160,10 @@ function update(params?: { ignoreUpdateScroll: boolean }) {
 onBeforeUnmount(() => {
   killTicker(move)
 })
+
+const emit = defineEmits<{
+  (e: 'update-position', value: Array<number>): void
+}>()
 </script>
 
 <style lang="scss">

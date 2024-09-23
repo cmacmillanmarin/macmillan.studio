@@ -42,4 +42,5 @@ export interface TickerItem {
   position: number
   init: number
   reset: number
+  x: number
 }
