@@ -72,13 +72,7 @@ const expanded = ref<boolean>(false)
 
 watch(x, () => {
   const items = contentEl.value?.querySelectorAll('.home__about__testimonials__testimonial')
-  items?.length &&
-    gsap.set(items, {
-      x: x.value,
-      onComplete: () => {
-        activeEntered.value = active.value
-      },
-    })
+  items?.length && gsap.set(items, { x: x.value })
 })
 
 watch(active, () => {
@@ -88,7 +82,12 @@ watch(active, () => {
   const { left } = item.getBoundingClientRect()
   const { left: parentLeft } = contentEl.value.getBoundingClientRect()
   const dif = left - parentLeft
-  gsap.to(x, { value: x.value - dif })
+  gsap.to(x, {
+    value: x.value - dif,
+    onComplete: () => {
+      activeEntered.value = active.value
+    },
+  })
 })
 
 watch(section, (to, from) => {
