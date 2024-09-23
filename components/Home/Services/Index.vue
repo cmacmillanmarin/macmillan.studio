@@ -61,7 +61,7 @@ const isActive = computed(() => section.value === 'services')
 const el = ref<HTMLElement>()
 
 watch(isActive, () => {
-  isActive.value ? fadeIn({ el: el.value }) : fadeOut({ el: el.value })
+  isActive.value ? fadeIn({ el: el.value, delay: 0.2 }) : fadeOut({ el: el.value })
 })
 
 function updateActive(i: number) {
@@ -88,7 +88,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     display: flex;
     align-items: center;
     column-gap: 0.8rem;
-    padding-top: toScale(6rem);
+    padding-top: toScale(6.8rem);
     @include will-fade;
     @include t-number;
   }
@@ -122,7 +122,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     position: relative;
     .home__services__service {
       position: sticky;
-      top: toScale(2.4rem);
+      top: calc(var(--layout-margin) * 2);
     }
   }
 

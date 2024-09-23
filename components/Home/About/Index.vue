@@ -56,7 +56,7 @@
       <HomeAboutGallery />
     </div>
 
-    <HomeAboutAwards />
+    <HomeAboutAwards :data="data.awards" />
   </div>
 </template>
 

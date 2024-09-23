@@ -3,26 +3,38 @@
     ref="el"
     data-scroll-sticky-state="false"
     :class="[
-      'home__services__service',
-      { 'home__services__service--hidden': hidden },
-      { 'home__services__service--no-bg': (i === of && active === i + 1) || active === 0 },
+      'home__about__awards__award',
+      { 'home__about__awards__award--hidden': hidden },
+      { 'home__about__awards__award--no-bg': active === 0 },
     ]">
     <Separator :left="4" :start="true" />
+
     <div
       v-if="i === of"
-      class="home__services__service__observer--in"
+      class="home__about__awards__award__observer--in"
       v-intersect="{ callback: onIntersectIn }" />
-    <!-- <div
-      v-if="i === of"
-      class="home__services__service__observer--out"
-      v-intersect="{ callback: onIntersectOut }" /> -->
-    <div class="home__services__service__content">
-      <div class="home__services__service__content__title">
-        <h3 class="home__services__service__content__title__label">
-          {{ data.title }}
+
+    <div class="home__about__awards__award__content">
+      <div class="home__about__awards__award__content__title">
+        <h3 class="home__about__awards__award__content__title__label">
+          {{ data.platform }}
         </h3>
       </div>
-      <div class="home__services__service__content__description" v-html="data.description" />
+      <div class="home__about__awards__award__content__list">
+        <div v-for="item in data.list" class="home__about__awards__award__content__list__item">
+          <p class="home__about__awards__award__content__list__item__label">
+            {{ item.label }}
+          </p>
+          <p
+            v-if="item.number"
+            class="home__about__awards__award__content__list__item__number"
+            v-text="`{${item.number}}`" />
+
+          <p v-else-if="item.link" class="home__about__awards__award__content__list__item__link">
+            {<SvgArrow />}
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -30,13 +42,13 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import useScrollStore from '~/store/useScrollStore'
-import type { Service } from '~/types/wordpress/service'
+import type { HomepageAboutAwardsAward } from '~/types/wordpress/homepage'
 
 const props = defineProps<{
   i: number
   of: number
   active: number
-  data: Service
+  data: HomepageAboutAwardsAward
 }>()
 
 const { direction } = storeToRefs(useScrollStore())
@@ -81,7 +93,7 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss">
-.home__services__service {
+.home__about__awards__award {
   position: relative;
   max-width: var(--layout-max-width);
   padding-top: toScale(4rem);
@@ -94,7 +106,7 @@ const emit = defineEmits<{
   }
 
   &--no-bg {
-    .home__services__service__content {
+    .home__about__awards__award__content {
       background-color: transparent;
       &:after {
         background-color: transparent;
@@ -103,7 +115,7 @@ const emit = defineEmits<{
   }
 
   &:last-child {
-    .home__services__service__content {
+    .home__about__awards__award__content {
       padding-bottom: toScale(18rem);
     }
   }
@@ -120,12 +132,11 @@ const emit = defineEmits<{
     top: 0;
     left: 0;
     width: 100%;
-    height: 1px;
-    // background-color: red;
+    // height: 1px;
 
     &--in,
     &--out {
-      @extend .home__services__service__observer;
+      @extend .home__about__awards__award__observer;
     }
     &--in {
       transform: translateY(toScale(-2.4rem));
@@ -160,9 +171,24 @@ const emit = defineEmits<{
       @include gap(2, 'left', 'desktop');
       @include columns(4, 'desktop');
     }
-    &__description {
-      @include t-b1;
+
+    &__list {
       @include columns(6, 'desktop');
+      &__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &__label {
+          @include t-b1;
+        }
+
+        &__number,
+        &__link {
+          @include t-number;
+          width: toColumns(2);
+        }
+      }
     }
   }
 }

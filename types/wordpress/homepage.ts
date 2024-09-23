@@ -67,6 +67,17 @@ export interface WP_Homepage {
         credit: string
       }
       testimonials: WP_Testimonial_Objects
+      awards: {
+        title: string
+        awards: Array<{
+          platform: string
+          list: Array<{
+            label: string
+            number: number
+            link: string
+          }>
+        }>
+      }
     }
   }
 }
@@ -93,6 +104,20 @@ export interface HomepageAboutClients {
   list: Clients
 }
 
+export interface HomepageAboutAwardsAward {
+  platform: string
+  list: Array<{
+    label: string
+    number: number
+    link: string
+  }>
+}
+
+export interface HomepageAboutAwards {
+  title: string
+  awards: Array<HomepageAboutAwardsAward>
+}
+
 export interface HomepageAbout {
   title: string
   hint: string
@@ -107,6 +132,7 @@ export interface HomepageAbout {
     credit: string
   }
   testimonials: Testimonials
+  awards: HomepageAboutAwards
 }
 
 export interface Homepage {
@@ -163,6 +189,10 @@ export function parseHomepage(params: {
         credit: parseText(homepage?.acf.about.collaborator.credit),
       },
       testimonials: parseTestimonials({ testimonials }),
+      awards: {
+        title: parseText(homepage?.acf.about.awards.title),
+        awards: homepage?.acf.about.awards.awards || [],
+      },
     },
   }
 }
