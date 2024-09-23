@@ -11,6 +11,8 @@
           v-for="(testimonial, i) in data"
           :pos="i"
           :data="testimonial"
+          :active="activeEntered === i"
+          :expanded="expanded && active === i"
           @mouseenter="onTestimonialMouseEnter"
           @mouseleave="onTestimonialMouseLeave" />
       </div>
@@ -52,9 +54,12 @@ const props = defineProps<{
 const store = useStore()
 const { updateCursor, updateSection } = store
 const { cursor, section } = storeToRefs(store)
-const { direction } = storeToRefs(useScrollStore())
+const scrollStore = useScrollStore()
+const { updateScroll } = scrollStore
+const { direction } = storeToRefs(scrollStore)
 const { vw } = useResize()
 const { x: mouseX } = useMouse()
+
 // const { init, swipeLeft, swipeRight } = useSwipe({})
 
 const el = ref<HTMLElement>()
@@ -62,13 +67,22 @@ const contentEl = ref<HTMLElement>()
 
 const x = ref<number>(0)
 const active = ref<number>(0)
+const activeEntered = ref<number>(0)
+const expanded = ref<boolean>(false)
 
 watch(x, () => {
   const items = contentEl.value?.querySelectorAll('.home__about__testimonials__testimonial')
-  items?.length && gsap.set(items, { x: x.value })
+  items?.length &&
+    gsap.set(items, {
+      x: x.value,
+      onComplete: () => {
+        activeEntered.value = active.value
+      },
+    })
 })
 
 watch(active, () => {
+  expanded.value = false
   const item = el.value?.querySelectorAll('.home__about__testimonials__testimonial')[active.value]
   if (!contentEl.value || !item) return
   const { left } = item.getBoundingClientRect()
@@ -84,6 +98,12 @@ watch(section, (to, from) => {
   if (from === 'about-testimonials') updateCursor('default')
 })
 
+watch(expanded, () => {
+  onTestimonialMouseEnter()
+  updateScroll()
+  // updateCarouselCursor()
+})
+
 // watch(swipeRight, () => {
 //   active.value = Math.max(0, active.value - 1)
 // })
@@ -96,11 +116,10 @@ watch(mouseX, () => {
   if (
     section.value === 'about-testimonials' &&
     cursor.value !== 'default' &&
-    cursor.value !== 'plus'
+    cursor.value !== 'plus' &&
+    cursor.value !== 'close'
   ) {
-    if (active.value === 0) updateCursor('arrow-right')
-    else if (active.value === props.data.length - 1) updateCursor('arrow-left')
-    else mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
+    updateCarouselCursor()
   }
 })
 
@@ -114,16 +133,18 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 }
 
 function onMouseEnter() {
-  if (cursor.value === 'default')
-    mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
+  cursor.value === 'default' && updateCarouselCursor()
 }
 
-function onClick(e: MouseEvent) {
-  const { target } = e
-  console.log(target)
+async function onClick(e: MouseEvent) {
   if (cursor.value === 'arrow-right')
     active.value = Math.min(props.data.length - 1, active.value + 1)
   else if (cursor.value === 'arrow-left') active.value = Math.max(0, active.value - 1)
+  else if (cursor.value === 'plus') {
+    expanded.value = true
+  } else if (cursor.value === 'close') {
+    expanded.value = false
+  }
 }
 
 function updateActive(n: number) {
@@ -135,11 +156,17 @@ function onMouseLeave() {
 }
 
 function onTestimonialMouseEnter() {
-  updateCursor('plus')
+  updateCursor(expanded.value ? 'close' : 'plus')
 }
 
 function onTestimonialMouseLeave() {
-  mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
+  updateCarouselCursor()
+}
+
+function updateCarouselCursor() {
+  if (active.value === 0) updateCursor('arrow-right')
+  else if (active.value === props.data.length - 1) updateCursor('arrow-left')
+  else mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
 }
 </script>
 
@@ -163,8 +190,10 @@ function onTestimonialMouseLeave() {
         will-change: transform;
         pointer-events: none;
 
-        &__quote__label {
-          pointer-events: auto;
+        &--active {
+          .home__about__testimonials__testimonial__quote__label {
+            pointer-events: auto;
+          }
         }
       }
     }
