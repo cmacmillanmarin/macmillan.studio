@@ -70,8 +70,8 @@ defineProps<{
       -webkit-line-clamp: 5;
       -webkit-box-orient: vertical;
       padding-bottom: toScale(1rem);
-      @include t-h2;
       will-change: opacity;
+      @include t-h2;
 
       &--expanded {
         line-clamp: unset;

@@ -6,6 +6,7 @@ uniform int uNoise;
 uniform float uTime;
 uniform float uFade;
 uniform float uPixel;
+uniform float uOpacity;
 uniform vec2 uPixelSize;
 uniform vec2 uPlaneSize;  
 uniform int uTextureType;
@@ -79,7 +80,7 @@ void main() {
   }
   vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, uPixel);
 
-  gl_FragColor = vec4(mixedTexture.xyz, uFade);
+  gl_FragColor = vec4(mixedTexture.xyz, uFade * uOpacity);
 
   if (uNoise == 1) {
     gl_FragColor = vec4(vec3(0.0), noise(vec2(time) * vUv) * 0.1);

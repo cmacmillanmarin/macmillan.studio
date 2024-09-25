@@ -62,7 +62,7 @@ const el = ref<HTMLElement>()
 
 watch(current, () => {
   if (!el.value) return
-  const y = Math.min(0, bounding.value - vh.value - current.value) + 1
+  const y = Math.min(0, bounding.value - vh.value - current.value)
 
   const threshold = vh.value - layoutMargin.value * 2
   const progress = Math.min(1, current.value / vh.value)

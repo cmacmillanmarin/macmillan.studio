@@ -88,6 +88,7 @@ class Scene {
     object.size = object.size || { x: 1, y: 1, z: 1 }
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
     object.zoom = object.zoom || 1
+    object.opacity = object.opacity !== undefined ? object.opacity : 1
     if (object.img && !this.loadedTextures[object.id]) {
       this.loadedTextures[object.id] = this.loader.load(object.img.src || object.img.currentSrc)
       this.loaderMesh.material.uniforms.uTxt.value = this.loadedTextures[object.id]
@@ -99,7 +100,19 @@ class Scene {
     return this.objects.find(obj => obj.id === id)
   }
 
-  updateObject({ id, fixed, position, rotate, zoom, size, border, onClick, onIntersect }) {
+  updateObject({
+    id,
+    fixed,
+    position,
+    opacity,
+    rotate,
+    zoom,
+    size,
+    fade,
+    border,
+    onClick,
+    onIntersect,
+  }) {
     this.log(`updateObject() ${JSON.stringify(position)}, ${JSON.stringify(size)}`)
     const object = this.getObject(id)
     if (object) {
@@ -108,7 +121,9 @@ class Scene {
       object.position = position || object.position
       object.rotate = rotate || object.rotate
       object.size = size || object.size
+      object.fade = fade !== undefined ? fade : object.fade
       object.fixed = fixed || object.fixed
+      object.opacity = opacity !== undefined ? opacity : object.opacity
       object.onClick = onClick !== undefined ? onClick : object.onClick
       object.onIntersect = onIntersect !== undefined ? onIntersect : object.onIntersect
     }
@@ -192,6 +207,7 @@ class Scene {
         object.mesh.scale.z = object.size.z
 
         const { uniforms } = object.mesh.material
+        uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
         uniforms.uZoom.value = object.zoom
         uniforms.uBorderRadius.value = object.border
         uniforms.uTime.value += 0.05
@@ -323,6 +339,7 @@ class Scene {
             uFade: { type: 'f', value: 0.0 },
             uZoom: { type: 'f', value: 1.0 },
             uPixel: { type: 'f', value: 0.0 },
+            uOpacity: { type: 'f', value: 1.0 },
             uBorderRadius: { type: 'f', value: 16.0 },
             uPixelSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
             uTextureType: { type: 'i', value: 0 }, // 0 Video, 1 Image

@@ -1,43 +1,61 @@
 <template>
   <div ref="el" class="home__about__gallery">
-    <Ticker @update-position="updatePosition">
-      <HomeAboutGalleryImage :pos="1" :columns="4" :x="positions[0]" />
-      <HomeAboutGalleryImage :pos="2" :columns="3" :x="positions[1]" />
-      <HomeAboutGalleryImage :pos="3" :columns="5" :x="positions[2]" />
-      <HomeAboutGalleryImage :pos="4" :columns="6" :x="positions[3]" />
-      <HomeAboutGalleryImage :pos="5" :columns="3" :x="positions[4]" />
-      <HomeAboutGalleryImage :pos="6" :columns="4" :x="positions[5]" />
-      <HomeAboutGalleryImage :pos="7" :columns="6" :x="positions[6]" />
-      <HomeAboutGalleryImage :pos="8" :columns="4" :x="positions[7]" />
-      <HomeAboutGalleryImage :pos="9" :columns="5" :x="positions[8]" />
-      <HomeAboutGalleryImage :pos="10" :columns="3" :x="positions[9]" />
-      <HomeAboutGalleryImage :pos="11" :columns="2" :x="positions[10]" />
-      <HomeAboutGalleryImage :pos="12" :columns="4" :x="positions[11]" />
-      <HomeAboutGalleryImage :pos="13" :columns="6" :x="positions[12]" />
-      <HomeAboutGalleryImage :pos="14" :columns="4" :x="positions[13]" />
+    <Ticker planes-id="gallery-image">
+      <HomeAboutGalleryImage v-for="(image, i) in images" :pos="i + 1" :columns="image" />
     </Ticker>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
+import { fadeIn, fadeOut } from '~/utils/animations'
+
+const { $scene }: any = useNuxtApp()
 
 const store = useStore()
 const { section } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
-const positions = ref<Array<number>>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+const images = ref<Array<number>>([4, 3, 5, 6, 3, 4, 6, 4, 5, 3, 2, 4, 6, 4])
+const imagesFade = ref<number>(0)
 
 watch(section, (to, from) => {
-  section.value === 'about-testimonials'
-    ? fadeIn({ el: el.value, delay: 0.2 })
-    : fadeOut({ el: el.value })
+  if (!el.value) return
+  gsap.killTweensOf(imagesFade)
+  if (section.value === 'about-testimonials') {
+    fadeIn({ el: el.value, delay: 0.2 })
+    gsap.to(imagesFade, {
+      value: 1,
+      duration: 1,
+      delay: 0.2,
+      onUpdate: () => {
+        images.value.forEach((position, index) => {
+          $scene.updateObject({
+            id: `gallery-image-${index + 1}`,
+            opacity: imagesFade.value,
+          })
+        })
+      },
+    })
+  } else {
+    fadeOut({ el: el.value })
+    gsap.to(imagesFade, {
+      value: 0,
+      duration: 0.6,
+      onUpdate: () => {
+        images.value.forEach((position, index) => {
+          $scene.updateObject({
+            id: `gallery-image-${index + 1}`,
+            opacity: imagesFade.value,
+          })
+        })
+      },
+    })
+  }
 })
-
-function updatePosition(updatedPositions: Array<number>) {
-  positions.value = [...updatedPositions]
-}
 </script>
 
 <style lang="scss">

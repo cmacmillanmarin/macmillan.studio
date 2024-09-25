@@ -32,6 +32,7 @@ export default function useScroll() {
     scrollTargetId,
     scrollUpdate,
     isVirtualScroll,
+    renderCallbacks,
   } = storeToRefs(scrollStore)
 
   const virtualScroll = useScrollVirtual()
@@ -127,6 +128,7 @@ export default function useScroll() {
       $scene.updateY(data.current)
       $scene.render()
     }
+    for (const callback of renderCallbacks.value) callback()
     updateScrollData(data)
   }
 

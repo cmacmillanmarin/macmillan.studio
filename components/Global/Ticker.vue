@@ -1,5 +1,10 @@
 <template>
-  <div ref="el" class="ticker" :style="{ height }" v-intersect="{ callback: onIntersect }">
+  <div
+    ref="el"
+    class="ticker"
+    data-scroll-set-position
+    :style="{ height }"
+    v-intersect="{ callback: onIntersect }">
     <slot />
   </div>
 </template>
@@ -7,17 +12,21 @@
 <script lang="ts" setup>
 import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
-import { toPx } from '~/utils/index'
+import { toPx, round } from '~/utils/index'
 import useScrollStore from '~/store/useScrollStore'
 import type { TickerItems, TickerItem } from '~/types/front'
 
+const props = defineProps<{
+  planesId?: string
+}>()
+
 const scrollStore = useScrollStore()
-const { updateScroll } = scrollStore
-const { scrollUpdated, scrollDirection, scrollSpeed } = storeToRefs(scrollStore)
+const { updateScroll, addRenderCallback, removeRenderCallback } = scrollStore
+const { scrollUpdated } = storeToRefs(scrollStore)
 
 const { onResize } = useResize()
 const { onEnter } = useKeyboard()
-const { addTicker, killTicker } = useRaf()
+const { getBounding } = useVirtualScrollAndThreeTools()
 const { init, onPan, panStart, panEnd, panHorizontal, panHorizontalDirection } = useSwipe({
   preventLeft: true,
   preventRight: true,
@@ -28,6 +37,7 @@ const el = ref<HTMLElement>()
 const minHeight = ref<number>(0)
 const height = computed(() => (minHeight.value !== 0 ? toPx(minHeight.value) : 'auto'))
 
+const y = ref<number>(0)
 const items = ref<TickerItems>([])
 const firstItem = computed<TickerItem | undefined>(() => items.value[0])
 const lastItem = computed<TickerItem | undefined>(() => items.value[items.value.length - 1])
@@ -43,6 +53,9 @@ let _containerWidth: number = 0
 let _moving: boolean = false
 
 watch(scrollUpdated, () => {
+  if (!el.value) return
+  const { top } = getBounding(el.value)
+  y.value = top
   update({ ignoreUpdateScroll: true })
 })
 
@@ -50,14 +63,14 @@ watch(onResize, () => {
   update()
 })
 
-watch(onEnter, () => {
-  if (_moving) {
-    killTicker(move)
-    _moving = false
-  } else {
-    addTicker(move)
-  }
-})
+// watch(onEnter, () => {
+//   if (_moving) {
+//     removeRenderCallback(move)
+//     _moving = false
+//   } else {
+//     addRenderCallback(move)
+//   }
+// })
 
 // watch(scrollSpeed, () => {
 //   if (!onPan.value) _speed = _speedInit + scrollSpeed.value * 0.025
@@ -88,7 +101,7 @@ onMounted(async () => {
 })
 
 function onIntersect(el: HTMLElement, visible: boolean) {
-  visible ? addTicker(move) : killTicker(move)
+  visible ? addRenderCallback(move) : removeRenderCallback(move)
 }
 
 function move() {
@@ -119,14 +132,28 @@ function move() {
     if (x < item.width * -1 || x > _containerWidth) {
       x = _containerWidth
     }
-    item.el.dataset.tickerX = x.toString()
+    x = round(x)
+    if (props.planesId) {
+      const { $scene }: any = useNuxtApp()
+      const index = items.value.indexOf(item)
+      const totalDistance = _containerWidth + item.width
+      const current = x + item.width
+      const progress = current / totalDistance
+      const distanceToCenter = distanceToMidpoint(progress)
+      $scene.updateObject({
+        id: `${props.planesId}-${index + 1}`,
+        position: { x: x, y: y.value },
+        zoom: 1 + 0.4 * progress,
+      })
+      $scene.render()
+    }
     gsap.set(item.el, { x })
     item.x = x
   }
-  emit(
-    'update-position',
-    items.value.map(item => item.x)
-  )
+}
+
+function distanceToMidpoint(value: number): number {
+  return Math.abs(value - 0.5)
 }
 
 function update(params?: { ignoreUpdateScroll: boolean }) {
@@ -158,12 +185,8 @@ function update(params?: { ignoreUpdateScroll: boolean }) {
 }
 
 onBeforeUnmount(() => {
-  killTicker(move)
+  removeRenderCallback(move)
 })
-
-const emit = defineEmits<{
-  (e: 'update-position', value: Array<number>): void
-}>()
 </script>
 
 <style lang="scss">

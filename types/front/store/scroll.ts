@@ -18,6 +18,7 @@ export interface State {
   target: number
   targetId: string
   inTarget: boolean
+  renderCallbacks: Array<() => void>
 }
 
 export interface Data {

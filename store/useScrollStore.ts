@@ -19,6 +19,7 @@ export default defineStore('use-scroll-store', {
     target: -1,
     targetId: '',
     inTarget: true,
+    renderCallbacks: [],
   }),
   getters: {
     isVirtualScroll(): boolean {
@@ -91,6 +92,15 @@ export default defineStore('use-scroll-store', {
       this.speed = data.speed
       this.progress = round(data.current / data.bounding, 2)
       this.inTarget = data.inTarget
+    },
+    addRenderCallback(callback: () => void) {
+      this.renderCallbacks.push(callback)
+    },
+    removeRenderCallback(callback: () => void) {
+      const index = this.renderCallbacks.indexOf(callback)
+      if (index > -1) {
+        this.renderCallbacks.splice(index, 1)
+      }
     },
     async updateScrollTarget(value: number): Promise<void> {
       this.target = value
