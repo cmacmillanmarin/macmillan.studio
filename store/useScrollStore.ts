@@ -77,7 +77,7 @@ export default defineStore('use-scroll-store', {
       await nextTick() // Updates layout
       await nextTick() // Makes sure the scroll is updated
       this.updated++
-      console.log(this.updated)
+      // console.log(this.updated)
     },
     disableScroll(value: boolean) {
       this.disabled = value

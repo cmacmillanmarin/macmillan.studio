@@ -8,8 +8,8 @@
 .svg__play--small {
   display: block;
   fill: none;
-  width: 1.6rem;
-  height: 2.4rem;
+  width: toScale(1.6rem);
+  height: toScale(2.4rem);
   path {
     fill: var(--lime);
   }

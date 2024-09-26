@@ -9,7 +9,7 @@
 <style lang="scss">
 .svg__arrow {
   overflow: visible;
-  width: 1.1rem;
+  width: toScale(1.1rem);
   display: inline-block;
   &__line {
     stroke: var(--black);

@@ -105,8 +105,8 @@ onBeforeUnmount(() => {
 
   &__dot {
     @include absolute-center;
-    width: 8rem;
-    height: 8rem;
+    width: toScale(8rem);
+    height: toScale(8rem);
     background-color: var(--black);
     border-radius: 50%;
 
