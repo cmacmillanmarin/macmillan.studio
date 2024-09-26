@@ -41,7 +41,7 @@
             { 'home__projects__buttons__button--active': activeList === 'selected' },
           ]"
           @mouseenter="onButtonMouseEnter"
-          @click="updateActiveList('selected')">
+          @click="updateActiveListToSelected">
           <span class="home__projects__buttons__button__label">
             <transition
               mode="out-in"
@@ -70,7 +70,7 @@
             { 'home__projects__buttons__button--active': activeList === 'all' },
           ]"
           @mouseenter="onButtonMouseEnter"
-          @click="updateActiveList('all')">
+          @click="updateActiveListToAll">
           <span class="home__projects__buttons__button__label">
             <transition
               mode="out-in"
@@ -92,7 +92,7 @@
 
     <HomeProjectsProject
       v-for="(project, i) in activeListProjects"
-      :key="`${activeListProjects.length}-${project.slug}`"
+      :key="`${activeList}-${project.slug}`"
       :list="activeList"
       :i="i"
       :of="activeListProjects.length - 1"
@@ -102,6 +102,20 @@
       :side-x="i % 2 === 0 ? -1 : 1"
       :side-y="-1"
       @update-active="updateActive" />
+
+    <div class="home__projects__videos" data-scroll-sticky>
+      <video
+        v-for="(video, i) in instancedVideos"
+        :id="slugify(video.src)"
+        :alt="video.alt"
+        :width="video.width"
+        :height="video.height"
+        muted
+        loop
+        crossorigin="anonymous">
+        <source :src="video.src" :type="video.mime" />
+      </video>
+    </div>
   </div>
 </template>
 
@@ -113,6 +127,8 @@ import { transitionShuffleIn, transitionShuffleOut, transitionDone } from '~/uti
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
+import type { Video } from '~/types/wordpress'
+import { slugify } from '~/utils'
 
 const props = defineProps<{
   data: HomepageProjects
@@ -124,11 +140,11 @@ const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { disableScroll, updateScroll, updateScrollTargetId } = scrollStore
-const { current, inTarget } = storeToRefs(scrollStore)
+const { current, inTarget, scrollUpdated } = storeToRefs(scrollStore)
 
 const { vh } = useResize()
 
-const { onReset, getBounding } = useVirtualScrollAndThreeTools()
+const { getBounding } = useVirtualScrollAndThreeTools()
 
 const top = ref<number>(0)
 const bottom = ref<number>(0)
@@ -146,16 +162,29 @@ const activeList = ref<'selected' | 'all'>('selected')
 const selectedProjectsList = ref<Projects>(props.data.list.filter(project => project.selected))
 const activeListProjects = ref<Projects>(selectedProjectsList.value)
 
-watch(onReset, () => {
+const instancedVideos = ref<Array<Video>>([])
+
+watchEffect(() => {
+  activeListProjects.value.forEach(item => {
+    const isVideoProject = item.thumbnail.type === 'vid' && item.thumbnail.video.src
+    if (isVideoProject && instancedVideos.value.indexOf(item.thumbnail.video) === -1) {
+      instancedVideos.value.push(item.thumbnail.video)
+    }
+  })
+})
+
+watch([scrollUpdated], () => {
   updateBounding()
 })
 
-watch(activeList, () => {
+watch(activeList, async () => {
   // _current = current.value
   // disableScroll(true)
-  updateScrollTargetId('projects')
+
   // waitInTarget.value = true
   updateActiveListProjects()
+  await nextTick()
+  updateScrollTargetId('projects')
 })
 
 watch(inTarget, () => {
@@ -180,7 +209,19 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   visible && updateSection('projects')
 }
 
-async function updateActiveList(value: 'selected' | 'all') {
+function updateActiveListToSelected(e: MouseEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+  updateActiveList('selected')
+}
+
+function updateActiveListToAll(e: MouseEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+  updateActiveList('all')
+}
+
+function updateActiveList(value: 'selected' | 'all') {
   activeList.value = value
 }
 
@@ -199,7 +240,7 @@ function updateActiveListProjects() {
     activeList.value === 'selected' ? selectedProjectsList.value : props.data.list
 }
 
-function updateBounding() {
+async function updateBounding() {
   const bounding = getBounding(el.value as HTMLElement)
   top.value = bounding.top
   bottom.value = bounding.bottom - vh.value
@@ -224,7 +265,8 @@ defineEmits(['update-active'])
     align-items: flex-start;
     column-gap: var(--layout-gutter);
     row-gap: var(--layout-gutter);
-    margin: toScale(12rem) auto;
+    padding-top: toScale(12rem);
+    padding-bottom: toScale(12rem);
   }
 
   &__index,
@@ -295,6 +337,24 @@ defineEmits(['update-active'])
     top: calc(var(--vh));
     left: 0;
     width: 100%;
+  }
+
+  &__videos {
+    position: absolute;
+    z-index: 9;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: max-content;
+    opacity: 0;
+    pointer-events: none;
+    video {
+      display: block;
+      width: toColumns(1);
+      height: max-content;
+    }
   }
 }
 </style>

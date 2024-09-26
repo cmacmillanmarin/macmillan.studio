@@ -100,6 +100,7 @@ watch(section, (to, from) => {
 watch(expanded, () => {
   onTestimonialMouseEnter()
   updateScroll()
+  emit('update-expanded', expanded.value)
   // updateCarouselCursor()
 })
 
@@ -167,6 +168,8 @@ function updateCarouselCursor() {
   else if (active.value === props.data.length - 1) updateCursor('arrow-left')
   else mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
 }
+
+const emit = defineEmits(['update-expanded'])
 </script>
 
 <style lang="scss">

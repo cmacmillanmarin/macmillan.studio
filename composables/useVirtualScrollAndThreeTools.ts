@@ -2,19 +2,7 @@ import { storeToRefs } from 'pinia'
 import useScrollStore from '~/store/useScrollStore'
 
 export default function userVirtualScrollAndThreeTools() {
-  const { onResize } = useResize()
-  const { current, scrollUpdate } = storeToRefs(useScrollStore())
-
-  const onReset = ref<number>(0)
-
-  watch([onResize, scrollUpdate], update)
-  onMounted(update)
-
-  async function update() {
-    await nextTick() // In default layout, both resize and scrollUpdate await a tick before scroll.update() call
-    await nextTick() // After scroll.update() call
-    onReset.value++
-  }
+  const { current } = storeToRefs(useScrollStore())
 
   function getBounding(el: HTMLElement): {
     top: number
@@ -44,7 +32,6 @@ export default function userVirtualScrollAndThreeTools() {
   }
 
   return {
-    onReset,
     getBounding,
   }
 }

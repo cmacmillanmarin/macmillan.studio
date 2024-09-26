@@ -18,7 +18,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 
 const store = useStore()
-const { isPreloaded, isLoading } = storeToRefs(store)
+const { isPreloaded } = storeToRefs(store)
 
 const scroll = useScroll()
 

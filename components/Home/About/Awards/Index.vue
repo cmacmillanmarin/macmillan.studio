@@ -8,7 +8,12 @@
     </div>
 
     <div ref="listEl" class="home__about__awards__list">
-      <div ref="logoEl" class="home__about__awards__list__logo">
+      <div
+        ref="logoEl"
+        :class="[
+          'home__about__awards__list__logo',
+          { 'home__about__awards__list__logo--safari': safari },
+        ]">
         <SvgLogo data-scroll-sticky />
       </div>
       <HomeAboutAwardsAward
@@ -40,6 +45,7 @@ const store = useStore()
 const { updateSection } = store
 const { section } = storeToRefs(store)
 const { direction } = storeToRefs(useScrollStore())
+const { safari } = useDevice()
 
 const activeAward = ref<number>(0)
 
@@ -132,8 +138,13 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       mix-blend-mode: color;
       @include will-fade;
 
+      &--safari {
+        mix-blend-mode: color-burn;
+      }
+
       svg {
         width: toColumns(8);
+        height: auto;
         path {
           fill: var(--lime);
         }

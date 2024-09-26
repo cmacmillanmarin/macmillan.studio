@@ -9,6 +9,7 @@
     :width="data.width"
     :height="data.height"
     :loading="lazy ? 'lazy' : undefined"
+    crossorigin="anonymous"
     :class="['custom-image', { 'custom-image--cover': cover }, { 'will-fade': fade }]"
     @load="onload"
     v-intersect="{ callback: intersect }" />

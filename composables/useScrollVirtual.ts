@@ -251,6 +251,8 @@ export default function useScrollVirtual() {
       if (child.setPosition) {
         child.el.dataset.positionTop = childBounding.top.toString()
         child.el.dataset.positionLeft = childBounding.left.toString()
+        child.el.dataset.positionBottom = childBounding.bottom.toString()
+        child.el.dataset.positionRight = childBounding.right.toString()
       }
       child.inView = _inView(childBounding)
       if (child.setProgress) {

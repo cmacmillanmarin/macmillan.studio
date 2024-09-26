@@ -168,7 +168,10 @@ class Controller {
     if (!this.objects) return
     const index = this.objects.findIndex(object => object.id === id)
     const object = this.objects[index]
-    if (object?.mesh) {
+    if (!object) return
+    console.log('remove', object.id)
+    if (object.mesh) {
+      console.log('remove with transition', object.id)
       gsap.killTweensOf(object.mesh.material.uniforms.uFade)
       gsap.to(object.mesh.material.uniforms.uFade, {
         value: 0.0,
@@ -181,7 +184,7 @@ class Controller {
           this.objects.splice(index, 1)
         },
       })
-    } else {
+    } else if (index !== -1) {
       this.objects.splice(index, 1)
     }
   }
@@ -199,7 +202,19 @@ class Controller {
       object.inView = this.inView(object)
       if (object.inView) {
         if (!object.mesh) {
-          if (object.img) {
+          // CHECKS
+
+          if (object.video) {
+            const isVideoPlaying = !!(
+              object.video.currentTime > 0 &&
+              !object.video.paused &&
+              object.video.readyState > 2
+            )
+            if (!isVideoPlaying) {
+              console.log('not playing')
+              continue
+            }
+          } else if (object.img) {
             const src = object.img.src || object.img.currentSrc
             const id = slugify(src)
             console.log(id)
@@ -214,6 +229,9 @@ class Controller {
             console.warn(`No available planes for ${object.id}`)
             continue
           }
+
+          // ASIGNATIONS
+
           object.mesh = availablePlane.mesh
           object.meshId = availablePlane.id
           object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0

@@ -7,23 +7,12 @@
       { 'home__projects__project--all-and-selected': all && data.selected },
     ]"
     data-scroll-set-position>
-    <video
-      v-if="data.thumbnail.type === 'vid' && data.thumbnail.video.src"
-      ref="videoEl"
-      :alt="data.thumbnail.video.alt"
-      :width="data.thumbnail.video.width"
-      :height="data.thumbnail.video.height"
-      muted
-      loop
-      crossorigin="anonymous"
-      class="home__projects__project__vid">
-      <source :src="data.thumbnail.video.src" :type="data.thumbnail.video.mime" />
-    </video>
     <CustomImage
-      v-else-if="data.thumbnail.image.src"
+      v-if="data.thumbnail.image.src"
       ref="customImageEl"
       :data="data.thumbnail.image"
-      class="home__projects__project__img" />
+      class="home__projects__project__img"
+      @load="onImageLoaded" />
 
     <ClientOnly>
       <Teleport to="#top-layer">
@@ -72,7 +61,7 @@ const router = useRouter()
 
 const { $scene }: any = useNuxtApp()
 const { getColumnWidth } = useCss()
-const { vw, vh, lvw } = useResize()
+const { vw, vh } = useResize()
 
 const store = useStore()
 const { updateCursor } = store
@@ -102,6 +91,23 @@ const active = computed<boolean>(
 const size = computed<{ x: number; y: number }>(() => {
   const width = getColumnWidth(all.value && props.data.selected ? 4 : 3)
   return { x: width, y: (width * 7) / 5 }
+})
+
+const inTarget = computed<boolean>(
+  () =>
+    (!all.value && progress.value > 0.3 && leaveProgress.value !== 1) ||
+    (all.value && progress.value > 0 && leaveProgress.value !== 1)
+)
+
+const loaded = ref<boolean>(false)
+
+let videoPlayRequested: boolean = false
+
+watch(section, () => {
+  if (!section.value.includes('project')) {
+    videoEl.value?.pause()
+    videoPlayRequested = false
+  }
 })
 
 watch([el, active], async () => {
@@ -139,7 +145,7 @@ watch([el, current], () => {
   leaveProgress.value = Math.min(Math.max(0, (current.value - bottom) / (leaveBottom - bottom)), 1)
 })
 
-watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProjectEntered], () => {
+watch([() => props.top, () => props.bottom, progress, leaveProgress, inTarget, loaded], () => {
   const sizeX = size.value.x * (progress.value + leaveProgress.value)
   const sizeY = size.value.y * (progress.value + leaveProgress.value)
 
@@ -166,12 +172,27 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, isInProject
     gsap.set(collaboratorEl.value, { x: htmlx - 14, y: htmly - 12 + htmlextra })
 
   if (videoEl.value) {
-    progress.value > 0.25 && leaveProgress.value !== 1
-      ? videoEl.value.play()
-      : videoEl.value.pause()
+    const isVideoPlaying = !!(
+      videoEl.value.currentTime > 0 &&
+      !videoEl.value.paused &&
+      videoEl.value.readyState > 2
+    )
+    if (inTarget.value && !isVideoPlaying) {
+      if (!videoPlayRequested) {
+        console.log('play video', projectId.value)
+        videoEl.value.play()
+        videoPlayRequested = true
+      }
+    } else if (!inTarget.value && isVideoPlaying) {
+      console.log('pause video', projectId.value)
+      videoPlayRequested = false
+      videoEl.value.pause()
+    }
   }
 
   const zoom = 0.4
+
+  if (!loaded.value) return
 
   if (all.value) {
     const { top, left } = getBounding(el.value as HTMLElement)
@@ -214,13 +235,24 @@ watch(section, () => {
 })
 
 onMounted(() => {
-  // !isInProjectEntered.value && videoEl.value?.play()
+  const id = slugify(props.data.thumbnail.video.src)
+  if (!!id) {
+    const video = document.getElementById(slugify(id)) as HTMLVideoElement | undefined
+    if (video) {
+      videoEl.value = video
+      if (videoEl.value.readyState > 2) onVideoLoaded()
+      else videoEl.value.addEventListener('canplay', onVideoLoaded)
+    }
+  }
+})
+
+function onVideoLoaded() {
+  // console.log(videoEl.value?.readyState)
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
     video: videoEl.value,
-    img: customImageEl.value?.el,
-    size: { x: 1, y: 1, z: 1 },
+    size: { x: 0, y: 0, z: 1 },
     position: { x: 0, y: 0 },
     fixed: { from: props.top, to: props.bottom },
     border: 16,
@@ -229,7 +261,25 @@ onMounted(() => {
     multiplyColor: 'darkGrey',
     fade: true,
   })
-})
+  loaded.value = true
+}
+
+function onImageLoaded() {
+  $scene.addObject({
+    id: projectId.value,
+    type: 'plane',
+    img: customImageEl.value?.el,
+    size: { x: 0, y: 0, z: 1 },
+    position: { x: 0, y: 0 },
+    fixed: { from: props.top, to: props.bottom },
+    border: 16,
+    onClick: openProject,
+    onIntersect: onProjectIntersect,
+    multiplyColor: 'darkGrey',
+    fade: true,
+  })
+  loaded.value = true
+}
 
 function openProject() {
   intersect.value = false
@@ -241,6 +291,7 @@ function onProjectIntersect(state: boolean) {
 }
 
 onBeforeUnmount(() => {
+  videoEl.value?.pause()
   $scene.removeObject({ id: projectId.value })
 })
 
@@ -279,7 +330,7 @@ const emit = defineEmits<{
 
   &__vid,
   &__img {
-    opacity: 0;
+    // opacity: 0;
     pointer-events: none;
     @include absolute-center;
     width: toColumns(3);

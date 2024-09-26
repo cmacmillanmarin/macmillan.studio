@@ -185,8 +185,8 @@ const emit = defineEmits<{
 
         &__number,
         &__link {
-          @include t-number;
           width: toColumns(2);
+          @include t-number;
         }
       }
     }

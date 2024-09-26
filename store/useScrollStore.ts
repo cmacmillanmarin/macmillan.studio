@@ -69,11 +69,15 @@ export default defineStore('use-scroll-store', {
     updateEl(el?: HTMLElement) {
       this.el = el
     },
-    async updateScroll() {
+    updateScroll() {
       this.update++
+      this.updateScrollUpdated()
+    },
+    async updateScrollUpdated() {
       await nextTick() // Updates layout
       await nextTick() // Makes sure the scroll is updated
-      this.updated = this.update
+      this.updated++
+      console.log(this.updated)
     },
     disableScroll(value: boolean) {
       this.disabled = value

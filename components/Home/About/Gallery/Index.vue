@@ -1,6 +1,6 @@
 <template>
   <div ref="el" class="home__about__gallery">
-    <Ticker :planes-id="planeIds">
+    <Ticker ref="tickerEl" :planes-id="planeIds">
       <HomeAboutGalleryItem
         v-for="(item, i) in items"
         :pos="i + 1"
@@ -16,6 +16,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import type { HomepageAboutGallery } from '~/types/wordpress/homepage'
 import { fadeIn, fadeOut } from '~/utils/animations'
+import Ticker from '~/components/Global/Ticker.vue'
 
 const props = defineProps<{
   data: HomepageAboutGallery
@@ -27,20 +28,11 @@ const store = useStore()
 const { section } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
-const items = ref<HomepageAboutGallery>([
-  ...props.data,
-  ...props.data,
-  ...props.data,
-  ...props.data,
-  ...props.data,
-  ...props.data,
-  ...props.data,
-  ...props.data,
-  ...props.data,
-  ...props.data,
-])
+const items = ref<HomepageAboutGallery>([...props.data])
 const itemsFade = ref<number>(0)
 const planeIds = ref<string>(`gallery-image-${Date.now()}`)
+
+const tickerEl = ref<typeof Ticker>()
 
 watch(section, () => {
   gsap.killTweensOf(itemsFade)
@@ -61,6 +53,14 @@ function onItemsFadeUpdate() {
     })
   })
 }
+
+function update() {
+  tickerEl.value?.update()
+}
+
+defineExpose({
+  update,
+})
 </script>
 
 <style lang="scss">

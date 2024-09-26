@@ -9,6 +9,7 @@ export default function useScroll() {
   const routeHash = computed<string>(() => route.hash?.substring(1) || '')
 
   const { touch } = useDevice()
+  const { onResize } = useResize()
 
   const { create: createScrollLock, destroy: destroyScrollLock } = useScrollLock()
 
@@ -22,6 +23,7 @@ export default function useScroll() {
     updateScrollData,
     updateScrollMode,
     updateScrollTargetId,
+    updateScrollUpdated,
     disableScroll,
   } = scrollStore
   const {
@@ -89,7 +91,7 @@ export default function useScroll() {
     updateScrollTargetId(routeHash.value)
   })
 
-  watch([scrollUpdate], async () => {
+  watch([onResize, scrollUpdate], async () => {
     await nextTick()
     update()
   })
@@ -110,10 +112,12 @@ export default function useScroll() {
 
   function update() {
     isVirtualScroll.value ? virtualScroll.update() : nativeScroll.update()
+    updateScrollUpdated()
   }
 
   function reset() {
     isVirtualScroll.value ? virtualScroll.reset() : nativeScroll.reset()
+    updateScrollUpdated()
   }
 
   async function forceReset() {

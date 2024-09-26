@@ -34,8 +34,11 @@ export async function get(call: string): Promise<any> {
   return new Promise(async (resolve): Promise<any> => {
     const config = useRuntimeConfig()
     const { IS_OFFLINE } = config.public
-
-    if (IS_OFFLINE) return resolve(getData({ call: pathFrom({ call }) }))
+    console.log('get', IS_OFFLINE)
+    if (IS_OFFLINE) {
+      console.log(pathFrom({ call }))
+      return resolve(getData({ call: pathFrom({ call }) }))
+    }
 
     try {
       const data = await fetch(apiCall({ call })).then(r => r.json())

@@ -38,6 +38,9 @@ export default function useDevice() {
   }
 
   function _update(): void {
+    safari.value =
+      navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') <= -1
+
     breakpoint.value = window.getComputedStyle(document.body, '::after').getPropertyValue('content')
     isMobile.value = breakpoint.value.includes('mobile')
     isTablet.value = breakpoint.value.includes('tablet')

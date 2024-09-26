@@ -15,7 +15,8 @@
             ref="thumbnailImageEl"
             :data="data.thumbnail"
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
-            data-scroll-set-position />
+            data-scroll-set-position
+            @load="thumbnailImageLoaded = true" />
           <p class="home__about__intro__content__thumbnail__credit">{{ data.credit }}</p>
         </div>
         <div class="home__about__intro__content__detail">
@@ -42,7 +43,8 @@
             ref="collaboratorImageEl"
             :data="data.collaborator.thumbnail"
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
-            data-scroll-set-position />
+            data-scroll-set-position
+            @load="collaboratorImageLoaded = true" />
           <p class="home__about__intro__collaborator__thumbnail__credit">
             {{ data.collaborator.credit }}
           </p>
@@ -51,8 +53,10 @@
     </div>
 
     <div class="home__about__testimonials-and-gallery">
-      <HomeAboutTestimonials :data="data.testimonials" />
-      <HomeAboutGallery :data="data.gallery" />
+      <HomeAboutTestimonials
+        :data="data.testimonials"
+        @update-expanded="onTestimonialsUpdateExpanded" />
+      <HomeAboutGallery ref="galleryEl" :data="data.gallery" />
     </div>
 
     <HomeAboutAwards :data="data.awards" />
@@ -66,6 +70,7 @@ import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAbout } from '~/types/wordpress/homepage'
 import CustomImage from '~/components/Global/CustomImage.vue'
+import HomeAboutGallery from '~/components/Home/About/Gallery/Index.vue'
 
 defineProps<{
   data: HomepageAbout
@@ -82,12 +87,58 @@ const { toScale } = useCss()
 const { getBounding } = useVirtualScrollAndThreeTools()
 
 const introEl = ref<HTMLElement>()
+const thumbnailImageLoaded = ref<boolean>(false)
 const thumbnailImageEl = ref<typeof CustomImage>()
+const collaboratorImageLoaded = ref<boolean>(false)
 const collaboratorImageEl = ref<typeof CustomImage>()
+const galleryEl = ref<typeof HomeAboutGallery>()
 
 const imagesFade = ref<number>(0)
 
+watch(thumbnailImageLoaded, () => {
+  if (thumbnailImageEl.value && thumbnailImageLoaded.value) {
+    $scene.preload(thumbnailImageEl.value.el)
+    $scene.addObject({
+      id: 'about-thumbnail',
+      type: 'plane',
+      img: thumbnailImageEl.value.el,
+      position: { x: 0, y: 0 },
+      size: { x: 0, y: 0, z: 1 },
+    })
+    updateImagePositions()
+  }
+})
+
+watch(collaboratorImageLoaded, () => {
+  if (collaboratorImageEl.value && collaboratorImageLoaded.value) {
+    $scene.preload(collaboratorImageEl.value.el)
+    $scene.addObject({
+      id: 'about-collaborator-thumbnail',
+      type: 'plane',
+      img: collaboratorImageEl.value.el,
+      position: { x: 0, y: 0 },
+      size: { x: 0, y: 0, z: 1 },
+    })
+    updateImagePositions()
+  }
+})
+
 watch(scrollUpdated, () => {
+  updateImagePositions()
+})
+
+watch(section, () => {
+  gsap.killTweensOf(imagesFade)
+  if (section.value === 'about') {
+    fadeIn({ el: introEl.value, delay: 0.2 })
+    gsap.to(imagesFade, { value: 1, duration: 1, delay: 0.2, onUpdate: onImagesFadeUpdate })
+  } else {
+    fadeOut({ el: introEl.value })
+    gsap.to(imagesFade, { value: 0, duration: 0.6, onUpdate: onImagesFadeUpdate })
+  }
+})
+
+function updateImagePositions() {
   if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
   const thumbnailImageBounding = getBounding(thumbnailImageEl.value.el)
   const thumbnailImageWidth = thumbnailImageEl.value.el.clientWidth
@@ -107,48 +158,26 @@ watch(scrollUpdated, () => {
     size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
     border: toScale(16),
   })
-})
-
-watch(section, () => {
-  gsap.killTweensOf(imagesFade)
-  if (section.value === 'about') {
-    fadeIn({ el: introEl.value, delay: 0.2 })
-    gsap.to(imagesFade, { value: 1, duration: 1, delay: 0.2, onUpdate: onImagesFadeUpdate })
-  } else {
-    fadeOut({ el: introEl.value })
-    gsap.to(imagesFade, { value: 0, duration: 0.6, onUpdate: onImagesFadeUpdate })
-  }
-})
+}
 
 function onImagesFadeUpdate() {
   $scene.updateObject({ id: 'about-thumbnail', opacity: imagesFade.value })
   $scene.updateObject({ id: 'about-collaborator-thumbnail', opacity: imagesFade.value })
 }
 
-onMounted(() => {
-  if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
-  $scene.preload(thumbnailImageEl.value.el)
-  $scene.preload(collaboratorImageEl.value.el)
-  $scene.addObject({
-    id: 'about-thumbnail',
-    type: 'plane',
-    img: thumbnailImageEl.value.el,
-    position: { x: 0, y: 0 },
-    size: { x: 0, y: 0, z: 1 },
-  })
-  $scene.addObject({
-    id: 'about-collaborator-thumbnail',
-    type: 'plane',
-    img: collaboratorImageEl.value.el,
-    position: { x: 0, y: 0 },
-    size: { x: 0, y: 0, z: 1 },
-  })
-})
-
 function onIntersect(el: HTMLElement, visible: boolean) {
   if (visible) updateSection('about')
   else if (direction.value === 'up') updateSection('services')
 }
+
+function onTestimonialsUpdateExpanded() {
+  galleryEl.value?.update()
+}
+
+onBeforeUnmount(() => {
+  $scene.removeObject('about-thumbnail')
+  $scene.removeObject('about-collaborator-thumbnail')
+})
 </script>
 
 <style lang="scss">

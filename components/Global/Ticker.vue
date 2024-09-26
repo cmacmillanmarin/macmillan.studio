@@ -24,8 +24,6 @@ const scrollStore = useScrollStore()
 const { updateScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { scrollUpdated } = storeToRefs(scrollStore)
 
-const { onResize } = useResize()
-const { onEnter } = useKeyboard()
 const { getBounding } = useVirtualScrollAndThreeTools()
 const { init, onPan, panStart, panEnd, panHorizontal, panHorizontalDirection } = useSwipe({
   preventLeft: true,
@@ -53,32 +51,9 @@ let _containerWidth: number = 0
 let _moving: boolean = false
 
 watch(scrollUpdated, () => {
-  if (!el.value) return
-  const { top } = getBounding(el.value)
-  y.value = top
   update({ ignoreUpdateScroll: true })
+  move()
 })
-
-watch(onResize, () => {
-  update()
-})
-
-// watch(onEnter, () => {
-//   if (_moving) {
-//     removeRenderCallback(move)
-//     _moving = false
-//   } else {
-//     addRenderCallback(move)
-//   }
-// })
-
-// watch(scrollSpeed, () => {
-//   if (!onPan.value) _speed = _speedInit + scrollSpeed.value * 0.025
-// })
-
-// watch(scrollDirection, () => {
-//   if (!onPan.value) _direction = scrollDirection.value === 'up' ? 1 : -1
-// })
 
 watch(panStart, () => {
   _panInit = _current
@@ -143,7 +118,7 @@ function move() {
       $scene.updateObject({
         id: `${props.planesId}-${index + 1}`,
         position: { x: x, y: y.value },
-        zoom: 1.2,
+        zoom: 1 + 0.4 * progress,
       })
       $scene.render()
     }
@@ -158,6 +133,9 @@ function distanceToMidpoint(value: number): number {
 
 function update(params?: { ignoreUpdateScroll: boolean }) {
   if (!el.value) return
+
+  const { top } = getBounding(el.value)
+  y.value = top
 
   let maxHeight = 0
   items.value.splice(0, items.value.length)
@@ -186,6 +164,10 @@ function update(params?: { ignoreUpdateScroll: boolean }) {
 
 onBeforeUnmount(() => {
   removeRenderCallback(move)
+})
+
+defineExpose({
+  update,
 })
 </script>
 

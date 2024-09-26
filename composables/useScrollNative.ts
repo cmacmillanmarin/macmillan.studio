@@ -26,9 +26,11 @@ export default function useScrollNative() {
 
   function update() {
     for (const child of _children) {
-      const { top, left } = child.getBoundingClientRect()
+      const { top, left, bottom, right } = child.getBoundingClientRect()
       child.dataset.positionLeft = left.toString()
       child.dataset.positionTop = (top + _current).toString()
+      child.dataset.positionRight = right.toString()
+      child.dataset.positionBottom = (bottom + _current).toString()
     }
   }
 

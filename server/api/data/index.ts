@@ -11,7 +11,6 @@ export default defineEventHandler(async (): Promise<Homepage> => {
 
   try {
     const homepage: WP_Homepage = await get('/custom-page?slug=homepage')
-
     let slugs: string
 
     slugs = getPostNamesFrom(homepage.acf.projects.list)

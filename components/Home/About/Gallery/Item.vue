@@ -11,7 +11,7 @@
         @load="onImageLoaded" />
     </div>
     <div ref="creditsEl" class="home__about__gallery__item__credits">
-      {{ data.type === 'image' ? data.image?.alt : data.video?.alt }} {{ columns }}
+      {{ data.type === 'image' ? data.image?.alt : data.video?.alt }}
     </div>
   </div>
 </template>
