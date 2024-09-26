@@ -5,9 +5,9 @@ let _to: any
 
 export default defineStore('use-store', {
   state: (): State => ({
-    preloaded: false,
+    preloadedFonts: false,
+    preloadedTextures: false,
     loading: true,
-    preview: false,
     grid: 'none',
     section: 'hero',
     cursor: 'default',
@@ -17,13 +17,10 @@ export default defineStore('use-store', {
   }),
   getters: {
     isPreloaded(): boolean {
-      return this.preloaded
+      return this.preloadedFonts && this.preloadedTextures
     },
     isLoading(): boolean {
       return this.loading
-    },
-    isPreview(): boolean {
-      return this.preview
     },
     gridType(): GridType {
       return this.grid
@@ -39,14 +36,14 @@ export default defineStore('use-store', {
     },
   },
   actions: {
-    updatePreloaded(value: boolean) {
-      this.preloaded = value
+    updatePreloadedFonts(value: boolean) {
+      this.preloadedFonts = value
+    },
+    updatePreloadedTextures(value: boolean) {
+      this.preloadedTextures = value
     },
     updateLoading(value: boolean) {
       this.loading = value
-    },
-    updatePreview(state: boolean) {
-      this.preview = state
     },
     updateGrid(state: GridType) {
       this.grid = state

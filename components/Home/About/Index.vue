@@ -11,16 +11,11 @@
       </div>
       <div class="home__about__intro__content">
         <div class="home__about__intro__content__thumbnail">
-          <img
-            ref="imgEl"
-            src="/assets/img/thumbnail.jpg"
-            alt="thumbnail"
-            width="2560"
-            height="2560"
-            loading="lazy"
-            @load="onLoaded"
-            data-scroll-set-position
-            class="home__about__intro__content__thumbnail__image" />
+          <CustomImage
+            ref="thumbnailImageEl"
+            :data="data.thumbnail"
+            :size="{ d: 0.2, t: 0.4, m: 0.5 }"
+            data-scroll-set-position />
           <p class="home__about__intro__content__thumbnail__credit">{{ data.credit }}</p>
         </div>
         <div class="home__about__intro__content__detail">
@@ -43,7 +38,11 @@
             v-html="data.collaborator.description" />
         </div>
         <div class="home__about__intro__collaborator__thumbnail">
-          <div class="home__about__intro__collaborator__thumbnail__image" />
+          <CustomImage
+            ref="collaboratorImageEl"
+            :data="data.collaborator.thumbnail"
+            :size="{ d: 0.2, t: 0.4, m: 0.5 }"
+            data-scroll-set-position />
           <p class="home__about__intro__collaborator__thumbnail__credit">
             {{ data.collaborator.credit }}
           </p>
@@ -53,7 +52,7 @@
 
     <div class="home__about__testimonials-and-gallery">
       <HomeAboutTestimonials :data="data.testimonials" />
-      <HomeAboutGallery />
+      <HomeAboutGallery :data="data.gallery" />
     </div>
 
     <HomeAboutAwards :data="data.awards" />
@@ -61,63 +60,90 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAbout } from '~/types/wordpress/homepage'
+import CustomImage from '~/components/Global/CustomImage.vue'
 
 defineProps<{
   data: HomepageAbout
 }>()
 
 const { $scene }: any = useNuxtApp()
-const { onResize } = useResize()
 
 const store = useStore()
 const { updateSection } = store
 const { isInProjectEntered, section } = storeToRefs(store)
 const { direction, scrollUpdated } = storeToRefs(useScrollStore())
 
-const introEl = ref<HTMLElement>()
-const imgEl = ref<HTMLImageElement>()
-const loaded = ref<boolean>(false)
+const { toScale } = useCss()
+const { getBounding } = useVirtualScrollAndThreeTools()
 
-watch([scrollUpdated, loaded, onResize, isInProjectEntered], () => {
-  if (!imgEl.value) return
-  const { positionLeft, positionTop } = imgEl.value.dataset
-  const width = imgEl.value.clientWidth
-  const height = imgEl.value.clientHeight
+const introEl = ref<HTMLElement>()
+const thumbnailImageEl = ref<typeof CustomImage>()
+const collaboratorImageEl = ref<typeof CustomImage>()
+
+const imagesFade = ref<number>(0)
+
+watch(scrollUpdated, () => {
+  if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
+  const thumbnailImageBounding = getBounding(thumbnailImageEl.value.el)
+  const thumbnailImageWidth = thumbnailImageEl.value.el.clientWidth
+  const thumbnailImageHeight = thumbnailImageEl.value.el.clientHeight
   $scene.updateObject({
     id: 'about-thumbnail',
-    position: {
-      x: isInProjectEntered.value ? -10000 : parseFloat(positionLeft || '0'),
-      y: parseFloat(positionTop || '0'),
-    },
-    size: { x: width, y: height, z: 1 },
+    position: { x: thumbnailImageBounding.left, y: thumbnailImageBounding.top },
+    size: { x: thumbnailImageWidth, y: thumbnailImageHeight, z: 1 },
+    border: toScale(16),
+  })
+  const collaboratorImageBounding = getBounding(collaboratorImageEl.value.el)
+  const collaboratorImageWidth = collaboratorImageEl.value.el.clientWidth
+  const collaboratorImageHeight = collaboratorImageEl.value.el.clientHeight
+  $scene.updateObject({
+    id: 'about-collaborator-thumbnail',
+    position: { x: collaboratorImageBounding.left, y: collaboratorImageBounding.top },
+    size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
+    border: toScale(16),
   })
 })
 
 watch(section, () => {
-  section.value === 'about'
-    ? fadeIn({ el: introEl.value, delay: 0.2 })
-    : fadeOut({ el: introEl.value })
+  gsap.killTweensOf(imagesFade)
+  if (section.value === 'about') {
+    fadeIn({ el: introEl.value, delay: 0.2 })
+    gsap.to(imagesFade, { value: 1, duration: 1, delay: 0.2, onUpdate: onImagesFadeUpdate })
+  } else {
+    fadeOut({ el: introEl.value })
+    gsap.to(imagesFade, { value: 0, duration: 0.6, onUpdate: onImagesFadeUpdate })
+  }
 })
 
+function onImagesFadeUpdate() {
+  $scene.updateObject({ id: 'about-thumbnail', opacity: imagesFade.value })
+  $scene.updateObject({ id: 'about-collaborator-thumbnail', opacity: imagesFade.value })
+}
+
 onMounted(() => {
+  if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
+  $scene.preload(thumbnailImageEl.value.el)
+  $scene.preload(collaboratorImageEl.value.el)
   $scene.addObject({
     id: 'about-thumbnail',
     type: 'plane',
-    img: imgEl.value,
+    img: thumbnailImageEl.value.el,
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
-    border: 16,
-    fade: true,
+  })
+  $scene.addObject({
+    id: 'about-collaborator-thumbnail',
+    type: 'plane',
+    img: collaboratorImageEl.value.el,
+    position: { x: 0, y: 0 },
+    size: { x: 0, y: 0, z: 1 },
   })
 })
-
-function onLoaded() {
-  loaded.value = true
-}
 
 function onIntersect(el: HTMLElement, visible: boolean) {
   if (visible) updateSection('about')
@@ -167,11 +193,9 @@ function onIntersect(el: HTMLElement, visible: boolean) {
         @include columns(2, 'desktop');
         @include gap(2, 'left', 'desktop');
 
-        &__image {
+        .custom-image {
           aspect-ratio: 1;
           display: block;
-          // background-color: black;
-          // border-radius: 1.6rem;
           margin-bottom: toScale(1.2rem);
           opacity: 0;
         }
@@ -225,11 +249,9 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       &__thumbnail {
         @include columns(2, 'desktop');
 
-        &__image {
-          aspect-ratio: 1;
-          background-color: black;
-          border-radius: 1.6rem;
+        .custom-image {
           margin-bottom: toScale(1.2rem);
+          opacity: 0;
         }
 
         &__credit {

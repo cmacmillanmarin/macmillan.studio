@@ -17,9 +17,6 @@
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 
-const config = useRuntimeConfig()
-const { IS_PREVIEW } = config.public
-
 const store = useStore()
 const { isPreloaded, isLoading } = storeToRefs(store)
 
@@ -29,10 +26,7 @@ const el = ref<HTMLElement>()
 
 watch(isPreloaded, () => {
   el.value && init()
-})
-
-watch(isLoading, () => {
-  IS_PREVIEW && !isLoading.value && nextTick(scroll.forceReset)
+  store.updateLoading(false)
 })
 
 onMounted(async (): Promise<void> => {

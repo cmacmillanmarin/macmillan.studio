@@ -1,28 +1,33 @@
 <template>
-  <div ref="el" class="home__about__gallery__image">
+  <div ref="el" class="home__about__gallery__item">
     <div
-      class="home__about__gallery__image__content"
+      class="home__about__gallery__item__content"
       @mouseenter="onMouseEnter"
       @mouseleave="onMouseLeave">
-      <img
-        ref="imgEl"
-        src="/assets/img/thumbnail.jpg"
-        alt="thumbnail"
-        loading="lazy"
+      <CustomImage
+        ref="customImageEl"
+        v-if="!!data.image"
+        :data="data.image"
         @load="onImageLoaded" />
     </div>
-    <div ref="creditsEl" class="home__about__gallery__image__credits">🇲🇽 Shot on iPhone 13</div>
+    <div ref="creditsEl" class="home__about__gallery__item__credits">
+      {{ data.type === 'image' ? data.image?.alt : data.video?.alt }} {{ columns }}
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import useScrollStore from '~/store/useScrollStore'
+import type { Video } from '~/types/wordpress'
+import type { HomepageAboutGalleryItem } from '~/types/wordpress/homepage'
 import { shuffleElsIn, fadeOut } from '~/utils/animations'
+import CustomImage from '~/components/Global/CustomImage.vue'
 
 const props = defineProps<{
   pos: number
-  columns: number
+  data: HomepageAboutGalleryItem
+  planesId: string
 }>()
 
 const { $scene }: any = useNuxtApp()
@@ -32,30 +37,37 @@ const { toScale } = useCss()
 const width = ref<number>(0)
 const height = ref<number>(0)
 const loaded = ref<boolean>(false)
+const columns = ref<number>(props.data.columns)
+
+const video = ref<Video | undefined>(props.data.video)
+
+const customImageEl = ref<InstanceType<typeof CustomImage>>()
 
 const el = ref<HTMLElement>()
-const imgEl = ref<HTMLImageElement>()
 const creditsEl = ref<HTMLElement>()
 
 watch(scrollUpdated, () => {
-  if (imgEl.value && loaded.value) {
-    width.value = imgEl.value.clientWidth
-    height.value = imgEl.value.clientHeight
+  if (loaded.value) {
+    width.value = customImageEl.value?.el ? customImageEl.value.el.width : video.value?.width || 0
+    height.value = customImageEl.value?.el
+      ? customImageEl.value.el.height
+      : video.value?.height || 0
     $scene.updateObject({
-      id: `gallery-image-${props.pos}`,
+      id: `${props.planesId}-${props.pos}`,
       size: { x: width.value, y: height.value, z: 1 },
+      border: toScale(16),
     })
   }
 })
 
 function onImageLoaded() {
-  if (!imgEl.value) return
-  width.value = imgEl.value.clientWidth
-  height.value = imgEl.value.clientHeight
+  width.value = customImageEl.value?.el ? customImageEl.value.el.width : video.value?.width || 0
+  height.value = customImageEl.value?.el ? customImageEl.value.el.height : video.value?.height || 0
+  customImageEl.value?.el && $scene.preload(customImageEl.value.el)
   $scene.addObject({
-    id: `gallery-image-${props.pos}`,
+    id: `${props.planesId}-${props.pos}`,
     type: 'plane',
-    img: imgEl.value,
+    img: customImageEl.value?.el,
     position: { x: -1000, y: -1000 },
     size: { x: width.value, y: height.value, z: 1 },
     border: toScale(16),
@@ -75,22 +87,20 @@ function onMouseLeave() {
 }
 
 onBeforeUnmount(() => {
-  $scene.removeObject(`gallery-image-${props.pos}`)
+  $scene.removeObject(`${props.planesId}-${props.pos}`)
 })
 </script>
 
 <style lang="scss">
-.home__about__gallery__image {
+.home__about__gallery__item {
   padding-right: var(--layout-gutter);
 
   &__content {
     width: toColumns(v-bind(columns));
-    aspect-ratio: 1;
-    // background-color: var(--light-grey);
     border-radius: toScale(1.6rem);
     pointer-events: auto;
 
-    img {
+    .custom-image {
       width: 100%;
       pointer-events: none;
       opacity: 0;

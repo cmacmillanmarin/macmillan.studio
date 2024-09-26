@@ -27,9 +27,9 @@ export type Cursor =
   | 'close'
 
 export interface State {
-  preloaded: boolean
+  preloadedFonts: boolean
+  preloadedTextures: boolean
   loading: boolean
-  preview: boolean
   grid: GridType
   section: Section
   cursor: Cursor

@@ -1,7 +1,11 @@
 <template>
   <div ref="el" class="home__about__gallery">
-    <Ticker planes-id="gallery-image">
-      <HomeAboutGalleryImage v-for="(image, i) in images" :pos="i + 1" :columns="image" />
+    <Ticker :planes-id="planeIds">
+      <HomeAboutGalleryItem
+        v-for="(item, i) in items"
+        :pos="i + 1"
+        :data="item"
+        :planes-id="planeIds" />
     </Ticker>
   </div>
 </template>
@@ -10,7 +14,12 @@
 import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
+import type { HomepageAboutGallery } from '~/types/wordpress/homepage'
 import { fadeIn, fadeOut } from '~/utils/animations'
+
+const props = defineProps<{
+  data: HomepageAboutGallery
+}>()
 
 const { $scene }: any = useNuxtApp()
 
@@ -18,44 +27,40 @@ const store = useStore()
 const { section } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
+const items = ref<HomepageAboutGallery>([
+  ...props.data,
+  ...props.data,
+  ...props.data,
+  ...props.data,
+  ...props.data,
+  ...props.data,
+  ...props.data,
+  ...props.data,
+  ...props.data,
+  ...props.data,
+])
+const itemsFade = ref<number>(0)
+const planeIds = ref<string>(`gallery-image-${Date.now()}`)
 
-const images = ref<Array<number>>([4, 3, 5, 6, 3, 4, 6, 4, 5, 3, 2, 4, 6, 4])
-const imagesFade = ref<number>(0)
-
-watch(section, (to, from) => {
-  if (!el.value) return
-  gsap.killTweensOf(imagesFade)
+watch(section, () => {
+  gsap.killTweensOf(itemsFade)
   if (section.value === 'about-testimonials') {
     fadeIn({ el: el.value, delay: 0.2 })
-    gsap.to(imagesFade, {
-      value: 1,
-      duration: 1,
-      delay: 0.2,
-      onUpdate: () => {
-        images.value.forEach((position, index) => {
-          $scene.updateObject({
-            id: `gallery-image-${index + 1}`,
-            opacity: imagesFade.value,
-          })
-        })
-      },
-    })
+    gsap.to(itemsFade, { value: 1, duration: 1, delay: 0.2, onUpdate: onItemsFadeUpdate })
   } else {
     fadeOut({ el: el.value })
-    gsap.to(imagesFade, {
-      value: 0,
-      duration: 0.6,
-      onUpdate: () => {
-        images.value.forEach((position, index) => {
-          $scene.updateObject({
-            id: `gallery-image-${index + 1}`,
-            opacity: imagesFade.value,
-          })
-        })
-      },
-    })
+    gsap.to(itemsFade, { value: 0, duration: 0.6, onUpdate: onItemsFadeUpdate })
   }
 })
+
+function onItemsFadeUpdate() {
+  items.value.forEach((item, i) => {
+    $scene.updateObject({
+      id: `${planeIds.value}-${i + 1}`,
+      opacity: itemsFade.value,
+    })
+  })
+}
 </script>
 
 <style lang="scss">

@@ -1,15 +1,29 @@
+import {
+  Vector2,
+  Vector4,
+  Raycaster,
+  TextureLoader,
+  PlaneGeometry,
+  Mesh,
+  ShaderMaterial,
+  VideoTexture,
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+} from 'three'
+
+import { gsap } from 'gsap'
+import { round, slugify } from '~/utils'
+
 import VS from './glsl/vs.glsl'
 import FS from './glsl/fs.glsl'
-import LoaderFS from './glsl/loader-fs.glsl'
-import * as THREE from 'three'
-import { round } from '~/utils'
-import { gsap } from 'gsap'
 
-class Scene {
+class Controller {
   constructor() {
     this.debug = false
 
     this.ready = false
+    this.active = false
     this.canvas = null
     this.scene = null
     this.camera = null
@@ -22,24 +36,28 @@ class Scene {
 
     this.z = 1000
 
-    this.size = new THREE.Vector2()
-    this.mouse = new THREE.Vector2(-1000, -1000)
-    this.raycaster = new THREE.Raycaster()
-    this.loader = new THREE.TextureLoader()
-    this.loadedTextures = {}
+    this.size = new Vector2()
+    this.mouse = new Vector2(-1000, -1000)
+    this.raycaster = new Raycaster()
+    this.loader = new TextureLoader()
+    this.loadedTextures = []
+    this.loadedTexturesCount = 0
+    this.onPreloaded = () => {
+      console.log('textures loaded!')
+    }
 
     this.maxPixelRatio = 2
     this.rendering = false
     this.needsUpdate = false
 
     this.geometries = {
-      plane: new THREE.PlaneGeometry(1, 1, 32, 32),
+      plane: new PlaneGeometry(1, 1, 32, 32),
     }
 
     this.colors = {
-      lime: new THREE.Vector4(197.0 / 255.0, 255.0 / 255.0, 32.0 / 255.0, 1.0),
-      lightGrey: new THREE.Vector4(211.0 / 255.0, 214.0 / 255.0, 218.0 / 255.0, 1.0),
-      darkGrey: new THREE.Vector4(129.0 / 255.0, 131.0 / 255.0, 136.0 / 255.0, 1.0),
+      lime: new Vector4(197.0 / 255.0, 255.0 / 255.0, 32.0 / 255.0, 1.0),
+      lightGrey: new Vector4(211.0 / 255.0, 214.0 / 255.0, 218.0 / 255.0, 1.0),
+      darkGrey: new Vector4(129.0 / 255.0, 131.0 / 255.0, 136.0 / 255.0, 1.0),
     }
 
     this.maxPlanes = 10
@@ -52,29 +70,50 @@ class Scene {
     this.bind()
   }
 
-  async create({ el, size, play, stop }) {
+  async create({ el, size, onPreloaded }) {
     this.log(`create()`)
 
     this.main = document.querySelector('main')
 
     this.canvas = el
 
-    this.scene = new THREE.Scene()
+    this.scene = new Scene()
 
-    this.camera = new THREE.PerspectiveCamera(75, size.x / size.y, 100, 1250)
+    this.camera = new PerspectiveCamera(75, size.x / size.y, 100, 1250)
     this.camera.position.z = this.z
 
-    this.renderer = new THREE.WebGLRenderer({
+    this.renderer = new WebGLRenderer({
       canvas: this.canvas,
       alpha: true,
       antialias: false,
       premultipliedAlpha: false,
     })
 
+    this.onPreloaded = onPreloaded || this.onPreloaded
+
     this.updateSize({ size })
     this.addListeners()
     this.generatePlanesBatch()
     this.ready = true
+  }
+
+  preload(img) {
+    const src = img.src || img.currentSrc
+    const id = slugify(src)
+    const exists = this.loadedTextures.find(t => t.id === id)
+    if (img && !exists) {
+      this.loadedTextures.push({
+        id,
+        ready: false,
+        txt: this.loader.load(img.src || img.currentSrc, async texture => {
+          await this.renderer.initTexture(texture)
+          const loadedTexture = this.loadedTextures.find(t => t.id === id)
+          loadedTexture.ready = true
+          this.loadedTexturesCount++
+          if (this.loadedTexturesCount === this.loadedTextures.length) this.onPreloaded()
+        }),
+      })
+    }
   }
 
   addObject(object) {
@@ -89,10 +128,6 @@ class Scene {
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
     object.zoom = object.zoom || 1
     object.opacity = object.opacity !== undefined ? object.opacity : 1
-    if (object.img && !this.loadedTextures[object.id]) {
-      this.loadedTextures[object.id] = this.loader.load(object.img.src || object.img.currentSrc)
-      this.loaderMesh.material.uniforms.uTxt.value = this.loadedTextures[object.id]
-    }
     this.objects.push(object)
   }
 
@@ -163,34 +198,47 @@ class Scene {
     for (const object of this.objects) {
       object.inView = this.inView(object)
       if (object.inView) {
-        this.needsUpdate = true
         if (!object.mesh) {
-          if (object.type === 'plane') {
-            const availablePlane = this.getAvailablePlane(object.id)
-            if (!availablePlane) {
-              console.warn(`No available planes for ${object.id}`)
-              continue
-            }
-            object.mesh = availablePlane.mesh
-            object.meshId = availablePlane.id
-            object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0
-            if (object.video) {
-              object.mesh.material.uniforms.uTextureType.value = 0
-              object.mesh.material.uniforms.uTextureVideo.value.image = object.video
-              object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
-              object.mesh.material.uniforms.uTextureSize.value.y =
-                (object.size.x * object.video.height) / object.video.width
-            } else if (object.img) {
-              object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
-              object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
-              object.mesh.material.uniforms.uTextureImage.value = this.loadedTextures[object.id]
-              object.mesh.material.uniforms.uTextureType.value = 1
-            }
+          if (object.img) {
+            const src = object.img.src || object.img.currentSrc
+            const id = slugify(src)
+            console.log(id)
+            const texture = this.loadedTextures.find(t => t.id === id)
+            if (texture && !texture.ready) continue
+            else if (!texture)
+              this.loadedTextures.push({ id, ready: true, txt: this.loader.load(src) })
           }
-          if (object.fade) {
-            this.planeIn(object.mesh.material.uniforms.uFade)
-          } else object.mesh.material.uniforms.uFade.value = 1
+
+          const availablePlane = this.getAvailablePlane(object.id)
+          if (!availablePlane) {
+            console.warn(`No available planes for ${object.id}`)
+            continue
+          }
+          object.mesh = availablePlane.mesh
+          object.meshId = availablePlane.id
+          object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0
+
+          if (object.video) {
+            object.mesh.material.uniforms.uTextureType.value = 0
+            object.mesh.material.uniforms.uTextureVideo.value.image = object.video
+            object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
+            object.mesh.material.uniforms.uTextureSize.value.y =
+              (object.size.x * object.video.height) / object.video.width
+          } else if (object.img) {
+            const src = object.img.src || object.img.currentSrc
+            const id = slugify(src)
+            const texture = this.loadedTextures.find(t => t.id === id)
+            object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
+            object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
+            object.mesh.material.uniforms.uTextureImage.value = texture.txt
+            object.mesh.material.uniforms.uTextureType.value = 1
+          }
+
+          if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
+          else object.mesh.material.uniforms.uFade.value = 1
         }
+
+        this.needsUpdate = true
 
         const position = this.fromDomToCanvas({
           x: object.position.x,
@@ -248,6 +296,8 @@ class Scene {
     const limitRight = position.x < this.size.x
     const limitBottom = y - this.y < this.size.y
     const limitLeft = position.x + size.x > size.x * -1
+
+    // console.log(size)
 
     return limitTop && limitRight && limitBottom && limitLeft && size.x > 0 && size.y > 0
   }
@@ -307,30 +357,11 @@ class Scene {
   generatePlanesBatch() {
     const video = document.createElement('video')
 
-    this.loaderMesh = new THREE.Mesh(
-      this.geometries.plane,
-      new THREE.ShaderMaterial({
-        vertexShader: VS,
-        fragmentShader: LoaderFS,
-        uniforms: {
-          uTxt: { type: 't', value: null },
-        },
-      })
-    )
-    const position = this.fromDomToCanvas({ x: -200, y: -200 })
-    this.loaderMesh.position.x = position.x
-    this.loaderMesh.position.y = position.y
-    this.loaderMesh.position.z = 1
-    this.loaderMesh.scale.x = 400
-    this.loaderMesh.scale.y = 400
-    this.loaderMesh.scale.z = 1
-    this.scene.add(this.loaderMesh)
-
     for (let id = 0; id < this.maxPlanes; id++) {
       const available = true
-      const mesh = new THREE.Mesh(
+      const mesh = new Mesh(
         this.geometries.plane,
-        new THREE.ShaderMaterial({
+        new ShaderMaterial({
           vertexShader: VS,
           fragmentShader: FS,
           uniforms: {
@@ -341,12 +372,12 @@ class Scene {
             uPixel: { type: 'f', value: 0.0 },
             uOpacity: { type: 'f', value: 1.0 },
             uBorderRadius: { type: 'f', value: 16.0 },
-            uPixelSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
+            uPixelSize: { type: 'v2', value: new Vector2(1, 1) },
             uTextureType: { type: 'i', value: 0 }, // 0 Video, 1 Image
             uTextureImage: { type: 't', value: null },
-            uTextureVideo: { type: 't', value: new THREE.VideoTexture(video) },
-            uTextureSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
-            uPlaneSize: { type: 'v2', value: new THREE.Vector2(1, 1) },
+            uTextureVideo: { type: 't', value: new VideoTexture(video) },
+            uTextureSize: { type: 'v2', value: new Vector2(1, 1) },
+            uPlaneSize: { type: 'v2', value: new Vector2(1, 1) },
             uMultiplyColor: { type: 'v4', value: this.colors.lime },
           },
           wireframe: false,
@@ -454,4 +485,4 @@ class Scene {
   }
 }
 
-export default Scene
+export default Controller

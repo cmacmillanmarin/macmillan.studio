@@ -143,7 +143,7 @@ function move() {
       $scene.updateObject({
         id: `${props.planesId}-${index + 1}`,
         position: { x: x, y: y.value },
-        zoom: 1 + 0.4 * progress,
+        zoom: 1.2,
       })
       $scene.render()
     }

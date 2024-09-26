@@ -5,6 +5,9 @@ import {
   type WP_Image,
   type Image,
   parseImage,
+  type MediaType,
+  type Video,
+  parseMedia,
 } from '~/types/wordpress'
 import {
   type WP_Projects,
@@ -30,6 +33,13 @@ import {
   type WP_Client_Objects,
   type WP_Clients,
 } from '~/types/wordpress/client'
+
+export interface WP_Homepage_About_Gallery_Image {
+  type: 'img' | 'vid'
+  image?: WP_Image
+  video?: WP_Image
+  columns: string
+}
 
 export interface WP_Homepage {
   acf: {
@@ -67,6 +77,7 @@ export interface WP_Homepage {
         credit: string
       }
       testimonials: WP_Testimonial_Objects
+      gallery: Array<WP_Homepage_About_Gallery_Image>
       awards: {
         title: string
         awards: Array<{
@@ -118,6 +129,26 @@ export interface HomepageAboutAwards {
   awards: Array<HomepageAboutAwardsAward>
 }
 
+export type HomepageAboutGallery = Array<HomepageAboutGalleryItem>
+
+export interface HomepageAboutGalleryItem {
+  type: MediaType
+  image?: Image
+  video?: Video
+  columns: number
+}
+
+function parseGallery(data?: Array<WP_Homepage_About_Gallery_Image>): HomepageAboutGallery {
+  const gallery: HomepageAboutGallery = []
+  for (const item of data || []) {
+    gallery.push({
+      ...parseMedia(item.type === 'img' ? item.image : item.video),
+      columns: parseFloat(item.columns || '3'),
+    })
+  }
+  return gallery
+}
+
 export interface HomepageAbout {
   title: string
   hint: string
@@ -132,6 +163,7 @@ export interface HomepageAbout {
     credit: string
   }
   testimonials: Testimonials
+  gallery: HomepageAboutGallery
   awards: HomepageAboutAwards
 }
 
@@ -189,6 +221,7 @@ export function parseHomepage(params: {
         credit: parseText(homepage?.acf.about.collaborator.credit),
       },
       testimonials: parseTestimonials({ testimonials }),
+      gallery: parseGallery(homepage?.acf.about.gallery),
       awards: {
         title: parseText(homepage?.acf.about.awards.title),
         awards: homepage?.acf.about.awards.awards || [],

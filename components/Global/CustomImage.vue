@@ -60,6 +60,7 @@ function intersect(el: HTMLElement, visible: boolean): void {
 
 function onload(): void {
   isLoaded.value = true
+  emit('load')
 }
 
 function enter(): void {
@@ -74,6 +75,8 @@ onMounted(() => {
 defineExpose({
   el,
 })
+
+const emit = defineEmits(['load'])
 </script>
 
 <style lang="scss">

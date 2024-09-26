@@ -26,7 +26,7 @@ export default defineNuxtPlugin(async () => {
       families: ['HelveticaNowDisplayBold', 'HelveticaNowDisplayMedium'],
     },
     active: (): void => {
-      store.updatePreloaded(true)
+      store.updatePreloadedFonts(true)
     },
   })
 
