@@ -43,7 +43,10 @@ class Controller {
     this.loadedTextures = []
     this.loadedTexturesCount = 0
     this.onPreloaded = () => {
-      console.log('textures loaded!')
+      console.log('Textures preloaded!')
+    }
+    this.updateCursor = value => {
+      console.log(`Update cursor to ${value}`)
     }
 
     this.maxPixelRatio = 2
@@ -70,7 +73,7 @@ class Controller {
     this.bind()
   }
 
-  async create({ el, size, onPreloaded }) {
+  async create({ el, size, onPreloaded, updateCursor }) {
     this.log(`create()`)
 
     this.main = document.querySelector('main')
@@ -90,6 +93,7 @@ class Controller {
     })
 
     this.onPreloaded = onPreloaded || this.onPreloaded
+    this.updateCursor = updateCursor || this.updateCursor
 
     this.updateSize({ size })
     this.addListeners()
@@ -127,6 +131,7 @@ class Controller {
     object.size = object.size || { x: 0, y: 0, z: 1 }
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
     object.zoom = object.zoom || 1
+    object.cursor = object.cursor || 'plus'
     object.opacity = object.opacity !== undefined ? object.opacity : 1
     this.objects.push(object)
   }
@@ -143,6 +148,7 @@ class Controller {
     rotate,
     zoom,
     size,
+    cursor,
     fade,
     border,
     onClick,
@@ -160,6 +166,7 @@ class Controller {
       object.fixed = fixed || object.fixed
       object.opacity = opacity !== undefined ? opacity : object.opacity
       object.onClick = onClick !== undefined ? onClick : object.onClick
+      object.cursor = cursor || object.cursor
       object.onIntersect = onIntersect !== undefined ? onIntersect : object.onIntersect
     }
   }
@@ -211,7 +218,7 @@ class Controller {
               object.video.readyState > 2
             )
             if (!isVideoPlaying) {
-              console.log('not playing')
+              console.log('not playing', object.id)
               continue
             }
           } else if (object.img) {
@@ -287,10 +294,10 @@ class Controller {
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
 
         const hovered = this.intersects.includes(object.mesh)
-        if (object.onIntersect) {
-          if (hovered || (!hovered && this.intersects.length <= 1)) object.onIntersect(hovered)
-        }
+
         const clickable = hovered && object.onClick
+        if (object.onIntersect) object.onIntersect(hovered)
+        if (!hovered && this.intersects.length <= 1) this.updateCursor('default')
         if (
           (clickable && uniforms.uPixel.value === 0) ||
           (!clickable && uniforms.uPixel.value === 1)
@@ -299,7 +306,10 @@ class Controller {
           gsap.killTweensOf(uniforms.uPixel)
           gsap.to(uniforms.uPixel, { value: clickable ? 1 : 0, duration: clickable ? 0.4 : 0.3 })
         }
-        if (clickable) this.main.classList.add('__main--pointer')
+        if (clickable) {
+          this.main.classList.add('__main--pointer')
+          this.updateCursor(object.cursor)
+        }
       } else if (object.mesh && object.type === 'plane') {
         object.mesh.material.uniforms.uFade.value = 0.0
         this.releasePlane(object.meshId)
@@ -308,14 +318,16 @@ class Controller {
     }
   }
 
-  inView({ fixed, position, size }) {
+  inView({ fixed, position, size, opacity }) {
     const y = position.y + this.getFixedY(fixed)
     const limitTop = y - this.y >= size.y * -1
     const limitRight = position.x < this.size.x
     const limitBottom = y - this.y < this.size.y
     const limitLeft = position.x + size.x > 0
 
-    return limitTop && limitRight && limitBottom && limitLeft && size.x > 0 && size.y > 0
+    return (
+      limitTop && limitRight && limitBottom && limitLeft && size.x > 0 && size.y > 0 && opacity > 0
+    )
   }
 
   getFixedY(fixed) {
@@ -327,15 +339,13 @@ class Controller {
   }
 
   render() {
-    if (this.mouse.x !== -1000)
-      this.intersects = this.raycaster
-        .intersectObjects(this.scene.children, false)
-        .map(i => i.object)
+    this.intersects = this.raycaster.intersectObjects(this.scene.children, false).map(i => i.object)
 
     this.updateObjects()
 
     if (this.needsUpdate) {
       this.log('render()')
+
       this.renderer.render(this.scene, this.camera)
     }
   }

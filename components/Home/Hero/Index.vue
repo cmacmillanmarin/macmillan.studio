@@ -2,8 +2,7 @@
   <section
     id="hero-target"
     :class="['home__hero', { 'home__hero--reel': reelVideoActive }]"
-    data-scroll-target-top
-    @click="reelVideoActive && closeReel()">
+    data-scroll-target-top>
     <h1 class="home__hero__title">{{ data.title }}</h1>
     <div class="home__hero__content" v-transition:in="{ callback: enter }">
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
@@ -172,10 +171,6 @@ watch([position, videoPlaying], () => {
   })
 })
 
-watch([intersect, isInReel], () => {
-  updateCursor(intersect.value ? (isInReel.value ? 'close' : 'play') : 'default')
-})
-
 onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
@@ -191,8 +186,8 @@ onMounted(() => {
     video: videoEl.value,
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 0 },
+    cursor: 'play',
     onClick: goToReel,
-    onIntersect: onReelIntersect,
   })
 })
 
@@ -203,7 +198,7 @@ function enter(params: { el: HTMLElement }) {
 function goToReel() {
   updateInReel(true)
   disableScroll(true)
-  $scene.updateObject({ id: 'reel', onClick: null })
+  $scene.updateObject({ id: 'reel', onClick: closeReel, cursor: 'close' })
   if (route.hash === '#reel') updateScrollTargetId('reel')
   else router.push('/#reel')
   if (videoEl.value) {
@@ -226,10 +221,6 @@ function closeReel() {
     videoEl.value.loop = true
     videoEl.value.play()
   }
-}
-
-function onReelIntersect(state: boolean) {
-  intersect.value = state
 }
 
 function onPlay() {

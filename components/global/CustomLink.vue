@@ -46,7 +46,9 @@ const componentType = computed(() => {
   return resolveComponent('NuxtLink')
 })
 
-async function onClick(): Promise<void> {
+async function onClick(e: MouseEvent): Promise<void> {
+  e.preventDefault()
+  e.stopPropagation()
   if (props.type === 'referral') {
     if (props.to === route.fullPath) updateScrollTargetId(props.to.replace('/#', ''))
     else if (props.to) router.push(props.to)

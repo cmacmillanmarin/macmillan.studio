@@ -97,7 +97,7 @@
       <div ref="listContainerEl" class="home__projects__list__container">
         <HomeProjectsProject
           v-for="(project, i) in activeListProjects"
-          :key="`${activeList}-${project.slug}`"
+          :key="project.slug"
           :list="activeList"
           :i="i"
           :of="activeListProjects.length - 1"
@@ -147,8 +147,7 @@ const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollTargetId } = scrollStore
-const { inTarget, scrollUpdated } = storeToRefs(scrollStore)
-
+const { scrollUpdated } = storeToRefs(scrollStore)
 const { vh } = useResize()
 
 const { getBounding } = useVirtualScrollAndThreeTools()
@@ -163,9 +162,7 @@ const listEl = ref<HTMLElement>()
 const listContainerEl = ref<HTMLElement>()
 
 const active = ref<number>(0)
-const indicators = computed<boolean>(
-  () => (active.value !== 0 || activeList.value === 'all') && section.value === 'projects'
-)
+const indicators = computed<boolean>(() => section.value === 'projects')
 
 let _to: any
 
@@ -184,33 +181,20 @@ watchEffect(() => {
   })
 })
 
-watch([scrollUpdated], () => {
+watch(scrollUpdated, () => {
   updateBounding()
 })
 
 watch(activeList, () => {
-  // _current = current.value
-  // disableScroll(true)
-
-  // waitInTarget.value = true
   updateActiveListProjects()
-})
-
-watch(inTarget, () => {
-  // if (inTarget.value && waitInTarget.value) {
-  //   updateActiveListProjects()
-  // }
 })
 
 watch(activeListProjects, async () => {
   await nextTick()
-  // waitInTarget.value = false
-  // disableScroll(false)
   const listWidth = listEl.value?.offsetWidth || 0
   const listContainerWidth = listContainerEl.value?.offsetWidth || 0
   bounding.value = listContainerWidth - listWidth
   minHeight.value = activeList.value === 'selected' ? 'auto' : toPx(bounding.value + vh.value)
-  console.log(minHeight.value)
   el.value && gsap.set(el.value, { minHeight: minHeight.value })
   await nextTick()
   updateScroll()
@@ -286,14 +270,14 @@ defineEmits(['update-active'])
       height: var(--vh);
       display: flex;
       align-items: center;
-
       overflow: var(--overflow--hidden);
       // border: 1px solid red;
       &__container {
         display: inline-block;
-        padding-left: var(--layout-gutter);
         white-space: nowrap;
         // border: 1px solid blue;
+        padding-left: calc(50vw - #{toColumns(4)} * 0.5);
+        padding-right: calc(50vw - #{toColumns(3)} * 0.5);
         height: max-content;
         .home__projects__project {
           display: inline-block;

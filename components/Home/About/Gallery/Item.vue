@@ -109,9 +109,9 @@ onBeforeUnmount(() => {
 
   &__credits {
     padding: toScale(1.2rem);
+    pointer-events: none;
     @include will-fade;
     @include t-b2;
-    pointer-events: none;
   }
 }
 </style>

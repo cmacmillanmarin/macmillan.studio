@@ -4,9 +4,13 @@
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
+import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 
-const { bounding } = storeToRefs(useScrollStore())
+const store = useStore()
+const { updateCursor } = store
+const scrollStore = useScrollStore()
+const { bounding } = storeToRefs(scrollStore)
 
 const { $scene }: any = useNuxtApp()
 const { onResize, vw, vh } = useResize()
@@ -33,6 +37,7 @@ onMounted(() => {
   $scene.create({
     el: el.value,
     size: { x: vw.value, y: vh.value },
+    updateCursor,
   })
   $scene.addObject({
     id: 'noise',
