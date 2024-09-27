@@ -95,7 +95,8 @@ const size = computed<{ x: number; y: number }>(() => {
 
 const inTarget = computed<boolean>(
   () =>
-    (!all.value && progress.value > 0.3 && leaveProgress.value !== 1) || (all.value && props.i < 4)
+    (!all.value && progress.value > 0.3 && leaveProgress.value !== 1) ||
+    (all.value && progress.value !== 0 && progress.value !== 1)
 )
 
 const loaded = ref<boolean>(false)
@@ -136,12 +137,12 @@ watch([el, active], async () => {
 })
 
 watch([el, current], () => {
+  let { top, left, bottom } = getBounding(el.value as HTMLElement)
   if (all.value) {
-    const { top, bottom } = props
-    progress.value = Math.min(Math.max(0, (current.value - top) / (bottom - top)), 1)
+    const scroll = left + size.value.x
+    progress.value = Math.min(Math.max(0, (current.value - props.top) / scroll), 1)
     leaveProgress.value = 1
   } else {
-    let { top, bottom } = getBounding(el.value as HTMLElement)
     top -= vh.value
     bottom -= vh.value
     const leaveBottom = bottom + vh.value
@@ -210,7 +211,7 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, inTarget, l
       id: projectId.value,
       opacity: 1,
       rotate: { x: 0, y: 0, z: 0 },
-      position: { x: left, y: top },
+      position: { x: left - y, y: top },
       size: { x: size.value.x, y: size.value.y, z: 1 },
       fixed: { from: props.top, to: props.bottom },
       border: toScale(16),

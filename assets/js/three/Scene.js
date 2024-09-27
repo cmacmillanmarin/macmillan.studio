@@ -313,9 +313,7 @@ class Controller {
     const limitTop = y - this.y >= size.y * -1
     const limitRight = position.x < this.size.x
     const limitBottom = y - this.y < this.size.y
-    const limitLeft = position.x + size.x > size.x * -1
-
-    // console.log(size)
+    const limitLeft = position.x + size.x > 0
 
     return limitTop && limitRight && limitBottom && limitLeft && size.x > 0 && size.y > 0
   }

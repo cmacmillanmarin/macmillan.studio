@@ -111,6 +111,7 @@ onBeforeUnmount(() => {
     padding: toScale(1.2rem);
     @include will-fade;
     @include t-b2;
+    pointer-events: none;
   }
 }
 </style>

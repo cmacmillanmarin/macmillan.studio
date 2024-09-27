@@ -163,6 +163,12 @@ const emit = defineEmits<{
     &__description {
       @include t-b1;
       @include columns(6, 'desktop');
+      p {
+        margin-bottom: toScale(1.6rem);
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
     }
   }
 }

@@ -241,6 +241,9 @@ onBeforeUnmount(() => {
           column-count: 2;
           column-gap: var(--layout-gutter);
           @include t-b1;
+          p {
+            margin-bottom: toScale(1.6rem);
+          }
         }
       }
     }
