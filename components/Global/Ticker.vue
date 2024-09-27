@@ -24,6 +24,7 @@ const scrollStore = useScrollStore()
 const { updateScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { scrollUpdated } = storeToRefs(scrollStore)
 
+const { onResize } = useResize()
 const { getBounding } = useVirtualScrollAndThreeTools()
 const { init, onPan, panStart, panEnd, panHorizontal, panHorizontalDirection } = useSwipe({
   preventLeft: true,
@@ -49,6 +50,10 @@ let _panInit: number = 0
 let _panSpeed: number = 0
 let _containerWidth: number = 0
 let _moving: boolean = false
+
+watch(onResize, () => {
+  update()
+})
 
 watch(scrollUpdated, () => {
   update({ ignoreUpdateScroll: true })

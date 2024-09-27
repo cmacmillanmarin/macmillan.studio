@@ -60,7 +60,7 @@ const props = defineProps<{
 const router = useRouter()
 
 const { $scene }: any = useNuxtApp()
-const { getColumnWidth } = useCss()
+const { toScale, getColumnWidth } = useCss()
 const { vw, vh } = useResize()
 
 const store = useStore()
@@ -95,8 +95,7 @@ const size = computed<{ x: number; y: number }>(() => {
 
 const inTarget = computed<boolean>(
   () =>
-    (!all.value && progress.value > 0.3 && leaveProgress.value !== 1) ||
-    (all.value && progress.value > 0 && leaveProgress.value !== 1)
+    (!all.value && progress.value > 0.3 && leaveProgress.value !== 1) || (all.value && props.i < 4)
 )
 
 const loaded = ref<boolean>(false)
@@ -137,12 +136,21 @@ watch([el, active], async () => {
 })
 
 watch([el, current], () => {
-  let { top, bottom } = getBounding(el.value as HTMLElement)
-  top -= vh.value
-  bottom -= vh.value
-  const leaveBottom = bottom + vh.value
-  progress.value = Math.min(Math.max(0, (current.value - top) / (bottom - top)), 1)
-  leaveProgress.value = Math.min(Math.max(0, (current.value - bottom) / (leaveBottom - bottom)), 1)
+  if (all.value) {
+    const { top, bottom } = props
+    progress.value = Math.min(Math.max(0, (current.value - top) / (bottom - top)), 1)
+    leaveProgress.value = 1
+  } else {
+    let { top, bottom } = getBounding(el.value as HTMLElement)
+    top -= vh.value
+    bottom -= vh.value
+    const leaveBottom = bottom + vh.value
+    progress.value = Math.min(Math.max(0, (current.value - top) / (bottom - top)), 1)
+    leaveProgress.value = Math.min(
+      Math.max(0, (current.value - bottom) / (leaveBottom - bottom)),
+      1
+    )
+  }
 })
 
 watch([() => props.top, () => props.bottom, progress, leaveProgress, inTarget, loaded], () => {
@@ -160,7 +168,7 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, inTarget, l
   const rotateRadX = (Math.PI / 180) * rotateX
   const rotateRadY = (Math.PI / 180) * rotateY
 
-  const opacity = leaveProgress.value < 1 ? 1 : 0
+  const opacity = progress.value + leaveProgress.value < 2 ? 1 : 0
 
   const htmlx = size.value.x * progress.value * 0.5
   const htmly = size.value.y * progress.value * 0.5
@@ -195,32 +203,33 @@ watch([() => props.top, () => props.bottom, progress, leaveProgress, inTarget, l
   if (!loaded.value) return
 
   if (all.value) {
+    const y = Math.max(0, current.value - props.top)
     const { top, left } = getBounding(el.value as HTMLElement)
+    // console.log(left)
     $scene.updateObject({
       id: projectId.value,
-      opacity,
+      opacity: 1,
       rotate: { x: 0, y: 0, z: 0 },
       position: { x: left, y: top },
       size: { x: size.value.x, y: size.value.y, z: 1 },
-      fixed: { from: 0, to: 0 },
-      border: 16,
+      fixed: { from: props.top, to: props.bottom },
+      border: toScale(16),
       zoom: 1,
     })
+    // $scene.render()
   } else {
+    // if (props.i === 0) console.log(positionX, positionY, sizeX, sizeY, inTarget.value)
     $scene.updateObject({
       id: projectId.value,
       opacity,
       rotate: { x: rotateRadX, y: rotateRadY, z: 0 },
       position: {
-        x:
-          isInProjectEntered.value || (progress.value === 1 && leaveProgress.value === 1)
-            ? -10000
-            : positionX,
+        x: positionX,
         y: positionY,
       },
       size: { x: sizeX, y: sizeY, z: 1 },
       fixed: { from: props.top, to: props.bottom },
-      border: 16 * (progress.value + leaveProgress.value),
+      border: toScale(16) * (progress.value + leaveProgress.value),
       zoom: 1 + zoom - zoom * progress.value,
     })
   }
@@ -310,6 +319,7 @@ const emit = defineEmits<{
 
   &--all {
     min-height: auto;
+    padding-right: var(--layout-gutter);
   }
 
   &--all-and-selected {
@@ -321,6 +331,7 @@ const emit = defineEmits<{
   }
 
   &__anchor {
+    display: block;
     pointer-events: none;
     width: toColumns(3);
     aspect-ratio: 5/7;

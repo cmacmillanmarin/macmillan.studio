@@ -9,8 +9,8 @@
 .svg__plus {
   display: block;
   fill: none;
-  width: 4rem;
-  height: 4rem;
+  width: toScale(4rem);
+  height: toScale(4rem);
   path {
     fill: var(--lime);
   }

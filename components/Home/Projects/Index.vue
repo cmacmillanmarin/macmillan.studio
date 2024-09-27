@@ -90,18 +90,25 @@
 
     <div class="home__projects__intersect" v-intersect="{ callback: onIntersect }" />
 
-    <HomeProjectsProject
-      v-for="(project, i) in activeListProjects"
-      :key="`${activeList}-${project.slug}`"
-      :list="activeList"
-      :i="i"
-      :of="activeListProjects.length - 1"
-      :data="project"
-      :top="top"
-      :bottom="bottom"
-      :side-x="i % 2 === 0 ? -1 : 1"
-      :side-y="-1"
-      @update-active="updateActive" />
+    <div
+      ref="listEl"
+      class="home__projects__list"
+      :data-scroll-sticky="activeList === 'all' ? '' : undefined">
+      <div ref="listContainerEl" class="home__projects__list__container">
+        <HomeProjectsProject
+          v-for="(project, i) in activeListProjects"
+          :key="`${activeList}-${project.slug}`"
+          :list="activeList"
+          :i="i"
+          :of="activeListProjects.length - 1"
+          :data="project"
+          :top="top"
+          :bottom="bottom"
+          :side-x="i % 2 === 0 ? -1 : 1"
+          :side-y="-1"
+          @update-active="updateActive" />
+      </div>
+    </div>
 
     <div class="home__projects__videos" data-scroll-sticky>
       <video
@@ -128,7 +135,7 @@ import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
 import type { Video } from '~/types/wordpress'
-import { slugify } from '~/utils'
+import { toPx, slugify } from '~/utils'
 
 const props = defineProps<{
   data: HomepageProjects
@@ -139,8 +146,8 @@ const { updateSection } = store
 const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
-const { disableScroll, updateScroll, updateScrollTargetId } = scrollStore
-const { current, inTarget, scrollUpdated } = storeToRefs(scrollStore)
+const { updateScroll, updateScrollTargetId } = scrollStore
+const { inTarget, scrollUpdated } = storeToRefs(scrollStore)
 
 const { vh } = useResize()
 
@@ -148,15 +155,19 @@ const { getBounding } = useVirtualScrollAndThreeTools()
 
 const top = ref<number>(0)
 const bottom = ref<number>(0)
+const bounding = ref<number>(0)
+const minHeight = ref<string>('auto')
 
 const el = ref<HTMLElement>()
+const listEl = ref<HTMLElement>()
+const listContainerEl = ref<HTMLElement>()
 
 const active = ref<number>(0)
-const indicators = computed<boolean>(() => active.value !== 0 && section.value === 'projects')
+const indicators = computed<boolean>(
+  () => (active.value !== 0 || activeList.value === 'all') && section.value === 'projects'
+)
 
 let _to: any
-let _current: number = 0
-const waitInTarget = ref<boolean>(false)
 
 const activeList = ref<'selected' | 'all'>('selected')
 const selectedProjectsList = ref<Projects>(props.data.list.filter(project => project.selected))
@@ -177,14 +188,12 @@ watch([scrollUpdated], () => {
   updateBounding()
 })
 
-watch(activeList, async () => {
+watch(activeList, () => {
   // _current = current.value
   // disableScroll(true)
 
   // waitInTarget.value = true
   updateActiveListProjects()
-  await nextTick()
-  updateScrollTargetId('projects')
 })
 
 watch(inTarget, () => {
@@ -197,8 +206,17 @@ watch(activeListProjects, async () => {
   await nextTick()
   // waitInTarget.value = false
   // disableScroll(false)
+  const listWidth = listEl.value?.offsetWidth || 0
+  const listContainerWidth = listContainerEl.value?.offsetWidth || 0
+  bounding.value = listContainerWidth - listWidth
+  minHeight.value = activeList.value === 'selected' ? 'auto' : toPx(bounding.value + vh.value)
+  console.log(minHeight.value)
+  el.value && gsap.set(el.value, { minHeight: minHeight.value })
+  await nextTick()
   updateScroll()
+  await nextTick()
   updateBounding()
+  updateScrollTargetId('projects')
 })
 
 function updateActive(value: number) {
@@ -259,14 +277,31 @@ defineEmits(['update-active'])
   padding-bottom: calc(var(--vh) * 0.25);
 
   &--all {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    column-gap: var(--layout-gutter);
-    row-gap: var(--layout-gutter);
-    padding-top: toScale(12rem);
-    padding-bottom: toScale(12rem);
+    display: block;
+    padding-bottom: 0;
+
+    .home__projects__list {
+      position: sticky;
+      top: 0;
+      height: var(--vh);
+      display: flex;
+      align-items: center;
+
+      overflow: var(--overflow--hidden);
+      // border: 1px solid red;
+      &__container {
+        display: inline-block;
+        padding-left: var(--layout-gutter);
+        white-space: nowrap;
+        // border: 1px solid blue;
+        height: max-content;
+        .home__projects__project {
+          display: inline-block;
+          vertical-align: top;
+          // border: 1px solid lime;
+        }
+      }
+    }
   }
 
   &__index,
@@ -337,6 +372,7 @@ defineEmits(['update-active'])
     top: calc(var(--vh));
     left: 0;
     width: 100%;
+    // border: 1px solid red;
   }
 
   &__videos {

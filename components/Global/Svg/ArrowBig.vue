@@ -15,8 +15,8 @@ defineProps<{
 .svg__arrow--big {
   display: block;
   fill: none;
-  width: 2.4rem;
-  height: 4rem;
+  width: toScale(2.4rem);
+  height: toScale(4rem);
   &-left {
     transform: rotate(180deg);
   }
