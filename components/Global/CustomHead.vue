@@ -7,8 +7,9 @@
 </template>
 
 <script lang="ts" setup>
+import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
-import type { Head } from '~/types/strapi'
+import type { Head } from '~/types/wordpress'
 
 defineProps<{
   head: Head
@@ -21,8 +22,9 @@ const route = useRoute()
 const canonical = computed(() => `${FE_BASE_URL}${route.fullPath !== '/' ? route.fullPath : ''}`)
 
 const store = useStore()
+const { isPreloaded } = storeToRefs(store)
 
 onMounted((): void => {
-  store.updateLoading(false)
+  isPreloaded.value && store.updateLoading(false)
 })
 </script>
