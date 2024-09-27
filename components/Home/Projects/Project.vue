@@ -93,6 +93,8 @@ const size = computed<{ x: number; y: number }>(() => {
   return { x: width, y: (width * 7) / 5 }
 })
 
+const inView = ref<boolean>(false)
+
 const inTarget = computed<boolean>(
   () =>
     (!all.value && progress.value > 0.3 && leaveProgress.value !== 1) ||
@@ -101,13 +103,14 @@ const inTarget = computed<boolean>(
 
 const loaded = ref<boolean>(false)
 
-let videoPlayRequested: boolean = false
+watch(inView, () => {
+  if (videoEl.value) {
+    inView.value ? videoEl.value.play() : videoEl.value.pause()
+  }
+})
 
 watch(section, () => {
-  if (!section.value.includes('project')) {
-    videoEl.value?.pause()
-    videoPlayRequested = false
-  }
+  if (!section.value.includes('project')) inView.value = false
 })
 
 watch([el, active], async () => {
@@ -145,95 +148,74 @@ watch([el, current], () => {
   } else {
     top -= vh.value
     bottom -= vh.value
-    const leaveBottom = bottom + vh.value
+    const leave = bottom + vh.value
     progress.value = Math.min(Math.max(0, (current.value - top) / (bottom - top)), 1)
-    leaveProgress.value = Math.min(
-      Math.max(0, (current.value - bottom) / (leaveBottom - bottom)),
-      1
-    )
+    leaveProgress.value = Math.min(Math.max(0, (current.value - bottom) / (leave - bottom)), 1)
   }
 })
 
-watch([() => props.top, () => props.bottom, progress, leaveProgress, inTarget, loaded], () => {
-  const sizeX = size.value.x * (progress.value + leaveProgress.value)
-  const sizeY = size.value.y * (progress.value + leaveProgress.value)
-
-  const leaveX = sizeX * props.sideX * leaveProgress.value
-  const leaveY = sizeY * props.sideY * leaveProgress.value
-
-  const positionX = vw.value * 0.5 - sizeX * 0.5 + leaveX
-  const positionY = props.top + vh.value * 0.5 - sizeY * 0.5 + leaveY
-
-  const rotateX = 33 * props.sideY * leaveProgress.value
-  const rotateY = 33 * props.sideX * leaveProgress.value
-  const rotateRadX = (Math.PI / 180) * rotateX
-  const rotateRadY = (Math.PI / 180) * rotateY
-
-  const opacity = progress.value + leaveProgress.value < 2 ? 1 : 0
-
+watch([() => props.top, () => props.bottom, progress, leaveProgress, loaded], () => {
   const htmlx = size.value.x * progress.value * 0.5
   const htmly = size.value.y * progress.value * 0.5
   const htmlextra = props.i === 0 ? vh.value - vh.value * progress.value : 0
+  const htmlmargin = toScale(12)
 
-  clientEl.value && gsap.set(clientEl.value, { x: -htmlx + 12, y: -htmly + 12 + htmlextra })
+  clientEl.value &&
+    gsap.set(clientEl.value, { x: -htmlx + htmlmargin, y: -htmly + htmlmargin + htmlextra })
 
   collaboratorEl.value &&
-    gsap.set(collaboratorEl.value, { x: htmlx - 14, y: htmly - 12 + htmlextra })
-
-  if (videoEl.value) {
-    const isVideoPlaying = !!(
-      videoEl.value.currentTime > 0 &&
-      !videoEl.value.paused &&
-      videoEl.value.readyState > 2
-    )
-    if (inTarget.value && !isVideoPlaying) {
-      if (!videoPlayRequested) {
-        console.log('play video', projectId.value)
-        videoEl.value.play()
-        videoPlayRequested = true
-      }
-    } else if (!inTarget.value && isVideoPlaying) {
-      console.log('pause video', projectId.value)
-      videoPlayRequested = false
-      videoEl.value.pause()
-    }
-  }
-
-  const zoom = 0.4
+    gsap.set(collaboratorEl.value, { x: htmlx - htmlmargin, y: htmly - htmlmargin + htmlextra })
 
   if (!loaded.value) return
+
+  const _position = { x: 0, y: 0 }
+  const _size = { x: 0, y: 0, z: 1 }
+  const _rotate = { x: 0, y: 0, z: 0 }
+  let _border = toScale(16)
+  let _zoom = 1
 
   if (all.value) {
     const y = Math.max(0, current.value - props.top)
     const { top, left } = getBounding(el.value as HTMLElement)
-    // console.log(left)
-    $scene.updateObject({
-      id: projectId.value,
-      opacity: 1,
-      rotate: { x: 0, y: 0, z: 0 },
-      position: { x: left - y, y: top },
-      size: { x: size.value.x, y: size.value.y, z: 1 },
-      fixed: { from: props.top, to: props.bottom },
-      border: toScale(16),
-      zoom: 1,
-    })
-    // $scene.render()
+    inView.value = left - y > size.value.x * -1 && progress.value !== 1
+    _position.x = left - y
+    _position.y = top
+    _size.x = size.value.x
+    _size.y = size.value.y
   } else {
-    // if (props.i === 0) console.log(positionX, positionY, sizeX, sizeY, inTarget.value)
-    $scene.updateObject({
-      id: projectId.value,
-      opacity,
-      rotate: { x: rotateRadX, y: rotateRadY, z: 0 },
-      position: {
-        x: positionX,
-        y: positionY,
-      },
-      size: { x: sizeX, y: sizeY, z: 1 },
-      fixed: { from: props.top, to: props.bottom },
-      border: toScale(16) * (progress.value + leaveProgress.value),
-      zoom: 1 + zoom - zoom * progress.value,
-    })
+    const sizeX = size.value.x * (progress.value + leaveProgress.value)
+    const sizeY = size.value.y * (progress.value + leaveProgress.value)
+
+    const leaveX = sizeX * props.sideX * leaveProgress.value
+    const leaveY = sizeY * props.sideY * leaveProgress.value
+
+    const positionX = vw.value * 0.5 - sizeX * 0.5 + leaveX
+    const positionY = props.top + vh.value * 0.5 - sizeY * 0.5 + leaveY
+
+    const rotateX = 33 * props.sideY * leaveProgress.value
+    const rotateY = 33 * props.sideX * leaveProgress.value
+    const rotateRadX = (Math.PI / 180) * rotateX
+    const rotateRadY = (Math.PI / 180) * rotateY
+    inView.value = progress.value > 0.3 && leaveProgress.value !== 1
+    _position.x = positionX
+    _position.y = positionY
+    _size.x = sizeX
+    _size.y = sizeY
+    _rotate.x = rotateRadX
+    _rotate.y = rotateRadY
+    _border = _border * (progress.value + leaveProgress.value)
+    _zoom = 1.4 - 0.4 * progress.value
   }
+
+  $scene.updateObject({
+    id: projectId.value,
+    rotate: _rotate,
+    position: _position,
+    size: _size,
+    border: _border,
+    zoom: _zoom,
+    fixed: { from: props.top, to: props.bottom },
+  })
 })
 
 watch(intersect, () => {
@@ -257,19 +239,13 @@ onMounted(() => {
 })
 
 function onVideoLoaded() {
-  // console.log(videoEl.value?.readyState)
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
     video: videoEl.value,
-    size: { x: 0, y: 0, z: 1 },
-    position: { x: 0, y: 0 },
-    fixed: { from: props.top, to: props.bottom },
-    border: 16,
     onClick: openProject,
     onIntersect: onProjectIntersect,
     multiplyColor: 'darkGrey',
-    fade: true,
   })
   loaded.value = true
 }
@@ -279,10 +255,6 @@ function onImageLoaded() {
     id: projectId.value,
     type: 'plane',
     img: customImageEl.value?.el,
-    size: { x: 0, y: 0, z: 1 },
-    position: { x: 0, y: 0 },
-    fixed: { from: props.top, to: props.bottom },
-    border: 16,
     onClick: openProject,
     onIntersect: onProjectIntersect,
     multiplyColor: 'darkGrey',

@@ -124,7 +124,7 @@ class Controller {
     object.border = object.border || 0
     object.fade = object.fade || false
     object.position = object.position || { x: 0, y: 0 }
-    object.size = object.size || { x: 1, y: 1, z: 1 }
+    object.size = object.size || { x: 0, y: 0, z: 1 }
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
     object.zoom = object.zoom || 1
     object.opacity = object.opacity !== undefined ? object.opacity : 1
