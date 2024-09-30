@@ -24,11 +24,12 @@
     </div>
 
     <div class="home__about__clients__featured">
-      <div
-        class="home__about__clients__featured__client"
-        v-transition:in="{ callback: enterLogos, offset: 0.1 }">
+      <div class="home__about__clients__featured__client">
         <SvgNike />
       </div>
+      <div
+        class="home__about__clients__featured__transition-in"
+        v-transition:in="{ callback: enterLogos }" />
       <div class="home__about__clients__featured__client">
         <SvgBuff />
       </div>
@@ -107,10 +108,19 @@ function enterLogos(params: { el: HTMLElement }) {
   }
 
   &__featured {
+    position: relative;
     aspect-ratio: 1 / 3;
     display: flex;
     flex-wrap: wrap;
     @include columns(2, 'desktop');
+
+    &__transition-in {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1px;
+    }
 
     &__client {
       position: relative;

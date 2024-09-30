@@ -137,6 +137,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       z-index: 9;
       mix-blend-mode: color;
       @include will-fade;
+      pointer-events: none;
 
       &--safari {
         mix-blend-mode: color-burn;

@@ -21,18 +21,34 @@
         </h3>
       </div>
       <div class="home__about__awards__award__content__list">
-        <div v-for="item in data.list" class="home__about__awards__award__content__list__item">
-          <p class="home__about__awards__award__content__list__item__label">
+        <div v-for="(item, i) in data.list" class="home__about__awards__award__content__list__item">
+          <p v-if="!item.link" class="home__about__awards__award__content__list__item__label">
             {{ item.label }}
           </p>
+          <a
+            v-else
+            :class="[
+              'home__about__awards__award__content__list__item__label',
+              `home__about__awards__award__content__list__item__label--${i}`,
+            ]"
+            :href="item.link"
+            :data-link="i"
+            target="_blank"
+            @mouseenter="shuffle">
+            {{ item.label }}
+          </a>
           <p
             v-if="item.number"
             class="home__about__awards__award__content__list__item__number"
             v-text="`{${item.number}}`" />
-
-          <p v-else-if="item.link" class="home__about__awards__award__content__list__item__link">
-            {<SvgArrow />}
-          </p>
+          <div v-else-if="item.link" class="home__about__awards__award__content__list__item__link">
+            <button
+              class="home__about__awards__award__content__list__item__link__button"
+              @mouseenter="shuffle"
+              :data-link="i">
+              {<SvgLinkArrow />}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -40,9 +56,11 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAboutAwardsAward } from '~/types/wordpress/homepage'
+import { shuffleElsIn } from '~/utils/animations'
 
 const props = defineProps<{
   i: number
@@ -81,6 +99,19 @@ onMounted(() => {
 function onIntersectIn(el: HTMLElement, visible: boolean) {
   if (props.active !== 0 && !visible && direction.value === 'down') emit('update-active', props.i)
   else if (visible && direction.value === 'up') emit('update-active', props.i - 1)
+}
+
+function shuffle(e: MouseEvent) {
+  const t = e.target as HTMLElement
+  const { link } = t.dataset
+
+  const linkEl = el.value?.querySelector(
+    `.home__about__awards__award__content__list__item__label--${link}`
+  )
+  if (linkEl) {
+    gsap.set(linkEl, { opacity: 0 })
+    shuffleElsIn({ els: [linkEl] })
+  }
 }
 
 onBeforeUnmount(() => {
@@ -167,6 +198,7 @@ const emit = defineEmits<{
     }
 
     &__title {
+      @include t-black;
       @include t-b1;
       @include gap(2, 'left', 'desktop');
       @include columns(4, 'desktop');
@@ -180,13 +212,32 @@ const emit = defineEmits<{
         justify-content: space-between;
 
         &__label {
+          @include t-black;
           @include t-b1;
         }
 
         &__number,
         &__link {
           width: toColumns(2);
+          @include t-black;
           @include t-number;
+        }
+
+        &__link {
+          &__button {
+            display: flex;
+            align-items: center;
+            column-gap: 0.05rem;
+            margin: 0;
+            padding: 0;
+            border: none;
+            width: max-content;
+            @include t-black;
+            @include t-number;
+            .svg__link-arrow {
+              transform: translate(-0.05rem, 0.15rem);
+            }
+          }
         }
       }
     }

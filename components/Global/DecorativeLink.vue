@@ -1,7 +1,7 @@
 <template>
   <CustomLink class="decorative-link" :to="to" :type="type" :content="true" @mouseenter="shuffle">
     <span ref="spanEl">{{ label }}</span>
-    <SvgArrow />
+    <SvgLinkArrow />
   </CustomLink>
 </template>
 
@@ -26,8 +26,14 @@ function shuffle(e: MouseEvent) {
 
 <style lang="scss">
 .decorative-link {
-  .svg__arrow {
-    margin-left: 0.8rem;
+  display: flex;
+  align-items: center;
+  column-gap: toScale(0.7rem);
+  .svg__link-arrow {
+    transform: translateY(0.3rem);
+    path {
+      stroke: var(--lime);
+    }
   }
 }
 </style>

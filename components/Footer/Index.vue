@@ -264,7 +264,10 @@ function copyEmail() {
 
 function updateHour() {
   const square = el.value?.querySelector('.footer__hour .svg__square')
-  square && gsap.fromTo(square, { opacity: 0 }, { opacity: 1 })
+  if (square) {
+    gsap.set(square, { opacity: 0 })
+    shuffleElsIn({ els: [square] })
+  }
   hour.value = getCurrentHourInCET()
   _to = setTimeout(updateHour, 1000)
 }
