@@ -224,7 +224,6 @@ class Controller {
           } else if (object.img) {
             const src = object.img.src || object.img.currentSrc
             const id = slugify(src)
-            console.log(id)
             const texture = this.loadedTextures.find(t => t.id === id)
             if (texture && !texture.ready) continue
             else if (!texture)
@@ -294,10 +293,11 @@ class Controller {
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
 
         const hovered = this.intersects.includes(object.mesh)
-
         const clickable = hovered && object.onClick
+
         if (object.onIntersect) object.onIntersect(hovered)
-        if (!hovered && this.intersects.length <= 1) this.updateCursor('default')
+        if (!hovered && object.wasHovered && this.intersects.length === 0)
+          this.updateCursor('default')
         if (
           (clickable && uniforms.uPixel.value === 0) ||
           (!clickable && uniforms.uPixel.value === 1)
@@ -306,10 +306,12 @@ class Controller {
           gsap.killTweensOf(uniforms.uPixel)
           gsap.to(uniforms.uPixel, { value: clickable ? 1 : 0, duration: clickable ? 0.4 : 0.3 })
         }
-        if (clickable) {
+        if (clickable && !object.wasClickable) {
           this.main.classList.add('__main--pointer')
           this.updateCursor(object.cursor)
         }
+        object.wasHovered = hovered
+        object.wasClickable = clickable
       } else if (object.mesh && object.type === 'plane') {
         object.mesh.material.uniforms.uFade.value = 0.0
         this.releasePlane(object.meshId)
@@ -339,7 +341,10 @@ class Controller {
   }
 
   render() {
-    this.intersects = this.raycaster.intersectObjects(this.scene.children, false).map(i => i.object)
+    this.intersects = this.raycaster
+      .intersectObjects(this.scene.children, false)
+      .map(i => i.object)
+      .filter(o => o.position.z === 0)
 
     this.updateObjects()
 
@@ -376,6 +381,8 @@ class Controller {
   releasePlane(id) {
     this.log(`Plane ${id} released`)
     const plane = this.batch.find(p => p.id === id)
+    plane.mesh.scale.x = 0
+    plane.mesh.scale.y = 0
     plane.available = true
     plane.mesh.visible = false
   }
