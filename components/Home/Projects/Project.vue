@@ -126,6 +126,10 @@ const active = computed<boolean>(
     isLoaded.value
 )
 
+const inActiveSection = computed<boolean>(
+  () => section.value.includes('project') || section.value === 'reel'
+)
+
 const size = computed<{ x: number; y: number }>(() => {
   const width = getColumnWidth(inAllProjectsList.value && props.data.selected ? 3.5 : 3)
   return { x: width, y: (width * 7) / 5 }
@@ -172,7 +176,7 @@ watch([isInProject, isInProjectEntered], () => {
 watch(section, () => {
   if (inAllProjectsList.value) {
     gsap.killTweensOf(opacity)
-    if (section.value.includes('projects')) {
+    if (inActiveSection.value) {
       gsap.to(opacity, { value: 1, duration: 1, delay: 0.2, onUpdate: onOpacityUpdate })
     } else {
       gsap.to(opacity, { value: 0, duration: 0.6, onUpdate: onOpacityUpdate })
@@ -290,13 +294,13 @@ function getInView(): boolean {
       left - y > size.value.x * -1 &&
       left - y < vw.value &&
       progress.value !== 1 &&
-      section.value.includes('project')
+      inActiveSection.value
     )
   }
   return (
     (progress.value > 0.3 || (props.i === 0 && progress.value > 0)) &&
     leaveProgress.value !== 1 &&
-    section.value.includes('project')
+    inActiveSection.value
   )
 }
 

@@ -34,7 +34,8 @@
       </video>
     </div>
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
-    <div class="home__hero__intersect" v-intersect="{ callback: onIntersect }" />
+    <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersectTop }" />
+    <div class="home__hero__intersect--bottom" v-intersect="{ callback: onIntersectBottom }" />
   </section>
 </template>
 
@@ -57,7 +58,7 @@ const router = useRouter()
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateSection, updateInReel } = store
+const { updateCursor, updateSection, updateInReel } = store
 const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -231,8 +232,12 @@ function onPause() {
   videoPlaying.value = false
 }
 
-function onIntersect(el: HTMLElement, visible: boolean) {
+function onIntersectTop(el: HTMLElement, visible: boolean) {
   if (visible && direction.value === 'up') updateSection('hero')
+}
+
+function onIntersectBottom(el: HTMLElement, visible: boolean) {
+  if (visible && direction.value === 'up') updateSection('reel')
 }
 
 onUnmounted(() => {
@@ -345,7 +350,17 @@ onUnmounted(() => {
     left: 0;
     width: 100%;
     height: 1px;
-    bottom: var(--vh);
+    // border: 1px solid red;
+    &--top,
+    &--bottom {
+      @extend .home__hero__intersect;
+    }
+    &--top {
+      bottom: var(--vh);
+    }
+    &--bottom {
+      bottom: 0.1rem;
+    }
   }
 }
 </style>
