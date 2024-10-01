@@ -14,6 +14,7 @@ export default function useScroll() {
   const { create: createScrollLock, destroy: destroyScrollLock } = useScrollLock()
 
   const store = useStore()
+  const { updateSectionThrottle } = store
   const { isPreloaded } = storeToRefs(store)
 
   const scrollStore = useScrollStore()
@@ -152,6 +153,7 @@ export default function useScroll() {
       $scene.render()
     }
     for (const callback of renderCallbacks.value) callback()
+    updateSectionThrottle(data.speed > 1000)
     updateScrollData(data)
   }
 

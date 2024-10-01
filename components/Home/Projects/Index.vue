@@ -10,6 +10,7 @@
         <transition
           mode="out-in"
           :css="false"
+          @before-enter="prepareFadeIn"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
           <p v-if="indicators" class="home__projects__index">
@@ -23,6 +24,7 @@
         <transition
           mode="out-in"
           :css="false"
+          @before-enter="prepareFadeIn"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
           <p v-if="indicators" class="home__projects__date">
@@ -36,6 +38,7 @@
       <transition
         mode="out-in"
         :css="false"
+        @before-enter="prepareFadeIn"
         @enter="transitionShuffleIn"
         @leave="transitionShuffleOut">
         <button
@@ -50,6 +53,7 @@
             <transition
               mode="out-in"
               :css="false"
+              @before-enter="prepareFadeIn"
               @enter="transitionShuffleIn"
               @leave="transitionShuffleOut">
               <SvgSquare v-if="activeList === 'selected'" />
@@ -79,6 +83,7 @@
             <transition
               mode="out-in"
               :css="false"
+              @before-enter="prepareFadeIn"
               @enter="transitionShuffleIn"
               @leave="transitionShuffleOut">
               <SvgSquare v-if="activeList === 'all'" />
@@ -92,6 +97,7 @@
       </transition>
     </div>
 
+    <div class="home__projects__intersect--bg" v-intersect="{ callback: onIntersectBg }" />
     <div class="home__projects__intersect" v-intersect="{ callback: onIntersect }" />
 
     <div ref="listEl" class="home__projects__list">
@@ -132,7 +138,7 @@
 import { gsap } from 'gsap'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { transitionShuffleIn, transitionShuffleOut, transitionDone } from '~/utils/animations'
+import { transitionShuffleIn, transitionShuffleOut, prepareFadeIn } from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
@@ -150,7 +156,7 @@ const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollFixedTargetId } = scrollStore
-const { scrollUpdated } = storeToRefs(scrollStore)
+const { scrollUpdated, direction } = storeToRefs(scrollStore)
 const { vh } = useResize()
 
 const { getBounding } = useVirtualScrollAndThreeTools()
@@ -226,6 +232,10 @@ function updateActive(value: number) {
 
 function onIntersect(el: HTMLElement, visible: boolean) {
   visible && updateSection('projects')
+}
+
+function onIntersectBg(el: HTMLElement, visible: boolean) {
+  visible && direction.value === 'down' && updateSection('projects-bg')
 }
 
 function updateActiveListToSelected(e: MouseEvent) {
@@ -326,12 +336,14 @@ defineEmits(['update-active'])
     display: flex;
     justify-content: space-around;
     align-items: center;
+    pointer-events: none;
 
     &__button {
       width: max-content;
-      width: 40rem;
+      width: toScale(40rem);
       border: none;
       @include will-fade;
+      pointer-events: auto;
 
       &--active {
         pointer-events: none;
@@ -368,7 +380,12 @@ defineEmits(['update-active'])
     top: calc(var(--vh));
     left: 0;
     width: 100%;
+    // height: 0.1rem;
     // border: 1px solid red;
+    &--bg {
+      @extend .home__projects__intersect;
+      top: 0.2rem;
+    }
   }
 
   &__videos {

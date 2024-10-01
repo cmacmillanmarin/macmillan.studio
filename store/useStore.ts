@@ -10,6 +10,7 @@ export default defineStore('use-store', {
     loading: true,
     grid: 'none',
     section: 'hero',
+    sectionThrottle: false,
     cursor: 'default',
     inReel: false,
     inProject: false,
@@ -50,9 +51,16 @@ export default defineStore('use-store', {
     },
     updateSection(state: Section) {
       _to && clearTimeout(_to)
-      _to = setTimeout(() => {
+      if (this.sectionThrottle) {
+        _to = setTimeout(() => {
+          this.section = state
+        }, 200)
+      } else {
         this.section = state
-      }, 200)
+      }
+    },
+    updateSectionThrottle(state: boolean) {
+      this.sectionThrottle = state
     },
     updateCursor(state: Cursor) {
       this.cursor = state

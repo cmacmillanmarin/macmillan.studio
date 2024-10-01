@@ -16,19 +16,45 @@
 
     <ClientOnly>
       <Teleport to="#top-layer">
-        <div v-if="data.client.name" ref="clientEl" class="home__projects__project__client">
-          <div class="home__projects__project__client__logo"></div>
-          <div class="home__projects__project__client__name">{{ data.client.name }}</div>
-        </div>
-        <div
-          v-if="data.collaborator.name"
-          ref="collaboratorEl"
-          class="home__projects__project__collaborator">
-          <div class="home__projects__project__collaborator__name">
-            {{ data.freelance ? 'w/ ' : 'at ' }}
-            {{ data.collaborator.name }}
+        <transition
+          mode="out-in"
+          :css="false"
+          @before-enter="prepareClientIn"
+          @enter="transitionShuffleIn"
+          @leave="transitionDone">
+          <div
+            v-if="data.client.name && !inTransition"
+            ref="clientEl"
+            :class="[
+              'home__projects__project__client',
+              { 'home__projects__project__client--all': inAllProjectsList },
+            ]">
+            <div
+              class="home__projects__project__client__logo"
+              :style="{ backgroundColor: projectColor }"></div>
+            <div class="home__projects__project__client__name">{{ data.client.name }}</div>
           </div>
-        </div>
+        </transition>
+        <transition
+          mode="out-in"
+          :css="false"
+          @before-enter="prepareCollaboratorIn"
+          @enter="transitionShuffleIn"
+          @leave="transitionDone">
+          <div
+            v-if="data.collaborator.name && !inTransition"
+            ref="collaboratorEl"
+            class="home__projects__project__collaborator"
+            :class="[
+              'home__projects__project__collaborator',
+              { 'home__projects__project__collaborator--all': inAllProjectsList },
+            ]">
+            <div class="home__projects__project__collaborator__name">
+              {{ data.freelance ? 'w/ ' : 'at ' }}
+              {{ data.collaborator.name }}
+            </div>
+          </div>
+        </transition>
       </Teleport>
     </ClientOnly>
 
@@ -43,7 +69,7 @@ import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { slugify } from '~/utils'
 import { fadeIn, fadeOut } from '~/utils/animations'
-import type { Plane } from '~/types/front/project'
+import type { Plane, ClientAndCollaborator } from '~/types/front/project'
 import type { Project } from '~/types/wordpress/project'
 import CustomImage from '~/components/Global/CustomImage.vue'
 
@@ -93,7 +119,11 @@ const leaveProgress = ref<number>(0)
 
 // For selected projects
 const active = computed<boolean>(
-  () => progress.value > 0.55 && leaveProgress.value === 0 && !isInProject.value
+  () =>
+    ((inAllProjectsList.value && inView.value) ||
+      (!inAllProjectsList.value && progress.value > 0.55 && leaveProgress.value === 0)) &&
+    !isInProject.value &&
+    isLoaded.value
 )
 
 const size = computed<{ x: number; y: number }>(() => {
@@ -102,6 +132,7 @@ const size = computed<{ x: number; y: number }>(() => {
 })
 
 let _plane: Plane = {
+  fixed: { from: 0, to: 0 },
   position: { x: 0, y: 0 },
   size: { x: 0, y: 0, z: 1 },
   rotate: { x: 0, y: 0, z: 0 },
@@ -110,6 +141,7 @@ let _plane: Plane = {
 }
 
 let _target: Plane = {
+  fixed: { from: 0, to: 0 },
   position: { x: 0, y: 0 },
   size: { x: 0, y: 0, z: 1 },
   rotate: { x: 0, y: 0, z: 0 },
@@ -146,33 +178,32 @@ watch(section, () => {
       gsap.to(opacity, { value: 0, duration: 0.6, onUpdate: onOpacityUpdate })
     }
   } else $scene.updateObject({ id: projectId.value, opacity: 1 })
-  if (!section.value.includes('project')) inView.value = false
+  inView.value = getInView()
 })
 
-watch([el, active], async () => {
+watch(active, async () => {
   await nextTick()
 
   if (clientEl.value) {
-    gsap.killTweensOf(clientEl.value)
     active.value
       ? fadeIn({ el: clientEl.value, duration: 0.4 })
       : fadeOut({ el: clientEl.value, duration: 0.1 })
   }
 
   if (collaboratorEl.value) {
-    gsap.killTweensOf(collaboratorEl.value)
     active.value
       ? fadeIn({ el: collaboratorEl.value, duration: 0.4 })
       : fadeOut({ el: collaboratorEl.value, duration: 0.1 })
   }
 
   active.value && emit('update-active', props.i)
-  // if (
-  //   !active.value &&
-  //   ((direction.value === 'up' && props.i === 0) ||
-  //     (direction.value === 'down' && props.i === props.of))
-  // )
-  //   emit('update-active', -1)
+})
+
+watch(inTransition, async () => {
+  if (active.value) return
+  await nextTick()
+  clientEl.value && fadeOut({ el: clientEl.value, duration: 0.1 })
+  collaboratorEl.value && fadeOut({ el: collaboratorEl.value, duration: 0.1 })
 })
 
 watch(inAllProjectsList, () => {
@@ -182,36 +213,24 @@ watch(inAllProjectsList, () => {
 watch(current, () => {
   progress.value = getProgress()
   leaveProgress.value = getLeaveProgress()
+  inView.value = getInView()
 })
 
 watch(
   [() => props.top, () => props.bottom, progress, leaveProgress, isLoaded, inAllProjectsList],
   () => {
-    if (!isLoaded.value) return
+    if (!isLoaded.value || inTransition.value) return
 
-    const htmlx = size.value.x * progress.value * 0.5
-    const htmly = size.value.y * progress.value * 0.5
-    const htmlextra = props.i === 0 ? vh.value - vh.value * progress.value : 0
-    const htmlmargin = toScale(12)
+    _plane = inAllProjectsList.value
+      ? getInAllProjectsListPlane()
+      : getInSelectedProjectsListPlane()
 
-    clientEl.value &&
-      gsap.set(clientEl.value, { x: -htmlx + htmlmargin, y: -htmly + htmlmargin + htmlextra })
+    const { client, collaborator } = getClientAndCollaborator()
+    clientEl.value && gsap.set(clientEl.value, { x: client.x, y: client.y })
+    collaboratorEl.value && gsap.set(collaboratorEl.value, { x: collaborator.x, y: collaborator.y })
 
-    collaboratorEl.value &&
-      gsap.set(collaboratorEl.value, { x: htmlx - htmlmargin, y: htmly - htmlmargin + htmlextra })
-
-    inView.value = getInView()
-
-    if (!inTransition.value) {
-      _plane = inAllProjectsList.value
-        ? getInAllProjectsListPlane()
-        : getInSelectedProjectsListPlane()
-      $scene.updateObject({
-        id: projectId.value,
-        fixed: { from: props.top, to: props.bottom },
-        ..._plane,
-      })
-    }
+    $scene.updateObject({ id: projectId.value, ..._plane })
+    $scene.render()
   }
 )
 
@@ -267,9 +286,18 @@ function getInView(): boolean {
   if (inAllProjectsList.value) {
     const y = Math.max(0, current.value - props.top)
     const { left } = getBounding(el.value as HTMLElement)
-    return left - y > size.value.x * -1 && left - y < vw.value && progress.value !== 1
+    return (
+      left - y > size.value.x * -1 &&
+      left - y < vw.value &&
+      progress.value !== 1 &&
+      section.value.includes('project')
+    )
   }
-  return progress.value > 0.3 && leaveProgress.value !== 1
+  return (
+    (progress.value > 0.3 || (props.i === 0 && progress.value > 0)) &&
+    leaveProgress.value !== 1 &&
+    section.value.includes('project')
+  )
 }
 
 function getProgress(): number {
@@ -296,13 +324,12 @@ function getInAllProjectsListPlane(): Plane {
   const y = Math.max(0, current.value - props.top)
   const { top, left } = getBounding(el.value as HTMLElement)
 
-  props.i === 0 && console.log('getInAllProjectsListPlane', y, top, left)
-
   let extra = 0
   if (progress.value < 0) {
     extra = Math.abs(current.value - props.top)
   }
   return {
+    fixed: { from: props.top, to: props.bottom },
     position: { x: left - y + extra, y: top },
     size: { x: size.value.x, y: size.value.y, z: 1 },
     rotate: { x: 0, y: 0, z: 0 },
@@ -321,9 +348,8 @@ function getInSelectedProjectsListPlane(): Plane {
   const positionX = vw.value * 0.5 - sizeX * 0.5 + leaveX
   const positionY = props.top + vh.value * 0.5 - sizeY * 0.5 + leaveY
 
-  props.i === 1 && console.log('getInSelectedProjectsListPlane', positionY)
-
   return {
+    fixed: { from: props.top, to: props.bottom },
     position: { x: positionX, y: positionY },
     size: { x: sizeX, y: sizeY, z: 1 },
     rotate: {
@@ -336,6 +362,43 @@ function getInSelectedProjectsListPlane(): Plane {
   }
 }
 
+function getClientAndCollaborator(params?: { to?: Plane }): ClientAndCollaborator {
+  const margin = toScale(12)
+
+  if (inAllProjectsList.value) {
+    const source: Plane = params?.to || _plane
+    let extra = 0
+    if (current.value < props.top) {
+      extra = Math.abs(current.value - props.top)
+    } else if (current.value > props.bottom) {
+      extra = Math.abs(current.value - props.bottom) * -1
+    }
+    return {
+      client: { x: source.position.x + margin, y: source.position.y - props.top + margin + extra },
+      collaborator: {
+        x: source.position.x + source.size.x - margin,
+        y: source.position.y - props.top + source.size.y - margin + extra,
+      },
+    }
+  }
+
+  const position = {
+    x: size.value.x * progress.value * 0.5,
+    y: size.value.y * progress.value * 0.5,
+  }
+  const extra = props.i === 0 ? vh.value - vh.value * progress.value : 0
+  return {
+    client: {
+      x: -position.x + margin,
+      y: -position.y + margin + extra,
+    },
+    collaborator: {
+      x: position.x - margin,
+      y: position.y - margin + extra,
+    },
+  }
+}
+
 function onOpacityUpdate() {
   $scene.updateObject({ id: projectId.value, opacity: opacity.value })
 }
@@ -345,14 +408,11 @@ function transition() {
   leaveProgress.value = getLeaveProgress()
   inView.value = getInView()
 
-  props.i === 0 && console.log('TRANSITION', progress.value, leaveProgress.value, inView.value)
-
   _target = inAllProjectsList.value ? getInAllProjectsListPlane() : getInSelectedProjectsListPlane()
   animate()
 }
 
 function animate() {
-  if (props.i === 0) console.log('ANIMATE!', _target.position.x)
   disableScroll(true)
   gsap.killTweensOf([_plane.position, _plane.rotate, _plane.size, _plane])
   gsap.to(_plane.position, { x: _target.position.x, y: _target.position.y })
@@ -374,8 +434,18 @@ function animate() {
   })
 }
 
+function prepareClientIn(el: Element) {
+  const { client } = getClientAndCollaborator({ to: _target })
+  gsap.set(el, { x: client.x, y: client.y })
+}
+
+function prepareCollaboratorIn(el: Element) {
+  const { collaborator } = getClientAndCollaborator({ to: _target })
+  gsap.set(el, { x: collaborator.x, y: collaborator.y })
+}
+
 onBeforeUnmount(() => {
-  // killTicker(raf)
+  console.log(`Pause video - ${projectId.value}`)
   videoEl.value?.pause()
   $scene.removeObject({ id: projectId.value })
 })
@@ -433,20 +503,25 @@ defineExpose({
     left: 50%;
     display: flex;
     align-items: center;
-    column-gap: 0.8rem;
+    column-gap: toScale(0.8rem);
+
+    &--all {
+      top: 0;
+      left: 0;
+    }
 
     opacity: 0.000001;
     will-change: opacity, transform;
 
     &__logo {
-      width: 2.4rem;
-      height: 2.4rem;
+      width: toScale(2.4rem);
+      height: toScale(2.4rem);
       border-radius: 50%;
       background-color: v-bind(projectColor);
     }
 
     &__name {
-      text-shadow: 0 0 1.2rem rgba(0, 0, 0, 0.8);
+      text-shadow: 0 0 toScale(1.2rem) rgba(0, 0, 0, 0.8);
 
       @include t-white;
       @include t-b2;

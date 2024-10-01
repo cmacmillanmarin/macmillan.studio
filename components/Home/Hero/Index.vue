@@ -34,8 +34,7 @@
       </video>
     </div>
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
-    <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersectTop }" />
-    <div class="home__hero__intersect--bottom" v-intersect="{ callback: onIntersectBottom }" />
+    <div class="home__hero__intersect" v-intersect="{ callback: onIntersect }" />
   </section>
 </template>
 
@@ -58,7 +57,7 @@ const router = useRouter()
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateCursor, updateSection, updateInReel } = store
+const { updateSection, updateInReel } = store
 const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -214,6 +213,7 @@ function closeReel() {
   updateInReel(false)
   disableScroll(false)
   updateScrollTargetId('projects')
+  $scene.updateObject({ id: 'reel', onClick: goToReel, cursor: 'play' })
   if (videoEl.value) {
     videoEl.value.src = '/assets/video/short.webm'
     videoEl.value.setAttribute('type', 'video/webm')
@@ -225,20 +225,14 @@ function closeReel() {
 
 function onPlay() {
   videoPlaying.value = true
-  if (!isInReel.value) $scene.updateObject({ id: 'reel', onClick: goToReel })
 }
 
 function onPause() {
   videoPlaying.value = false
 }
 
-function onIntersectTop(el: HTMLElement, visible: boolean) {
+function onIntersect(el: HTMLElement, visible: boolean) {
   if (visible && direction.value === 'up') updateSection('hero')
-}
-
-function onIntersectBottom(el: HTMLElement, visible: boolean) {
-  if (visible && direction.value === 'down' && current.value > 0) updateSection('projects-bg')
-  else if (visible && direction.value === 'up') updateSection('projects-bg')
 }
 
 onUnmounted(() => {
@@ -351,17 +345,7 @@ onUnmounted(() => {
     left: 0;
     width: 100%;
     height: 1px;
-    // background-color: red;
-    &--top,
-    &--bottom {
-      @extend .home__hero__intersect;
-    }
-    &--top {
-      bottom: var(--vh);
-    }
-    &--bottom {
-      bottom: 1px;
-    }
+    bottom: var(--vh);
   }
 }
 </style>

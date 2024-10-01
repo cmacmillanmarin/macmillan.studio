@@ -308,12 +308,13 @@ class Controller {
           gsap.killTweensOf(uniforms.uPixel)
           gsap.to(uniforms.uPixel, { value: clickable ? 1 : 0, duration: clickable ? 0.4 : 0.3 })
         }
-        if (clickable && !object.wasClickable) {
+        if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
           this.main.classList.add('__main--pointer')
           this.updateCursor(object.cursor)
         }
         object.wasHovered = hovered
         object.wasClickable = clickable
+        object.previousCursor = object.cursor
       } else if (object.mesh && object.type === 'plane') {
         object.mesh.material.uniforms.uFade.value = 0.0
         this.releasePlane(object.meshId)

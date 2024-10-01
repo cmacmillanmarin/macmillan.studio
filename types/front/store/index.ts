@@ -32,6 +32,7 @@ export interface State {
   loading: boolean
   grid: GridType
   section: Section
+  sectionThrottle: boolean
   cursor: Cursor
   inReel: boolean
   inProject: boolean
