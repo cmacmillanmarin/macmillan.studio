@@ -7,11 +7,15 @@
     data-scroll-set-position>
     <ClientOnly>
       <Teleport to=".header__top">
-        <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
-          <p v-if="indicators" :key="activeListProjects.length" class="home__projects__index">
+        <transition
+          mode="out-in"
+          :css="false"
+          @enter="transitionShuffleIn"
+          @leave="transitionShuffleOut">
+          <p v-if="indicators" class="home__projects__index">
             <SvgSquare />
             <span
-              v-html="`{${startWithZero(active)}—${startWithZero(activeListProjects.length)}}`" />
+              v-text="`{${startWithZero(active)}—${startWithZero(activeListProjects.length)}}`" />
           </p>
         </transition>
       </Teleport>
@@ -22,7 +26,7 @@
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
           <p v-if="indicators" class="home__projects__date">
-            <span>{2024—2013}</span>
+            <span v-text="`{${year}—2013}`" />
           </p>
         </transition>
       </Teleport>
@@ -90,13 +94,11 @@
 
     <div class="home__projects__intersect" v-intersect="{ callback: onIntersect }" />
 
-    <div
-      ref="listEl"
-      class="home__projects__list"
-      :data-scroll-sticky="activeList === 'all' ? '' : undefined">
+    <div ref="listEl" class="home__projects__list">
       <div ref="listContainerEl" class="home__projects__list__container">
         <HomeProjectsProject
           v-for="(project, i) in activeListProjects"
+          ref="projectEls"
           :key="project.slug"
           :list="activeList"
           :i="i"
@@ -136,6 +138,7 @@ import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
 import type { Video } from '~/types/wordpress'
 import { toPx, slugify } from '~/utils'
+import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
 
 const props = defineProps<{
   data: HomepageProjects
@@ -146,7 +149,7 @@ const { updateSection } = store
 const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
-const { updateScroll, updateScrollTargetId } = scrollStore
+const { updateScroll, updateScrollFixedTargetId } = scrollStore
 const { scrollUpdated } = storeToRefs(scrollStore)
 const { vh } = useResize()
 
@@ -160,9 +163,12 @@ const minHeight = ref<string>('auto')
 const el = ref<HTMLElement>()
 const listEl = ref<HTMLElement>()
 const listContainerEl = ref<HTMLElement>()
+const projectEls = ref<Array<typeof HomeProjectsProject>>([])
 
 const active = ref<number>(0)
 const indicators = computed<boolean>(() => section.value === 'projects')
+
+const year = ref<string>(new Date().getFullYear().toString())
 
 let _to: any
 
@@ -190,6 +196,7 @@ watch(activeList, () => {
 })
 
 watch(activeListProjects, async () => {
+  active.value = 1
   await nextTick()
   const listWidth = listEl.value?.offsetWidth || 0
   const listContainerWidth = listContainerEl.value?.offsetWidth || 0
@@ -200,8 +207,18 @@ watch(activeListProjects, async () => {
   updateScroll()
   await nextTick()
   updateBounding()
-  updateScrollTargetId('projects')
+  updateScrollFixedTargetId('projects')
+  await nextTick()
+  await nextTick()
+  for (const project of projectEls.value) {
+    project.transition()
+  }
 })
+
+function updateActiveListProjects() {
+  activeListProjects.value =
+    activeList.value === 'selected' ? selectedProjectsList.value : props.data.list
+}
 
 function updateActive(value: number) {
   active.value = value + 1
@@ -235,11 +252,6 @@ function onButtonMouseEnter(e: MouseEvent) {
     gsap.set(labelEl, { opacity: 0 })
     shuffleElsIn({ els: [labelEl] })
   }
-}
-
-function updateActiveListProjects() {
-  activeListProjects.value =
-    activeList.value === 'selected' ? selectedProjectsList.value : props.data.list
 }
 
 async function updateBounding() {

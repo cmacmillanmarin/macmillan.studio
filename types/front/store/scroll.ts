@@ -16,7 +16,9 @@ export interface State {
   bounding: number
   progress: number
   target: number
+  fixedTarget: number
   targetId: string
+  fixedTargetId: string
   inTarget: boolean
   renderCallbacks: Array<() => void>
 }

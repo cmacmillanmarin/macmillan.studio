@@ -154,7 +154,7 @@ class Controller {
     onClick,
     onIntersect,
   }) {
-    this.log(`updateObject() ${JSON.stringify(position)}, ${JSON.stringify(size)}`)
+    this.log(`updateObject() ${id}`)
     const object = this.getObject(id)
     if (object) {
       object.zoom = zoom !== undefined ? zoom : object.zoom
@@ -204,7 +204,7 @@ class Controller {
 
   updateObjects() {
     this.needsUpdate = false
-    this.main.classList.remove('__main--pointer')
+
     for (const object of this.objects) {
       object.inView = this.inView(object)
       if (object.inView) {
@@ -218,7 +218,7 @@ class Controller {
               object.video.readyState > 2
             )
             if (!isVideoPlaying) {
-              console.log('not playing', object.id)
+              // console.log('not playing', object.id)
               continue
             }
           } else if (object.img) {
@@ -296,8 +296,10 @@ class Controller {
         const clickable = hovered && object.onClick
 
         if (object.onIntersect) object.onIntersect(hovered)
-        if (!hovered && object.wasHovered && this.intersects.length === 0)
+        if (!hovered && object.wasHovered && this.intersects.length === 0) {
           this.updateCursor('default')
+          this.main.classList.remove('__main--pointer')
+        }
         if (
           (clickable && uniforms.uPixel.value === 0) ||
           (!clickable && uniforms.uPixel.value === 1)

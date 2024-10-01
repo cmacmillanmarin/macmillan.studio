@@ -67,14 +67,14 @@ export default function useScrollNative() {
     })
   }
 
-  function to(target: number) {
-    gsap.to(_el, { scrollTo: target })
+  function to(params: { value: number; fixed?: boolean }) {
+    gsap[params.fixed ? 'set' : 'to'](_el, { scrollTo: params.value })
   }
 
-  function toId(targetId: string) {
-    const target: HTMLElement | null = document.getElementById(targetId)
+  function toId(params: { value: string; fixed?: boolean }) {
+    const target: HTMLElement | null = document.getElementById(params.value)
     const offset: number = parseFloat(target?.dataset.scrollTargetOffset || '0')
-    target && gsap.to(_el, { scrollTo: { y: target, offsetY: offset } })
+    target && gsap[params.fixed ? 'set' : 'to'](_el, { scrollTo: { y: target, offsetY: offset } })
   }
 
   function reset() {

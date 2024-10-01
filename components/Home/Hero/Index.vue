@@ -34,8 +34,8 @@
       </video>
     </div>
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
-    <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersect }" />
-    <div class="home__hero__intersect--bottom" v-intersect="{ callback: onIntersect }" />
+    <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersectTop }" />
+    <div class="home__hero__intersect--bottom" v-intersect="{ callback: onIntersectBottom }" />
   </section>
 </template>
 
@@ -232,9 +232,13 @@ function onPause() {
   videoPlaying.value = false
 }
 
-function onIntersect(el: HTMLElement, visible: boolean) {
+function onIntersectTop(el: HTMLElement, visible: boolean) {
+  if (visible && direction.value === 'up') updateSection('hero')
+}
+
+function onIntersectBottom(el: HTMLElement, visible: boolean) {
   if (visible && direction.value === 'down' && current.value > 0) updateSection('projects-bg')
-  else if (visible && direction.value === 'up') updateSection('hero')
+  else if (visible && direction.value === 'up') updateSection('projects-bg')
 }
 
 onUnmounted(() => {
@@ -347,6 +351,7 @@ onUnmounted(() => {
     left: 0;
     width: 100%;
     height: 1px;
+    // background-color: red;
     &--top,
     &--bottom {
       @extend .home__hero__intersect;
