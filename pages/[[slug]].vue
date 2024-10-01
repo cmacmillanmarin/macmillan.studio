@@ -43,7 +43,7 @@ const route = useRoute()
 const { data } = await useFetch<Homepage>('/api/data')
 
 const store = useStore()
-const { updateInProject, updateInProjectEntered } = store
+const { updateCursor, updateInProject, updateInProjectEntered } = store
 const { section } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
@@ -56,6 +56,7 @@ const project = computed<Project | undefined>(() => {
 })
 
 watch(inProject, () => {
+  updateCursor('default')
   updateInProject(inProject.value)
 })
 
