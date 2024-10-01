@@ -95,7 +95,7 @@ const active = computed<boolean>(
 )
 
 const size = computed<{ x: number; y: number }>(() => {
-  const width = getColumnWidth(all.value && props.data.selected ? 4 : 3)
+  const width = getColumnWidth(all.value && props.data.selected ? 3.5 : 3)
   return { x: width, y: (width * 7) / 5 }
 })
 
@@ -414,7 +414,7 @@ const emit = defineEmits<{
     .home__projects__project__anchor,
     .home__projects__project__vid,
     .home__projects__project__img {
-      width: toColumns(4);
+      width: toColumns(3.5);
     }
   }
 
