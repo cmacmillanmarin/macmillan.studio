@@ -200,7 +200,7 @@ watch(active, async () => {
       : fadeOut({ el: collaboratorEl.value, duration: 0.1 })
   }
 
-  active.value && emit('update-active', props.i)
+  active.value && !inAllProjectsList.value && emit('update-active', props.i)
 })
 
 watch(inTransition, async () => {
@@ -218,6 +218,7 @@ watch(current, () => {
   progress.value = getProgress()
   leaveProgress.value = getLeaveProgress()
   inView.value = getInView()
+  inAllProjectsList.value && getActiveInAllProjectsList() && emit('update-active', props.i)
 })
 
 watch(
@@ -401,6 +402,12 @@ function getClientAndCollaborator(params?: { to?: Plane }): ClientAndCollaborato
       y: position.y - margin + extra,
     },
   }
+}
+
+function getActiveInAllProjectsList() {
+  const { left } = getBounding(el.value as HTMLElement)
+  const scrollPoint = current.value - props.top + vw.value * 0.5 - getColumnWidth(3.5) * 0.5
+  return scrollPoint > left && scrollPoint < left + size.value.x
 }
 
 function onOpacityUpdate() {
