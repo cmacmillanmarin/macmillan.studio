@@ -118,6 +118,19 @@
       </div>
     </div>
 
+    <template v-if="activeList === 'all'">
+      <NuxtLink
+        v-for="(project, i) in activeListProjects"
+        :to="`${project.slug}`"
+        :class="[
+          'home__projects__anchor',
+          { 'home__projects__anchor--selected': project.selected },
+        ]"
+        :style="`top: ${getAnchorTop(i)}`"
+        data-scroll-target-top
+        :data-scroll-target-offset="getOffset()" />
+    </template>
+
     <div class="home__projects__videos" data-scroll-sticky>
       <video
         v-for="(video, i) in instancedVideos"
@@ -158,6 +171,8 @@ const scrollStore = useScrollStore()
 const { updateScroll, updateScrollFixedTargetId } = scrollStore
 const { scrollUpdated, direction } = storeToRefs(scrollStore)
 const { vh } = useResize()
+
+const { getColumnWidth, layoutGutter } = useCss()
 
 const { getBounding } = useVirtualScrollAndThreeTools()
 
@@ -254,6 +269,25 @@ function updateActiveList(value: 'selected' | 'all') {
   activeList.value = value
 }
 
+function getAnchorTop(position: number): string {
+  let top = getOffset()
+  // console.log(`position ${position}`)
+  for (let i = 0; i < position; i++) {
+    const { selected } = activeListProjects.value[i]
+    // console.log(`Scrolls half${selected ? ' selected' : ''} plus gutter `)
+    top += getColumnWidth(selected ? 3.5 : 3) + layoutGutter.value
+  }
+  if (position > 0) {
+    const { selected } = activeListProjects.value[position]
+    // if (!selected) top -= getColumnWidth(0.333333)
+  }
+  return toPx(top)
+}
+
+function getOffset(): number {
+  return (vh.value - (getColumnWidth(3.5) * 7) / 5) * 0.5
+}
+
 function onButtonMouseEnter(e: MouseEvent) {
   const el = e.target as HTMLElement
   if (!el || el.classList.contains('clicked')) return
@@ -298,7 +332,7 @@ defineEmits(['update-active'])
         display: inline-block;
         white-space: nowrap;
         // border: 1px solid blue;
-        padding-left: calc(50vw - #{toColumns(4)} * 0.5);
+        padding-left: calc(50vw - #{toColumns(3.5)} * 0.5);
         padding-right: calc(50vw - #{toColumns(3)} * 0.5);
         height: max-content;
         .home__projects__project {
@@ -306,6 +340,21 @@ defineEmits(['update-active'])
           vertical-align: top;
           // border: 1px solid lime;
         }
+      }
+    }
+    .home__projects__anchor {
+      position: absolute;
+      // top: 0;
+      left: calc(50vw - #{toColumns(3.5)} * 0.5);
+      display: block;
+      width: toColumns(3);
+      aspect-ratio: 5/7;
+      // border: 2px solid red;
+      border-radius: toScale(1.6rem);
+      pointer-events: none;
+
+      &--selected {
+        width: toColumns(3.5);
       }
     }
   }

@@ -58,7 +58,11 @@
       </Teleport>
     </ClientOnly>
 
-    <CustomLink :to="`/${data.slug}`" class="home__projects__project__anchor" :content="true" />
+    <CustomLink
+      :to="`/${data.slug}`"
+      class="home__projects__project__anchor"
+      :content="true"
+      :tabindex="inAllProjectsList ? -1 : undefined" />
   </div>
 </template>
 
@@ -95,7 +99,7 @@ const { disableScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { current, direction } = storeToRefs(scrollStore)
 const { getBounding } = useVirtualScrollAndThreeTools()
 
-const { toScale, getColumnWidth } = useCss()
+const { toScale, getColumnWidth, layoutGutter } = useCss()
 const { vw, vh } = useResize()
 
 const inAllProjectsList = computed<boolean>(() => props.list === 'all')
@@ -411,8 +415,9 @@ function getClientAndCollaborator(params?: { to?: Plane }): ClientAndCollaborato
 
 function getActiveInAllProjectsList() {
   const { left } = getBounding(el.value as HTMLElement)
+
   const scrollPoint = current.value - props.top + vw.value * 0.5 - getColumnWidth(3.5) * 0.5
-  return scrollPoint > left && scrollPoint < left + size.value.x
+  return scrollPoint > left - layoutGutter.value && scrollPoint < left + size.value.x
 }
 
 function onOpacityUpdate() {
