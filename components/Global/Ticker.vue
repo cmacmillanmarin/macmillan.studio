@@ -125,7 +125,6 @@ function move() {
         position: { x: x, y: y.value },
         zoom: 1 + 0.4 * progress,
       })
-      $scene.render()
     }
     gsap.set(item.el, { x })
     item.x = x

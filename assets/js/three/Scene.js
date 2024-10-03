@@ -13,7 +13,7 @@ import {
 } from 'three'
 
 import { gsap } from 'gsap'
-import { round, slugify } from '~/utils'
+import { round, slugify, videoLoaded } from '~/utils'
 
 import VS from './glsl/vs.glsl'
 import FS from './glsl/fs.glsl'
@@ -122,7 +122,7 @@ class Controller {
 
   addObject(object) {
     this.log('addObject()')
-    object.multiplyColor = object.multiplyColor || null
+
     object.onClick = object.onClick || null
     object.onIntersect = object.onIntersect || null
     object.border = object.border || 0
@@ -133,6 +133,8 @@ class Controller {
     object.zoom = object.zoom || 1
     object.cursor = object.cursor || 'plus'
     object.opacity = object.opacity !== undefined ? object.opacity : 1
+    object.multiplyColor = object.multiplyColor || null
+    object.color = object.color || null
     this.objects.push(object)
   }
 
@@ -151,6 +153,8 @@ class Controller {
     cursor,
     fade,
     border,
+    multiplyColor,
+    color,
     onClick,
     onIntersect,
   }) {
@@ -166,6 +170,8 @@ class Controller {
       object.fixed = fixed || object.fixed
       object.opacity = opacity !== undefined ? opacity : object.opacity
       object.onClick = onClick !== undefined ? onClick : object.onClick
+      object.multiplyColor = multiplyColor || object.multiplyColor
+      object.color = color || object.color
       object.cursor = cursor || object.cursor
       object.onIntersect = onIntersect !== undefined ? onIntersect : object.onIntersect
     }
@@ -207,29 +213,9 @@ class Controller {
 
     for (const object of this.objects) {
       object.inView = this.inView(object)
+      let texture = null
       if (object.inView) {
         if (!object.mesh) {
-          // CHECKS
-
-          if (object.video) {
-            const isVideoPlaying = !!(
-              object.video.currentTime > 0 &&
-              !object.video.paused &&
-              object.video.readyState > 2
-            )
-            if (!isVideoPlaying) {
-              // console.log('not playing', object.id)
-              continue
-            }
-          } else if (object.img) {
-            const src = object.img.src || object.img.currentSrc
-            const id = slugify(src)
-            const texture = this.loadedTextures.find(t => t.id === id)
-            if (texture && !texture.ready) continue
-            else if (!texture)
-              this.loadedTextures.push({ id, ready: true, txt: this.loader.load(src) })
-          }
-
           const availablePlane = this.getAvailablePlane(object.id)
           if (!availablePlane) {
             console.warn(`No available planes for ${object.id}`)
@@ -241,6 +227,7 @@ class Controller {
           object.mesh = availablePlane.mesh
           object.meshId = availablePlane.id
           object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0
+          object.mesh.material.uniforms.uTextureFade.value = 0
 
           if (object.video) {
             object.mesh.material.uniforms.uTextureType.value = 0
@@ -248,18 +235,42 @@ class Controller {
             object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
             object.mesh.material.uniforms.uTextureSize.value.y =
               (object.size.x * object.video.height) / object.video.width
+            object.mesh.material.uniforms.uTextureLoaded.value = videoLoaded(object.video) ? 1 : 0
           } else if (object.img) {
             const src = object.img.src || object.img.currentSrc
             const id = slugify(src)
-            const texture = this.loadedTextures.find(t => t.id === id)
+            texture = this.loadedTextures.find(t => t.id === id)
+            if (!texture) {
+              this.loadedTextures.push({ id, ready: true, txt: this.loader.load(src) })
+              texture = this.loadedTextures.find(t => t.id === id)
+            }
             object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
             object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
             object.mesh.material.uniforms.uTextureImage.value = texture.txt
+            object.mesh.material.uniforms.uTextureLoaded.value = texture.ready ? 1 : 0
             object.mesh.material.uniforms.uTextureType.value = 1
+          } else {
+            object.mesh.material.uniforms.uTextureLoaded.value = 1
           }
 
           if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
           else object.mesh.material.uniforms.uFade.value = 1
+        }
+
+        const { uniforms } = object.mesh.material
+
+        let isLoaded = false
+        if (uniforms.uTextureLoaded.value === 1 || object.id === 'noise') isLoaded = true
+        else if (object.video) isLoaded = videoLoaded(object.video)
+        else if (object.img) isLoaded = texture.ready
+        const textureLoaded = isLoaded ? 1 : 0
+
+        if (textureLoaded && uniforms.uTextureFade.value === 0) {
+          const fade = textureLoaded !== uniforms.uTextureLoaded.value
+          // console.log(`${object.id} ${fade ? 'just loaded' : 'was already loaded'}!`)
+          uniforms.uTextureLoaded.value = 1
+          gsap.killTweensOf(uniforms.uTextureFade)
+          gsap[fade ? 'to' : 'set'](uniforms.uTextureFade, { value: 1 })
         }
 
         this.needsUpdate = true
@@ -278,7 +289,8 @@ class Controller {
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
 
-        const { uniforms } = object.mesh.material
+        if (object.color) uniforms.uColor.value = object.color
+        if (object.multiplyColor) uniforms.uMultiplyColor.value = this.colors[object.multiplyColor]
         uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
         uniforms.uZoom.value = object.zoom
         uniforms.uBorderRadius.value = object.border
@@ -304,7 +316,6 @@ class Controller {
           (clickable && uniforms.uPixel.value === 0) ||
           (!clickable && uniforms.uPixel.value === 1)
         ) {
-          uniforms.uMultiplyColor.value = this.colors[object.multiplyColor] || this.colors.lightGrey
           gsap.killTweensOf(uniforms.uPixel)
           gsap.to(uniforms.uPixel, { value: clickable ? 1 : 0, duration: clickable ? 0.4 : 0.3 })
         }
@@ -410,10 +421,13 @@ class Controller {
             uBorderRadius: { type: 'f', value: 16.0 },
             uPixelSize: { type: 'v2', value: new Vector2(1, 1) },
             uTextureType: { type: 'i', value: 0 }, // 0 Video, 1 Image
+            uTextureFade: { type: 'f', value: 0.0 },
+            uTextureLoaded: { type: 'i', value: 0 },
             uTextureImage: { type: 't', value: null },
             uTextureVideo: { type: 't', value: new VideoTexture(video) },
             uTextureSize: { type: 'v2', value: new Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new Vector2(1, 1) },
+            uColor: { type: 'v4', value: this.colors.lightGrey },
             uMultiplyColor: { type: 'v4', value: this.colors.lime },
           },
           wireframe: false,

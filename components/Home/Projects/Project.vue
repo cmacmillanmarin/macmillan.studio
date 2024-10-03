@@ -67,7 +67,7 @@ import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { slugify } from '~/utils'
+import { slugify, hexToRgb, rbgToVec4 } from '~/utils'
 import { fadeIn, fadeOut } from '~/utils/animations'
 import type { Plane, ClientAndCollaborator } from '~/types/front/project'
 import type { Project } from '~/types/wordpress/project'
@@ -91,7 +91,7 @@ const router = useRouter()
 const store = useStore()
 const { section, isInProject, isInProjectEntered } = storeToRefs(store)
 const scrollStore = useScrollStore()
-const { disableScroll } = scrollStore
+const { disableScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { current, direction } = storeToRefs(scrollStore)
 const { getBounding } = useVirtualScrollAndThreeTools()
 
@@ -230,12 +230,7 @@ watch(
       ? getInAllProjectsListPlane()
       : getInSelectedProjectsListPlane()
 
-    const { client, collaborator } = getClientAndCollaborator()
-    clientEl.value && gsap.set(clientEl.value, { x: client.x, y: client.y })
-    collaboratorEl.value && gsap.set(collaboratorEl.value, { x: collaborator.x, y: collaborator.y })
-
     $scene.updateObject({ id: projectId.value, ..._plane })
-    $scene.render()
   }
 )
 
@@ -258,27 +253,37 @@ onMounted(async () => {
     _plane.position.x = vw.value * 0.5
     _plane.position.y = props.top + vh.value * 0.5
   }
+  addRenderCallback(updateDom)
 })
 
+function updateDom() {
+  const { client, collaborator } = getClientAndCollaborator()
+  clientEl.value && gsap.set(clientEl.value, { x: client.x, y: client.y })
+  collaboratorEl.value && gsap.set(collaboratorEl.value, { x: collaborator.x, y: collaborator.y })
+}
+
 function onVideoLoaded() {
+  const rgb = hexToRgb(props.data.secondaryColor)
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
     video: videoEl.value,
     onClick: openProject,
+    color: rbgToVec4(rgb || { r: 1, g: 1, b: 1 }),
     multiplyColor: 'darkGrey',
   })
   isLoaded.value = true
 }
 
 function onImageLoaded() {
+  const rgb = hexToRgb(props.data.secondaryColor)
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
     img: customImageEl.value?.el,
     onClick: openProject,
+    color: rbgToVec4(rgb || { r: 1, g: 1, b: 1 }),
     multiplyColor: 'darkGrey',
-    fade: true,
   })
   isLoaded.value = true
 }
@@ -458,6 +463,7 @@ function prepareCollaboratorIn(el: Element) {
 onBeforeUnmount(() => {
   console.log(`Pause video - ${projectId.value}`)
   videoEl.value?.pause()
+  removeRenderCallback(updateDom)
   $scene.removeObject({ id: projectId.value })
 })
 
@@ -503,8 +509,8 @@ defineExpose({
   &__img {
     // opacity: 0;
     pointer-events: none;
-    @include absolute-center;
     width: toColumns(3);
+    @include absolute-center;
   }
 
   &__client,
@@ -516,13 +522,13 @@ defineExpose({
     align-items: center;
     column-gap: toScale(0.8rem);
 
+    opacity: 0.000001;
+    will-change: opacity, transform;
+
     &--all {
       top: 0;
       left: 0;
     }
-
-    opacity: 0.000001;
-    will-change: opacity, transform;
 
     &__logo {
       width: toScale(2.4rem);

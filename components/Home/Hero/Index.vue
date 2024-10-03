@@ -188,6 +188,7 @@ onMounted(() => {
     size: { x: 0, y: 0, z: 0 },
     cursor: 'play',
     onClick: goToReel,
+    multiplyColor: 'lightGrey',
   })
 })
 

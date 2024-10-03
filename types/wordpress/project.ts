@@ -46,6 +46,7 @@ export interface Project {
   title: string
   selected: boolean
   color: string
+  secondaryColor: string
   client: Client
   collaborator: Client
   freelance: boolean
@@ -90,6 +91,7 @@ export function parseProject(params: {
     title: parseText(project?.title.rendered),
     selected: !!project?.acf.selected_project,
     color: parseText(project?.acf.primary_color),
+    secondaryColor: parseText(project?.acf.secondary_color),
     client: parseClient({ client }),
     collaborator: parseClient({ client: collaborator }),
     freelance: !!project?.acf.freelance,
