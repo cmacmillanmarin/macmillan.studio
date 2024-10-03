@@ -7,11 +7,16 @@
     data-scroll-set-position>
     <ClientOnly>
       <Teleport to=".header__top">
-        <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
-          <p v-if="indicators" :key="activeListProjects.length" class="home__projects__index">
+        <transition
+          mode="out-in"
+          :css="false"
+          @before-enter="prepareFadeIn"
+          @enter="transitionShuffleIn"
+          @leave="transitionShuffleOut">
+          <p v-if="indicators" class="home__projects__index">
             <SvgSquare />
             <span
-              v-html="`{${startWithZero(active)}—${startWithZero(activeListProjects.length)}}`" />
+              v-text="`{${startWithZero(active)}—${startWithZero(activeListProjects.length)}}`" />
           </p>
         </transition>
       </Teleport>
@@ -19,10 +24,11 @@
         <transition
           mode="out-in"
           :css="false"
+          @before-enter="prepareFadeIn"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
           <p v-if="indicators" class="home__projects__date">
-            <span>{2024—2013}</span>
+            <span v-text="`{${year}—2013}`" />
           </p>
         </transition>
       </Teleport>
@@ -32,6 +38,7 @@
       <transition
         mode="out-in"
         :css="false"
+        @before-enter="prepareFadeIn"
         @enter="transitionShuffleIn"
         @leave="transitionShuffleOut">
         <button
@@ -46,6 +53,7 @@
             <transition
               mode="out-in"
               :css="false"
+              @before-enter="prepareFadeIn"
               @enter="transitionShuffleIn"
               @leave="transitionShuffleOut">
               <SvgSquare v-if="activeList === 'selected'" />
@@ -75,6 +83,7 @@
             <transition
               mode="out-in"
               :css="false"
+              @before-enter="prepareFadeIn"
               @enter="transitionShuffleIn"
               @leave="transitionShuffleOut">
               <SvgSquare v-if="activeList === 'all'" />
@@ -88,15 +97,14 @@
       </transition>
     </div>
 
+    <div class="home__projects__intersect--bg" v-intersect="{ callback: onIntersectBg }" />
     <div class="home__projects__intersect" v-intersect="{ callback: onIntersect }" />
 
-    <div
-      ref="listEl"
-      class="home__projects__list"
-      :data-scroll-sticky="activeList === 'all' ? '' : undefined">
+    <div ref="listEl" class="home__projects__list">
       <div ref="listContainerEl" class="home__projects__list__container">
         <HomeProjectsProject
           v-for="(project, i) in activeListProjects"
+          ref="projectEls"
           :key="project.slug"
           :list="activeList"
           :i="i"
@@ -130,12 +138,13 @@
 import { gsap } from 'gsap'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { transitionShuffleIn, transitionShuffleOut, transitionDone } from '~/utils/animations'
+import { transitionShuffleIn, transitionShuffleOut, prepareFadeIn } from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
 import type { Video } from '~/types/wordpress'
 import { toPx, slugify } from '~/utils'
+import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
 
 const props = defineProps<{
   data: HomepageProjects
@@ -146,8 +155,8 @@ const { updateSection } = store
 const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
-const { updateScroll, updateScrollTargetId } = scrollStore
-const { scrollUpdated } = storeToRefs(scrollStore)
+const { updateScroll, updateScrollFixedTargetId } = scrollStore
+const { scrollUpdated, direction } = storeToRefs(scrollStore)
 const { vh } = useResize()
 
 const { getBounding } = useVirtualScrollAndThreeTools()
@@ -160,9 +169,12 @@ const minHeight = ref<string>('auto')
 const el = ref<HTMLElement>()
 const listEl = ref<HTMLElement>()
 const listContainerEl = ref<HTMLElement>()
+const projectEls = ref<Array<typeof HomeProjectsProject>>([])
 
 const active = ref<number>(0)
 const indicators = computed<boolean>(() => section.value === 'projects')
+
+const year = ref<string>(new Date().getFullYear().toString())
 
 let _to: any
 
@@ -190,6 +202,7 @@ watch(activeList, () => {
 })
 
 watch(activeListProjects, async () => {
+  active.value = 1
   await nextTick()
   const listWidth = listEl.value?.offsetWidth || 0
   const listContainerWidth = listContainerEl.value?.offsetWidth || 0
@@ -200,8 +213,18 @@ watch(activeListProjects, async () => {
   updateScroll()
   await nextTick()
   updateBounding()
-  updateScrollTargetId('projects')
+  updateScrollFixedTargetId('projects')
+  await nextTick()
+  await nextTick()
+  for (const project of projectEls.value) {
+    project.transition()
+  }
 })
+
+function updateActiveListProjects() {
+  activeListProjects.value =
+    activeList.value === 'selected' ? selectedProjectsList.value : props.data.list
+}
 
 function updateActive(value: number) {
   active.value = value + 1
@@ -209,6 +232,10 @@ function updateActive(value: number) {
 
 function onIntersect(el: HTMLElement, visible: boolean) {
   visible && updateSection('projects')
+}
+
+function onIntersectBg(el: HTMLElement, visible: boolean) {
+  visible && direction.value === 'down' && updateSection('projects-bg')
 }
 
 function updateActiveListToSelected(e: MouseEvent) {
@@ -235,11 +262,6 @@ function onButtonMouseEnter(e: MouseEvent) {
     gsap.set(labelEl, { opacity: 0 })
     shuffleElsIn({ els: [labelEl] })
   }
-}
-
-function updateActiveListProjects() {
-  activeListProjects.value =
-    activeList.value === 'selected' ? selectedProjectsList.value : props.data.list
 }
 
 async function updateBounding() {
@@ -314,12 +336,14 @@ defineEmits(['update-active'])
     display: flex;
     justify-content: space-around;
     align-items: center;
+    pointer-events: none;
 
     &__button {
       width: max-content;
-      width: 40rem;
+      width: toScale(40rem);
       border: none;
       @include will-fade;
+      pointer-events: auto;
 
       &--active {
         pointer-events: none;
@@ -356,7 +380,12 @@ defineEmits(['update-active'])
     top: calc(var(--vh));
     left: 0;
     width: 100%;
+    // height: 0.1rem;
     // border: 1px solid red;
+    &--bg {
+      @extend .home__projects__intersect;
+      top: 0.2rem;
+    }
   }
 
   &__videos {

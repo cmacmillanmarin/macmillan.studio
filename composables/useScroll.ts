@@ -14,6 +14,7 @@ export default function useScroll() {
   const { create: createScrollLock, destroy: destroyScrollLock } = useScrollLock()
 
   const store = useStore()
+  const { updateSectionThrottle } = store
   const { isPreloaded } = storeToRefs(store)
 
   const scrollStore = useScrollStore()
@@ -31,7 +32,9 @@ export default function useScroll() {
     scrollPosition,
     scrollDisabled,
     scrollTarget,
+    scrollFixedTarget,
     scrollTargetId,
+    scrollFixedTargetId,
     scrollUpdate,
     isVirtualScroll,
     renderCallbacks,
@@ -77,14 +80,31 @@ export default function useScroll() {
   watch(scrollTarget, () => {
     if (scrollTarget.value === -1) return
     isVirtualScroll.value
-      ? virtualScroll.to(scrollTarget.value)
-      : nativeScroll.to(scrollTarget.value)
+      ? virtualScroll.to({ value: scrollTarget.value })
+      : nativeScroll.to({ value: scrollTarget.value })
+  })
+
+  watch(scrollFixedTarget, () => {
+    if (scrollFixedTarget.value === -1) return
+    isVirtualScroll.value
+      ? virtualScroll.to({ value: scrollFixedTarget.value, fixed: true })
+      : nativeScroll.to({ value: scrollFixedTarget.value, fixed: true })
   })
 
   watch(scrollTargetId, () => {
     if (scrollTargetId.value === '') return
     const targetId = targetify(scrollTargetId.value)
-    isVirtualScroll.value ? virtualScroll.toId(targetId) : nativeScroll.toId(targetId)
+    isVirtualScroll.value
+      ? virtualScroll.toId({ value: targetId })
+      : nativeScroll.toId({ value: targetId })
+  })
+
+  watch(scrollFixedTargetId, () => {
+    if (scrollFixedTargetId.value === '') return
+    const targetId = targetify(scrollFixedTargetId.value)
+    isVirtualScroll.value
+      ? virtualScroll.toId({ value: targetId, fixed: true })
+      : nativeScroll.toId({ value: targetId, fixed: true })
   })
 
   watch(routeHash, () => {
@@ -133,6 +153,7 @@ export default function useScroll() {
       $scene.render()
     }
     for (const callback of renderCallbacks.value) callback()
+    updateSectionThrottle(data.speed > 1000)
     updateScrollData(data)
   }
 

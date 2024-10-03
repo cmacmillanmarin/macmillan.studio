@@ -125,13 +125,17 @@ export default function useScrollVirtual() {
     _disabled = value
   }
 
-  function to(value: number): void {
-    target.value = _clampTarget(value)
+  function to(params: { value: number; fixed?: boolean }): void {
+    target.value = _clampTarget(params.value)
+    if (params.fixed) {
+      current.value = target.value
+      // _run({ force: true })
+    }
   }
 
-  function toId(value: string): void {
-    const target: HTMLElement | null = document.getElementById(value)
-    target && _scrollToEl(target)
+  function toId(params: { value: string; fixed?: boolean }): void {
+    const target: HTMLElement | null = document.getElementById(params.value)
+    target && _scrollToEl({ el: target, fixed: params.fixed })
   }
 
   async function reset(): Promise<void> {
@@ -435,7 +439,8 @@ export default function useScrollVirtual() {
     return Math.max(0, currentScroll).toString()
   }
 
-  function _scrollToEl(el: HTMLElement, gap?: number) {
+  function _scrollToEl(params: { el?: HTMLElement; gap?: number; fixed?: boolean }) {
+    const { el, gap, fixed } = params
     if (!el) return
     const _gap: number = gap || 0
     _cleanTransforms()
@@ -448,7 +453,10 @@ export default function useScrollVirtual() {
     const _target: number = _clampTarget(top - vwHeight + heightTarget - scrollOffset)
     if (Math.abs(target.value - _target) > _gap) {
       target.value = _target
-      // _startRaf()
+      if (fixed) {
+        current.value = target.value
+        // _run({ force: true })
+      }
     }
   }
 
@@ -476,7 +484,7 @@ export default function useScrollVirtual() {
         tabFixed = activeElement.dataset.tabFixed === ''
         focusable.includes(tagName) &&
           !tabFixed &&
-          _scrollToEl(document.activeElement as HTMLElement, 100)
+          _scrollToEl({ el: document.activeElement as HTMLElement, gap: 100 })
         break
       case 'Space':
         if (document.activeElement) {

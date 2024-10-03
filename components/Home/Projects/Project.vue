@@ -3,8 +3,8 @@
     ref="el"
     :class="[
       'home__projects__project',
-      { 'home__projects__project--all': all },
-      { 'home__projects__project--all-and-selected': all && data.selected },
+      { 'home__projects__project--all': inAllProjectsList },
+      { 'home__projects__project--all-and-selected': inAllProjectsList && data.selected },
     ]"
     data-scroll-set-position>
     <CustomImage
@@ -16,19 +16,45 @@
 
     <ClientOnly>
       <Teleport to="#top-layer">
-        <div v-if="data.client.name && !all" ref="clientEl" class="home__projects__project__client">
-          <div class="home__projects__project__client__logo"></div>
-          <div class="home__projects__project__client__name">{{ data.client.name }}</div>
-        </div>
-        <div
-          v-if="data.collaborator.name && !all"
-          ref="collaboratorEl"
-          class="home__projects__project__collaborator">
-          <div class="home__projects__project__collaborator__name">
-            {{ data.freelance ? 'w/ ' : 'at ' }}
-            {{ data.collaborator.name }}
+        <transition
+          mode="out-in"
+          :css="false"
+          @before-enter="prepareClientIn"
+          @enter="transitionShuffleIn"
+          @leave="transitionDone">
+          <div
+            v-if="data.client.name && !inTransition"
+            ref="clientEl"
+            :class="[
+              'home__projects__project__client',
+              { 'home__projects__project__client--all': inAllProjectsList },
+            ]">
+            <div
+              class="home__projects__project__client__logo"
+              :style="{ backgroundColor: projectColor }"></div>
+            <div class="home__projects__project__client__name">{{ data.client.name }}</div>
           </div>
-        </div>
+        </transition>
+        <transition
+          mode="out-in"
+          :css="false"
+          @before-enter="prepareCollaboratorIn"
+          @enter="transitionShuffleIn"
+          @leave="transitionDone">
+          <div
+            v-if="data.collaborator.name && !inTransition"
+            ref="collaboratorEl"
+            class="home__projects__project__collaborator"
+            :class="[
+              'home__projects__project__collaborator',
+              { 'home__projects__project__collaborator--all': inAllProjectsList },
+            ]">
+            <div class="home__projects__project__collaborator__name">
+              {{ data.freelance ? 'w/ ' : 'at ' }}
+              {{ data.collaborator.name }}
+            </div>
+          </div>
+        </transition>
       </Teleport>
     </ClientOnly>
 
@@ -43,6 +69,7 @@ import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { slugify } from '~/utils'
 import { fadeIn, fadeOut } from '~/utils/animations'
+import type { Plane, ClientAndCollaborator } from '~/types/front/project'
 import type { Project } from '~/types/wordpress/project'
 import CustomImage from '~/components/Global/CustomImage.vue'
 
@@ -63,14 +90,15 @@ const router = useRouter()
 
 const store = useStore()
 const { section, isInProject, isInProjectEntered } = storeToRefs(store)
-const { current, direction } = storeToRefs(useScrollStore())
+const scrollStore = useScrollStore()
+const { disableScroll } = scrollStore
+const { current, direction } = storeToRefs(scrollStore)
 const { getBounding } = useVirtualScrollAndThreeTools()
 
 const { toScale, getColumnWidth } = useCss()
 const { vw, vh } = useResize()
-const { addTicker, killTicker } = useRaf()
 
-const all = computed<boolean>(() => props.list === 'all')
+const inAllProjectsList = computed<boolean>(() => props.list === 'all')
 
 const projectId = ref<string>(slugify(props.data.title))
 const projectColor = ref<string>(props.data.color)
@@ -91,27 +119,33 @@ const leaveProgress = ref<number>(0)
 
 // For selected projects
 const active = computed<boolean>(
-  () => leaveProgress.value === 0 && progress.value > 0.55 && !isInProject.value
+  () =>
+    ((inAllProjectsList.value && inView.value) ||
+      (!inAllProjectsList.value && progress.value > 0.55 && leaveProgress.value === 0)) &&
+    !isInProject.value &&
+    isLoaded.value
+)
+
+const inActiveSection = computed<boolean>(
+  () => section.value.includes('project') || section.value === 'reel'
 )
 
 const size = computed<{ x: number; y: number }>(() => {
-  const width = getColumnWidth(all.value && props.data.selected ? 4 : 3)
+  const width = getColumnWidth(inAllProjectsList.value && props.data.selected ? 3.5 : 3)
   return { x: width, y: (width * 7) / 5 }
 })
 
-let _position = { x: 0, y: 0 }
-let _size = { x: 0, y: 0, z: 1 }
-let _rotate = { x: 0, y: 0, z: 0 }
-let _border = 0
-let _zoom = 1
-let _target = {
+let _plane: Plane = {
+  fixed: { from: 0, to: 0 },
   position: { x: 0, y: 0 },
   size: { x: 0, y: 0, z: 1 },
   rotate: { x: 0, y: 0, z: 0 },
   border: 0,
   zoom: 0,
 }
-let _animated = {
+
+let _target: Plane = {
+  fixed: { from: 0, to: 0 },
   position: { x: 0, y: 0 },
   size: { x: 0, y: 0, z: 1 },
   rotate: { x: 0, y: 0, z: 0 },
@@ -128,19 +162,8 @@ watch(inView, () => {
   }
 })
 
-watch(all, () => {
-  inTransition.value = true
-  _animated = {
-    position: _position,
-    size: _size,
-    rotate: _rotate,
-    border: _border,
-    zoom: _zoom,
-  }
-  addTicker(raf)
-})
-
 watch([isInProject, isInProjectEntered], () => {
+  $scene.updateObject({ id: projectId.value, onClick: isInProject.value ? null : openProject })
   if (isInProjectEntered.value) {
     opacity.value = 0
     onOpacityUpdate()
@@ -151,126 +174,75 @@ watch([isInProject, isInProjectEntered], () => {
 })
 
 watch(section, () => {
-  if (all.value) {
+  if (inAllProjectsList.value) {
     gsap.killTweensOf(opacity)
-    if (section.value === 'projects') {
+    if (inActiveSection.value) {
       gsap.to(opacity, { value: 1, duration: 1, delay: 0.2, onUpdate: onOpacityUpdate })
     } else {
       gsap.to(opacity, { value: 0, duration: 0.6, onUpdate: onOpacityUpdate })
     }
   } else $scene.updateObject({ id: projectId.value, opacity: 1 })
-  if (!section.value.includes('project')) inView.value = false
+  inView.value = getInView()
 })
 
-watch([el, active], async () => {
+watch(active, async () => {
   await nextTick()
 
   if (clientEl.value) {
-    gsap.killTweensOf(clientEl.value)
     active.value
       ? fadeIn({ el: clientEl.value, duration: 0.4 })
       : fadeOut({ el: clientEl.value, duration: 0.1 })
   }
 
   if (collaboratorEl.value) {
-    gsap.killTweensOf(collaboratorEl.value)
     active.value
       ? fadeIn({ el: collaboratorEl.value, duration: 0.4 })
       : fadeOut({ el: collaboratorEl.value, duration: 0.1 })
   }
 
   active.value && emit('update-active', props.i)
-  if (
-    !active.value &&
-    ((direction.value === 'up' && props.i === 0) ||
-      (direction.value === 'down' && props.i === props.of))
-  )
-    emit('update-active', -1)
 })
 
-watch([el, current, all], () => {
+watch(inTransition, async () => {
+  if (active.value) return
+  await nextTick()
+  clientEl.value && fadeOut({ el: clientEl.value, duration: 0.1 })
+  collaboratorEl.value && fadeOut({ el: collaboratorEl.value, duration: 0.1 })
+})
+
+watch(inAllProjectsList, () => {
+  inTransition.value = true
+})
+
+watch(current, () => {
   progress.value = getProgress()
   leaveProgress.value = getLeaveProgress()
-})
-
-watch([() => props.top, () => props.bottom, progress, leaveProgress, isLoaded, all], () => {
-  const htmlx = size.value.x * progress.value * 0.5
-  const htmly = size.value.y * progress.value * 0.5
-  const htmlextra = props.i === 0 ? vh.value - vh.value * progress.value : 0
-  const htmlmargin = toScale(12)
-
-  clientEl.value &&
-    gsap.set(clientEl.value, { x: -htmlx + htmlmargin, y: -htmly + htmlmargin + htmlextra })
-
-  collaboratorEl.value &&
-    gsap.set(collaboratorEl.value, { x: htmlx - htmlmargin, y: htmly - htmlmargin + htmlextra })
-
-  if (!isLoaded.value) return
-
   inView.value = getInView()
-
-  _position = { x: 0, y: 0 }
-  _size = { x: 0, y: 0, z: 1 }
-  _rotate = { x: 0, y: 0, z: 0 }
-  _border = toScale(16)
-  _zoom = 1
-
-  if (all.value) {
-    const y = Math.max(0, current.value - props.top)
-    const { top, left } = getBounding(el.value as HTMLElement)
-
-    _position.x = left - y
-    _position.y = top
-    _size.x = size.value.x
-    _size.y = size.value.y
-    _zoom = 1.4 - 0.4 * progress.value
-  } else {
-    const sizeX = size.value.x * (progress.value + leaveProgress.value)
-    const sizeY = size.value.y * (progress.value + leaveProgress.value)
-
-    const leaveX = sizeX * props.sideX * leaveProgress.value
-    const leaveY = sizeY * props.sideY * leaveProgress.value
-
-    const positionX = vw.value * 0.5 - sizeX * 0.5 + leaveX
-    const positionY = props.top + vh.value * 0.5 - sizeY * 0.5 + leaveY
-
-    const rotateX = 33 * props.sideY * leaveProgress.value
-    const rotateY = 33 * props.sideX * leaveProgress.value
-    const rotateRadX = (Math.PI / 180) * rotateX
-    const rotateRadY = (Math.PI / 180) * rotateY
-
-    _position.x = positionX
-    _position.y = positionY
-    _size.x = sizeX
-    _size.y = sizeY
-    _rotate.x = rotateRadX
-    _rotate.y = rotateRadY
-    _border = _border * (progress.value + leaveProgress.value)
-    _zoom = 1.4 - 0.4 * progress.value
-  }
-
-  if (!inTransition.value) {
-    $scene.updateObject({
-      id: projectId.value,
-      rotate: _rotate,
-      position: _position,
-      size: _size,
-      border: _border,
-      zoom: _zoom,
-      fixed: { from: props.top, to: props.bottom },
-    })
-  } else {
-    _target = {
-      position: _position,
-      size: _size,
-      rotate: _rotate,
-      border: _border,
-      zoom: _zoom,
-    }
-  }
 })
 
-onMounted(() => {
+watch(
+  [() => props.top, () => props.bottom, progress, leaveProgress, isLoaded, inAllProjectsList],
+  () => {
+    if (!isLoaded.value || inTransition.value) return
+
+    _plane = inAllProjectsList.value
+      ? getInAllProjectsListPlane()
+      : getInSelectedProjectsListPlane()
+
+    const { client, collaborator } = getClientAndCollaborator()
+    clientEl.value && gsap.set(clientEl.value, { x: client.x, y: client.y })
+    collaboratorEl.value && gsap.set(collaboratorEl.value, { x: collaborator.x, y: collaborator.y })
+
+    $scene.updateObject({ id: projectId.value, ..._plane })
+    $scene.render()
+  }
+)
+
+onMounted(async () => {
+  await nextTick()
+  progress.value = getProgress()
+  leaveProgress.value = getLeaveProgress()
+  inView.value = getInView()
   const id = slugify(props.data.thumbnail.video.src)
   if (!!id) {
     const video = document.getElementById(slugify(id)) as HTMLVideoElement | undefined
@@ -280,11 +252,10 @@ onMounted(() => {
       else videoEl.value.addEventListener('canplay', onVideoLoaded)
     }
   }
-  if (all.value) {
+  if (inAllProjectsList.value) {
     inTransition.value = true
-    _animated.position.x = vw.value * 0.5
-    _animated.position.y = props.top + vh.value * 0.5
-    addTicker(raf)
+    _plane.position.x = vw.value * 0.5
+    _plane.position.y = props.top + vh.value * 0.5
   }
 })
 
@@ -316,19 +287,28 @@ function openProject() {
 }
 
 function getInView(): boolean {
-  if (all.value) {
+  if (inAllProjectsList.value) {
     const y = Math.max(0, current.value - props.top)
     const { left } = getBounding(el.value as HTMLElement)
-    return left - y > size.value.x * -1 && left - y < vw.value && progress.value !== 1
+    return (
+      left - y > size.value.x * -1 &&
+      left - y < vw.value &&
+      progress.value !== 1 &&
+      inActiveSection.value
+    )
   }
-  return progress.value > 0.3 && leaveProgress.value !== 1
+  return (
+    (progress.value > 0.3 || (props.i === 0 && progress.value > 0)) &&
+    leaveProgress.value !== 1 &&
+    inActiveSection.value
+  )
 }
 
 function getProgress(): number {
   let { top, left, bottom } = getBounding(el.value as HTMLElement)
-  if (all.value) {
+  if (inAllProjectsList.value) {
     const scroll = left + size.value.x
-    return Math.min(Math.max(0, (current.value - props.top) / scroll), 1)
+    return Math.min((current.value - props.top) / scroll, 1)
   }
   top -= vh.value
   bottom -= vh.value
@@ -336,7 +316,7 @@ function getProgress(): number {
 }
 
 function getLeaveProgress(): number {
-  if (all.value) return 1
+  if (inAllProjectsList.value) return 1
   let { top, bottom } = getBounding(el.value as HTMLElement)
   top -= vh.value
   bottom -= vh.value
@@ -344,50 +324,132 @@ function getLeaveProgress(): number {
   return Math.min(Math.max(0, (current.value - bottom) / (leave - bottom)), 1)
 }
 
+function getInAllProjectsListPlane(): Plane {
+  const y = Math.max(0, current.value - props.top)
+  const { top, left } = getBounding(el.value as HTMLElement)
+
+  let extra = 0
+  if (progress.value < 0) {
+    extra = Math.abs(current.value - props.top)
+  }
+  return {
+    fixed: { from: props.top, to: props.bottom },
+    position: { x: left - y + extra, y: top },
+    size: { x: size.value.x, y: size.value.y, z: 1 },
+    rotate: { x: 0, y: 0, z: 0 },
+    border: toScale(16),
+    zoom: 1.4 - 0.4 * progress.value,
+  }
+}
+
+function getInSelectedProjectsListPlane(): Plane {
+  const sizeX = size.value.x * (progress.value + leaveProgress.value)
+  const sizeY = size.value.y * (progress.value + leaveProgress.value)
+
+  const leaveX = sizeX * props.sideX * leaveProgress.value
+  const leaveY = sizeY * props.sideY * leaveProgress.value
+
+  const positionX = vw.value * 0.5 - sizeX * 0.5 + leaveX
+  const positionY = props.top + vh.value * 0.5 - sizeY * 0.5 + leaveY
+
+  return {
+    fixed: { from: props.top, to: props.bottom },
+    position: { x: positionX, y: positionY },
+    size: { x: sizeX, y: sizeY, z: 1 },
+    rotate: {
+      x: 33 * props.sideY * leaveProgress.value * (Math.PI / 180),
+      y: 33 * props.sideX * leaveProgress.value * (Math.PI / 180),
+      z: 0,
+    },
+    border: toScale(16) * (progress.value + leaveProgress.value),
+    zoom: 1.4 - 0.4 * progress.value,
+  }
+}
+
+function getClientAndCollaborator(params?: { to?: Plane }): ClientAndCollaborator {
+  const margin = toScale(12)
+
+  if (inAllProjectsList.value) {
+    const source: Plane = params?.to || _plane
+    let extra = 0
+    if (current.value < props.top) {
+      extra = Math.abs(current.value - props.top)
+    } else if (current.value > props.bottom) {
+      extra = Math.abs(current.value - props.bottom) * -1
+    }
+    return {
+      client: { x: source.position.x + margin, y: source.position.y - props.top + margin + extra },
+      collaborator: {
+        x: source.position.x + source.size.x - margin,
+        y: source.position.y - props.top + source.size.y - margin + extra,
+      },
+    }
+  }
+
+  const position = {
+    x: size.value.x * progress.value * 0.5,
+    y: size.value.y * progress.value * 0.5,
+  }
+  const extra = props.i === 0 ? vh.value - vh.value * progress.value : 0
+  return {
+    client: {
+      x: -position.x + margin,
+      y: -position.y + margin + extra,
+    },
+    collaborator: {
+      x: position.x - margin,
+      y: position.y - margin + extra,
+    },
+  }
+}
+
 function onOpacityUpdate() {
   $scene.updateObject({ id: projectId.value, opacity: opacity.value })
 }
 
-let n = 0.15
-function raf() {
-  if (_target.position.y === 0) return
-  _animated.position.x += (_target.position.x - _animated.position.x) * n
-  _animated.position.y += (_target.position.y - _animated.position.y) * n
-  _animated.size.x += (_target.size.x - _animated.size.x) * n
-  _animated.size.y += (_target.size.y - _animated.size.y) * n
-  _animated.rotate.x += (_target.rotate.x - _animated.rotate.x) * n
-  _animated.rotate.y += (_target.rotate.y - _animated.rotate.y) * n
-  _animated.border += (_target.border - _animated.border) * n
-  _animated.zoom += (_target.zoom - _animated.zoom) * n
-  if (
-    Math.abs(_target.position.x - _animated.position.x) < 0.2 &&
-    Math.abs(_target.position.y - _animated.position.y) < 0.2 &&
-    Math.abs(_target.size.x - _animated.size.x) < 0.2 &&
-    Math.abs(_target.size.y - _animated.size.y) < 0.2 &&
-    Math.abs(_target.rotate.x - _animated.rotate.x) < 0.2 &&
-    Math.abs(_target.rotate.y - _animated.rotate.y) < 0.2 &&
-    Math.abs(_target.border - _animated.border) < 0.2 &&
-    Math.abs(_target.zoom - _animated.zoom) < 0.2
-  ) {
-    _animated = { position: _position, size: _size, rotate: _rotate, border: _border, zoom: _zoom }
-    inTransition.value = false
-    killTicker(raf)
-  }
+function transition() {
   progress.value = getProgress()
   leaveProgress.value = getLeaveProgress()
   inView.value = getInView()
-  $scene.updateObject({
-    id: projectId.value,
-    rotate: _animated.rotate,
-    position: _animated.position,
-    size: _animated.size,
-    border: _animated.border,
-    zoom: _animated.zoom,
+
+  _target = inAllProjectsList.value ? getInAllProjectsListPlane() : getInSelectedProjectsListPlane()
+  animate()
+}
+
+function animate() {
+  disableScroll(true)
+  gsap.killTweensOf([_plane.position, _plane.rotate, _plane.size, _plane])
+  gsap.to(_plane.position, { x: _target.position.x, y: _target.position.y })
+  gsap.to(_plane.rotate, { x: _target.rotate.x, y: _target.rotate.y })
+  gsap.to(_plane.size, { x: _target.size.x, y: _target.size.y })
+  gsap.to(_plane, {
+    border: _target.border,
+    zoom: _target.zoom,
+    onUpdate: () => {
+      progress.value = getProgress()
+      leaveProgress.value = getLeaveProgress()
+      inView.value = getInView()
+      inView.value && $scene.updateObject({ id: projectId.value, ..._plane })
+    },
+    onComplete: () => {
+      inTransition.value = false
+      disableScroll(false)
+    },
   })
 }
 
+function prepareClientIn(el: Element) {
+  const { client } = getClientAndCollaborator({ to: _target })
+  gsap.set(el, { x: client.x, y: client.y })
+}
+
+function prepareCollaboratorIn(el: Element) {
+  const { collaborator } = getClientAndCollaborator({ to: _target })
+  gsap.set(el, { x: collaborator.x, y: collaborator.y })
+}
+
 onBeforeUnmount(() => {
-  killTicker(raf)
+  console.log(`Pause video - ${projectId.value}`)
   videoEl.value?.pause()
   $scene.removeObject({ id: projectId.value })
 })
@@ -395,6 +457,10 @@ onBeforeUnmount(() => {
 const emit = defineEmits<{
   (e: 'update-active', value: number): void
 }>()
+
+defineExpose({
+  transition,
+})
 </script>
 
 <style lang="scss">
@@ -414,7 +480,7 @@ const emit = defineEmits<{
     .home__projects__project__anchor,
     .home__projects__project__vid,
     .home__projects__project__img {
-      width: toColumns(4);
+      width: toColumns(3.5);
     }
   }
 
@@ -424,7 +490,6 @@ const emit = defineEmits<{
     width: toColumns(3);
     aspect-ratio: 5/7;
     border-radius: 1.6rem;
-    // border: 1px solid red;
   }
 
   &__vid,
@@ -442,20 +507,25 @@ const emit = defineEmits<{
     left: 50%;
     display: flex;
     align-items: center;
-    column-gap: 0.8rem;
+    column-gap: toScale(0.8rem);
+
+    &--all {
+      top: 0;
+      left: 0;
+    }
 
     opacity: 0.000001;
     will-change: opacity, transform;
 
     &__logo {
-      width: 2.4rem;
-      height: 2.4rem;
+      width: toScale(2.4rem);
+      height: toScale(2.4rem);
       border-radius: 50%;
       background-color: v-bind(projectColor);
     }
 
     &__name {
-      text-shadow: 0 0 1.2rem rgba(0, 0, 0, 0.8);
+      text-shadow: 0 0 toScale(1.2rem) rgba(0, 0, 0, 0.8);
 
       @include t-white;
       @include t-b2;

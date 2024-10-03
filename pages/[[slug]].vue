@@ -43,7 +43,7 @@ const route = useRoute()
 const { data } = await useFetch<Homepage>('/api/data')
 
 const store = useStore()
-const { updateInProject, updateInProjectEntered } = store
+const { updateCursor, updateInProject, updateInProjectEntered } = store
 const { section } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
@@ -56,6 +56,7 @@ const project = computed<Project | undefined>(() => {
 })
 
 watch(inProject, () => {
+  updateCursor('default')
   updateInProject(inProject.value)
 })
 
@@ -67,7 +68,8 @@ watch(section, () => {
   if (!el.value) return
 
   let color = 'light-grey'
-  if (section.value === 'projects' || section.value === 'projects-bg') color = 'dark-grey'
+  if (section.value === 'reel' || section.value === 'projects' || section.value === 'projects-bg')
+    color = 'dark-grey'
   else if (section.value === 'services') color = 'light-grey'
   else if (section.value === 'about') color = 'lime'
   else if (section.value === 'about-testimonials') color = 'dark-grey'

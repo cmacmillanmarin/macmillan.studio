@@ -117,7 +117,7 @@ export function shuffleElsIn(params: {
   const els = shuffle(Array.from(params.els || []))
   for (let i = 0; i < els.length; i++) {
     const el = els[i]
-    const delay = 0.2 * i
+    const delay = (params.fast ? 0.1 : 0.2) * i
     const duration = 0.2
     gsap.killTweensOf(el)
     gsap.to(el, { opacity: 1, duration, delay, ease: 'power1.in' })
@@ -142,11 +142,12 @@ export function shuffleElsIn(params: {
 export function shuffleElsOut(params: {
   els?: NodeListOf<Element> | Array<HTMLElement | Element>
   done?: Function
+  fast?: boolean
 }) {
   const els = shuffle(Array.from(params.els || []))
   for (let i = 0; i < els.length; i++) {
     const el = els[i]
-    const delay = 0.2 * i
+    const delay = (params.fast ? 0.1 : 0.2) * i
     const duration = 0.2
     gsap.killTweensOf(el)
     gsap.to(el, { opacity: 0, duration, delay, ease: 'power1.out' })

@@ -18,6 +18,8 @@ export default defineStore('use-scroll-store', {
     progress: 0,
     target: -1,
     targetId: '',
+    fixedTarget: -1,
+    fixedTargetId: '',
     inTarget: true,
     renderCallbacks: [],
   }),
@@ -52,8 +54,14 @@ export default defineStore('use-scroll-store', {
     scrollTarget(): number {
       return this.target
     },
+    scrollFixedTarget(): number {
+      return this.fixedTarget
+    },
     scrollTargetId(): string {
       return this.targetId
+    },
+    scrollFixedTargetId(): string {
+      return this.fixedTargetId
     },
     scrollDisabled(): boolean {
       return this.disabled
@@ -111,11 +119,23 @@ export default defineStore('use-scroll-store', {
       await nextTick()
       this.target = -1
     },
+    async updateScrollFixedTarget(value: number): Promise<void> {
+      this.fixedTarget = value
+      await nextTick()
+      this.fixedTarget = -1
+    },
     async updateScrollTargetId(value?: string): Promise<void> {
       if (value) {
         this.targetId = value
         await nextTick()
         this.targetId = ''
+      }
+    },
+    async updateScrollFixedTargetId(value?: string): Promise<void> {
+      if (value) {
+        this.fixedTargetId = value
+        await nextTick()
+        this.fixedTargetId = ''
       }
     },
   },

@@ -82,19 +82,21 @@ watch([isInProject, isInReel], () => {
 function enter() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'auto' })
-  const els = el.value.querySelectorAll(
-    '.header__hint, .header__top, .header__bottom, .header__link__anchor, .svg__logo'
-  )
-  shuffleElsIn({ els })
+  const links =
+    el.value.querySelectorAll('.header__top, .header__bottom, .header__link__anchor') || []
+  const hints = el.value.querySelectorAll('.header__hint, .svg__logo') || []
+  shuffleElsIn({ els: hints, fast: true })
+  shuffleElsIn({ els: links, fast: true })
 }
 
 function leave() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'none' })
-  const els = el.value.querySelectorAll(
-    '.header__hint, .header__top, .header__bottom, .header__link__anchor, .svg__logo'
-  )
-  shuffleElsOut({ els })
+  const links =
+    el.value.querySelectorAll('.header__top, .header__bottom, .header__link__anchor') || []
+  const hints = el.value.querySelectorAll('.header__hint, .svg__logo') || []
+  shuffleElsOut({ els: hints, fast: true })
+  shuffleElsOut({ els: links, fast: true })
 }
 </script>
 
