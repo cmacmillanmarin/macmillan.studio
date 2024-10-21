@@ -293,6 +293,7 @@ function onImageLoaded() {
 }
 
 function openProject() {
+  emit('update-active', props.i)
   router.push(`/${props.data.slug}`)
 }
 

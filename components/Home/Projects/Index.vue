@@ -10,6 +10,7 @@
         <transition
           mode="out-in"
           :css="false"
+          :appear="true"
           @before-enter="prepareFadeIn"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
@@ -32,70 +33,69 @@
           </p>
         </transition>
       </Teleport>
+      <div class="home__projects__buttons" data-scroll-sticky>
+        <transition
+          mode="out-in"
+          :css="false"
+          @before-enter="prepareFadeIn"
+          @enter="transitionShuffleIn"
+          @leave="transitionShuffleOut">
+          <button
+            v-if="indicators"
+            :class="[
+              'home__projects__buttons__button',
+              { 'home__projects__buttons__button--active': activeList === 'selected' },
+            ]"
+            @mouseenter="onButtonMouseEnter"
+            @click="updateActiveListToSelected">
+            <span class="home__projects__buttons__button__label">
+              <transition
+                mode="out-in"
+                :css="false"
+                @before-enter="prepareFadeIn"
+                @enter="transitionShuffleIn"
+                @leave="transitionShuffleOut">
+                <SvgSquare v-if="activeList === 'selected'" />
+              </transition>
+              <span class="home__projects__buttons__button__label__el">Selected projects</span>
+              <span
+                class="home__projects__buttons__button__label__count"
+                v-html="`{${startWithZero(selectedProjectsList.length)}}`" />
+            </span>
+          </button>
+        </transition>
+        <div class="home__projects__buttons__separator" />
+        <transition
+          mode="out-in"
+          :css="false"
+          @enter="transitionShuffleIn"
+          @leave="transitionShuffleOut">
+          <button
+            v-if="indicators"
+            :class="[
+              'home__projects__buttons__button',
+              { 'home__projects__buttons__button--active': activeList === 'all' },
+            ]"
+            @mouseenter="onButtonMouseEnter"
+            @click="updateActiveListToAll">
+            <span class="home__projects__buttons__button__label">
+              <transition
+                mode="out-in"
+                :css="false"
+                @before-enter="prepareFadeIn"
+                @enter="transitionShuffleIn"
+                @leave="transitionShuffleOut">
+                <SvgSquare v-if="activeList === 'all'" />
+              </transition>
+              <span class="home__projects__buttons__button__label__el">All projects</span>
+              <span
+                class="home__projects__buttons__button__label__count"
+                v-html="`{${startWithZero(data.list.length)}}`" />
+            </span>
+          </button>
+        </transition>
+      </div>
     </ClientOnly>
-
-    <div class="home__projects__buttons" data-scroll-sticky>
-      <transition
-        mode="out-in"
-        :css="false"
-        @before-enter="prepareFadeIn"
-        @enter="transitionShuffleIn"
-        @leave="transitionShuffleOut">
-        <button
-          v-if="indicators"
-          :class="[
-            'home__projects__buttons__button',
-            { 'home__projects__buttons__button--active': activeList === 'selected' },
-          ]"
-          @mouseenter="onButtonMouseEnter"
-          @click="updateActiveListToSelected">
-          <span class="home__projects__buttons__button__label">
-            <transition
-              mode="out-in"
-              :css="false"
-              @before-enter="prepareFadeIn"
-              @enter="transitionShuffleIn"
-              @leave="transitionShuffleOut">
-              <SvgSquare v-if="activeList === 'selected'" />
-            </transition>
-            <span class="home__projects__buttons__button__label__el">Selected projects</span>
-            <span
-              class="home__projects__buttons__button__label__count"
-              v-html="`{${startWithZero(selectedProjectsList.length)}}`" />
-          </span>
-        </button>
-      </transition>
-      <div class="home__projects__buttons__separator" />
-      <transition
-        mode="out-in"
-        :css="false"
-        @enter="transitionShuffleIn"
-        @leave="transitionShuffleOut">
-        <button
-          v-if="indicators"
-          :class="[
-            'home__projects__buttons__button',
-            { 'home__projects__buttons__button--active': activeList === 'all' },
-          ]"
-          @mouseenter="onButtonMouseEnter"
-          @click="updateActiveListToAll">
-          <span class="home__projects__buttons__button__label">
-            <transition
-              mode="out-in"
-              :css="false"
-              @before-enter="prepareFadeIn"
-              @enter="transitionShuffleIn"
-              @leave="transitionShuffleOut">
-              <SvgSquare v-if="activeList === 'all'" />
-            </transition>
-            <span class="home__projects__buttons__button__label__el">All projects</span>
-            <span
-              class="home__projects__buttons__button__label__count"
-              v-html="`{${startWithZero(data.list.length)}}`" />
-          </span>
-        </button>
-      </transition>
-    </div>
 
     <div class="home__projects__intersect--bg" v-intersect="{ callback: onIntersectBg }" />
     <div class="home__projects__intersect" v-intersect="{ callback: onIntersect }" />
@@ -162,6 +162,8 @@ import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
 const props = defineProps<{
   data: HomepageProjects
 }>()
+
+const route = useRoute()
 
 const store = useStore()
 const { updateSection } = store
@@ -233,6 +235,13 @@ watch(activeListProjects, async () => {
   await nextTick()
   for (const project of projectEls.value) {
     project.transition()
+  }
+})
+
+onBeforeMount(() => {
+  if (route.params.slug) {
+    active.value =
+      activeListProjects.value.findIndex(project => project.slug === route.params.slug) + 1
   }
 })
 

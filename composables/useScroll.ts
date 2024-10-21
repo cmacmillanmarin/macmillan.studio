@@ -15,7 +15,7 @@ export default function useScroll() {
 
   const store = useStore()
   const { updateSectionThrottle } = store
-  const { isPreloaded } = storeToRefs(store)
+  const { isPreloaded, isInProject } = storeToRefs(store)
 
   const scrollStore = useScrollStore()
   const {
@@ -46,7 +46,7 @@ export default function useScroll() {
   const el = ref<HTMLElement>()
 
   watch(isPreloaded, () => {
-    disableScroll(false)
+    !isInProject.value && disableScroll(false)
     el.value && init({ el: el.value })
   })
 

@@ -1,5 +1,5 @@
 <template>
-  <header ref="el" class="header" v-transition:in="{ callback: enter }">
+  <header ref="el" class="header" v-transition:in="{ callback: transitionIn }">
     <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
     <div class="header__top" />
@@ -79,11 +79,14 @@ watch([isInProject, isInReel], () => {
   isInProject.value || isInReel.value ? leave() : enter()
 })
 
+function transitionIn() {
+  if (!isInProject.value && !isInReel.value) enter()
+}
+
 function enter() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'auto' })
-  const links =
-    el.value.querySelectorAll('.header__top, .header__bottom, .header__link__anchor') || []
+  const links = el.value.querySelectorAll('.header__bottom, .header__link__anchor') || []
   const hints = el.value.querySelectorAll('.header__hint, .svg__logo') || []
   shuffleElsIn({ els: hints, fast: true })
   shuffleElsIn({ els: links, fast: true })
@@ -92,8 +95,7 @@ function enter() {
 function leave() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'none' })
-  const links =
-    el.value.querySelectorAll('.header__top, .header__bottom, .header__link__anchor') || []
+  const links = el.value.querySelectorAll('.header__bottom, .header__link__anchor') || []
   const hints = el.value.querySelectorAll('.header__hint, .svg__logo') || []
   shuffleElsOut({ els: hints, fast: true })
   shuffleElsOut({ els: links, fast: true })
@@ -180,7 +182,6 @@ function leave() {
   &__bottom {
     position: absolute;
     padding: var(--layout-margin);
-    @include will-fade;
   }
 
   &__top {
@@ -192,6 +193,7 @@ function leave() {
   &__bottom {
     right: 0;
     bottom: 0;
+    @include will-fade;
   }
 }
 </style>
