@@ -143,6 +143,10 @@ function onIntersect(el: HTMLElement, visible: boolean) {
         mix-blend-mode: color-burn;
       }
 
+      @include from__desktop--x-large {
+        left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
+      }
+
       svg {
         width: toColumns(8);
         height: auto;

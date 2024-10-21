@@ -342,6 +342,7 @@ onBeforeUnmount(() => {
 
   &__squares {
     position: absolute;
+    z-index: 9;
     bottom: 20%;
     left: 3.1%;
     height: 47%;
@@ -369,6 +370,10 @@ onBeforeUnmount(() => {
 
     p {
       @include t-number;
+    }
+
+    @include from__desktop--x-large {
+      right: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
     }
   }
 
@@ -490,6 +495,7 @@ onBeforeUnmount(() => {
           color: var(--lime);
           padding: 0;
           @include t-b1;
+          border: none;
           &--tetris {
             display: flex;
             align-items: center;

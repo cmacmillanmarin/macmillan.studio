@@ -71,7 +71,32 @@ onMounted(() => {
   logo.src = '/assets/img/logo.svg'
   logo.onload = () => {
     ready.value = true
-    update()
+    tetris.matrix = []
+    for (let row = 1; row <= tetris.board.rows; row++) {
+      tetris.matrix.push(new Array(tetris.board.columns).fill(0))
+    }
+    tetris.matrix.forEach((row, r) => {
+      row.forEach((column, c) => {
+        const rows = tetris.matrix.length
+        if (r + 5 === rows) {
+          const pieces = [5]
+          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
+        } else if (r + 4 === rows) {
+          const pieces = [5, 6, 11]
+          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
+        } else if (r + 3 === rows) {
+          const pieces = [0, 6, 11]
+          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
+        } else if (r + 2 === rows) {
+          const pieces = [0, 3, 4, 9, 11]
+          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
+        } else if (r + 1 === rows) {
+          const pieces = [0, 1, 3, 4, 8, 9, 10, 11]
+          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
+        }
+      })
+    })
+    draw()
   }
 })
 
@@ -87,12 +112,11 @@ function draw() {
   tetris.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value !== 0) {
-        if (value === 3 && tetris.ctx) tetris.ctx.globalAlpha = opacity.value
+        if (tetris.ctx) tetris.ctx.globalAlpha = value === 3 ? opacity.value : 1
         drawLogo({
           x: tetris.size.piece * x,
           y: tetris.size.y - tetris.size.piece * (tetris.board.rows - y),
         })
-        if (tetris.ctx) tetris.ctx.globalAlpha = 1
       }
     })
   })
@@ -118,7 +142,42 @@ function drawBoard() {
 }
 
 function drawLogo(position: Position) {
-  tetris.ctx?.drawImage(logo, position.x, position.y, tetris.size.piece, tetris.size.piece)
+  const gap = 0.6
+  tetris.ctx?.drawImage(
+    tint(logo, 26, 26, 26),
+    position.x + gap * 0.5,
+    position.y + gap * 0.5,
+    tetris.size.piece - gap,
+    tetris.size.piece - gap
+  )
+}
+
+function tint(
+  image: HTMLImageElement,
+  r: number,
+  g: number,
+  b: number
+): OffscreenCanvas | HTMLImageElement {
+  const imageSize = image.width
+
+  const offscreen = new OffscreenCanvas(imageSize, imageSize)
+  const ctx = offscreen.getContext('2d')
+  if (!ctx) return image
+
+  ctx.drawImage(image, 0, 0)
+
+  const imageData = ctx.getImageData(0, 0, imageSize, imageSize)
+
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    if (imageData.data[i + 3] === 0) continue
+    imageData.data[i + 0] = r
+    imageData.data[i + 1] = g
+    imageData.data[i + 2] = b
+  }
+
+  ctx.putImageData(imageData, 0, 0)
+
+  return offscreen
 }
 
 function reset() {

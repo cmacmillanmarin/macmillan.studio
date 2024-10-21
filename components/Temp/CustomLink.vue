@@ -47,9 +47,9 @@ const componentType = computed(() => {
 })
 
 async function onClick(e: MouseEvent): Promise<void> {
-  e.preventDefault()
-  e.stopPropagation()
   if (props.type === 'referral') {
+    e.preventDefault()
+    e.stopPropagation()
     if (props.to === route.fullPath) updateScrollTargetId(props.to.replace('/#', ''))
     else if (props.to) router.push(props.to)
   }
