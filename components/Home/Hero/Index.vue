@@ -62,7 +62,7 @@ const { updateCursor, updateSection, updateInReel } = store
 const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
-const { disableScroll, updateScrollTargetId } = scrollStore
+const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
 const { current, direction } = storeToRefs(scrollStore)
 
 const { layoutMargin } = useCss()
@@ -75,8 +75,6 @@ const reelVideoActive = computed(
     ((direction.value === 'up' && section.value === 'hero') ||
       (direction.value === 'down' && section.value === 'projects-bg'))
 )
-
-const intersect = ref<boolean>(false)
 
 const videoEl = ref<HTMLVideoElement>()
 const sourceEl = ref<HTMLSourceElement>()
@@ -132,6 +130,7 @@ const position = computed<{ x: number; y: number }>(() => {
 
 watch(isInProjectEntered, v => {
   v ? videoEl.value?.pause() : videoEl.value?.play()
+  updateScroll()
 })
 
 watch(current, () => {
@@ -153,7 +152,6 @@ watch(current, () => {
   gsap.set('.home__hero__content__macmillan', {
     y: toPx(current.value + scroll),
   })
-  // gsap.set('.home__hero__bg', { opacity: scrollProgress.value === 1 ? 1 : 0 })
 })
 
 watch([position, videoPlaying], () => {

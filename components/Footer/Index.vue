@@ -494,8 +494,8 @@ onBeforeUnmount(() => {
         &__btn {
           color: var(--lime);
           padding: 0;
-          @include t-b1;
           border: none;
+          @include t-b1;
           &--tetris {
             display: flex;
             align-items: center;

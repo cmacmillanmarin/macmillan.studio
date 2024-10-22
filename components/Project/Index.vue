@@ -1,5 +1,9 @@
 <template>
-  <div ref="el" class="project" :style="{ backgroundColor: data.color }">
+  <div
+    ref="el"
+    :class="['project', { 'project--entered': !transition }]"
+    :style="{ backgroundColor: data.color }"
+    @click="closeProject">
     <ClientOnly>
       <Teleport to="#top-layer">
         <transition @leave="transitionFadeOut">
@@ -22,6 +26,8 @@ import { transitionFadeOut } from '~/utils/animations'
 defineProps<{
   data: Project
 }>()
+
+const router = useRouter()
 
 const store = useStore()
 const { updateCursor, updateSection } = store
@@ -48,6 +54,7 @@ function enter() {
     opacity: 1,
     delay: 0.1,
     onComplete: () => {
+      updateCursor('close')
       transition.value = false
     },
   })
@@ -57,12 +64,20 @@ onBeforeUnmount(() => {
   disableScroll(false)
 })
 
+function closeProject() {
+  if (transition.value) return
+  router.push('/')
+}
+
 const emit = defineEmits(['mounted', 'entered'])
 </script>
 
 <style lang="scss">
 .project {
   @include will-fade;
+  &--entered {
+    cursor: pointer;
+  }
   h1 {
     position: absolute;
     bottom: var(--layout-margin);
