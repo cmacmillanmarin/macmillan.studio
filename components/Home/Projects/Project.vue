@@ -27,11 +27,17 @@
             ref="clientEl"
             :class="[
               'home__projects__project__client',
+              `home__projects__project__client--${data.slug}`,
               { 'home__projects__project__client--all': inAllProjectsList },
             ]">
-            <div
-              class="home__projects__project__client__logo"
-              :style="{ backgroundColor: projectColor }"></div>
+            <div class="home__projects__project__client__logo">
+              <img
+                v-if="data.client.logo"
+                :src="data.client.logo"
+                :alt="`${data.client.name} logo`"
+                width="640"
+                height="640" />
+            </div>
             <div class="home__projects__project__client__name">{{ data.client.name }}</div>
           </div>
         </transition>
@@ -541,6 +547,9 @@ defineExpose({
       height: toScale(2.4rem);
       border-radius: 50%;
       background-color: v-bind(projectColor);
+      img {
+        will-change: transform;
+      }
     }
 
     &__name {

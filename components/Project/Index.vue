@@ -12,7 +12,12 @@
       </Teleport>
     </ClientOnly>
 
-    <h1>{{ data.title }}</h1>
+    <ProjectLanding :data="data" :ready="isInProjectEntered" />
+    <WebGLVideo
+      v-if="data.assets[0]"
+      :data="data.assets[0].video"
+      :bg-color="data.secondaryColor"
+      :ready="isInProjectEntered" />
   </div>
 </template>
 
@@ -22,6 +27,7 @@ import { type Project } from '~/types/wordpress/project'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { transitionFadeOut } from '~/utils/animations'
+import { storeToRefs } from 'pinia'
 
 defineProps<{
   data: Project
@@ -31,6 +37,7 @@ const router = useRouter()
 
 const store = useStore()
 const { updateCursor, updateSection } = store
+const { isInProjectEntered } = storeToRefs(store)
 
 const { disableScroll } = useScrollStore()
 
@@ -74,15 +81,27 @@ const emit = defineEmits(['mounted', 'entered'])
 
 <style lang="scss">
 .project {
+  display: inline-block;
+  white-space: nowrap;
   @include will-fade;
+
   &--entered {
     cursor: pointer;
   }
-  h1 {
-    position: absolute;
-    bottom: var(--layout-margin);
-    left: var(--layout-margin);
-    @include t-h1;
+
+  > div {
+    white-space: normal;
+    display: inline-block;
+    vertical-align: top;
+    width: max-content;
   }
+
+  &__landing {
+    width: max-content;
+    height: 100%;
+  }
+
+  // &__image {
+  // }
 }
 </style>

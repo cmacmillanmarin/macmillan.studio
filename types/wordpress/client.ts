@@ -1,4 +1,4 @@
-import { parseText } from '~/types/wordpress'
+import { parseText, type WP_Image } from '~/types/wordpress'
 
 export type WP_Client_Objects = Array<WP_Client_Object>
 export interface WP_Client_Object {
@@ -13,15 +13,19 @@ export interface WP_Client {
   }
   acf: {
     featured: boolean
+    logo: WP_Image
     name: string
+    link: string
   }
 }
 
 export type Clients = Array<Client>
 export interface Client {
   slug: string
+  logo: string
   name: string
   featured: boolean
+  link: string
 }
 
 export function parseClients(params: { clients?: WP_Clients }): Clients {
@@ -36,7 +40,9 @@ export function parseClient(params: { client?: WP_Client }): Client {
   const { client } = params
   return {
     slug: parseText(client?.slug),
+    logo: parseText(client?.acf.logo.url),
     name: parseText(client?.acf.name),
     featured: !!client?.acf.featured,
+    link: parseText(client?.acf.link),
   }
 }

@@ -23,15 +23,21 @@ export interface WP_Project {
   }
   acf: {
     selected_project?: boolean
-    freelance: boolean
-    client?: Array<WP_Client_Object>
+    link: string
+    primary_color: string
+    secondary_color: string
     thumbnail: {
       type: 'img' | 'vid'
       image?: WP_Image
       video?: WP_Video
     }
-    primary_color: string
-    secondary_color: string
+    assets: Array<{
+      type: 'img' | 'vid'
+      image?: WP_Image
+      video?: WP_Video
+    }>
+    freelance: boolean
+    client?: Array<WP_Client_Object>
   }
 }
 
@@ -47,14 +53,19 @@ export interface Project {
   selected: boolean
   color: string
   secondaryColor: string
-  client: Client
-  collaborator: Client
-  freelance: boolean
   thumbnail: {
     type: 'img' | 'vid'
     image: Image
     video: Video
   }
+  assets: Array<{
+    type: 'img' | 'vid'
+    image: Image
+    video: Video
+  }>
+  client: Client
+  collaborator: Client
+  freelance: boolean
 }
 
 export function parseProjects(params: { projects?: WP_Projects; clients?: WP_Clients }): Projects {
@@ -92,13 +103,22 @@ export function parseProject(params: {
     selected: !!project?.acf.selected_project,
     color: parseText(project?.acf.primary_color),
     secondaryColor: parseText(project?.acf.secondary_color),
-    client: parseClient({ client }),
-    collaborator: parseClient({ client: collaborator }),
-    freelance: !!project?.acf.freelance,
     thumbnail: {
       type: project?.acf.thumbnail.type || 'img',
       image: parseImage(project?.acf.thumbnail.image),
       video: parseVideo(project?.acf.thumbnail.video),
     },
+    assets: project?.acf.assets.length
+      ? project.acf.assets.map(asset => {
+          return {
+            type: asset.type,
+            image: parseImage(asset.image),
+            video: parseVideo(asset.video),
+          }
+        })
+      : [],
+    client: parseClient({ client }),
+    collaborator: parseClient({ client: collaborator }),
+    freelance: !!project?.acf.freelance,
   }
 }

@@ -58,7 +58,7 @@ const router = useRouter()
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateCursor, updateSection, updateInReel } = store
+const { updateSection, updateInReel } = store
 const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
