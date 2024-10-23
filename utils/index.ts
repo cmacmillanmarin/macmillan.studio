@@ -206,7 +206,8 @@ export function splitArray<T>(array: T[], n: number): T[][] {
   for (let i = 0; i < n; i++) {
     const start = i * chunkSize
     const end = start + chunkSize
-    result.push(array.slice(start, end))
+    const chunk = array.slice(start, end)
+    chunk.length && result.push(chunk)
   }
 
   return result

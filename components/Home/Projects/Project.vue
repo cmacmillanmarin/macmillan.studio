@@ -30,7 +30,9 @@
               `home__projects__project__client--${data.slug}`,
               { 'home__projects__project__client--all': inAllProjectsList },
             ]">
-            <div class="home__projects__project__client__logo">
+            <div
+              class="home__projects__project__client__logo"
+              :style="{ backgroundColor: projectColor }">
               <img
                 v-if="data.client.logo"
                 :src="data.client.logo"
@@ -280,7 +282,7 @@ function onVideoLoaded() {
     video: videoEl.value,
     onClick: openProject,
     color: rbgToVec4(rgb || { r: 1, g: 1, b: 1 }),
-    multiplyColor: 'darkGrey',
+    multiplyColor: 'lightGrey',
   })
   isLoaded.value = true
 }
@@ -293,7 +295,7 @@ function onImageLoaded() {
     img: customImageEl.value?.el,
     onClick: openProject,
     color: rbgToVec4(rgb || { r: 1, g: 1, b: 1 }),
-    multiplyColor: 'darkGrey',
+    multiplyColor: 'lightGrey',
   })
   isLoaded.value = true
 }
@@ -546,7 +548,6 @@ defineExpose({
       width: toScale(2.4rem);
       height: toScale(2.4rem);
       border-radius: 50%;
-      background-color: v-bind(projectColor);
       img {
         will-change: transform;
       }
