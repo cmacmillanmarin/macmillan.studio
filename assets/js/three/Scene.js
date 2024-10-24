@@ -132,6 +132,7 @@ class Controller {
     object.size = object.size || { x: 0, y: 0, z: 1 }
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
     object.zoom = object.zoom || 1
+    object.order = object.order || 0
     object.cursor = object.cursor || 'plus'
     object.opacity = object.opacity !== undefined ? object.opacity : 1
     object.multiplyColor = object.multiplyColor || null
@@ -154,6 +155,7 @@ class Controller {
     cursor,
     fade,
     border,
+    order,
     multiplyColor,
     color,
     onClick,
@@ -169,6 +171,7 @@ class Controller {
       object.size = size || object.size
       object.fade = fade !== undefined ? fade : object.fade
       object.fixed = fixed || object.fixed
+      object.order = order !== undefined ? order : object.order
       object.opacity = opacity !== undefined ? opacity : object.opacity
       object.onClick = onClick !== undefined ? onClick : object.onClick
       object.multiplyColor = multiplyColor || object.multiplyColor
@@ -183,9 +186,7 @@ class Controller {
     const index = this.objects.findIndex(object => object.id === id)
     const object = this.objects[index]
     if (!object) return
-    console.log('remove', object.id)
     if (object.mesh) {
-      console.log('remove with transition', object.id)
       gsap.killTweensOf(object.mesh.material.uniforms.uFade)
       gsap.to(object.mesh.material.uniforms.uFade, {
         value: 0.0,
@@ -215,6 +216,7 @@ class Controller {
     for (const object of this.objects) {
       object.inView = this.inView(object)
       let texture = null
+
       if (object.inView) {
         if (!object.mesh) {
           const availablePlane = this.getAvailablePlane(object.id)
@@ -223,12 +225,11 @@ class Controller {
             continue
           }
 
-          // ASIGNATIONS
-
           object.mesh = availablePlane.mesh
           object.meshId = availablePlane.id
           object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0
           object.mesh.material.uniforms.uTextureFade.value = 0
+          object.mesh.material.uniforms.uTextureLoaded.value = 0
 
           if (object.video) {
             object.mesh.material.uniforms.uTextureType.value = 0
@@ -238,20 +239,14 @@ class Controller {
               (object.size.x * object.video.height) / object.video.width
             object.mesh.material.uniforms.uTextureLoaded.value = videoLoaded(object.video) ? 1 : 0
           } else if (object.img) {
-            const src = object.img.src || object.img.currentSrc
-            const id = slugify(src)
-            texture = this.loadedTextures.find(t => t.id === id)
-            if (!texture) {
-              this.loadedTextures.push({ id, ready: true, txt: this.loader.load(src) })
-              texture = this.loadedTextures.find(t => t.id === id)
-            }
+            object.mesh.material.uniforms.uTextureType.value = 1
             object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
             object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
-            object.mesh.material.uniforms.uTextureImage.value = texture.txt
-            object.mesh.material.uniforms.uTextureLoaded.value = texture.ready ? 1 : 0
-            object.mesh.material.uniforms.uTextureType.value = 1
-          } else {
-            object.mesh.material.uniforms.uTextureLoaded.value = 1
+            if (this.imageLoaded(object.img)) {
+              object.mesh.material.uniforms.uTextureLoaded.value = 1
+              texture = this.loadedTextures.find(t => t.id === slugify(object.img.currentSrc))
+              object.mesh.material.uniforms.uTextureImage.value = texture.txt
+            }
           }
 
           if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
@@ -260,14 +255,19 @@ class Controller {
 
         const { uniforms } = object.mesh.material
 
-        let isLoaded = false
-        if (uniforms.uTextureLoaded.value === 1 || object.id === 'noise') isLoaded = true
-        else if (object.video) isLoaded = videoLoaded(object.video)
-        else if (object.img) isLoaded = texture.ready
-        const textureLoaded = isLoaded ? 1 : 0
+        let isLoaded = 0
+        if (uniforms.uTextureLoaded.value === 1 || object.id === 'noise') isLoaded = 1
+        else if (object.video) isLoaded = videoLoaded(object.video) ? 1 : 0
+        else if (object.img) {
+          isLoaded = this.imageLoaded(object.img)
+          if (isLoaded) {
+            texture = this.loadedTextures.find(t => t.id === slugify(object.img.currentSrc))
+            uniforms.uTextureImage.value = texture.txt
+          }
+        }
 
-        if (textureLoaded && uniforms.uTextureFade.value === 0) {
-          const fade = textureLoaded !== uniforms.uTextureLoaded.value
+        if (isLoaded && uniforms.uTextureFade.value === 0) {
+          const fade = isLoaded !== uniforms.uTextureLoaded.value
           // console.log(`${object.id} ${fade ? 'just loaded' : 'was already loaded'}!`)
           uniforms.uTextureLoaded.value = 1
           gsap.killTweensOf(uniforms.uTextureFade)
@@ -280,6 +280,7 @@ class Controller {
           x: object.position.x,
           y: object.position.y + this.getFixedY(object.fixed),
         })
+        object.mesh.renderOrder = object.order
         object.mesh.position.x = position.x + object.size.x * 0.5
         object.mesh.position.y = position.y - object.size.y * 0.5
         object.mesh.position.z = object.position.z || 0
@@ -290,7 +291,7 @@ class Controller {
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
 
-        if (object.color) uniforms.uColor.value = object.color
+        uniforms.uColor.value = object.color || this.colors.lightGrey
         uniforms.uMultiplyColor.value = object.multiplyColor || this.colors.white
         uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
         uniforms.uZoom.value = object.zoom
@@ -400,6 +401,8 @@ class Controller {
     plane.mesh.scale.y = 0
     plane.available = true
     plane.mesh.visible = false
+    plane.video = null
+    plane.img = null
   }
 
   generatePlanesBatch() {
@@ -433,6 +436,8 @@ class Controller {
           },
           wireframe: false,
           transparent: true,
+          depthTest: false,
+          depthWrite: false,
         })
       )
       mesh.visible = false
@@ -494,6 +499,14 @@ class Controller {
       -((e.clientY - this.bounding.top) / (this.bounding.bottom - this.bounding.top)) * 2 + 1
 
     this.raycaster.setFromCamera(this.mouse, this.camera)
+  }
+
+  imageLoaded(img) {
+    const { currentSrc } = img
+    const id = slugify(currentSrc)
+    const texture = this.loadedTextures.find(t => t.id === id)
+    if (texture?.ready) return 1
+    return 0
   }
 
   bind() {

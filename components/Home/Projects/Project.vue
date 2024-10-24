@@ -11,7 +11,8 @@
       v-if="data.thumbnail.image.src"
       ref="customImageEl"
       :data="data.thumbnail.image"
-      class="home__projects__project__img" />
+      class="home__projects__project__img"
+      @load="onImageLoaded" />
 
     <ClientOnly>
       <Teleport to="#top-layer">
@@ -153,6 +154,7 @@ let _plane: Plane = {
   rotate: { x: 0, y: 0, z: 0 },
   border: 0,
   zoom: 0,
+  order: 0,
 }
 
 let _target: Plane = {
@@ -162,14 +164,20 @@ let _target: Plane = {
   rotate: { x: 0, y: 0, z: 0 },
   border: 0,
   zoom: 0,
+  order: 0,
 }
 
-watch(inView, () => {
+watch([inView, inTransition], () => {
+  if (inTransition.value) return
   if (videoEl.value) {
-    inView.value
-      ? console.log(`Play video - ${projectId.value}`)
-      : console.log(`Pause video - ${projectId.value}`)
-    inView.value ? videoEl.value.play() : videoEl.value.pause()
+    if (inView.value) {
+      videoEl.value.play()
+      // console.log(`Play video - ${projectId.value}`)
+    } else {
+      videoEl.value.pause()
+      // $scene.releasePlane(projectId.value)
+      // console.log(`Pause video - ${projectId.value}`)
+    }
   }
 })
 
@@ -247,26 +255,26 @@ watch(
 
 onMounted(async () => {
   await nextTick()
+
   progress.value = getProgress()
   leaveProgress.value = getLeaveProgress()
   inView.value = getInView()
+
   const id = slugify(props.data.thumbnail.video.src)
+
   if (!!id) {
     const video = document.getElementById(slugify(id)) as HTMLVideoElement | undefined
-    if (video) {
-      videoEl.value = video
-      onVideoLoaded()
-      // if (videoEl.value.readyState > 2) onVideoLoaded()
-      // else videoEl.value.addEventListener('canplay', onVideoLoaded)
-    } else {
-      onImageLoaded()
-    }
+    if (video) videoEl.value = video
   }
+
+  createPlane()
+
   if (inAllProjectsList.value) {
     inTransition.value = true
     _plane.position.x = vw.value * 0.5
     _plane.position.y = props.top + vh.value * 0.5
   }
+
   addRenderCallback(updateDom)
 })
 
@@ -276,30 +284,18 @@ function updateDom() {
   collaboratorEl.value && gsap.set(collaboratorEl.value, { x: collaborator.x, y: collaborator.y })
 }
 
-function onVideoLoaded() {
-  const colorRgb = hexToRgb(props.data.color)
-  const secondaryColorRgb = hexToRgb(props.data.secondaryColor)
-  $scene.addObject({
-    id: projectId.value,
-    type: 'plane',
-    video: videoEl.value,
-    onClick: openProject,
-    color: rbgToVec4(colorRgb),
-    // multiplyColor: rbgToVec4(colorRgb),
-  })
-  isLoaded.value = true
+function onImageLoaded() {
+  customImageEl.value?.el && $scene.preload(customImageEl.value.el)
 }
 
-function onImageLoaded() {
-  const colorRgb = hexToRgb(props.data.color)
-  const secondaryColorRgb = hexToRgb(props.data.secondaryColor)
+async function createPlane() {
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
     img: customImageEl.value?.el,
+    video: videoEl.value,
     onClick: openProject,
-    color: rbgToVec4(colorRgb),
-    // multiplyColor: rbgToVec4(colorRgb),
+    color: rbgToVec4(hexToRgb(props.data.color)),
   })
   isLoaded.value = true
 }
@@ -361,7 +357,8 @@ function getInAllProjectsListPlane(): Plane {
     size: { x: size.value.x, y: size.value.y, z: 1 },
     rotate: { x: 0, y: 0, z: 0 },
     border: toScale(16),
-    zoom: 1.4 - 0.4 * progress.value,
+    order: props.of - props.i,
+    zoom: 1,
   }
 }
 
@@ -384,6 +381,7 @@ function getInSelectedProjectsListPlane(): Plane {
       y: 33 * props.sideX * leaveProgress.value * (Math.PI / 180),
       z: 0,
     },
+    order: props.of - props.i,
     border: toScale(16) * (progress.value + leaveProgress.value),
     zoom: 1.4 - 0.4 * progress.value,
   }
@@ -479,7 +477,6 @@ function prepareCollaboratorIn(el: Element) {
 }
 
 onBeforeUnmount(() => {
-  console.log(`Pause video - ${projectId.value}`)
   videoEl.value?.pause()
   removeRenderCallback(updateDom)
   $scene.removeObject({ id: projectId.value })

@@ -5,6 +5,7 @@ export interface Plane {
   rotate: { x: number; y: number; z: number }
   border: number
   zoom: number
+  order: number
 }
 
 export interface ClientAndCollaborator {

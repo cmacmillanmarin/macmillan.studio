@@ -16,8 +16,7 @@
           @leave="transitionShuffleOut">
           <p v-if="indicators" class="home__projects__index">
             <SvgSquare />
-            <span
-              v-text="`{${startWithZero(active)}—${startWithZero(activeListProjects.length)}}`" />
+            <span v-text="`{${startWithZero(active)}—${startWithZero(activeOf)}}`" />
           </p>
         </transition>
       </Teleport>
@@ -167,7 +166,7 @@ const route = useRoute()
 
 const store = useStore()
 const { updateSection } = store
-const { section } = storeToRefs(store)
+const { section, cursor } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollFixedTargetId } = scrollStore
@@ -188,16 +187,17 @@ const listEl = ref<HTMLElement>()
 const listContainerEl = ref<HTMLElement>()
 const projectEls = ref<Array<typeof HomeProjectsProject>>([])
 
-const active = ref<number>(0)
 const indicators = computed<boolean>(() => section.value === 'projects')
 
 const year = ref<string>(new Date().getFullYear().toString())
 
 let _to: any
-
-const activeList = ref<'selected' | 'all'>('selected')
 const selectedProjectsList = ref<Projects>(props.data.list.filter(project => project.selected))
 const activeListProjects = ref<Projects>(selectedProjectsList.value)
+const activeList = ref<'selected' | 'all'>('selected')
+
+const active = ref<number>(0)
+const activeOf = ref<number>(activeListProjects.value.length)
 
 const instancedVideos = ref<Array<Video>>([])
 
@@ -210,6 +210,10 @@ watchEffect(() => {
   })
 })
 
+watch(indicators, () => {
+  activeOf.value = activeListProjects.value.length
+})
+
 watch(scrollUpdated, () => {
   updateBounding()
 })
@@ -220,6 +224,7 @@ watch(activeList, () => {
 
 watch(activeListProjects, async () => {
   active.value = 1
+  activeOf.value = activeListProjects.value.length
   await nextTick()
   const listWidth = listEl.value?.offsetWidth || 0
   const listContainerWidth = listContainerEl.value?.offsetWidth || 0
@@ -240,8 +245,12 @@ watch(activeListProjects, async () => {
 
 onBeforeMount(() => {
   if (route.params.slug) {
-    active.value =
-      activeListProjects.value.findIndex(project => project.slug === route.params.slug) + 1
+    let index = activeListProjects.value.findIndex(project => project.slug === route.params.slug)
+    if (index === -1) {
+      index = props.data.list.findIndex(project => project.slug === route.params.slug)
+      activeOf.value = props.data.list.length
+    }
+    active.value = index + 1
   }
 })
 
@@ -251,6 +260,7 @@ function updateActiveListProjects() {
 }
 
 function updateActive(value: number) {
+  if (route.params.slug) return
   active.value = value + 1
 }
 
@@ -263,12 +273,14 @@ function onIntersectBg(el: HTMLElement, visible: boolean) {
 }
 
 function updateActiveListToSelected(e: MouseEvent) {
+  if (cursor.value === 'plus') return
   e.preventDefault()
   e.stopPropagation()
   updateActiveList('selected')
 }
 
 function updateActiveListToAll(e: MouseEvent) {
+  if (cursor.value === 'plus') return
   e.preventDefault()
   e.stopPropagation()
   updateActiveList('all')

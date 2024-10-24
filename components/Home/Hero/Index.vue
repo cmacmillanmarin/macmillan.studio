@@ -128,6 +128,10 @@ const position = computed<{ x: number; y: number }>(() => {
   }
 })
 
+watch(hideComponents, () => {
+  !hideComponents.value && updateSection('hero')
+})
+
 watch(isInProjectEntered, v => {
   v ? videoEl.value?.pause() : videoEl.value?.play()
   updateScroll()

@@ -46,6 +46,7 @@ onMounted(() => {
     size: { x: vw.value, y: vh.value, z: 1 },
     position: { x: 0, y: 0, z: 300 },
     fade: true,
+    order: 50,
   })
 })
 
