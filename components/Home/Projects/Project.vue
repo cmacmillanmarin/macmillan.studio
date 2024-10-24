@@ -521,7 +521,7 @@ defineExpose({
 
   &__vid,
   &__img {
-    // opacity: 0;
+    opacity: 0;
     pointer-events: none;
     width: toColumns(3);
     @include absolute-center;
