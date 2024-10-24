@@ -11,8 +11,7 @@
       v-if="data.thumbnail.image.src"
       ref="customImageEl"
       :data="data.thumbnail.image"
-      class="home__projects__project__img"
-      @load="onImageLoaded" />
+      class="home__projects__project__img" />
 
     <ClientOnly>
       <Teleport to="#top-layer">
@@ -256,8 +255,11 @@ onMounted(async () => {
     const video = document.getElementById(slugify(id)) as HTMLVideoElement | undefined
     if (video) {
       videoEl.value = video
-      if (videoEl.value.readyState > 2) onVideoLoaded()
-      else videoEl.value.addEventListener('canplay', onVideoLoaded)
+      onVideoLoaded()
+      // if (videoEl.value.readyState > 2) onVideoLoaded()
+      // else videoEl.value.addEventListener('canplay', onVideoLoaded)
+    } else {
+      onImageLoaded()
     }
   }
   if (inAllProjectsList.value) {
@@ -275,27 +277,29 @@ function updateDom() {
 }
 
 function onVideoLoaded() {
-  const rgb = hexToRgb(props.data.secondaryColor)
+  const colorRgb = hexToRgb(props.data.color)
+  const secondaryColorRgb = hexToRgb(props.data.secondaryColor)
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
     video: videoEl.value,
     onClick: openProject,
-    color: rbgToVec4(rgb || { r: 1, g: 1, b: 1 }),
-    multiplyColor: 'lightGrey',
+    color: rbgToVec4(colorRgb),
+    // multiplyColor: rbgToVec4(colorRgb),
   })
   isLoaded.value = true
 }
 
 function onImageLoaded() {
-  const rgb = hexToRgb(props.data.secondaryColor)
+  const colorRgb = hexToRgb(props.data.color)
+  const secondaryColorRgb = hexToRgb(props.data.secondaryColor)
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
     img: customImageEl.value?.el,
     onClick: openProject,
-    color: rbgToVec4(rgb || { r: 1, g: 1, b: 1 }),
-    multiplyColor: 'lightGrey',
+    color: rbgToVec4(colorRgb),
+    // multiplyColor: rbgToVec4(colorRgb),
   })
   isLoaded.value = true
 }

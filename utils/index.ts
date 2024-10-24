@@ -300,7 +300,7 @@ export function numberToShortMonth(number: string): string {
   }
 }
 
-export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   // Remove the hash at the start if it's there
   hex = hex.replace(/^#/, '')
 
@@ -317,7 +317,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
   } else if (hex.length === 6) {
     bigint = parseInt(hex, 16)
   } else {
-    return null // Invalid hex string
+    return { r: 1, g: 1, b: 1 }
   }
 
   // Extract the RGB values

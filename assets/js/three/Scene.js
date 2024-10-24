@@ -58,6 +58,7 @@ class Controller {
     }
 
     this.colors = {
+      white: new Vector4(1.0, 1.0, 1.0, 1.0),
       lime: new Vector4(197.0 / 255.0, 255.0 / 255.0, 32.0 / 255.0, 1.0),
       lightGrey: new Vector4(211.0 / 255.0, 214.0 / 255.0, 218.0 / 255.0, 1.0),
       darkGrey: new Vector4(129.0 / 255.0, 131.0 / 255.0, 136.0 / 255.0, 1.0),
@@ -290,7 +291,7 @@ class Controller {
         object.mesh.scale.z = object.size.z
 
         if (object.color) uniforms.uColor.value = object.color
-        if (object.multiplyColor) uniforms.uMultiplyColor.value = this.colors[object.multiplyColor]
+        uniforms.uMultiplyColor.value = object.multiplyColor || this.colors.white
         uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
         uniforms.uZoom.value = object.zoom
         uniforms.uBorderRadius.value = object.border

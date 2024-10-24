@@ -67,7 +67,7 @@ void main() {
   uv += vec2(0.5);
 
   // vec2 pixel = floor(vUv * (uPixelSize - (uPixelSize - 1.0) * time)) / (uPixelSize - (uPixelSize - 1.0) * time);
-  vec2 pixel = floor(vUv * uPixelSize) / uPixelSize;
+  vec2 pixel = floor(uv * uPixelSize) / uPixelSize;
   pixel = pixel * s / new + offset;
   pixel -= vec2(0.5);
   pixel += vec2(0.5);
