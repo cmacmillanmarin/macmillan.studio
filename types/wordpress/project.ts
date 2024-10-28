@@ -26,16 +26,8 @@ export interface WP_Project {
     link: string
     primary_color: string
     secondary_color: string
-    thumbnail: {
-      type: 'img' | 'vid'
-      image?: WP_Image
-      video?: WP_Video
-    }
-    assets: Array<{
-      type: 'img' | 'vid'
-      image?: WP_Image
-      video?: WP_Video
-    }>
+    thumbnail: WP_Project_Thumbnail
+    assets: Array<WP_Project_Asset>
     freelance: boolean
     client?: Array<WP_Client_Object>
   }
@@ -46,6 +38,33 @@ export interface WP_Project_Object {
   post_name: string
 }
 
+export interface WP_Project_Thumbnail {
+  type: 'img' | 'vid'
+  image?: WP_Image
+  video?: WP_Video
+}
+export interface WP_Project_Asset {
+  layout: 'full' | 'top' | 'bottom' | 'scroll'
+  gap: 'l' | 'm' | 's'
+  type: 'img' | 'vid'
+  image?: WP_Image
+  video?: WP_Video
+}
+
+export interface ProjectAsset {
+  layout: 'full' | 'top' | 'bottom' | 'scroll'
+  gap: 'l' | 'm' | 's'
+  type: 'img' | 'vid'
+  image: Image
+  video: Video
+}
+
+export interface ProjectThumbnail {
+  type: 'img' | 'vid'
+  image: Image
+  video: Video
+}
+
 export type Projects = Array<Project>
 export interface Project {
   slug: string
@@ -53,16 +72,8 @@ export interface Project {
   selected: boolean
   color: string
   secondaryColor: string
-  thumbnail: {
-    type: 'img' | 'vid'
-    image: Image
-    video: Video
-  }
-  assets: Array<{
-    type: 'img' | 'vid'
-    image: Image
-    video: Video
-  }>
+  thumbnail: ProjectThumbnail
+  assets: Array<ProjectAsset>
   client: Client
   collaborator: Client
   freelance: boolean
@@ -97,6 +108,12 @@ export function parseProject(params: {
   collaborator?: WP_Client
 }): Project {
   const { project, client, collaborator } = params
+  const assets: Array<WP_Project_Asset> = project?.acf.assets
+    ? project?.acf.assets.filter(
+        asset =>
+          (asset.type === 'img' && asset.image?.url) || (asset.type === 'vid' && asset.video?.url)
+      )
+    : []
   return {
     slug: parseText(project?.slug),
     title: parseText(project?.title.rendered),
@@ -108,15 +125,15 @@ export function parseProject(params: {
       image: parseImage(project?.acf.thumbnail.image),
       video: parseVideo(project?.acf.thumbnail.video),
     },
-    assets: project?.acf.assets.length
-      ? project.acf.assets.map(asset => {
-          return {
-            type: asset.type,
-            image: parseImage(asset.image),
-            video: parseVideo(asset.video),
-          }
-        })
-      : [],
+    assets: assets.map(asset => {
+      return {
+        layout: asset.layout,
+        gap: asset.gap,
+        type: asset.type,
+        image: parseImage(asset.image),
+        video: parseVideo(asset.video),
+      }
+    }),
     client: parseClient({ client }),
     collaborator: parseClient({ client: collaborator }),
     freelance: !!project?.acf.freelance,

@@ -59,7 +59,7 @@ const { $scene }: any = useNuxtApp()
 
 const store = useStore()
 const { updateSection, updateInReel } = store
-const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
+const { section, gridType, isInReel, isInProject } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
@@ -68,7 +68,7 @@ const { current, direction } = storeToRefs(scrollStore)
 const { layoutMargin } = useCss()
 const { lvw, vw, vh } = useResize()
 
-const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && isInProjectEntered.value)
+const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && isInProject.value)
 const reelVideoActive = computed(
   () =>
     isInReel.value &&
@@ -128,11 +128,7 @@ const position = computed<{ x: number; y: number }>(() => {
   }
 })
 
-watch(hideComponents, () => {
-  !hideComponents.value && updateSection('hero')
-})
-
-watch(isInProjectEntered, v => {
+watch(isInProject, v => {
   v ? videoEl.value?.pause() : videoEl.value?.play()
   updateScroll()
 })
@@ -176,7 +172,7 @@ watch([position, videoPlaying], () => {
 onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
-  !isInProjectEntered.value && videoEl.value?.play()
+  !isInProject.value && videoEl.value?.play()
   $scene.addObject({
     id: 'reel',
     type: 'plane',
@@ -190,7 +186,6 @@ onMounted(() => {
     size: { x: 0, y: 0, z: 0 },
     cursor: 'play',
     onClick: goToReel,
-    // multiplyColor: 'lightGrey',
   })
 })
 
@@ -201,7 +196,7 @@ function enter(params: { el: HTMLElement }) {
 function goToReel() {
   updateInReel(true)
   disableScroll(true)
-  $scene.updateObject({ id: 'reel', onClick: closeReel, cursor: 'close' })
+  $scene.updateObject({ id: 'reel', onClick: closeReel, noPixel: true, cursor: 'close' })
   if (route.hash === '#reel') updateScrollTargetId('reel')
   else router.push('/#reel')
   if (videoEl.value) {
@@ -217,7 +212,7 @@ function closeReel() {
   updateInReel(false)
   disableScroll(false)
   updateScrollTargetId('projects')
-  $scene.updateObject({ id: 'reel', onClick: goToReel, cursor: 'play' })
+  $scene.updateObject({ id: 'reel', onClick: goToReel, noPixel: false, cursor: 'play' })
   if (videoEl.value) {
     videoEl.value.src = '/assets/video/short.webm'
     videoEl.value.setAttribute('type', 'video/webm')

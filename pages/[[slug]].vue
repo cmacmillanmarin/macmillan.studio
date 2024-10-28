@@ -2,22 +2,24 @@
   <div v-if="data" ref="el" class="home">
     <CustomHead :head="data.head" />
 
-    <transition
-      mode="out-in"
-      :css="false"
-      @leave="transitionFadeOut"
-      @before-leave="onBeforeProjectLeave">
-      <Project
-        v-if="project"
-        :key="projectSlug"
-        :data="project"
-        @mounted="onProjectMounted"
-        @entered="onProjectEntered" />
-    </transition>
+    <Project
+      v-if="project"
+      :key="project.slug"
+      :data="project"
+      :list="projectList"
+      :next-project="nextProject"
+      @mounted="onProjectMounted"
+      @entered="onProjectEntered"
+      @next="onNextProject"
+      @closed="onProjectClosed" />
 
     <HomeHero data-scroll data-scroll-continuous :data="data.hero" />
 
-    <HomeProjects v-if="data.projects.list.length" data-scroll :data="data.projects" />
+    <HomeProjects
+      v-if="data.projects.list.length"
+      data-scroll
+      :data="data.projects"
+      @update-list="onProjectListUpdated" />
 
     <HomeServices v-if="data.services.list.length" data-scroll :data="data.services" />
 
@@ -35,7 +37,6 @@
 import { gsap } from 'gsap'
 import { type Homepage } from '~/types/wordpress/homepage'
 import { type Project } from '~/types/wordpress/project'
-import { transitionFadeOut } from '~/utils/animations'
 import useStore from '~/store/useStore'
 import { storeToRefs } from 'pinia'
 
@@ -43,20 +44,30 @@ const route = useRoute()
 const { data } = await useFetch<Homepage>('/api/data')
 
 const store = useStore()
-const { updateCursor, updateInProject, updateInProjectEntered } = store
+const { updateInProject, updateInProjectEntered } = store
 const { section } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
 const bgColor = ref<string>('light-grey')
+
 const inProject = ref<boolean>(false)
 const inProjectEntered = ref<boolean>(false)
+const projectList = ref<'selected' | 'all'>('selected')
 const projectSlug = computed<string>(() => `${route.params.slug}`)
 const project = computed<Project | undefined>(() => {
   return data.value?.projects.list.find(project => project.slug === projectSlug.value)
 })
+const nextProject = computed<Project | undefined>(() => {
+  const list =
+    projectList.value === 'selected'
+      ? data.value?.projects.list.filter(p => p.selected)
+      : data.value?.projects.list
+  const index = list?.findIndex(p => p.slug === projectSlug.value)
+  if (index !== undefined && index >= 0) return list?.[index + 1]
+  return undefined
+})
 
 watch(inProject, () => {
-  updateCursor('default')
   updateInProject(inProject.value)
 })
 
@@ -83,12 +94,15 @@ watch(bgColor, () => {
   )
   const active = `.home__bg--${bgColor.value}`
   const activeBg = el.value.querySelector(active)
-  // const duration = section.value === 'hero' || section.value === 'projects-bg' ? 0 : undefined
   gsap.set(bgs, { zIndex: 1 })
   fadeOut({ el: bgs })
   gsap.killTweensOf(activeBg)
   gsap.set(activeBg, { zIndex: 0, opacity: 1 })
 })
+
+function onProjectListUpdated(value: 'all' | 'selected') {
+  projectList.value = value
+}
 
 function onProjectMounted() {
   inProject.value = true
@@ -98,7 +112,11 @@ function onProjectEntered() {
   inProjectEntered.value = true
 }
 
-function onBeforeProjectLeave() {
+function onNextProject() {
+  inProjectEntered.value = false
+}
+
+function onProjectClosed() {
   inProject.value = false
   inProjectEntered.value = false
 }

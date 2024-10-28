@@ -1,12 +1,17 @@
 <template>
-  <div :class="['project__landing', `project__landing--${data.slug}`]">
+  <div
+    :class="[
+      'project__landing',
+      `project__landing--${data.slug}`,
+      { 'project__landing--animation': animation },
+    ]">
     <div class="project__landing__info">
-      <div class="project__landing__info__stack">
+      <div ref="stackEl" class="project__landing__info__stack">
         <p>Role</p>
         <p>Tech Stack</p>
         <p>Credits</p>
       </div>
-      <div class="project__landing__info__description">
+      <div ref="descriptionEl" class="project__landing__info__description">
         <p>
           During my days at B-Reel, I worked with the Pixel Team at Google to conceptualize and
           build interactive and generative Wallpapers. Each Wallpaper is a calming, delightful
@@ -17,8 +22,11 @@
       </div>
       <div class="project__landing__info__link" />
     </div>
-    <div class="project__landing__title">
-      <SvgProjectWallpapers v-if="ready" />
+    <div v-if="ready" class="project__landing__title">
+      <!-- <SvgProjectWallpapers v-if="data.slug === 'pixel-wallpapers'" :animation="animation" /> -->
+      <h2 v-transition:in="{ callback: animation ? shuffleIn : () => {} }">
+        <span v-for="letter in data.title">{{ letter }}</span>
+      </h2>
     </div>
     <ClientOnly>
       <div v-if="gridType === 'golden-ratio'" class="project__landing__grid">
@@ -32,19 +40,55 @@
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { type Project } from '~/types/wordpress/project'
+import { fadeIn, shuffleIn } from '~/utils/animations'
 
 const store = useStore()
 const { gridType } = storeToRefs(store)
 
-defineProps<{
-  ready: boolean
+const props = defineProps<{
   data: Project
+  ready: boolean
+  animation: boolean
 }>()
+
+const stackEl = ref<HTMLElement>()
+const descriptionEl = ref<HTMLElement>()
+
+watch(
+  () => props.ready,
+  () => {
+    fadeIn({ el: stackEl.value })
+    fadeIn({ el: descriptionEl.value, delay: 0.2 })
+  }
+)
 </script>
 
 <style lang="scss">
 .project__landing {
   position: relative;
+  height: var(--vh);
+
+  &--animation {
+    .project__landing__title {
+      h2 {
+        span {
+          @include will-fade;
+        }
+      }
+      svg {
+        > path,
+        > g {
+          @include will-fade;
+        }
+      }
+    }
+    .project__landing__info {
+      .project__landing__info__stack,
+      .project__landing__info__description {
+        @include will-fade;
+      }
+    }
+  }
 
   &--nike-trail-challenge {
     .project__landing__title {
@@ -83,12 +127,13 @@ defineProps<{
     bottom: var(--layout-margin);
     left: var(--layout-margin);
     svg {
-      path {
-        @include will-fade;
-      }
       &:nth-child(1) {
         margin-bottom: 1.2rem;
       }
+    }
+    h2 {
+      text-transform: uppercase;
+      @include t-project;
     }
   }
 

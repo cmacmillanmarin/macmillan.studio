@@ -68,6 +68,7 @@
 
     <CustomLink
       :to="`/${data.slug}`"
+      :id="targetify(`selected-${data.slug}-anchor`)"
       class="home__projects__project__anchor"
       :content="true"
       :tabindex="inAllProjectsList ? -1 : undefined" />

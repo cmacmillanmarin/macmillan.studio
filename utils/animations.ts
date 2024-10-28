@@ -93,7 +93,7 @@ export function transitionShuffleOut(el: Element, done: Function) {
 
 export function shuffleIn(params: { el: HTMLElement }) {
   const { el } = params
-  const paths = shuffle(Array.from(el.querySelectorAll('path')))
+  const paths = shuffle(Array.from(el.querySelectorAll(':scope > path, :scope > g, :scope > span')))
   for (let i = 0; i < paths.length; i++) {
     const path = paths[i]
     const delay = 0.2 * i

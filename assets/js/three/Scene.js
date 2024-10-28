@@ -137,6 +137,7 @@ class Controller {
     object.opacity = object.opacity !== undefined ? object.opacity : 1
     object.multiplyColor = object.multiplyColor || null
     object.color = object.color || null
+    object.noPixel = !!object.noPixel
     this.objects.push(object)
   }
 
@@ -158,6 +159,7 @@ class Controller {
     order,
     multiplyColor,
     color,
+    noPixel,
     onClick,
     onIntersect,
   }) {
@@ -177,6 +179,7 @@ class Controller {
       object.multiplyColor = multiplyColor || object.multiplyColor
       object.color = color || object.color
       object.cursor = cursor || object.cursor
+      object.noPixel = noPixel !== undefined ? noPixel : object.noPixel
       object.onIntersect = onIntersect !== undefined ? onIntersect : object.onIntersect
     }
   }
@@ -309,17 +312,18 @@ class Controller {
         const hovered = this.intersects.includes(object.mesh)
         const clickable = hovered && object.onClick
 
+        const pixelated = clickable && !object.noPixel
+        const pixelatedTransition =
+          (pixelated && uniforms.uPixel.value === 0) || (!pixelated && uniforms.uPixel.value === 1)
+        if (pixelatedTransition) {
+          gsap.killTweensOf(uniforms.uPixel)
+          gsap.to(uniforms.uPixel, { value: pixelated ? 1 : 0, duration: pixelated ? 0.4 : 0.3 })
+        }
+
         if (object.onIntersect) object.onIntersect(hovered)
-        if (!hovered && object.wasHovered && this.intersects.length === 0) {
+        if (!clickable && object.wasClickable && this.intersects.length === 0) {
           this.updateCursor('default')
           this.main.classList.remove('__main--pointer')
-        }
-        if (
-          (clickable && uniforms.uPixel.value === 0) ||
-          (!clickable && uniforms.uPixel.value === 1)
-        ) {
-          gsap.killTweensOf(uniforms.uPixel)
-          gsap.to(uniforms.uPixel, { value: clickable ? 1 : 0, duration: clickable ? 0.4 : 0.3 })
         }
         if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
           this.main.classList.add('__main--pointer')

@@ -20,10 +20,12 @@
           </p>
         </transition>
       </Teleport>
+
       <Teleport to=".header__bottom">
         <transition
           mode="out-in"
           :css="false"
+          :appear="true"
           @before-enter="prepareFadeIn"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
@@ -32,68 +34,13 @@
           </p>
         </transition>
       </Teleport>
-      <div class="home__projects__buttons" data-scroll-sticky>
-        <transition
-          mode="out-in"
-          :css="false"
-          @before-enter="prepareFadeIn"
-          @enter="transitionShuffleIn"
-          @leave="transitionShuffleOut">
-          <button
-            v-if="indicators"
-            :class="[
-              'home__projects__buttons__button',
-              { 'home__projects__buttons__button--active': activeList === 'selected' },
-            ]"
-            @mouseenter="onButtonMouseEnter"
-            @click="updateActiveListToSelected">
-            <span class="home__projects__buttons__button__label">
-              <transition
-                mode="out-in"
-                :css="false"
-                @before-enter="prepareFadeIn"
-                @enter="transitionShuffleIn"
-                @leave="transitionShuffleOut">
-                <SvgSquare v-if="activeList === 'selected'" />
-              </transition>
-              <span class="home__projects__buttons__button__label__el">Selected projects</span>
-              <span
-                class="home__projects__buttons__button__label__count"
-                v-html="`{${startWithZero(selectedProjectsList.length)}}`" />
-            </span>
-          </button>
-        </transition>
-        <div class="home__projects__buttons__separator" />
-        <transition
-          mode="out-in"
-          :css="false"
-          @enter="transitionShuffleIn"
-          @leave="transitionShuffleOut">
-          <button
-            v-if="indicators"
-            :class="[
-              'home__projects__buttons__button',
-              { 'home__projects__buttons__button--active': activeList === 'all' },
-            ]"
-            @mouseenter="onButtonMouseEnter"
-            @click="updateActiveListToAll">
-            <span class="home__projects__buttons__button__label">
-              <transition
-                mode="out-in"
-                :css="false"
-                @before-enter="prepareFadeIn"
-                @enter="transitionShuffleIn"
-                @leave="transitionShuffleOut">
-                <SvgSquare v-if="activeList === 'all'" />
-              </transition>
-              <span class="home__projects__buttons__button__label__el">All projects</span>
-              <span
-                class="home__projects__buttons__button__label__count"
-                v-html="`{${startWithZero(data.list.length)}}`" />
-            </span>
-          </button>
-        </transition>
-      </div>
+
+      <HomeProjectsButtons
+        :indicators="indicators"
+        :projects="data.list.length"
+        :selected-projects="selectedProjectsList.length"
+        :active-list="activeList"
+        @update-list="updateActiveList" />
     </ClientOnly>
 
     <div class="home__projects__intersect--bg" v-intersect="{ callback: onIntersectBg }" />
@@ -121,6 +68,7 @@
       <NuxtLink
         v-for="(project, i) in activeListProjects"
         :to="`${project.slug}`"
+        :id="targetify(`all-${project.slug}-anchor`)"
         :class="[
           'home__projects__anchor',
           { 'home__projects__anchor--selected': project.selected },
@@ -210,6 +158,17 @@ watchEffect(() => {
   })
 })
 
+watchEffect(() => {
+  if (route.params.slug) {
+    let index = activeListProjects.value.findIndex(project => project.slug === route.params.slug)
+    if (index === -1) {
+      index = props.data.list.findIndex(project => project.slug === route.params.slug)
+      activeOf.value = props.data.list.length
+    }
+    active.value = index + 1
+  }
+})
+
 watch(indicators, () => {
   activeOf.value = activeListProjects.value.length
 })
@@ -219,6 +178,7 @@ watch(scrollUpdated, () => {
 })
 
 watch(activeList, () => {
+  emit('update-list', activeList.value)
   updateActiveListProjects()
 })
 
@@ -243,17 +203,6 @@ watch(activeListProjects, async () => {
   }
 })
 
-onBeforeMount(() => {
-  if (route.params.slug) {
-    let index = activeListProjects.value.findIndex(project => project.slug === route.params.slug)
-    if (index === -1) {
-      index = props.data.list.findIndex(project => project.slug === route.params.slug)
-      activeOf.value = props.data.list.length
-    }
-    active.value = index + 1
-  }
-})
-
 function updateActiveListProjects() {
   activeListProjects.value =
     activeList.value === 'selected' ? selectedProjectsList.value : props.data.list
@@ -270,20 +219,6 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
 function onIntersectBg(el: HTMLElement, visible: boolean) {
   visible && direction.value === 'down' && updateSection('projects-bg')
-}
-
-function updateActiveListToSelected(e: MouseEvent) {
-  if (cursor.value === 'plus') return
-  e.preventDefault()
-  e.stopPropagation()
-  updateActiveList('selected')
-}
-
-function updateActiveListToAll(e: MouseEvent) {
-  if (cursor.value === 'plus') return
-  e.preventDefault()
-  e.stopPropagation()
-  updateActiveList('all')
 }
 
 function updateActiveList(value: 'selected' | 'all') {
@@ -309,16 +244,6 @@ function getOffset(): number {
   return (vh.value - (getColumnWidth(3.5) * 7) / 5) * 0.5
 }
 
-function onButtonMouseEnter(e: MouseEvent) {
-  const el = e.target as HTMLElement
-  if (!el || el.classList.contains('clicked')) return
-  const labelEl = el.querySelector('.home__projects__buttons__button__label__el')
-  if (labelEl) {
-    gsap.set(labelEl, { opacity: 0 })
-    shuffleElsIn({ els: [labelEl] })
-  }
-}
-
 async function updateBounding() {
   const bounding = getBounding(el.value as HTMLElement)
   top.value = bounding.top
@@ -329,7 +254,7 @@ onBeforeUnmount(() => {
   _to && clearTimeout(_to)
 })
 
-defineEmits(['update-active'])
+const emit = defineEmits(['update-list', 'update-active'])
 </script>
 
 <style lang="scss">
@@ -392,57 +317,6 @@ defineEmits(['update-active'])
   &__index {
     position: absolute;
     width: max-content;
-  }
-
-  &__buttons {
-    z-index: 9;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 100vw;
-    max-width: var(--layout-max-width);
-    transform: translate(-50%, 0);
-    height: var(--vh);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    pointer-events: none;
-
-    &__button {
-      width: max-content;
-      width: toScale(40rem);
-      border: none;
-      @include will-fade;
-      pointer-events: auto;
-
-      &--active {
-        pointer-events: none;
-      }
-
-      &__label {
-        position: relative;
-        @include t-black;
-        @include t-b1;
-
-        &__el {
-          will-change: opacity;
-        }
-
-        .svg__square {
-          position: absolute;
-          top: 50%;
-          left: 0;
-          transform: translate(calc(-100% - 0.4rem), -50%);
-        }
-
-        &__count {
-          position: absolute;
-          transform: translate(0.8rem, -0.4rem);
-          font-family: 'HelveticaNowDisplayBold' !important;
-          @include t-b3;
-        }
-      }
-    }
   }
 
   &__intersect {

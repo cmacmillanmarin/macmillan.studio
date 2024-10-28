@@ -25,6 +25,18 @@
   }
 }
 
+@mixin t-project {
+  font-size: toScaleUp(6rem);
+  line-height: toScaleUp(4.8rem);
+
+  @include t-h;
+
+  @include from__desktop {
+    font-size: toScale(16rem);
+    line-height: toScale(13rem);
+  }
+}
+
 @mixin t-h1 {
   font-size: toScaleUp(6rem);
   line-height: toScaleUp(4.8rem);

@@ -80,7 +80,7 @@ const { $scene }: any = useNuxtApp()
 
 const store = useStore()
 const { updateSection } = store
-const { isInProjectEntered, section } = storeToRefs(store)
+const { section } = storeToRefs(store)
 const { direction, scrollUpdated } = storeToRefs(useScrollStore())
 
 const { toScale } = useCss()
