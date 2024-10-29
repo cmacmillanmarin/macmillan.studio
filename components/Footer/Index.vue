@@ -41,17 +41,17 @@
         <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
         <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
         <div class="footer__email__christian">
-          <button>
+          <button aria-label="Copy email">
             <SvgChristian />
           </button>
         </div>
         <div class="footer__email__domain">
-          <button>
+          <button aria-label="Copy email">
             <SvgDomain />
           </button>
         </div>
         <div class="footer__email__extension">
-          <button>
+          <button aria-label="Copy email">
             <SvgExtension />
           </button>
         </div>

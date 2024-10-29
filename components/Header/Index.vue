@@ -34,7 +34,12 @@
           :active="section === 'contact' && !isInProject" />
       </ul>
       <div class="header__nav__logo">
-        <CustomLink to="/#hero" type="referral" :content="true" data-tab-fixed>
+        <CustomLink
+          to="/#hero"
+          type="referral"
+          :content="true"
+          aria-label="MacMillan Studio logo"
+          data-tab-fixed>
           <SvgLogo />
         </CustomLink>
       </div>

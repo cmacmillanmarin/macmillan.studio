@@ -7,7 +7,6 @@
     ]">
     <div class="home__about__testimonials__testimonial__quote">
       <SvgQuote :data-pos="pos" />
-
       <p
         :class="[
           'home__about__testimonials__testimonial__quote__label',

@@ -27,6 +27,7 @@
       <div class="home__about__testimonials__indicator__buttons">
         <button
           v-for="i in data.length"
+          :aria-label="`Go to testimonial ${i}`"
           :class="[
             'home__about__testimonials__indicator__buttons__button',
             { 'home__about__testimonials__indicator__buttons__button--active': i - 1 === active },

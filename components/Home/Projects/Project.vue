@@ -69,9 +69,10 @@
     <CustomLink
       :to="`/${data.slug}`"
       :id="targetify(`selected-${data.slug}-anchor`)"
-      class="home__projects__project__anchor"
+      :aria-label="`Go to ${data.title} project`"
       :content="true"
-      :tabindex="inAllProjectsList ? -1 : undefined" />
+      :tabindex="inAllProjectsList ? -1 : undefined"
+      class="home__projects__project__anchor" />
   </div>
 </template>
 

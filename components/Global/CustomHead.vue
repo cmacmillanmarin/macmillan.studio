@@ -2,6 +2,7 @@
   <Head>
     <Title>{{ head.title }}</Title>
     <Link rel="canonical" :href="canonical" />
+    <Meta name="description" :content="head.description" />
     <Meta name="og:url" :content="canonical" />
   </Head>
 </template>
