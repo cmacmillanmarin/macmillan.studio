@@ -6,20 +6,22 @@
       `project__asset--layout-${data.layout}`,
       `project__asset--gap-${data.gap}`,
     ]">
-    <ProjectVideo
-      v-if="data.type === 'vid'"
-      :data="data.video"
-      :ready="ready"
-      :bg-color="bgColor"
-      :layout="data.layout"
-      @update-scroll="emit('update-scroll')" />
-    <ProjectImage
-      v-else
-      :data="data.image"
-      :bg-color="bgColor"
-      :ready="ready"
-      :layout="data.layout"
-      @update-scroll="emit('update-scroll')" />
+    <div class="project__asset__content">
+      <ProjectVideo
+        v-if="data.type === 'vid'"
+        :data="data.video"
+        :ready="ready"
+        :bg-color="bgColor"
+        :layout="data.layout"
+        @update-scroll="emit('update-scroll')" />
+      <ProjectImage
+        v-else
+        :data="data.image"
+        :bg-color="bgColor"
+        :ready="ready"
+        :layout="data.layout"
+        @update-scroll="emit('update-scroll')" />
+    </div>
   </div>
 </template>
 
@@ -50,18 +52,33 @@ const emit = defineEmits(['update-scroll'])
 <style lang="scss">
 .project__asset {
   @include will-fade;
+
+  &__content {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+
   &--layout-top {
-    padding-bottom: 26rem;
+    .project__asset__content {
+      align-items: flex-start;
+    }
   }
+
   &--layout-bottom {
-    padding-top: 26rem;
+    .project__asset__content {
+      align-items: flex-end;
+    }
   }
+
   &--gap-s {
     padding-right: 4rem;
   }
+
   &--gap-m {
     padding-right: 20rem;
   }
+
   &--gap-l {
     padding-right: 36rem;
   }

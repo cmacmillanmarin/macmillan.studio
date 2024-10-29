@@ -15,6 +15,7 @@ export default defineStore('use-store', {
     inReel: false,
     inProject: false,
     inProjectEntered: false,
+    inProjectScroll: true,
   }),
   getters: {
     isPreloaded(): boolean {
@@ -73,6 +74,9 @@ export default defineStore('use-store', {
     },
     updateInProjectEntered(state: boolean) {
       this.inProjectEntered = state
+    },
+    updateInProjectScroll(state: boolean) {
+      this.inProjectScroll = state
     },
   },
 })

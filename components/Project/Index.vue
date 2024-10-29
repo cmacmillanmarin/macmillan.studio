@@ -22,7 +22,7 @@
         :bg-color="data.secondaryColor"
         @update-scroll="updateScroll" />
       <div v-if="data.assets.length === 0" class="project__content__gap" />
-      <ProjectRecognitions />
+      <ProjectRecognitions v-if="data.recognitions.length" :data="data.recognitions" />
       <ProjectNext
         v-if="nextProject"
         :data="nextProject"
@@ -54,7 +54,7 @@ const { addTicker, killTicker } = useRaf()
 const { onResize } = useResize()
 
 const store = useStore()
-const { updateCursor, updateSection } = store
+const { updateCursor, updateSection, updateInProjectScroll } = store
 const { isInProject, isInProjectEntered, cursor, gridType } = storeToRefs(store)
 
 const { disableScroll, updateScrollFixedTargetId } = useScrollStore()
@@ -108,6 +108,7 @@ function _onWheel(e: WheelEvent) {
   const { deltaY } = e
   const y = deltaY
   _scroll.target = _clampTarget(_scroll.target + y)
+  updateInProjectScroll(false)
 }
 
 function _clampTarget(value: number): number {
@@ -191,22 +192,30 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
   }
 
   &__content {
+    will-change: transform;
     display: inline-block;
     white-space: nowrap;
+
+    .project__landing {
+      z-index: 2;
+    }
 
     > div {
       white-space: normal;
       display: inline-block;
       vertical-align: top;
       width: max-content;
+      height: var(--vh);
     }
 
     &__gap {
       width: 25vw !important;
-      height: var(--vh);
       &--next {
         @extend .project__content__gap;
         background-color: v-bind(nextProjectBackgroundColor);
+        @include from__desktop--x-large {
+          width: calc(25vw - ((100vw - var(--layout-max-width)) * 0.5)) !important;
+        }
       }
     }
   }

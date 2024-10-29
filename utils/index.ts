@@ -106,7 +106,9 @@ export function InView(el: HTMLElement): any {
 }
 
 export function slugify(str: string): string {
-  return str
+  return he
+    .decode(str)
+    .replace('&', 'and')
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '')

@@ -7,27 +7,78 @@
     ]">
     <div class="project__landing__info">
       <div ref="stackEl" class="project__landing__info__stack">
-        <p>Role</p>
-        <p>Tech Stack</p>
-        <p>Credits</p>
+        <div
+          class="project__landing__info__stack__content"
+          @mouseenter="onMouseEnter"
+          @mouseleave="onMouseLeave">
+          <Accordion
+            v-if="data.techStack.length"
+            title="Tech Stack"
+            :content="data.techStack.join(', ')"
+            :first="true"
+            :open="!next"
+            :animation="!next" />
+          <Accordion
+            title="Client"
+            :content="client"
+            :first="!data.techStack.length"
+            :open="!data.techStack.length"
+            :animation="!next && !!data.techStack.length" />
+          <Accordion
+            v-for="info in data.info"
+            :title="info.title"
+            :content="info.label"
+            :animation="true" />
+        </div>
       </div>
-      <div ref="descriptionEl" class="project__landing__info__description">
-        <p>
-          During my days at B-Reel, I worked with the Pixel Team at Google to conceptualize and
-          build interactive and generative Wallpapers. Each Wallpaper is a calming, delightful
-          portrait of the technical smarts behind Pixel. Some Wallpapers provide ambient information
-          about your phone through subtle visualizations, while others react to changes in the
-          environment.
-        </p>
+
+      <div ref="contentEl" class="project__landing__info__content">
+        <div class="project__landing__info__content__services">
+          <p
+            v-for="service in data.services"
+            class="project__landing__info__content__services__label">
+            #{{ slugify(service) }}
+          </p>
+        </div>
+
+        <div class="project__landing__info__content__description" v-html="data.description" />
       </div>
-      <div class="project__landing__info__link" />
+
+      <div
+        v-if="data.link && !next"
+        ref="linkEl"
+        class="project__landing__info__link"
+        @mouseenter="onMouseEnter"
+        @mouseleave="onMouseLeave">
+        <a
+          :href="data.link"
+          :aria-label="`Open ${data.link} in another tab`"
+          target="_blank"
+          rel="noopener noreferral"
+          class="project__landing__info__link__label"
+          @mouseenter="onLaunchProjectMouseEnter">
+          <span>Launch Project</span>
+          <SvgLinkArrow />
+        </a>
+      </div>
+
+      <transition :css="false" @leave="transitionFadeOut">
+        <div v-if="inProjectScroll" ref="scrollEl" class="project__landing__info__scroll">
+          <p>Scroll</p>
+          <div class="project__landing__info__scroll__bar">
+            <div ref="scrollLineEl" class="project__landing__info__scroll__bar__line" />
+          </div>
+        </div>
+      </transition>
     </div>
+
     <div v-if="ready" class="project__landing__title">
       <!-- <SvgProjectWallpapers v-if="data.slug === 'pixel-wallpapers'" :animation="animation" /> -->
       <h2 v-transition:in="{ callback: animation ? shuffleIn : () => {} }">
         <span v-for="letter in data.title">{{ letter }}</span>
       </h2>
     </div>
+
     <ClientOnly>
       <div v-if="gridType === 'golden-ratio'" class="project__landing__grid">
         <GridGoldenRatio />
@@ -37,36 +88,74 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { type Project } from '~/types/wordpress/project'
 import { fadeIn, shuffleIn } from '~/utils/animations'
+import { slugify } from '~/utils'
 
 const store = useStore()
-const { gridType } = storeToRefs(store)
+const { updateCursor } = store
+const { gridType, inProjectScroll } = storeToRefs(store)
 
 const props = defineProps<{
   data: Project
   ready: boolean
   animation: boolean
+  next?: boolean
 }>()
 
 const stackEl = ref<HTMLElement>()
-const descriptionEl = ref<HTMLElement>()
+const contentEl = ref<HTMLElement>()
+const linkEl = ref<HTMLElement>()
+const scrollEl = ref<HTMLElement>()
+const scrollLineEl = ref<HTMLElement>()
+
+const client = ref<string>(
+  `${props.data.client.name}
+  ${props.data.collaborator.name ? (props.data.freelance ? ' w/ ' : ' at ') : ''}
+  ${props.data.collaborator.name}`
+)
 
 watch(
   () => props.ready,
   () => {
     fadeIn({ el: stackEl.value })
-    fadeIn({ el: descriptionEl.value, delay: 0.2 })
+    fadeIn({ el: contentEl.value, delay: 0.2 })
+    linkEl.value && shuffleIn({ el: linkEl.value })
+    fadeIn({ el: scrollEl.value, delay: 0.4 })
+    scrollLineEl.value && gsap.to(scrollLineEl.value, { x: toPercentage(0), delay: 0.6 })
   }
 )
+
+onMounted(() => {
+  props.ready && linkEl.value && shuffleIn({ el: linkEl.value })
+})
+
+function onMouseEnter() {
+  updateCursor('default')
+}
+
+function onMouseLeave() {
+  updateCursor(props.next ? 'arrow-right' : 'close')
+}
+
+function onLaunchProjectMouseEnter(e: MouseEvent) {
+  e.preventDefault()
+  const label = (e.target as HTMLElement)?.querySelector('span')
+  label && gsap.set(label, { opacity: 0 })
+  shuffleIn({ el: e.target as HTMLElement })
+}
 </script>
 
 <style lang="scss">
 .project__landing {
   position: relative;
   height: var(--vh);
+  @include from__desktop--x-large {
+    padding-left: calc((100vw - var(--layout-max-width)) * 0.5);
+  }
 
   &--animation {
     .project__landing__title {
@@ -84,7 +173,9 @@ watch(
     }
     .project__landing__info {
       .project__landing__info__stack,
-      .project__landing__info__description {
+      .project__landing__info__content,
+      .project__landing__info__link,
+      .project__landing__info__scroll {
         @include will-fade;
       }
     }
@@ -101,24 +192,97 @@ watch(
   }
 
   &__info {
+    position: relative;
     display: flex;
     justify-content: flex-start;
     width: 75vw;
+    height: var(--vh);
+
     &__stack,
-    &__description {
+    &__content {
       display: flex;
       height: calc(var(--vh) * 0.33);
       align-items: flex-end;
-      @include t-b2;
     }
+
     &__stack {
       margin-left: 3vw;
       width: 22vw;
+      &__content {
+        width: 100%;
+      }
     }
-    &__description {
+
+    &__content {
+      align-content: space-between;
+      flex-wrap: wrap;
       margin-left: 15vw;
       width: 20vw;
-      @include t-b2;
+      @include t-b3;
+
+      &__services,
+      &__description {
+        width: 100%;
+      }
+
+      &__services {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 0.4rem;
+        padding-top: var(--layout-margin);
+        padding-bottom: 2rem;
+      }
+    }
+
+    &__link {
+      position: absolute;
+      top: 50%;
+      left: 40vw;
+      transform: translateY(-60%);
+      @include will-fade;
+
+      &__label {
+        display: flex;
+        align-items: center;
+        column-gap: toScale(0.7rem);
+        font-family: 'HelveticaNowDisplayBold' !important;
+        @include t-black;
+        @include t-b2;
+        // @include t-b--bold;
+
+        .svg__link-arrow {
+          width: toScale(1.2rem);
+          transform: translateY(0.2rem);
+        }
+      }
+    }
+
+    &__scroll {
+      position: absolute;
+      left: 62.5vw;
+      width: 14vw;
+      will-change: opacity;
+      padding-top: var(--layout-margin);
+      @include t-b3;
+
+      &__bar {
+        position: absolute;
+        bottom: 0.4rem;
+        left: 4.8rem;
+        width: calc(100% - 4.8rem);
+        height: 0.2rem;
+        overflow: var(--overflow--hidden);
+        &__line {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: black;
+          transform: translateX(-100%);
+          will-change: transform;
+        }
+      }
     }
   }
 
@@ -126,6 +290,9 @@ watch(
     position: absolute;
     bottom: var(--layout-margin);
     left: var(--layout-margin);
+    @include from__desktop--x-large {
+      left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
+    }
     svg {
       &:nth-child(1) {
         margin-bottom: 1.2rem;
@@ -144,6 +311,9 @@ watch(
     width: 100vw;
     height: 100%;
     pointer-events: none;
+    @include from__desktop--x-large {
+      left: calc((100vw - var(--layout-max-width)) * 0.5);
+    }
   }
 }
 </style>

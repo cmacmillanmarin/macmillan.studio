@@ -1,6 +1,6 @@
 <template>
   <div class="project__next" v-transition:in="{ callback: enter }">
-    <ProjectLanding :data="data" :ready="ready" :animation="true" />
+    <ProjectLanding :data="data" :ready="ready" :animation="true" :next="true" />
   </div>
 </template>
 

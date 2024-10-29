@@ -16,20 +16,43 @@ import {
 } from '~/types/wordpress/client'
 
 export type WP_Projects = Array<WP_Project>
+
+export interface WP_Recognition {
+  recognition: string
+}
 export interface WP_Project {
   slug: string
   title: {
     rendered: string
   }
+  tech_stack_tag?: Array<number>
   acf: {
     selected_project?: boolean
     link: string
     primary_color: string
     secondary_color: string
     thumbnail: WP_Project_Thumbnail
-    assets: Array<WP_Project_Asset>
+    info?: Array<{ title: string; label: string }>
+    description: string
+    assets?: Array<WP_Project_Asset>
+    recognitions?: Array<WP_Recognition>
     freelance: boolean
     client?: Array<WP_Client_Object>
+    services?: Array<number>
+  }
+  _embedded?: {
+    'acf:post'?: Array<{
+      id: number
+      type: 'service' | 'client'
+      title: { rendered: string }
+    }>
+    'wp:term'?: Array<
+      Array<{
+        id: number
+        taxonomy: 'category' | 'tech_stack_tag'
+        name: string
+      }>
+    >
   }
 }
 
@@ -66,17 +89,24 @@ export interface ProjectThumbnail {
 }
 
 export type Projects = Array<Project>
+
 export interface Project {
   slug: string
   title: string
   selected: boolean
+  link: string
   color: string
   secondaryColor: string
   thumbnail: ProjectThumbnail
+  description: string
+  info: Array<{ title: string; label: string }>
   assets: Array<ProjectAsset>
+  recognitions: Array<string>
   client: Client
   collaborator: Client
   freelance: boolean
+  services: Array<string>
+  techStack: Array<string>
 }
 
 export function parseProjects(params: { projects?: WP_Projects; clients?: WP_Clients }): Projects {
@@ -114,8 +144,24 @@ export function parseProject(params: {
           (asset.type === 'img' && asset.image?.url) || (asset.type === 'vid' && asset.video?.url)
       )
     : []
+
+  const services: Array<string> = []
+  for (const serviceId of project?.acf.services || []) {
+    const service = project?._embedded?.['acf:post']?.find(post => post.id === serviceId)
+    service && services.push(service.title.rendered)
+  }
+
+  const techStack: Array<string> = []
+  for (const tag of project?._embedded?.['wp:term'] || []) {
+    for (const t of tag) {
+      if (t.taxonomy === 'tech_stack_tag') {
+        techStack.push(t.name)
+      }
+    }
+  }
   return {
     slug: parseText(project?.slug),
+    link: parseText(project?.acf.link),
     title: parseText(project?.title.rendered),
     selected: !!project?.acf.selected_project,
     color: parseText(project?.acf.primary_color),
@@ -125,6 +171,15 @@ export function parseProject(params: {
       image: parseImage(project?.acf.thumbnail.image),
       video: parseVideo(project?.acf.thumbnail.video),
     },
+    description: parseText(project?.acf.description),
+    info: project?.acf.info
+      ? project?.acf.info.map(i => {
+          return {
+            title: parseText(i.title),
+            label: parseText(i.label),
+          }
+        })
+      : [],
     assets: assets.map(asset => {
       return {
         layout: asset.layout,
@@ -134,8 +189,13 @@ export function parseProject(params: {
         video: parseVideo(asset.video),
       }
     }),
+    recognitions: project?.acf.recognitions?.length
+      ? project?.acf.recognitions?.map(r => r.recognition)
+      : [],
     client: parseClient({ client }),
     collaborator: parseClient({ client: collaborator }),
     freelance: !!project?.acf.freelance,
+    services,
+    techStack,
   }
 }

@@ -38,4 +38,5 @@ export interface State {
   inReel: boolean
   inProject: boolean
   inProjectEntered: boolean
+  inProjectScroll: boolean
 }

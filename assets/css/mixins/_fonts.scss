@@ -80,6 +80,10 @@
   font-family: 'HelveticaNowDisplayMedium';
 }
 
+@mixin t-b--bold {
+  font-family: 'HelveticaNowDisplayBold';
+}
+
 @mixin t-b1 {
   font-size: toScaleUp(1.5rem);
   line-height: toScaleUp(1.8rem);
@@ -108,7 +112,19 @@
   font-size: toScaleUp(1.1rem);
   line-height: toScaleUp(1.3rem);
 
-  @include t-b;
+  @include t-b--bold;
+
+  @include from__desktop {
+    font-size: toScale(1.4rem);
+    line-height: toScale(2rem);
+  }
+}
+
+@mixin t-b4 {
+  font-size: toScaleUp(1.1rem);
+  line-height: toScaleUp(1.3rem);
+
+  @include t-b--bold;
 
   @include from__desktop {
     font-size: toScale(1.2rem);

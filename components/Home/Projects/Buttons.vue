@@ -155,8 +155,7 @@ const emit = defineEmits(['update-list'])
       &__count {
         position: absolute;
         transform: translate(0.8rem, -0.4rem);
-        font-family: 'HelveticaNowDisplayBold' !important;
-        @include t-b3;
+        @include t-b4;
       }
     }
   }

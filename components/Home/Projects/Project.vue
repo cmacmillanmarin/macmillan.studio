@@ -184,7 +184,10 @@ watch([inView, inTransition], () => {
 })
 
 watch([isInProject, isInProjectEntered], () => {
-  $scene.updateObject({ id: projectId.value, onClick: isInProject.value ? null : openProject })
+  $scene.updateObject({
+    id: projectId.value,
+    onClick: isInProjectEntered.value ? null : openProject,
+  })
   if (isInProjectEntered.value) {
     opacity.value = 0
     onOpacityUpdate()
