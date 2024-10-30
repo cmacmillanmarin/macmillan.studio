@@ -92,7 +92,7 @@ function enter() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'auto' })
   const links = el.value.querySelectorAll('.header__bottom, .header__link__anchor') || []
-  const hints = el.value.querySelectorAll('.header__hint, .svg__logo') || []
+  const hints = el.value.querySelectorAll('.header__hint') || []
   shuffleElsIn({ els: hints, fast: true })
   shuffleElsIn({ els: links, fast: true })
 }
@@ -101,7 +101,7 @@ function leave() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'none' })
   const links = el.value.querySelectorAll('.header__bottom, .header__link__anchor') || []
-  const hints = el.value.querySelectorAll('.header__hint, .svg__logo') || []
+  const hints = el.value.querySelectorAll('.header__hint') || []
   shuffleElsOut({ els: hints, fast: true })
   shuffleElsOut({ els: links, fast: true })
 }

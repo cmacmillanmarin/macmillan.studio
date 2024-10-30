@@ -1,5 +1,7 @@
 import {
+  Box3,
   Vector2,
+  Vector3,
   Vector4,
   Raycaster,
   TextureLoader,
@@ -37,6 +39,11 @@ class Controller {
     this.logoScene = null
     this.logoCamera = null
     this.logoLight = null
+    this.logoSize = 160
+    this.logoScale = 1
+    this.logoMargin =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
+      10
 
     this._onClick = null
     this._onMouseMovement = null
@@ -116,11 +123,11 @@ class Controller {
 
     const loader = new GLTFLoader()
     loader.load('./assets/gltf/logo.gltf', async gltf => {
-      this.logo = gltf.scene
-      this.logo.scale.x = 80
-      this.logo.scale.y = 80
-      this.logo.scale.z = 40
+      this.logo = gltf.scene.children[0].children[0].children[0]
+      this.logo.scale.set(1, 1, 1)
       this.logo.rotation.set(0, 0, 0)
+      this.logo.position.set(0, 0, 0)
+      this.updateLogoScale()
 
       this.logoLight = new DirectionalLight(0xffffff, 0)
       this.logoLight.position.set(1, 1, 1)
@@ -413,7 +420,27 @@ class Controller {
     }
 
     if (this.logo) {
-      this.renderer.setViewport(this.size.x - 600, 0, 600, (600 * this.size.y) / this.size.x)
+      const logoTargetScale = 0.25
+      const scrollTarget = this.size.y
+      const scrollProgress = Math.min(1, this.y / scrollTarget)
+      const scrollDistance = this.size.y - this.logoSize * logoTargetScale - this.logoMargin * 2
+      const scrollGap = scrollDistance * scrollProgress
+      const logoCurrentScale = 1 - (1 - logoTargetScale) * scrollProgress
+      const logoGap = this.logoSize * logoCurrentScale * 0.5 + this.logoMargin
+      const screenGap = Math.max(0, this.size.x - 1800) * 0.5
+
+      this.logo.scale.set(
+        this.logoScale * logoCurrentScale,
+        this.logoScale * logoCurrentScale,
+        this.logoScale * logoCurrentScale * 0.5
+      )
+
+      this.renderer.setViewport(
+        this.size.x * 0.5 - logoGap - screenGap,
+        this.size.y * -0.5 + logoGap + scrollGap,
+        this.size.x,
+        this.size.y
+      )
       this.renderer.render(this.logoScene, this.logoCamera)
     }
   }
@@ -502,6 +529,11 @@ class Controller {
     this.logoCamera.aspect = size.x / size.y
     this.logoCamera.fov = 2 * Math.atan((size.y * 0.5) / this.z) * (180 / Math.PI)
     this.logoCamera.updateProjectionMatrix()
+    this.logoMargin =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
+      10
+
+    this.updateLogoScale()
 
     this.renderer.setSize(size.x, size.y)
     this.renderer.setPixelRatio(this.getDevicePixelRatio())
@@ -530,6 +562,15 @@ class Controller {
     gsap.killTweensOf(prop)
     const duration = 1.2
     gsap.fromTo(prop, { value: 0 }, { value: 1, duration })
+  }
+
+  updateLogoScale() {
+    if (this.logo) {
+      this.logo.scale.set(1, 1, 1)
+      const box = new Box3().setFromObject(this.logo)
+      const size = box.getSize(new Vector3())
+      this.logoScale = this.logoSize / size.x
+    }
   }
 
   updateLogoLight() {
