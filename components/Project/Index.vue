@@ -1,9 +1,5 @@
 <template>
-  <div
-    ref="el"
-    :class="['project', { 'project--entered': !transition }]"
-    :style="{ backgroundColor: data.color }"
-    @click="onClick">
+  <div ref="el" :class="['project', { 'project--entered': !transition }]" @click="onClick">
     <ClientOnly>
       <Teleport to="#top-layer">
         <transition @leave="transitionFadeOut">
@@ -49,6 +45,7 @@ const props = defineProps<{
   nextProject?: Project
 }>()
 
+const route = useRoute()
 const router = useRouter()
 const { addTicker, killTicker } = useRaf()
 const { onResize } = useResize()
@@ -67,6 +64,7 @@ const svgAnimation = ref<boolean>(transition.value)
 const ready = ref<boolean>(!transition.value)
 
 const toNextProject = ref<boolean>(false)
+const backgroundColor = ref<string>(props.data.color || '')
 const nextProjectBackgroundColor = ref<string>(props.nextProject?.color || '')
 
 let _scroll: any = {
@@ -165,16 +163,18 @@ async function goToNextProject() {
 }
 
 function closeProject() {
-  emit('closed')
-  updateCursor('default')
-  const toProjects = props.list === 'selected' && !props.data.selected
-  const target = toProjects ? 'projects' : `${props.list}-${props.data.slug}-anchor`
-  updateScrollFixedTargetId(target)
   if (transition.value) return
   router.push('/')
 }
 
 onBeforeUnmount(() => {
+  if (!route.params.slug) {
+    emit('closed')
+    updateCursor('default')
+    const toProjects = props.list === 'selected' && !props.data.selected
+    const target = toProjects ? 'projects' : `${props.list}-${props.data.slug}-anchor`
+    updateScrollFixedTargetId(target)
+  }
   killTicker(_onRaf)
   killScroll()
   disableScroll(false)
@@ -186,6 +186,7 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
 <style lang="scss">
 .project {
   @include will-fade;
+  background-color: v-bind(backgroundColor);
 
   &--entered {
     cursor: pointer;

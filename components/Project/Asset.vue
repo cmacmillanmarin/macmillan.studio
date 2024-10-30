@@ -40,11 +40,13 @@ const el = ref<HTMLElement>()
 watch(
   () => props.ready,
   () => {
-    if (props.ready) {
-      fadeIn({ el: el.value })
-    }
+    props.ready && fadeIn({ el: el.value })
   }
 )
+
+onMounted(() => {
+  props.ready && fadeIn({ el: el.value })
+})
 
 const emit = defineEmits(['update-scroll'])
 </script>

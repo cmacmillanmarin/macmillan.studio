@@ -11,6 +11,7 @@ import {
   PerspectiveCamera,
   WebGLRenderer,
 } from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 import { gsap } from 'gsap'
 import { round, slugify, videoLoaded } from '~/utils'
@@ -30,6 +31,8 @@ class Controller {
     this.renderer = null
     this.bounding = null
     this.main = null
+
+    this.logo = null
 
     this._onClick = null
     this._onMouseMovement = null
@@ -91,6 +94,7 @@ class Controller {
       alpha: true,
       antialias: false,
       premultipliedAlpha: false,
+      sortObjects: true,
     })
 
     this.onPreloaded = onPreloaded || this.onPreloaded
@@ -100,6 +104,22 @@ class Controller {
     this.addListeners()
     this.generatePlanesBatch()
     this.ready = true
+
+    // const loader = new GLTFLoader()
+    // loader.load('./assets/gltf/logo.gltf', async gltf => {
+    //   this.logo = gltf.scene.children[0].children[0].children[0]
+    //   this.logo.renderOrder = 49
+    //   this.logo.transparent = true
+    //   this.logo.depthTest = false
+    //   this.logo.depthWrite = false
+    //   this.logo.scale.set(0.4, 0.4, 0.4)
+
+    //   // this.logo.scale.set(1, 1, 1)
+    //   // wait until the model can be added to the scene without blocking due to shader compilation
+    //   // await this.renderer.compileAsync(model, this.camera, this.scene)
+    //   this.scene.add(this.logo)
+
+    // })
   }
 
   preload(img) {
@@ -371,6 +391,12 @@ class Controller {
     if (this.needsUpdate) {
       this.log('render()')
 
+      if (this.logo) {
+        this.logo.rotation.y += 0.01
+        this.logo.position.x = this.size.x * -0.25
+        this.logo.position.y = this.camera.position.y
+      }
+      // console.log(this.scene.children)
       this.renderer.render(this.scene, this.camera)
     }
   }

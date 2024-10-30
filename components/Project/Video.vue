@@ -39,20 +39,32 @@ const width = computed<string>(() =>
 
 const videoEl = ref<HTMLVideoElement>()
 
+const active = ref<boolean>(false)
 const inView = ref<boolean>(false)
 const playing = ref<boolean>(false)
 
-watch([() => props.ready, inView], () => {
+let playPromise: Promise<void> | undefined = undefined
+
+watch([() => props.ready, active, inView], () => {
+  if (!active.value) return
   if (props.ready && inView.value) {
-    videoEl.value?.play()
+    playPromise = videoEl.value?.play()
   } else if (playing.value) {
-    videoEl.value?.pause()
+    if (playPromise) {
+      playPromise.then(() => {
+        videoEl.value?.pause()
+      })
+    }
   }
 })
 
 watch([width, height], async () => {
   await nextTick()
   emit('update-scroll')
+})
+
+onMounted(() => {
+  active.value = true
 })
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -63,6 +75,15 @@ function enter() {
   playing.value = true
   fadeIn({ el: videoEl.value })
 }
+
+onBeforeUnmount(() => {
+  active.value = false
+  if (playPromise) {
+    playPromise.then(() => {
+      videoEl.value?.pause()
+    })
+  }
+})
 
 const emit = defineEmits(['update-scroll'])
 </script>

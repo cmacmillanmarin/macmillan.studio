@@ -1,3 +1,4 @@
+import { gsap } from 'gsap'
 import type { Direction } from '~/types/front/store/scroll'
 
 export default function useScrollNative() {
