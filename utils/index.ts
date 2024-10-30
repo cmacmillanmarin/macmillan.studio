@@ -1,6 +1,4 @@
 import he from 'he'
-import { storeToRefs } from 'pinia'
-import useStore from '~/store/useStore'
 
 export function targetify(input: string): string {
   return `${slugify(input)}-target`
@@ -137,15 +135,6 @@ export function readingTime(text: string): number {
   const words: number = text.trim().split(/\s+/).length
   const time: number = Math.ceil(words / wpm)
   return time
-}
-
-export function navigateBack(params: { fallback: string }) {
-  const store = useStore()
-  const { routeFrom } = storeToRefs(store)
-
-  const router = useRouter()
-
-  routeFrom.value ? router.back() : router.push(params.fallback)
 }
 
 export function multiplyArrayValues(data?: { input?: Array<any>; times: number }): Array<any> {
