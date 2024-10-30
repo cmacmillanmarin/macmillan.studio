@@ -10,6 +10,7 @@ import {
   Scene,
   PerspectiveCamera,
   WebGLRenderer,
+  DirectionalLight,
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
@@ -33,6 +34,9 @@ class Controller {
     this.main = null
 
     this.logo = null
+    this.logoScene = null
+    this.logoCamera = null
+    this.logoLight = null
 
     this._onClick = null
     this._onMouseMovement = null
@@ -85,9 +89,13 @@ class Controller {
     this.canvas = el
 
     this.scene = new Scene()
+    this.logoScene = new Scene()
 
     this.camera = new PerspectiveCamera(75, size.x / size.y, 100, 1250)
     this.camera.position.z = this.z
+
+    this.logoCamera = new PerspectiveCamera(75, size.x / size.y, 100, 1250)
+    this.logoCamera.position.z = this.z
 
     this.renderer = new WebGLRenderer({
       canvas: this.canvas,
@@ -96,6 +104,7 @@ class Controller {
       premultipliedAlpha: false,
       sortObjects: true,
     })
+    this.renderer.autoClear = false
 
     this.onPreloaded = onPreloaded || this.onPreloaded
     this.updateCursor = updateCursor || this.updateCursor
@@ -105,21 +114,20 @@ class Controller {
     this.generatePlanesBatch()
     this.ready = true
 
-    // const loader = new GLTFLoader()
-    // loader.load('./assets/gltf/logo.gltf', async gltf => {
-    //   this.logo = gltf.scene.children[0].children[0].children[0]
-    //   this.logo.renderOrder = 49
-    //   this.logo.transparent = true
-    //   this.logo.depthTest = false
-    //   this.logo.depthWrite = false
-    //   this.logo.scale.set(0.4, 0.4, 0.4)
+    const loader = new GLTFLoader()
+    loader.load('./assets/gltf/logo.gltf', async gltf => {
+      this.logo = gltf.scene
+      this.logo.scale.x = 80
+      this.logo.scale.y = 80
+      this.logo.scale.z = 40
+      this.logo.rotation.set(0, 0, 0)
 
-    //   // this.logo.scale.set(1, 1, 1)
-    //   // wait until the model can be added to the scene without blocking due to shader compilation
-    //   // await this.renderer.compileAsync(model, this.camera, this.scene)
-    //   this.scene.add(this.logo)
+      this.logoLight = new DirectionalLight(0xffffff, 0)
+      this.logoLight.position.set(1, 1, 1)
 
-    // })
+      this.logoScene.add(this.logoLight)
+      this.logoScene.add(this.logo)
+    })
   }
 
   preload(img) {
@@ -344,10 +352,18 @@ class Controller {
         if (!clickable && object.wasClickable && this.intersects.length === 0) {
           this.updateCursor('default')
           this.main.classList.remove('__main--pointer')
+          if (this.logo) {
+            gsap.killTweensOf(this.logo.rotation)
+            gsap.to(this.logo.rotation, { y: 0, onUpdate: this.updateLogoLight.bind(this) })
+          }
         }
         if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
           this.main.classList.add('__main--pointer')
           this.updateCursor(object.cursor)
+          if (this.logo) {
+            gsap.killTweensOf(this.logo.rotation)
+            gsap.to(this.logo.rotation, { y: Math.PI, onUpdate: this.updateLogoLight.bind(this) })
+          }
         }
         object.wasHovered = hovered
         object.wasClickable = clickable
@@ -381,6 +397,8 @@ class Controller {
   }
 
   render() {
+    this.renderer.clear()
+
     this.intersects = this.raycaster
       .intersectObjects(this.scene.children, false)
       .map(i => i.object)
@@ -390,14 +408,13 @@ class Controller {
 
     if (this.needsUpdate) {
       this.log('render()')
-
-      if (this.logo) {
-        this.logo.rotation.y += 0.01
-        this.logo.position.x = this.size.x * -0.25
-        this.logo.position.y = this.camera.position.y
-      }
-      // console.log(this.scene.children)
+      this.renderer.setViewport(0, 0, this.size.x, this.size.y)
       this.renderer.render(this.scene, this.camera)
+    }
+
+    if (this.logo) {
+      this.renderer.setViewport(this.size.x - 600, 0, 600, (600 * this.size.y) / this.size.x)
+      this.renderer.render(this.logoScene, this.logoCamera)
     }
   }
 
@@ -482,6 +499,10 @@ class Controller {
     this.camera.fov = 2 * Math.atan((size.y * 0.5) / this.z) * (180 / Math.PI)
     this.camera.updateProjectionMatrix()
 
+    this.logoCamera.aspect = size.x / size.y
+    this.logoCamera.fov = 2 * Math.atan((size.y * 0.5) / this.z) * (180 / Math.PI)
+    this.logoCamera.updateProjectionMatrix()
+
     this.renderer.setSize(size.x, size.y)
     this.renderer.setPixelRatio(this.getDevicePixelRatio())
 
@@ -509,6 +530,13 @@ class Controller {
     gsap.killTweensOf(prop)
     const duration = 1.2
     gsap.fromTo(prop, { value: 0 }, { value: 1, duration })
+  }
+
+  updateLogoLight() {
+    if (!this.logo) return
+    const maxIntensity = 0.75
+    const distanceToMiddlePoint = Math.abs(this.logo.rotation.y - Math.PI * 0.5) / (Math.PI * 0.5)
+    this.logoLight.intensity = maxIntensity - distanceToMiddlePoint * maxIntensity
   }
 
   onClick(e) {
@@ -567,8 +595,12 @@ class Controller {
     this.canvas.remove()
     this.canvas = null
     this.scene = null
-    this.renderer = null
     this.camera = null
+    this.logo = null
+    this.logoScene = null
+    this.logoCamera = null
+    this.logoLight = null
+    this.renderer = null
     this.objects = []
     for (const i in this.batch) {
       this.batch[i] = null
