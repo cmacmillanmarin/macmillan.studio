@@ -232,6 +232,10 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
         padding-top: var(--layout-margin);
         padding-bottom: 2rem;
       }
+
+      &__description {
+        transform: translateY(0.4rem);
+      }
     }
 
     &__link {
