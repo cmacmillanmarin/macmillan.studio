@@ -169,16 +169,20 @@ let _target: Plane = {
   order: 0,
 }
 
+let playPromise: Promise<void> | undefined = undefined
 watch([inView, inTransition], () => {
   if (inTransition.value) return
   if (videoEl.value) {
     if (inView.value) {
-      videoEl.value.play()
+      playPromise = videoEl.value.play()
       // console.log(`Play video - ${projectId.value}`)
     } else {
-      videoEl.value.pause()
-      // $scene.releasePlane(projectId.value)
-      // console.log(`Pause video - ${projectId.value}`)
+      if (playPromise) {
+        playPromise.then(() => {
+          videoEl.value?.pause()
+          // console.log(`Pause video - ${projectId.value}`)
+        })
+      }
     }
   }
 })
@@ -482,7 +486,12 @@ function prepareCollaboratorIn(el: Element) {
 }
 
 onBeforeUnmount(() => {
-  videoEl.value?.pause()
+  if (playPromise) {
+    playPromise.then(() => {
+      videoEl.value?.pause()
+      // console.log(`Pause video - ${projectId.value}`)
+    })
+  }
   removeRenderCallback(updateDom)
   $scene.removeObject({ id: projectId.value })
 })

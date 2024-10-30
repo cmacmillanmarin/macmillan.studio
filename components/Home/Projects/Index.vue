@@ -114,7 +114,7 @@ const route = useRoute()
 
 const store = useStore()
 const { updateSection } = store
-const { section, cursor } = storeToRefs(store)
+const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollFixedTargetId } = scrollStore
@@ -157,6 +157,19 @@ watchEffect(() => {
     }
   })
 })
+
+watch(
+  () => route.params.slug,
+  (to, from) => {
+    if (from) {
+      const inActiveList = !!activeListProjects.value.find(p => p.slug === from)
+      if (!inActiveList) {
+        active.value = 1
+        activeOf.value = activeListProjects.value.length
+      }
+    }
+  }
+)
 
 watchEffect(() => {
   if (route.params.slug) {
@@ -218,7 +231,10 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 }
 
 function onIntersectBg(el: HTMLElement, visible: boolean) {
-  visible && direction.value === 'down' && updateSection('projects-bg')
+  visible &&
+    direction.value === 'down' &&
+    section.value !== 'projects' &&
+    updateSection('projects-bg')
 }
 
 function updateActiveList(value: 'selected' | 'all') {
@@ -227,16 +243,14 @@ function updateActiveList(value: 'selected' | 'all') {
 
 function getAnchorTop(position: number): string {
   let top = getOffset()
-  // console.log(`position ${position}`)
   for (let i = 0; i < position; i++) {
     const { selected } = activeListProjects.value[i]
-    // console.log(`Scrolls half${selected ? ' selected' : ''} plus gutter `)
     top += getColumnWidth(selected ? 3.5 : 3) + layoutGutter.value
   }
-  if (position > 0) {
-    const { selected } = activeListProjects.value[position]
-    // if (!selected) top -= getColumnWidth(0.333333)
-  }
+  // if (position > 0) {
+  //   const { selected } = activeListProjects.value[position]
+  //   // if (!selected) top -= getColumnWidth(0.333333)
+  // }
   return toPx(top)
 }
 

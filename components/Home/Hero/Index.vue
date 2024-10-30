@@ -79,6 +79,7 @@ const reelVideoActive = computed(
 const videoEl = ref<HTMLVideoElement>()
 const sourceEl = ref<HTMLSourceElement>()
 const videoPlaying = ref<boolean>(false)
+const videoInView = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
 const verticalGapPx = computed<string>(() => toPx(lvw.value * 0.082 * 1.5))
@@ -89,6 +90,7 @@ const scrollProgress = computed<number>(() =>
   Math.min(1, current.value / (vh.value * scrollGap.value))
 )
 const scrollThreshold = computed<number>(() => verticalGap.value * 2.5)
+const componentHeight = computed<number>(() => vh.value + vh.value * scrollGap.value)
 
 const size = computed<{ x: number; y: number; z: number }>(() => {
   const initWidth = lvw.value * 0.666666 - layoutMargin.value
@@ -128,8 +130,17 @@ const position = computed<{ x: number; y: number }>(() => {
   }
 })
 
-watch(isInProject, v => {
-  v ? videoEl.value?.pause() : videoEl.value?.play()
+watch(section, () => {
+  $scene.updateObject({ id: 'reel', fade: false })
+})
+
+watch([section, videoInView, isInProject], () => {
+  const play = videoInView.value && !isInProject.value
+  if (!play) {
+    videoPlaying.value && videoEl.value?.pause()
+  } else {
+    !videoPlaying.value && videoEl.value?.play()
+  }
   updateScroll()
 })
 
@@ -139,6 +150,8 @@ watch(current, () => {
   const incrementScale = initScale - finalScale
   const scaleProgress = Math.min(1, current.value / scrollThreshold.value)
   const scale = initScale - incrementScale * scaleProgress
+
+  videoInView.value = current.value < componentHeight.value
 
   const scroll = Math.min(0, scrollThreshold.value - current.value) * 0.5
 
@@ -172,7 +185,7 @@ watch([position, videoPlaying], () => {
 onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
-  !isInProject.value && videoEl.value?.play()
+  videoInView.value = current.value < componentHeight.value
   $scene.addObject({
     id: 'reel',
     type: 'plane',

@@ -58,10 +58,14 @@ const project = computed<Project | undefined>(() => {
   return data.value?.projects.list.find(project => project.slug === projectSlug.value)
 })
 const nextProject = computed<Project | undefined>(() => {
-  const list =
-    projectList.value === 'selected'
-      ? data.value?.projects.list.filter(p => p.selected)
-      : data.value?.projects.list
+  const selectedList = data.value?.projects.list.filter(project => project.selected)
+  const inSelectedProjectLists =
+    projectList.value === 'selected' && !!selectedList?.find(p => p.slug === projectSlug.value)
+  if (inSelectedProjectLists) {
+    const activeProjectIndex = selectedList?.findIndex(p => p.slug === projectSlug.value) || 0
+    return selectedList?.[activeProjectIndex + 1]
+  }
+  const list = data.value?.projects.list
   const index = list?.findIndex(p => p.slug === projectSlug.value)
   if (index !== undefined && index >= 0) return list?.[index + 1]
   return undefined
