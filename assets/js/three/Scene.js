@@ -111,6 +111,7 @@ class Controller {
       premultipliedAlpha: false,
       sortObjects: true,
     })
+    this.renderer.setClearColor(0x000000, 0)
     this.renderer.autoClear = false
 
     this.onPreloaded = onPreloaded || this.onPreloaded
