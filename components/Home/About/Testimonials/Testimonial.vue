@@ -21,6 +21,7 @@
         <img
           :src="data.thumbnail?.src"
           :alt="data.thumbnail?.alt"
+          loading="lazy"
           class="home__about__testimonials__testimonial__credit__thumbnail__image" />
       </div>
       <p class="home__about__testimonials__testimonial__credit__role">{{ data.credit }}</p>
