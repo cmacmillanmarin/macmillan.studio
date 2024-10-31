@@ -17,13 +17,13 @@ defineProps<{
   top: 0;
   left: 0;
   width: 100%;
-  height: 0.2rem;
+  height: toScale(0.2rem);
   background-color: var(--black);
 
   .svg__square {
     position: absolute;
-    top: 0.1rem;
-    width: 1.2rem;
+    top: toScale(0.1rem);
+    width: toScale(1.2rem);
     background-color: var(--black);
 
     left: calc(

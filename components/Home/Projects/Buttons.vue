@@ -149,13 +149,14 @@ const emit = defineEmits(['update-list'])
         position: absolute;
         top: 50%;
         left: 0;
-        transform: translate(calc(-100% - 0.4rem), -50%);
+        transform: translate(calc(-100% - toScale(0.6rem)), -50%);
+        @include will-fade;
       }
 
       &__count {
         position: absolute;
-        transform: translate(0.8rem, -0.4rem);
-        @include t-b4;
+        transform: translate(toScale(0.6rem), toScale(-0.4rem));
+        @include t-b3;
       }
     }
   }

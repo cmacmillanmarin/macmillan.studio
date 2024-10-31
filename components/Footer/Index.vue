@@ -368,6 +368,9 @@ onBeforeUnmount(() => {
     column-gap: 0.6rem;
     @include will-fade;
 
+    svg {
+      will-change: opacity;
+    }
     p {
       @include t-number;
     }
@@ -488,6 +491,9 @@ onBeforeUnmount(() => {
     &__credits {
       pointer-events: auto;
       &__link {
+        span {
+          will-change: opacity;
+        }
         .svg__arrow line {
           stroke: var(--lime);
         }
@@ -495,6 +501,7 @@ onBeforeUnmount(() => {
           color: var(--lime);
           padding: 0;
           border: none;
+          will-change: opacity;
           @include t-b1;
           &--tetris {
             display: flex;
@@ -528,6 +535,11 @@ onBeforeUnmount(() => {
     &__coordinates,
     &__year {
       pointer-events: auto;
+    }
+    &__coordinates {
+      a {
+        will-change: opacity;
+      }
     }
   }
 

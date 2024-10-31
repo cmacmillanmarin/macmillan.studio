@@ -323,7 +323,7 @@ const emit = defineEmits(['update-list', 'update-active'])
   &__date {
     display: flex;
     align-items: center;
-    column-gap: 0.8rem;
+    column-gap: toScale(0.6rem);
     @include will-fade;
     @include t-number;
   }

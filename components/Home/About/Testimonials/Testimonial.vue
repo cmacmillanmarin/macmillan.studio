@@ -83,7 +83,7 @@ defineProps<{
   &__credit {
     display: flex;
     align-items: center;
-    column-gap: 0.8rem;
+    column-gap: toScale(0.8rem);
     margin-top: toScale(2.2rem);
 
     &__thumbnail {

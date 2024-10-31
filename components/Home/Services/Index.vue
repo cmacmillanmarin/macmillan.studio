@@ -87,7 +87,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     width: max-content;
     display: flex;
     align-items: center;
-    column-gap: 0.8rem;
+    column-gap: toScale(0.6rem);
     padding-top: toScale(6.8rem);
     @include will-fade;
     @include t-number;

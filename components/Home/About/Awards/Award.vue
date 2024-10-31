@@ -212,6 +212,7 @@ const emit = defineEmits<{
         justify-content: space-between;
 
         &__label {
+          will-change: opacity;
           @include t-black;
           @include t-b1;
         }

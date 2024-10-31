@@ -240,9 +240,9 @@ onBeforeUnmount(() => {
         &__text {
           column-count: 2;
           column-gap: var(--layout-gutter);
-          @include t-b1;
+          @include t-b2;
           p {
-            margin-bottom: toScale(1.6rem);
+            margin-bottom: toScale(1rem);
           }
         }
       }
@@ -274,7 +274,10 @@ onBeforeUnmount(() => {
         @include gap(1, 'right', 'desktop');
         &__label {
           margin-top: toScale(1.2rem);
-          @include t-b1;
+          @include t-b2;
+          p {
+            margin-bottom: toScale(1rem);
+          }
         }
       }
 
@@ -303,7 +306,7 @@ onBeforeUnmount(() => {
 
   &__gallery {
     padding-top: toScale(12rem);
-    padding-bottom: toScale(12rem);
+    padding-bottom: toScale(16rem);
   }
 
   &__intersect {

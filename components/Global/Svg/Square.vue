@@ -7,8 +7,8 @@
 <style lang="scss">
 .svg__square {
   display: block;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: toScale(1.2rem);
+  height: toScale(1.2rem);
   rect {
     fill: var(--black);
   }

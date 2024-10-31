@@ -141,8 +141,8 @@
   @include t-b;
 
   @include from__desktop {
-    font-size: toScale(2.2rem);
-    line-height: toScale(2.2rem);
+    font-size: toScale(1.6rem);
+    line-height: toScale(1.6rem);
   }
 }
 
