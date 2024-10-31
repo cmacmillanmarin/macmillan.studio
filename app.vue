@@ -1,7 +1,11 @@
 <template>
   <main
-    class="__main"
-    :class="[{ '__main--loading': isLoading }, { '__main--native-scroll': !isVirtualScroll }]">
+    :class="[
+      '__main',
+      { '__main--loading': isLoading },
+      { '__main--preloading': !scrollMode },
+      { '__main--native-scroll': !isVirtualScroll },
+    ]">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
@@ -21,7 +25,7 @@ const { IS_PRODUCTION } = config.public
 
 const store = useStore()
 const { isLoading, gridType } = storeToRefs(store)
-const { isVirtualScroll } = storeToRefs(useScrollStore())
+const { scrollMode, isVirtualScroll } = storeToRefs(useScrollStore())
 
 const { keyPressed } = useKeyboard()
 
@@ -65,6 +69,15 @@ watch(keyPressed, () => {
       .c-page {
         height: max-content;
       }
+    }
+  }
+
+  &--preloading {
+    height: var(--vh);
+    overflow: hidden;
+    .__layout {
+      height: var(--vh);
+      overflow: hidden;
     }
   }
 }

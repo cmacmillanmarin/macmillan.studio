@@ -1,5 +1,5 @@
 <template>
-  <header ref="el" class="header" v-transition:in="{ callback: transitionIn }">
+  <header ref="el" class="header">
     <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
     <div class="header__top" />
@@ -14,15 +14,15 @@
         <HeaderLink
           label="Projects,"
           to="/#projects"
-          :active="section === 'projects' && !isInProject" />
+          :active="section === 'projects' && !isInProject && entered" />
         <HeaderLink
           label="Services,"
           to="/#services"
-          :active="section === 'services' && !isInProject" />
+          :active="section === 'services' && !isInProject && entered" />
         <HeaderLink
           label="About"
           to="/#about"
-          :active="section.includes('about') && !isInProject" />
+          :active="section.includes('about') && !isInProject && entered" />
       </ul>
     </nav>
 
@@ -31,7 +31,7 @@
         <HeaderLink
           label="Contact"
           to="/#contact"
-          :active="section === 'contact' && !isInProject" />
+          :active="section === 'contact' && !isInProject && entered" />
       </ul>
       <div class="header__nav__logo">
         <CustomLink
@@ -57,13 +57,20 @@ import useScrollStore from '~/store/useScrollStore'
 import { shuffleElsIn, shuffleElsOut } from '~/utils/animations'
 import { toPx, toPercentage } from '~/utils'
 
+const { $scene }: any = useNuxtApp()
+
 const { section, gridType, isInProject, isInReel } = storeToRefs(useStore())
-const { current, bounding } = storeToRefs(useScrollStore())
+const { current, bounding, disabled } = storeToRefs(useScrollStore())
 
 const { vh } = useResize()
 const { layoutMargin } = useCss()
 
 const el = ref<HTMLElement>()
+const entered = ref<boolean>(false)
+
+watch(disabled, () => {
+  !disabled.value && !entered.value && enter()
+})
 
 watch(current, () => {
   if (!el.value) return
@@ -81,20 +88,19 @@ watch(current, () => {
 })
 
 watch([isInProject, isInReel], () => {
+  if (!entered.value) return
   isInProject.value || isInReel.value ? leave() : enter()
 })
 
-function transitionIn() {
-  if (!isInProject.value && !isInReel.value) enter()
-}
-
 function enter() {
   if (!el.value) return
+  entered.value = true
   gsap.set(el.value, { pointerEvents: 'auto' })
   const links = el.value.querySelectorAll('.header__bottom, .header__link__anchor') || []
   const hints = el.value.querySelectorAll('.header__hint') || []
   shuffleElsIn({ els: hints, fast: true })
   shuffleElsIn({ els: links, fast: true })
+  $scene.updateLogoState(true)
 }
 
 function leave() {
@@ -104,6 +110,7 @@ function leave() {
   const hints = el.value.querySelectorAll('.header__hint') || []
   shuffleElsOut({ els: hints, fast: true })
   shuffleElsOut({ els: links, fast: true })
+  $scene.updateLogoState(false)
 }
 </script>
 

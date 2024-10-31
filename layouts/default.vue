@@ -18,30 +18,26 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 
 const store = useStore()
-const { isPreloaded } = storeToRefs(store)
+const { updateLoading } = store
+const { isPreloaded, isInProject } = storeToRefs(store)
 
 const scroll = useScroll()
 
 const el = ref<HTMLElement>()
 
 watch(isPreloaded, () => {
-  el.value && init()
-  store.updateLoading(false)
+  init()
 })
 
-onMounted(async (): Promise<void> => {
-  if (isPreloaded.value) {
-    // Await ClientOnly Template
-    await nextTick()
-    init()
-  }
+onMounted(() => {
+  isPreloaded.value && init()
 })
 
-function init() {
+async function init() {
+  await nextTick()
+  isInProject.value && updateLoading(false)
   el.value && scroll.init({ el: el.value })
 }
-
-onUnmounted(() => {})
 </script>
 
 <style lang="scss">

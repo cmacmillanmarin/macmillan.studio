@@ -4,13 +4,12 @@
     :class="['home__hero', { 'home__hero--reel': reelVideoActive }]"
     data-scroll-target-top>
     <h1 class="home__hero__title">{{ data.title }}</h1>
-    <div class="home__hero__content" v-transition:in="{ callback: enter }">
+    <div class="home__hero__content">
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
 
       <div class="home__hero__content__macmillan">
         <SvgMacMillan v-if="!hideComponents" />
       </div>
-
       <ClientOnly>
         <Teleport to="#top-layer">
           <div
@@ -25,14 +24,15 @@
         </Teleport>
       </ClientOnly>
 
-      <div class="home__hero__content__hint">
+      <div ref="hintEl" class="home__hero__content__hint">
         <p class="home__hero__content__hint__label" v-html="data.hint" />
       </div>
 
       <video ref="videoEl" class="home__hero__content__video" width="1920" height="1080" muted loop>
-        <source ref="sourceEl" src="/assets/video/short.webm" type="video/webm" />
+        <source src="/assets/video/short.webm" type="video/webm" />
       </video>
     </div>
+
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
     <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersectTop }" />
     <div class="home__hero__intersect--bottom" v-intersect="{ callback: onIntersectBottom }" />
@@ -45,7 +45,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { toPx, round } from '~/utils'
-import { fadeIn } from '~/utils/animations'
+import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
 
 defineProps<{
@@ -58,17 +58,21 @@ const router = useRouter()
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateSection, updateInReel } = store
-const { section, gridType, isInReel, isInProject } = storeToRefs(store)
+const { updateLoading, updateSection, updateInReel } = store
+const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
 const { current, direction } = storeToRefs(scrollStore)
 
-const { layoutMargin } = useCss()
+const { layoutMargin, toScale } = useCss()
 const { lvw, vw, vh } = useResize()
 
-const hideComponents = computed<boolean>(() => scrollProgress.value < 1 && isInProject.value)
+const firstTransition = reactive<FirstTransition>({ state: false, step: 1, progress: 0, steps: [] })
+
+const hideComponents = computed<boolean>(
+  () => (scrollProgress.value < 1 && videoInProject.value) || firstTransition.state
+)
 const reelVideoActive = computed(
   () =>
     isInReel.value &&
@@ -76,10 +80,11 @@ const reelVideoActive = computed(
       (direction.value === 'down' && section.value === 'projects-bg'))
 )
 
+const hintEl = ref<HTMLElement>()
 const videoEl = ref<HTMLVideoElement>()
-const sourceEl = ref<HTMLSourceElement>()
 const videoPlaying = ref<boolean>(false)
 const videoInView = ref<boolean>(false)
+const videoInProject = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
 const verticalGapPx = computed<string>(() => toPx(lvw.value * 0.082 * 1.5))
@@ -130,12 +135,13 @@ const position = computed<{ x: number; y: number }>(() => {
   }
 })
 
-watch(section, () => {
-  $scene.updateObject({ id: 'reel', fade: false })
+watch(isInProjectEntered, () => {
+  if (isInProjectEntered.value) videoInProject.value = true
+  else videoInProject.value = !!route.params.slug
 })
 
-watch([section, videoInView, isInProject], () => {
-  const play = videoInView.value && !isInProject.value
+watch([section, videoInView, videoInProject], () => {
+  const play = videoInView.value && !videoInProject.value
   if (!play) {
     videoPlaying.value && videoEl.value?.pause()
   } else {
@@ -157,54 +163,74 @@ watch(current, () => {
 
   const opacity = 1 - (1 * current.value) / (vh.value * 0.4)
 
+  const hintY = toPx(current.value * 0.2)
+  const contentY = toPx(
+    current.value - (verticalGap.value + titleMargin.value) * scaleProgress + scroll
+  )
+  const titleY = toPx(current.value + scroll)
+
   gsap.set('.svg__macmillan, .svg__studio', { scale })
-  gsap.set('.home__hero__content__hint', { opacity, y: toPx(current.value * 0.2) })
-  gsap.set('.home__hero__content__studio__content', {
-    y: toPx(current.value - (verticalGap.value + titleMargin.value) * scaleProgress + scroll),
-  })
-  gsap.set('.home__hero__content__macmillan', {
-    y: toPx(current.value + scroll),
-  })
+  gsap.set('.home__hero__content__hint', { opacity, y: hintY })
+  gsap.set('.home__hero__content__studio__content', { y: contentY })
+  gsap.set('.home__hero__content__macmillan', { y: titleY })
 })
 
-watch([position, videoPlaying], () => {
+watch([firstTransition, position, videoPlaying, videoInProject], () => {
+  let _size = size.value
+  let _position = position.value
+  let _border = 0
+  let _zoom = 1
+  let _opacity = 1
+  let _fixed = { from: 0, to: vh.value * scrollGap.value }
+
+  if (firstTransition.state) {
+    const from = firstTransition.steps[firstTransition.step - 1]
+    const to = firstTransition.steps[firstTransition.step]
+    if (from && to) {
+      const progress = firstTransition.progress
+      _size = {
+        x: from.size.x + (to.size.x - from.size.x) * progress,
+        y: from.size.y + (to.size.y - from.size.y) * progress,
+        z: 1,
+      }
+      _position = {
+        x: from.position.x + (to.position.x - from.position.x) * progress,
+        y: from.position.y + (to.position.y - from.position.y) * progress,
+      }
+      _border = from.border + (to.border - from.border) * progress
+      _zoom = from.zoom + (to.zoom - from.zoom) * progress
+    }
+  } else if (videoInProject.value) _opacity = 0
+
   $scene.updateObject({
     id: 'reel',
-    fixed: {
-      from: 0,
-      to: vh.value * scrollGap.value,
-    },
-    size: size.value,
-    position: {
-      x: videoPlaying.value ? position.value.x : -10000,
-      y: videoPlaying.value ? position.value.y : 0,
-    },
+    fixed: _fixed,
+    size: _size,
+    position: _position,
+    border: _border,
+    zoom: _zoom,
+    opacity: _opacity,
   })
 })
 
 onMounted(() => {
+  firstTransition.state = section.value === 'hero'
+  firstTransition.state && updateFirstTransitionSteps()
+  videoInProject.value = !firstTransition.state
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
-  videoInView.value = current.value < componentHeight.value
+  videoEl.value?.addEventListener('canplaythrough', onVideoReady)
+  !videoInProject.value && videoEl.value?.load()
+  videoInView.value = current.value < componentHeight.value && section.value === 'hero'
   $scene.addObject({
     id: 'reel',
     type: 'plane',
-    fade: true,
-    fixed: {
-      from: 0,
-      to: vh.value * scrollGap.value,
-    },
     video: videoEl.value,
-    position: { x: 0, y: 0 },
-    size: { x: 0, y: 0, z: 0 },
+    onClick: videoInProject.value ? goToReel : undefined,
+    color: rbgToVec4(hexToRgb('#818388')),
     cursor: 'play',
-    onClick: goToReel,
   })
 })
-
-function enter(params: { el: HTMLElement }) {
-  fadeIn({ el: params.el })
-}
 
 function goToReel() {
   updateInReel(true)
@@ -235,6 +261,75 @@ function closeReel() {
   }
 }
 
+function updateFirstTransitionSteps() {
+  const halfWidth = vw.value * 0.5
+  const halfHeight = vh.value * 0.5
+
+  const initWidthRatio = 0.333333
+
+  const initWidth = lvw.value * initWidthRatio
+  const finalWidth = lvw.value * 0.666666 - layoutMargin.value
+
+  const initHeight = vh.value * initWidthRatio
+  const finalHeight = vh.value * 0.666666 - verticalGap.value
+
+  const layoutGap = Math.min(0, lvw.value - vw.value) * -0.5
+
+  const finalX = vw.value - layoutMargin.value - finalWidth - layoutGap
+
+  firstTransition.steps = [
+    {
+      position: { x: halfWidth - initWidth * 0.5, y: vh.value },
+      size: { x: initWidth, y: initHeight, z: 1 },
+      border: toScale(16),
+      zoom: 2,
+    },
+    {
+      position: { x: halfWidth - initWidth * 0.5, y: halfHeight - initHeight * 0.5 },
+      size: { x: initWidth, y: initHeight, z: 1 },
+      border: toScale(16),
+      zoom: 2,
+    },
+    {
+      position: { x: finalX, y: verticalGap.value },
+      size: { x: finalWidth, y: finalHeight, z: 1 },
+      border: 0,
+      zoom: 1,
+    },
+  ]
+}
+
+function onVideoReady() {
+  if (firstTransition.state) {
+    updateLoading(false)
+    const duration = 0.8
+    for (let i = 1; i < firstTransition.steps.length; i++) {
+      const delay = duration * (i - 1)
+      gsap.set(firstTransition, { progress: 0, delay })
+      gsap.to(firstTransition, {
+        progress: 1,
+        duration,
+        delay,
+        onStart: () => {
+          firstTransition.step = i
+        },
+        onComplete: () => {
+          i === firstTransition.steps.length - 2 && fadeIn({ el: hintEl.value })
+          i === firstTransition.steps.length - 1 && onFirstAnimationDone()
+        },
+      })
+    }
+  }
+}
+
+async function onFirstAnimationDone() {
+  firstTransition.state = false
+  await nextTick()
+  updateScroll()
+  disableScroll(false)
+  $scene.updateObject({ id: 'reel', onClick: goToReel })
+}
+
 function onPlay() {
   videoPlaying.value = true
 }
@@ -254,6 +349,7 @@ function onIntersectBottom(el: HTMLElement, visible: boolean) {
 onUnmounted(() => {
   videoEl.value?.removeEventListener('play', onPlay)
   videoEl.value?.removeEventListener('pause', onPause)
+  videoEl.value?.removeEventListener('canplaythrough', onVideoReady)
   $scene.removeObject('reel')
   $scene.destroy()
 })
@@ -286,10 +382,8 @@ onUnmounted(() => {
   &__content {
     position: relative;
     height: var(--vh);
-
     align-content: flex-start;
     @include grid('rule-of-thirds');
-    @include will-fade;
 
     &__macmillan {
       width: calc(var(--col) * 2);
@@ -328,10 +422,9 @@ onUnmounted(() => {
       height: var(--col);
       width: var(--col);
       display: flex;
-      will-change: opacity;
+      @include will-fade;
       p {
         color: var(--black);
-        // padding-right: 24%;
         height: max-content;
         @include t-b1;
       }

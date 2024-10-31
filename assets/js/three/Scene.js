@@ -41,6 +41,9 @@ class Controller {
     this.logoLight = null
     this.logoSize = 160
     this.logoScale = 1
+    this.logoAnimation = {
+      value: 0,
+    }
     this.logoMargin =
       parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
       10
@@ -362,7 +365,7 @@ class Controller {
           this.main.classList.remove('__main--pointer')
           if (this.logo) {
             gsap.killTweensOf(this.logo.rotation)
-            gsap.to(this.logo.rotation, { y: 0, onUpdate: this.updateLogoLight.bind(this) })
+            gsap.to(this.logo.rotation, { y: Math.PI, onUpdate: this.updateLogoLight.bind(this) })
           }
         }
         if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
@@ -370,7 +373,10 @@ class Controller {
           this.updateCursor(object.cursor)
           if (this.logo) {
             gsap.killTweensOf(this.logo.rotation)
-            gsap.to(this.logo.rotation, { y: Math.PI, onUpdate: this.updateLogoLight.bind(this) })
+            gsap.to(this.logo.rotation, {
+              y: Math.PI * 2,
+              onUpdate: this.updateLogoLight.bind(this),
+            })
           }
         }
         object.wasHovered = hovered
@@ -431,9 +437,9 @@ class Controller {
       const screenGap = Math.max(0, this.size.x - 1800) * 0.5
 
       this.logo.scale.set(
-        this.logoScale * logoCurrentScale,
-        this.logoScale * logoCurrentScale,
-        this.logoScale * logoCurrentScale * 0.5
+        this.logoScale * logoCurrentScale * this.logoAnimation.value,
+        this.logoScale * logoCurrentScale * this.logoAnimation.value,
+        this.logoScale * logoCurrentScale * this.logoAnimation.value * 0.5
       )
 
       this.renderer.setViewport(
@@ -565,6 +571,16 @@ class Controller {
     gsap.fromTo(prop, { value: 0 }, { value: 1, duration })
   }
 
+  updateLogoState(value) {
+    gsap.killTweensOf(this.logo.rotation)
+    gsap.killTweensOf(this.logoAnimation)
+    gsap.to(this.logoAnimation, { value: value ? 1 : 0 })
+    gsap.to(this.logo.rotation, {
+      y: value ? Math.PI : 0,
+      onUpdate: this.updateLogoLight.bind(this),
+    })
+  }
+
   updateLogoScale() {
     if (this.logo) {
       this.logo.scale.set(1, 1, 1)
@@ -576,8 +592,9 @@ class Controller {
 
   updateLogoLight() {
     if (!this.logo) return
-    const maxIntensity = 0.75
-    const distanceToMiddlePoint = Math.abs(this.logo.rotation.y - Math.PI * 0.5) / (Math.PI * 0.5)
+    const maxIntensity = 0.25
+    const rotation = this.logo.rotation.y % Math.PI
+    const distanceToMiddlePoint = Math.abs(rotation - Math.PI * 0.5) / (Math.PI * 0.5)
     this.logoLight.intensity = maxIntensity - distanceToMiddlePoint * maxIntensity
   }
 

@@ -174,10 +174,10 @@ onBeforeUnmount(() => {
     const toProjects = props.list === 'selected' && !props.data.selected
     const target = toProjects ? 'projects' : `${props.list}-${props.data.slug}-anchor`
     updateScrollFixedTargetId(target)
+    disableScroll(false)
   }
   killTicker(_onRaf)
   killScroll()
-  disableScroll(false)
 })
 
 const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])

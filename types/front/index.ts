@@ -44,3 +44,15 @@ export interface TickerItem {
   reset: number
   x: number
 }
+
+export interface FirstTransition {
+  state: boolean
+  step: number
+  progress: number
+  steps: Array<{
+    zoom: number
+    border: number
+    position: { x: number; y: number }
+    size: { x: number; y: number; z: number }
+  }>
+}

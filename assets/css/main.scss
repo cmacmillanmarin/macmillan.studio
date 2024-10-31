@@ -13,6 +13,7 @@ html {
 
 body {
   background-color: var(--white);
+  overflow: hidden;
   * {
     &::-webkit-scrollbar {
       width: 0;
