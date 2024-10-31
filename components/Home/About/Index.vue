@@ -240,7 +240,7 @@ onBeforeUnmount(() => {
         &__text {
           column-count: 2;
           column-gap: var(--layout-gutter);
-          @include t-b2;
+          @include t-b3;
           p {
             margin-bottom: toScale(1rem);
           }
@@ -274,7 +274,7 @@ onBeforeUnmount(() => {
         @include gap(1, 'right', 'desktop');
         &__label {
           margin-top: toScale(1.2rem);
-          @include t-b2;
+          @include t-b3;
           p {
             margin-bottom: toScale(1rem);
           }

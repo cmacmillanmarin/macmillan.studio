@@ -138,7 +138,7 @@
   font-size: toScaleUp(1.1rem);
   line-height: toScaleUp(1.3rem);
 
-  @include t-b;
+  @include t-b--bold;
 
   @include from__desktop {
     font-size: toScale(1.6rem);
