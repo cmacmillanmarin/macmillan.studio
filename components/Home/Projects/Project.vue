@@ -119,7 +119,8 @@ const infoVisible = computed<boolean>(
   () =>
     !inTransition.value &&
     !inProject.value &&
-    ((inAllProjectsList.value && section.value === 'projects') || !inAllProjectsList.value)
+    ((inAllProjectsList.value && section.value === 'projects') ||
+      (!inAllProjectsList.value && active.value))
 )
 const clientNameVisible = computed<boolean>(() => !!props.data.client.name && infoVisible.value)
 const collaboratorNameVisible = computed<boolean>(
