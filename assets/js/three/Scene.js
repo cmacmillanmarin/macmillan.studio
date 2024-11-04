@@ -34,6 +34,7 @@ class Controller {
     this.renderer = null
     this.bounding = null
     this.main = null
+    this.frame = 0
 
     this.logo = null
     this.logoScene = null
@@ -333,6 +334,7 @@ class Controller {
         object.mesh.scale.y = object.size.y
         object.mesh.scale.z = object.size.z
 
+        uniforms.uFrame.value = this.frame
         uniforms.uColor.value = object.color || this.colors.lightGrey
         uniforms.uMultiplyColor.value = object.multiplyColor || this.colors.white
         uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
@@ -411,6 +413,7 @@ class Controller {
   }
 
   render() {
+    this.frame++
     this.renderer.clear()
 
     this.intersects = this.raycaster
@@ -498,6 +501,7 @@ class Controller {
           fragmentShader: FS,
           uniforms: {
             uNoise: { type: 'i', value: 0 },
+            uFrame: { type: 'i', value: 0 },
             uTime: { type: 'f', value: 0.0 },
             uFade: { type: 'f', value: 0.0 },
             uZoom: { type: 'f', value: 1.0 },
