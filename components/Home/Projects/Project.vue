@@ -23,7 +23,7 @@
           @enter="transitionShuffleIn"
           @leave="transitionDone">
           <div
-            v-if="data.client.name && !inTransition"
+            v-if="clientNameVisible"
             ref="clientEl"
             :class="[
               'home__projects__project__client',
@@ -50,7 +50,7 @@
           @enter="transitionShuffleIn"
           @leave="transitionDone">
           <div
-            v-if="data.collaborator.name && !inTransition"
+            v-if="collaboratorNameVisible"
             ref="collaboratorEl"
             class="home__projects__project__collaborator"
             :class="[
@@ -115,6 +115,16 @@ const { vw, vh } = useResize()
 
 const inProject = ref<boolean>(false)
 const inAllProjectsList = computed<boolean>(() => props.list === 'all')
+const infoVisible = computed<boolean>(
+  () =>
+    !inTransition.value &&
+    !inProject.value &&
+    ((inAllProjectsList.value && section.value === 'projects') || !inAllProjectsList.value)
+)
+const clientNameVisible = computed<boolean>(() => !!props.data.client.name && infoVisible.value)
+const collaboratorNameVisible = computed<boolean>(
+  () => !!props.data.collaborator.name && infoVisible.value
+)
 
 const projectId = ref<string>(slugify(props.data.title))
 const projectColor = ref<string>(props.data.color)
@@ -129,7 +139,7 @@ const inView = ref<boolean>(false)
 const isLoaded = ref<boolean>(false)
 const inTransition = ref<boolean>(false)
 
-const opacity = ref<number>(0)
+const opacity = ref<number>(1)
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
 
@@ -210,13 +220,17 @@ watch(inProject, () => {
 
 watch(section, () => {
   if (inAllProjectsList.value) {
-    gsap.killTweensOf(opacity)
-    if (inActiveSection.value) {
-      gsap.to(opacity, { value: 1, duration: 1, delay: 0.2, onUpdate: onOpacityUpdate })
-    } else {
+    if (inActiveSection.value && opacity.value === 0) {
+      gsap.killTweensOf(opacity)
+      gsap.to(opacity, { value: 1, duration: 1, onUpdate: onOpacityUpdate })
+    } else if (!inActiveSection.value && opacity.value === 1) {
+      gsap.killTweensOf(opacity)
       gsap.to(opacity, { value: 0, duration: 0.6, onUpdate: onOpacityUpdate })
     }
-  } else $scene.updateObject({ id: projectId.value, opacity: 1 })
+  } else {
+    opacity.value = 1
+    $scene.updateObject({ id: projectId.value, opacity: 1 })
+  }
   inView.value = getInView()
 })
 

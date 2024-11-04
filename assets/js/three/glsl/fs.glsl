@@ -8,6 +8,7 @@ uniform float uTime;
 uniform float uFade;
 uniform float uPixel;
 uniform float uOpacity;
+uniform vec2 uParallax;
 uniform vec2 uPixelSize;
 uniform vec2 uPlaneSize;  
 uniform int uTextureType;
@@ -65,12 +66,17 @@ void main() {
   
   // Apply zoom
   vec2 uv = (vUv - 0.5) / uZoom + 0.5;
+  uv.x = uv.x + uParallax.x;
+  uv.y = uv.y + uParallax.y;
   uv = uv * s / new + offset;
   uv -= vec2(0.5);
   uv += vec2(0.5);
 
   // vec2 pixel = floor(vUv * (uPixelSize - (uPixelSize - 1.0) * time)) / (uPixelSize - (uPixelSize - 1.0) * time);
-  vec2 pixel = floor(uv * uPixelSize) / uPixelSize;
+  vec2 pixel = floor(vUv * uPixelSize) / uPixelSize;
+  pixel = (pixel - 0.5) / uZoom + 0.5;
+  pixel.x = pixel.x + uParallax.x;
+  pixel.y = pixel.y + uParallax.y;
   pixel = pixel * s / new + offset;
   pixel -= vec2(0.5);
   pixel += vec2(0.5);
@@ -91,7 +97,7 @@ void main() {
     uvec2 uvI = uvec2(uv.xy * uPlaneSize.x * uPlaneSize.y);
     uint frameI = uint(uFrame);
     float random = hash(uvI.x + psI.x * uvI.y + (psI.x * psI.y) * frameI);
-    gl_FragColor = vec4(vec3(0.0), random * 0.25 * uOpacity * uFade);
+    gl_FragColor = vec4(vec3(0.0), random * 0.2 * uOpacity * uFade);
   } else if (uTextureLoaded == 0) {
     gl_FragColor = vec4(uColor.xyz, uFade * uOpacity);
   } else if (uTextureFade != 1.0) {

@@ -48,7 +48,7 @@ import { toPx, round } from '~/utils'
 import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
 
-defineProps<{
+const props = defineProps<{
   data: HomepageHero
 }>()
 
@@ -113,6 +113,12 @@ const size = computed<{ x: number; y: number; z: number }>(() => {
   }
 })
 
+const parallaxY = computed<number>(() => {
+  const videoHeight = (size.value.x * 1080) / 1920
+  const parallax = (videoHeight - size.value.y) * 0.5
+  return parallax / videoHeight
+})
+
 const position = computed<{ x: number; y: number }>(() => {
   const initGap = Math.min(0, lvw.value - vw.value) * -0.5
   const finalGap = 0
@@ -138,6 +144,10 @@ const position = computed<{ x: number; y: number }>(() => {
 watch(isInProjectEntered, () => {
   if (isInProjectEntered.value) videoInProject.value = true
   else videoInProject.value = !!route.params.slug
+})
+
+watch(videoInProject, () => {
+  $scene.updateObject({ id: 'reel', onClick: videoInProject.value ? undefined : goToReel })
 })
 
 watch([section, videoInView, videoInProject], () => {
@@ -182,10 +192,12 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
   let _zoom = 1
   let _opacity = 1
   let _fixed = { from: 0, to: vh.value * scrollGap.value }
+  let _parallax = { x: 0, y: 0 }
 
   if (firstTransition.state) {
     const from = firstTransition.steps[firstTransition.step - 1]
     const to = firstTransition.steps[firstTransition.step]
+
     if (from && to) {
       const progress = firstTransition.progress
       _size = {
@@ -199,6 +211,9 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
       }
       _border = from.border + (to.border - from.border) * progress
       _zoom = from.zoom + (to.zoom - from.zoom) * progress
+      if (firstTransition.step === 1) {
+        _parallax.y = (parallaxY.value - parallaxY.value * firstTransition.progress) * _zoom * -2
+      }
     }
   } else if (videoInProject.value) _opacity = 0
 
@@ -210,6 +225,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
     border: _border,
     zoom: _zoom,
     opacity: _opacity,
+    parallax: _parallax,
   })
 })
 
@@ -226,7 +242,6 @@ onMounted(() => {
     id: 'reel',
     type: 'plane',
     video: videoEl.value,
-    onClick: videoInProject.value ? goToReel : undefined,
     color: rbgToVec4(hexToRgb('#818388')),
     cursor: 'play',
   })

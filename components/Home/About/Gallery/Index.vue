@@ -35,12 +35,13 @@ const planeIds = ref<string>(`gallery-image-${Date.now()}`)
 const tickerEl = ref<typeof Ticker>()
 
 watch(section, () => {
-  gsap.killTweensOf(itemsFade)
   if (section.value === 'about-testimonials') {
     fadeIn({ el: el.value, delay: 0.2 })
+    gsap.killTweensOf(itemsFade)
     gsap.to(itemsFade, { value: 1, duration: 1, delay: 0.2, onUpdate: onItemsFadeUpdate })
   } else {
     fadeOut({ el: el.value })
+    gsap.killTweensOf(itemsFade)
     gsap.to(itemsFade, { value: 0, duration: 0.6, onUpdate: onItemsFadeUpdate })
   }
 })

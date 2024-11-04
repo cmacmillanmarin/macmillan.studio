@@ -169,6 +169,7 @@ class Controller {
     object.border = object.border || 0
     object.fade = object.fade || false
     object.position = object.position || { x: 0, y: 0 }
+    object.parallax = object.parallax || { x: 0, y: 0 }
     object.size = object.size || { x: 0, y: 0, z: 1 }
     object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
     object.zoom = object.zoom || 1
@@ -189,6 +190,7 @@ class Controller {
     id,
     fixed,
     position,
+    parallax,
     opacity,
     rotate,
     zoom,
@@ -209,6 +211,7 @@ class Controller {
       object.zoom = zoom !== undefined ? zoom : object.zoom
       object.border = border !== undefined ? border : object.border
       object.position = position || object.position
+      object.parallax = parallax || object.parallax
       object.rotate = rotate || object.rotate
       object.size = size || object.size
       object.fade = fade !== undefined ? fade : object.fade
@@ -338,39 +341,67 @@ class Controller {
         uniforms.uColor.value = object.color || this.colors.lightGrey
         uniforms.uMultiplyColor.value = object.multiplyColor || this.colors.white
         uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
-        uniforms.uZoom.value = object.zoom
         uniforms.uBorderRadius.value = object.border
         uniforms.uTime.value += 0.05
         const xPixelRatio = object.size.x / round(object.size.x / this.toScale(18))
         const yPixelRatio = object.size.y / round(object.size.y / this.toScale(18))
         uniforms.uPixelSize.value.x = object.size.x / xPixelRatio
         uniforms.uPixelSize.value.y = object.size.y / yPixelRatio
+        uniforms.uParallax.value.x = object.parallax.x
+        uniforms.uParallax.value.y = object.parallax.y
         uniforms.uPlaneSize.value.x = object.size.x
         uniforms.uPlaneSize.value.y = object.size.y
         uniforms.uTextureVideo.value.needsUpdate =
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
 
+        if (object.onIntersect) object.onIntersect(hovered)
+
         const hovered = this.intersects.includes(object.mesh)
         const clickable = hovered && object.onClick
-
         const pixelated = clickable && !object.noPixel
-        const pixelatedTransition =
-          (pixelated && uniforms.uPixel.value === 0) || (!pixelated && uniforms.uPixel.value === 1)
-        if (pixelatedTransition) {
+        const wasPixelated = uniforms.uPixel.value === 1
+        const wasntPixelated = uniforms.uPixel.value === 0
+        const pixelatedTransition = (pixelated && wasntPixelated) || (!pixelated && wasPixelated)
+
+        if (pixelatedTransition || pixelated !== object.wasPixelated) {
           gsap.killTweensOf(uniforms.uPixel)
-          gsap.to(uniforms.uPixel, { value: pixelated ? 1 : 0, duration: pixelated ? 0.4 : 0.3 })
+          gsap.to(uniforms.uPixel, { value: pixelated ? 1 : 0, duration: 0.4 })
         }
 
-        if (object.onIntersect) object.onIntersect(hovered)
-        if (!clickable && object.wasClickable && this.intersects.length === 0) {
-          this.updateCursor('default')
-          this.main.classList.remove('__main--pointer')
-          if (this.logo) {
-            gsap.killTweensOf(this.logo.rotation)
-            gsap.to(this.logo.rotation, { y: Math.PI, onUpdate: this.updateLogoLight.bind(this) })
+        if (!clickable && object.wasClickable) {
+          gsap.killTweensOf(uniforms.uZoom)
+          gsap.to(uniforms.uZoom, {
+            value: object.zoom,
+            duration: 0.4,
+            onStart: () => {
+              object.inZoomTransition = true
+            },
+            onComplete: () => {
+              object.inZoomTransition = false
+            },
+          })
+
+          if (this.intersects.length === 0) {
+            this.updateCursor('default')
+            this.main.classList.remove('__main--pointer')
+            if (this.logo) {
+              gsap.killTweensOf(this.logo.rotation)
+              gsap.to(this.logo.rotation, { y: Math.PI, onUpdate: this.updateLogoLight.bind(this) })
+            }
           }
-        }
-        if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
+        } else if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
+          if (clickable && !object.wasClickable) {
+            gsap.to(uniforms.uZoom, {
+              value: object.zoom + 0.2,
+              duration: 1,
+              onStart: () => {
+                object.inZoomTransition = true
+              },
+              onComplete: () => {
+                object.inZoomTransition = false
+              },
+            })
+          }
           this.main.classList.add('__main--pointer')
           this.updateCursor(object.cursor)
           if (this.logo) {
@@ -380,7 +411,10 @@ class Controller {
               onUpdate: this.updateLogoLight.bind(this),
             })
           }
+        } else if (!clickable && !object.inZoomTransition) {
+          uniforms.uZoom.value = object.zoom
         }
+        object.wasPixelated = pixelated
         object.wasHovered = hovered
         object.wasClickable = clickable
         object.previousCursor = object.cursor
@@ -506,6 +540,7 @@ class Controller {
             uFade: { type: 'f', value: 0.0 },
             uZoom: { type: 'f', value: 1.0 },
             uPixel: { type: 'f', value: 0.0 },
+            uParallax: { type: 'v2', value: new Vector2(0, 0) },
             uOpacity: { type: 'f', value: 1.0 },
             uBorderRadius: { type: 'f', value: 16.0 },
             uPixelSize: { type: 'v2', value: new Vector2(1, 1) },
