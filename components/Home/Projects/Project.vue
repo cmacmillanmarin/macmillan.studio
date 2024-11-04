@@ -100,18 +100,20 @@ const props = defineProps<{
 
 const { $scene }: any = useNuxtApp()
 
+const route = useRoute()
 const router = useRouter()
 
 const store = useStore()
-const { section, isInProject, isInProjectEntered } = storeToRefs(store)
+const { section, isInProjectEntered } = storeToRefs(store)
 const scrollStore = useScrollStore()
 const { disableScroll, addRenderCallback, removeRenderCallback } = scrollStore
-const { current, direction } = storeToRefs(scrollStore)
+const { current } = storeToRefs(scrollStore)
 const { getBounding } = useVirtualScrollAndThreeTools()
 
 const { toScale, getColumnWidth, layoutGutter } = useCss()
 const { vw, vh } = useResize()
 
+const inProject = ref<boolean>(false)
 const inAllProjectsList = computed<boolean>(() => props.list === 'all')
 
 const projectId = ref<string>(slugify(props.data.title))
@@ -131,12 +133,17 @@ const opacity = ref<number>(0)
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
 
+watch(isInProjectEntered, () => {
+  if (isInProjectEntered.value) inProject.value = true
+  else inProject.value = !!route.params.slug
+})
+
 // For selected projects
 const active = computed<boolean>(
   () =>
     ((inAllProjectsList.value && inView.value) ||
       (!inAllProjectsList.value && progress.value > 0.55 && leaveProgress.value === 0)) &&
-    !isInProject.value &&
+    !inProject.value &&
     isLoaded.value
 )
 
@@ -187,17 +194,17 @@ watch([inView, inTransition], () => {
   }
 })
 
-watch([isInProject, isInProjectEntered], () => {
+watch(inProject, () => {
   $scene.updateObject({
     id: projectId.value,
-    onClick: isInProjectEntered.value ? null : openProject,
+    onClick: inProject.value ? null : openProject,
   })
-  if (isInProjectEntered.value) {
+  gsap.killTweensOf(opacity)
+  if (inProject.value) {
     opacity.value = 0
     onOpacityUpdate()
-  } else if (!isInProject.value) {
-    gsap.killTweensOf(opacity)
-    gsap.to(opacity, { value: 1, duration: 1, onUpdate: onOpacityUpdate })
+  } else {
+    gsap.to(opacity, { value: 1, onUpdate: onOpacityUpdate })
   }
 })
 

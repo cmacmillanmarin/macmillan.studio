@@ -91,7 +91,7 @@ void main() {
     uvec2 uvI = uvec2(uv.xy * uPlaneSize.x * uPlaneSize.y);
     uint frameI = uint(uFrame);
     float random = hash(uvI.x + psI.x * uvI.y + (psI.x * psI.y) * frameI);
-    gl_FragColor = vec4(vec3(0.0), random * 0.3);
+    gl_FragColor = vec4(vec3(0.0), random * 0.25 * uOpacity * uFade);
   } else if (uTextureLoaded == 0) {
     gl_FragColor = vec4(uColor.xyz, uFade * uOpacity);
   } else if (uTextureFade != 1.0) {
