@@ -48,7 +48,7 @@ import { toPx, round } from '~/utils'
 import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
 
-const props = defineProps<{
+defineProps<{
   data: HomepageHero
 }>()
 
