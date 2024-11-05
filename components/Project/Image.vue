@@ -10,7 +10,8 @@ import type { Image } from '~/types/wordpress'
 const props = defineProps<{
   data: Image
   ready?: boolean
-  layout?: 'full' | 'top' | 'bottom' | 'scroll'
+  transparent?: boolean
+  layout?: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   bgColor: string
 }>()
 
@@ -20,9 +21,12 @@ const { toScale } = useCss()
 const el = ref<HTMLElement>()
 
 const loaded = ref<boolean>(false)
+const background = ref<string>(props.transparent ? 'transparent' : props.bgColor)
 
 const gap = computed<number>(() =>
-  props.layout === 'top' || props.layout === 'bottom' ? toScale(260) : 0
+  props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center'
+    ? toScale(260)
+    : 0
 )
 
 const height = computed<string>(() => toPx(vh.value - gap.value))
@@ -50,7 +54,7 @@ const emit = defineEmits(['update-scroll'])
 
 <style lang="scss">
 .project__image {
-  background-color: v-bind(bgColor);
+  background-color: v-bind(background);
   .custom-image {
     display: block;
     width: v-bind(width);

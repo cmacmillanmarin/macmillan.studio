@@ -21,7 +21,8 @@ import { fadeIn } from '~/utils/animations'
 const props = defineProps<{
   data: Video
   ready?: boolean
-  layout?: 'full' | 'top' | 'bottom' | 'scroll'
+  layout?: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
+  transparent: boolean
   bgColor: string
 }>()
 
@@ -29,7 +30,9 @@ const { vh } = useResize()
 const { toScale } = useCss()
 
 const gap = computed<number>(() =>
-  props.layout === 'top' || props.layout === 'bottom' ? toScale(260) : 0
+  props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center'
+    ? toScale(260)
+    : 0
 )
 
 const height = computed<string>(() => toPx(vh.value - gap.value))
@@ -42,6 +45,7 @@ const videoEl = ref<HTMLVideoElement>()
 const active = ref<boolean>(false)
 const inView = ref<boolean>(false)
 const playing = ref<boolean>(false)
+const background = ref<string>(props.transparent ? 'transparent' : props.bgColor)
 
 let playPromise: Promise<void> | undefined = undefined
 
@@ -90,7 +94,7 @@ const emit = defineEmits(['update-scroll'])
 
 <style lang="scss">
 .project__video {
-  background-color: v-bind(bgColor);
+  background-color: v-bind(background);
   &__el {
     display: block;
     width: v-bind(width);
