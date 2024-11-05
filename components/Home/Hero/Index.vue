@@ -73,8 +73,7 @@ const firstTransition = reactive<FirstTransition>({ state: false, step: 1, progr
 const hideComponents = computed<boolean>(
   () =>
     (scrollProgress.value < 1 && videoInProject.value) ||
-    firstTransition.step === 1 ||
-    firstTransition.progress < 0.5
+    ((firstTransition.step === 1 || firstTransition.progress < 0.5) && firstTransition.state)
 )
 const reelVideoActive = computed(
   () =>
