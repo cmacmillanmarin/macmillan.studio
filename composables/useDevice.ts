@@ -17,7 +17,10 @@ export default function useDevice() {
   // Layout
   const isDesktop = ref<boolean>(false)
   const isTablet = ref<boolean>(false)
+  const isTabletPortrait = ref<boolean>(false)
+  const isTabletLandscape = ref<boolean>(false)
   const isMobile = ref<boolean>(false)
+  const isMobileLayout = computed<boolean>(() => isMobile.value || isTablet.value)
 
   // Device
   const isPhoneOrTablet = ref<boolean>(false)
@@ -44,6 +47,10 @@ export default function useDevice() {
     breakpoint.value = window.getComputedStyle(document.body, '::after').getPropertyValue('content')
     isMobile.value = breakpoint.value.includes('mobile')
     isTablet.value = breakpoint.value.includes('tablet')
+    isTabletPortrait.value =
+      breakpoint.value.includes('tablet') && !breakpoint.value.includes('landscape')
+    isTabletLandscape.value =
+      breakpoint.value.includes('tablet') && breakpoint.value.includes('landscape')
     isDesktop.value = breakpoint.value.includes('desktop')
 
     dpr.value = window.devicePixelRatio || 1
@@ -96,6 +103,9 @@ export default function useDevice() {
     isMobile,
     isDesktop,
     isTablet,
+    isTabletPortrait,
+    isTabletLandscape,
+    isMobileLayout,
     breakpoint,
     dpr,
     webpSupport,

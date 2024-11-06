@@ -4,7 +4,7 @@
 
     <div class="header__top" />
 
-    <div class="header__hint">
+    <div v-show="!isMobileLayout" class="header__hint">
       <SvgPixelArrow />
       <p class="header__hint__label">Independent Tech Lead ~ Developer</p>
     </div>
@@ -20,13 +20,18 @@
           to="/#services"
           :active="section === 'services' && !isInProject && entered" />
         <HeaderLink
-          label="About"
+          :label="`About${isMobileLayout ? ',' : ''}`"
           to="/#about"
           :active="section.includes('about') && !isInProject && entered" />
+        <HeaderLink
+          v-show="isMobileLayout"
+          label="Contact"
+          to="/#contact"
+          :active="section.includes('contact') && !isInProject && entered" />
       </ul>
     </nav>
 
-    <nav class="header__nav--sub">
+    <nav v-show="!isMobileLayout" class="header__nav--sub">
       <ul class="header__nav__list">
         <HeaderLink
           label="Contact"
@@ -43,6 +48,11 @@
           <SvgLogo />
         </CustomLink>
       </div>
+    </nav>
+    <nav v-show="isMobileLayout" class="header__nav--scroll">
+      <NuxtLink to="/#projects">
+        <SvgPixelArrow />
+      </NuxtLink>
     </nav>
 
     <div class="header__bottom" />
@@ -63,6 +73,7 @@ const { header, section, gridType, isInProject, isInReel } = storeToRefs(useStor
 const { current, bounding } = storeToRefs(useScrollStore())
 
 const { vh } = useResize()
+const { isMobileLayout } = useDevice()
 const { layoutMargin } = useCss()
 
 const el = ref<HTMLElement>()
@@ -124,7 +135,11 @@ function leave() {
 
   &__hint,
   &__nav {
-    width: var(--col);
+    width: 100%;
+
+    @include from__tablet--landscape {
+      width: var(--col);
+    }
   }
 
   &__hint {
@@ -148,6 +163,7 @@ function leave() {
     &--main {
       @extend .header__nav;
     }
+
     &--sub {
       @extend .header__nav;
       display: flex;
@@ -157,9 +173,26 @@ function leave() {
       padding-right: var(--layout-margin);
     }
 
+    &--scroll {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+      padding-top: toScale(3.2rem, 37.5rem);
+      .svg__pixel-arrow {
+        width: toScale(2.4rem, 37.5rem);
+        display: block;
+      }
+    }
+
     &__list {
       display: flex;
-      column-gap: 0.8rem;
+      justify-content: center;
+      column-gap: toScale(0.4rem, 37.5rem);
+
+      @include from__tablet--landscape {
+        justify-content: flex-start;
+        column-gap: toScale(0.8rem);
+      }
 
       .header__link {
         &__anchor {

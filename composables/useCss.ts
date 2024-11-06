@@ -1,4 +1,5 @@
-export default function useKeyboard() {
+export default function useCss() {
+  const { isMobileLayout } = useDevice()
   const { onResize, vw } = useResize()
 
   const maxWidth = ref<number>(0)
@@ -33,7 +34,7 @@ export default function useKeyboard() {
 
   function toScale(n: number): number {
     const mvw = Math.min(vw.value, maxWidth.value)
-    return (n * mvw) / 1440
+    return (n * mvw) / (isMobileLayout.value ? 375 : 1440)
   }
 
   function getColumnWidth(n: number): number {

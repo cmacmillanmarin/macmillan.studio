@@ -1,11 +1,7 @@
 <template>
   <section
     id="hero-target"
-    :class="[
-      'home__hero',
-      { 'home__hero--mobile': isMobile },
-      { 'home__hero--reel': reelVideoActive },
-    ]"
+    :class="['home__hero', { 'home__hero--reel': reelVideoActive }]"
     data-scroll-target-top>
     <h1 class="home__hero__title">{{ data.title }}</h1>
     <div class="home__hero__content">
@@ -69,7 +65,7 @@ const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
 const { current, direction } = storeToRefs(scrollStore)
 
-const { isMobile } = useDevice()
+const { isMobileLayout } = useDevice()
 const { layoutMargin, toScale } = useCss()
 const { lvw, vw, vh } = useResize()
 
@@ -95,7 +91,9 @@ const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
-const verticalGapPx = computed<string>(() => toPx(lvw.value * 0.082 * 1.5))
+const verticalGapPx = computed<string>(() =>
+  toPx(isMobileLayout.value ? toScale(71 + 8 + 16) : lvw.value * 0.082 * 1.5)
+)
 const titleMargin = computed<number>(() => verticalGap.value * 0.5)
 const titleMarginPx = computed<string>(() => toPx(titleMargin.value))
 const scrollGap = computed<number>(() => 1)
@@ -106,11 +104,15 @@ const scrollThreshold = computed<number>(() => verticalGap.value * 2.5)
 const componentHeight = computed<number>(() => vh.value + vh.value * scrollGap.value)
 
 const size = computed<{ x: number; y: number; z: number }>(() => {
-  const initWidth = lvw.value * 0.666666 - layoutMargin.value
+  const initWidth = isMobileLayout.value
+    ? lvw.value - layoutMargin.value * 2
+    : lvw.value * 0.666666 - layoutMargin.value
   const finalWidth = vw.value
   const incrementWidth = finalWidth - initWidth
 
-  const initHeight = vh.value * 0.666666 - verticalGap.value
+  const initHeight = isMobileLayout.value
+    ? ((lvw.value - layoutMargin.value * 2) * 9) / 16
+    : vh.value * 0.666666 - verticalGap.value
   const finalHeight = vh.value
   const incrementHeight = finalHeight - initHeight
 
@@ -139,7 +141,7 @@ const position = computed<{ x: number; y: number }>(() => {
     incrementGap * (scrollProgress.value - 1) +
     layoutMargin.value * scrollProgress.value
 
-  const initY = verticalGap.value
+  const initY = isMobileLayout.value ? toScale(260) : verticalGap.value
   const finalY = 0
   const incrementY = finalY - initY
 
@@ -170,7 +172,7 @@ watch([section, videoInView, videoInProject], () => {
 
 watch(current, () => {
   const initScale = 1
-  const finalScale = 0.885
+  const finalScale = isMobileLayout.value ? 1 : 0.885
   const incrementScale = initScale - finalScale
   const scaleProgress = Math.min(1, current.value / scrollThreshold.value)
   const scale = initScale - incrementScale * scaleProgress
@@ -188,9 +190,12 @@ watch(current, () => {
   const titleY = toPx(current.value + scroll)
 
   gsap.set('.svg__macmillan, .svg__studio', { scale })
-  gsap.set('.home__hero__content__hint', { opacity, y: hintY })
+  gsap.set('.home__hero__content__hint', {
+    opacity: isMobileLayout.value ? 1 : 0,
+    y: isMobileLayout.value ? contentY : hintY,
+  })
   gsap.set('.home__hero__content__studio__content', { y: contentY })
-  gsap.set('.home__hero__content__macmillan', { y: titleY })
+  gsap.set('.home__hero__content__macmillan', { y: isMobileLayout.value ? contentY : titleY })
 })
 
 watch([firstTransition, position, videoPlaying, videoInProject], () => {
@@ -288,33 +293,40 @@ function updateFirstTransitionSteps() {
   const halfWidth = vw.value * 0.5
   const halfHeight = vh.value * 0.5
 
-  const initWidthRatio = 0.333333
+  const initWidthRatio = isMobileLayout.value ? 0.5 : 0.333333
 
   const initWidth = lvw.value * initWidthRatio
-  const finalWidth = lvw.value * 0.666666 - layoutMargin.value
+  const finalWidth = isMobileLayout.value
+    ? lvw.value - layoutMargin.value * 2
+    : lvw.value * 0.666666 - layoutMargin.value
 
-  const initHeight = vh.value * initWidthRatio
-  const finalHeight = vh.value * 0.666666 - verticalGap.value
+  const initHeight = isMobileLayout
+    ? (lvw.value * initWidthRatio * 9) / 16
+    : vh.value * initWidthRatio
+  const finalHeight = isMobileLayout.value
+    ? ((lvw.value - layoutMargin.value * 2) * 9) / 16
+    : vh.value * 0.666666 - verticalGap.value
 
   const layoutGap = Math.min(0, lvw.value - vw.value) * -0.5
 
   const finalX = vw.value - layoutMargin.value - finalWidth - layoutGap
+  const finalY = isMobileLayout.value ? toScale(260) : verticalGap.value
 
   firstTransition.steps = [
     {
       position: { x: halfWidth - initWidth * 0.5, y: vh.value },
       size: { x: initWidth, y: initHeight, z: 1 },
-      border: toScale(16),
+      border: toScale(isMobileLayout.value ? 8 : 16),
       zoom: 2,
     },
     {
       position: { x: halfWidth - initWidth * 0.5, y: halfHeight - initHeight * 0.5 },
       size: { x: initWidth, y: initHeight, z: 1 },
-      border: toScale(16),
+      border: toScale(isMobileLayout.value ? 8 : 16),
       zoom: 2,
     },
     {
-      position: { x: finalX, y: verticalGap.value },
+      position: { x: finalX, y: finalY },
       size: { x: finalWidth, y: finalHeight, z: 1 },
       border: 0,
       zoom: 1,
@@ -420,14 +432,23 @@ onUnmounted(() => {
     @include grid('rule-of-thirds');
 
     &__macmillan {
-      width: calc(var(--col) * 2);
-      margin-left: var(--col);
-      padding-right: var(--layout-margin);
-      margin-bottom: v-bind(titleMarginPx);
+      padding-top: var(--layout-margin);
       will-change: transform;
+
+      @include from__tablet--landscape {
+        width: calc(var(--col) * 2);
+        margin-left: var(--col);
+        padding-right: var(--layout-margin);
+        margin-bottom: v-bind(titleMarginPx);
+        padding-top: 0;
+      }
       svg {
+        width: 146.65vw;
         will-change: transform;
         transform-origin: top right;
+        @include from__tablet--landscape {
+          width: 100%;
+        }
       }
     }
 
@@ -435,28 +456,49 @@ onUnmounted(() => {
       position: relative;
       z-index: 1;
       pointer-events: none;
-      width: calc(min(100vw, var(--layout-max-width)) * 0.333333);
+      width: calc(100vw - var(--layout-margin) * 2);
       padding-top: v-bind(verticalGapPx);
-      padding-left: var(--layout-margin);
+      margin-left: var(--layout-margin);
 
-      svg {
-        width: 127.9%;
-        will-change: transform;
-        transform-origin: top left;
+      @include from__tablet--landscape {
+        width: calc(min(100vw, var(--layout-max-width)) * 0.333333);
+        padding-top: v-bind(verticalGapPx);
+        padding-left: var(--layout-margin);
+        margin-left: 0;
       }
+
       @include from__desktop--x-large {
         margin-left: calc((100vw - var(--layout-max-width)) * 0.5);
+      }
+
+      svg {
+        will-change: transform;
+        transform-origin: top left;
+        @include from__tablet--landscape {
+          width: 127.9%;
+        }
       }
     }
 
     &__hint {
       position: absolute;
-      top: calc(var(--col) * 3 - #{toScale(16rem)} - var(--layout-margin));
-      left: var(--col);
-      height: var(--col);
-      width: var(--col);
-      display: flex;
+      width: calc(100vw - var(--layout-margin) * 2);
+      top: toScale(19.65rem, 37.5rem);
+      left: var(--layout-margin);
+      padding: 0 var(--layout-margin);
+      text-align: center;
       @include will-fade;
+
+      @include from__tablet--landscape {
+        display: flex;
+        width: var(--col);
+        top: calc(var(--col) * 3 - #{toScale(16rem)} - var(--layout-margin));
+        left: var(--col);
+        height: var(--col);
+        text-align: left;
+        padding: 0;
+      }
+
       p {
         color: var(--black);
         height: max-content;
