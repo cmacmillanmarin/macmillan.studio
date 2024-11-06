@@ -111,7 +111,7 @@ export default function useScroll() {
   })
 
   watch(touch, () => {
-    forceReset()
+    // forceReset()
   })
 
   onMounted(() => {
@@ -121,7 +121,7 @@ export default function useScroll() {
   function init(params: { el: HTMLElement }) {
     el.value = params.el
     updateEl(el.value)
-    updateScrollMode('auto')
+    updateScrollMode('virtual')
   }
 
   function update() {
@@ -137,7 +137,7 @@ export default function useScroll() {
   async function forceReset() {
     updateScrollMode(undefined)
     await nextTick()
-    updateScrollMode('auto')
+    updateScrollMode('virtual')
   }
 
   function onScroll(data: Data) {

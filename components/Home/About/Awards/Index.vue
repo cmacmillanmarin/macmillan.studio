@@ -8,14 +8,16 @@
     </div>
 
     <div ref="listEl" class="home__about__awards__list">
-      <div
-        ref="logoEl"
-        :class="[
-          'home__about__awards__list__logo',
-          { 'home__about__awards__list__logo--safari': safari },
-        ]">
-        <SvgLogo data-scroll-sticky />
-      </div>
+      <ClientOnly>
+        <div
+          ref="logoEl"
+          :class="[
+            'home__about__awards__list__logo',
+            { 'home__about__awards__list__logo--safari': safari },
+          ]">
+          <SvgLogo data-scroll-sticky />
+        </div>
+      </ClientOnly>
       <HomeAboutAwardsAward
         v-for="(award, i) in data.awards"
         :i="i"

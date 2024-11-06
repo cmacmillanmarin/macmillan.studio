@@ -1,7 +1,11 @@
 <template>
   <section
     id="hero-target"
-    :class="['home__hero', { 'home__hero--reel': reelVideoActive }]"
+    :class="[
+      'home__hero',
+      { 'home__hero--mobile': isMobile },
+      { 'home__hero--reel': reelVideoActive },
+    ]"
     data-scroll-target-top>
     <h1 class="home__hero__title">{{ data.title }}</h1>
     <div class="home__hero__content">
@@ -65,6 +69,7 @@ const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
 const { current, direction } = storeToRefs(scrollStore)
 
+const { isMobile } = useDevice()
 const { layoutMargin, toScale } = useCss()
 const { lvw, vw, vh } = useResize()
 
