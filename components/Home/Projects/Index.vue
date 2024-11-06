@@ -87,6 +87,7 @@
         :height="video.height"
         muted
         loop
+        playsinline
         crossorigin="anonymous">
         <source :src="video.src" :type="video.mime" />
       </video>

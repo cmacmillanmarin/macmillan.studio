@@ -5,12 +5,15 @@
     data-scroll-target-top>
     <h1 class="home__hero__title">{{ data.title }}</h1>
     <div class="home__hero__content">
-      <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
-
-      <div class="home__hero__content__macmillan">
-        <SvgMacMillan v-if="!hideComponents" />
-      </div>
       <ClientOnly>
+        <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
+        <div class="home__hero__content__macmillan">
+          <SvgMacMillan v-if="!hideComponents && !isMobileLayout" />
+          <Ticker v-if="!hideComponents && isMobileLayout">
+            <div v-for="i in 2" :key="i"><SvgMacMillan /></div>
+          </Ticker>
+        </div>
+
         <Teleport to="#top-layer">
           <div
             v-if="!hideComponents"
@@ -182,7 +185,7 @@ watch(current, () => {
 
   const scroll = Math.min(0, scrollThreshold.value - current.value) * 0.5
 
-  const opacity = 1 - (1 * current.value) / (vh.value * 0.4)
+  const opacity = Math.max(0, 1 - (1 * current.value) / (vh.value * 0.15))
 
   const hintY = toPx(current.value * 0.2)
   const contentY = toPx(
@@ -192,7 +195,7 @@ watch(current, () => {
 
   gsap.set('.svg__macmillan, .svg__studio', { scale })
   gsap.set('.home__hero__content__hint', {
-    opacity: isMobileLayout.value ? 1 : 0,
+    opacity: isMobileLayout.value ? 1 : opacity,
     y: isMobileLayout.value ? contentY : hintY,
   })
   gsap.set('.home__hero__content__studio__content', { y: contentY })
@@ -433,6 +436,8 @@ onUnmounted(() => {
     @include grid('rule-of-thirds');
 
     &__macmillan {
+      position: relative;
+      width: 100vw;
       padding-top: var(--layout-margin);
       will-change: transform;
 
@@ -443,10 +448,20 @@ onUnmounted(() => {
         margin-bottom: v-bind(titleMarginPx);
         padding-top: 0;
       }
+      .ticker {
+        > div {
+          padding-right: toScale(3.2rem, 37.5rem);
+        }
+      }
+
       svg {
+        display: block;
         width: 146.65vw;
         will-change: transform;
         transform-origin: top right;
+        &:nth-child(2) {
+          margin: 0 var(--layout-margin);
+        }
         @include from__tablet--landscape {
           width: 100%;
         }

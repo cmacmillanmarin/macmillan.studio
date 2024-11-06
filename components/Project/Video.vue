@@ -7,6 +7,7 @@
       :height="data.height"
       muted
       loop
+      playsinline
       v-intersect="{ callback: onIntersect }"
       @playing="enter">
       <source :src="data.src" :type="data.mime" />
