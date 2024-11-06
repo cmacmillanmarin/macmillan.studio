@@ -21,6 +21,7 @@ uniform float uBorderRadius;
 uniform vec4 uMultiplyColor;
 uniform vec4 uColor;
 uniform float uZoom;
+uniform float uDevicePixelRatio;
 
 float hash(uint n) {
     n = (n << 13U) ^ n;
@@ -94,7 +95,7 @@ void main() {
 
   if (uNoise == 1) {
     uvec2 psI = uvec2(uPlaneSize.xy);
-    uvec2 uvI = uvec2(uv.xy * uPlaneSize.x * uPlaneSize.y);
+    uvec2 uvI = uvec2(uv.xy * uPlaneSize.x * uPlaneSize.y * uDevicePixelRatio);
     uint frameI = uint(uFrame);
     float random = hash(uvI.x + psI.x * uvI.y + (psI.x * psI.y) * frameI);
     gl_FragColor = vec4(vec3(0.0), random * 0.2 * uOpacity * uFade);

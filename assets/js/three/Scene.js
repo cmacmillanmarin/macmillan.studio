@@ -353,6 +353,7 @@ class Controller {
         uniforms.uPlaneSize.value.y = object.size.y
         uniforms.uTextureVideo.value.needsUpdate =
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
+        uniforms.uDevicePixelRatio.value = this.getDevicePixelRatio()
 
         if (object.onIntersect) object.onIntersect(hovered)
 
@@ -551,6 +552,7 @@ class Controller {
             uTextureVideo: { type: 't', value: new VideoTexture(video) },
             uTextureSize: { type: 'v2', value: new Vector2(1, 1) },
             uPlaneSize: { type: 'v2', value: new Vector2(1, 1) },
+            uDevicePixelRatio: { type: 'f', value: 1.0 },
             uColor: { type: 'v4', value: this.colors.lightGrey },
             uMultiplyColor: { type: 'v4', value: this.colors.lime },
           },
