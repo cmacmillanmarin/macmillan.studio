@@ -24,6 +24,7 @@ const scrollStore = useScrollStore()
 const { updateScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { scrollUpdated } = storeToRefs(scrollStore)
 
+const { isMobileLayout } = useDevice()
 const { onResize } = useResize()
 const { getBounding } = useVirtualScrollAndThreeTools()
 const { init, onPan, panStart, panEnd, panHorizontal, panHorizontalDirection } = useSwipe({
@@ -112,7 +113,7 @@ function move() {
     if (x < item.width * -1 || x > _containerWidth) {
       x = _containerWidth
     }
-    x = round(x)
+    x = round(x, isMobileLayout.value ? 1 : 0)
     if (props.planesId) {
       const { $scene }: any = useNuxtApp()
       const index = items.value.indexOf(item)
