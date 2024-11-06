@@ -202,6 +202,9 @@ watch(current, () => {
   )
   const titleY = toPx(current.value + scroll)
 
+  const videoY = Math.min(current.value, vh.value * 2 - (200 * 9) / 16)
+
+  gsap.set('.home__hero__content__video', { y: videoY })
   gsap.set('.svg__macmillan, .svg__studio', { scale })
   gsap.set('.home__hero__content__hint', {
     opacity: isMobileLayout.value ? 1 : opacity,
