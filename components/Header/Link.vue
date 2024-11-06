@@ -5,7 +5,7 @@
       type="referral"
       :to="to"
       :label="label"
-      @mouseenter="onMouseEnter"
+      @mouseenter="!touch ? onMouseEnter : () => {}"
       data-tab-fixed />
     <transition
       mode="out-in"
@@ -26,6 +26,8 @@ defineProps<{
   to: string
   active: boolean
 }>()
+
+const { touch } = useDevice()
 
 const el = ref<HTMLElement>()
 

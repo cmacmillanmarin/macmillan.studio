@@ -12,7 +12,7 @@ import type { Direction } from '~/types/front/store/scroll'
 
 export default function useScrollVirtual() {
   const { vh } = useResize()
-  const { safari, hasWheelEvent } = useDevice()
+  const { safari, hasWheelEvent, isMobileLayout } = useDevice()
   const { addTicker, killTicker } = useRaf()
   const {
     init: initPan,
@@ -72,6 +72,10 @@ export default function useScrollVirtual() {
   const current = ref<number>(0)
   const direction = ref<Direction>('down')
 
+  watch(isMobileLayout, () => {
+    isMobileLayout.value && _el ? initPan({ el: _el, cursor: false }) : destroyPan()
+  })
+
   watch(panVertical, (): void => {
     if (_disabled || Math.abs(panVertical.value) < 20) return
     if (_panTarget === -1) _panTarget = target.value
@@ -104,6 +108,7 @@ export default function useScrollVirtual() {
       _getChildren({ reset: true })
       await _updateSize()
       _addEventListeners()
+      isMobileLayout.value && initPan({ el: _el, cursor: false })
       if (position !== 0) {
         _previous = 0
         current.value = target.value = position
@@ -512,7 +517,6 @@ export default function useScrollVirtual() {
   function _addEventListeners(): void {
     _log('_addEventListeners()')
     const disablePassive = { passive: false }
-    initPan({ el: _el, cursor: false })
     _el.addEventListener('wheel', _onWheel, disablePassive)
     window.addEventListener('keyup', _keyUp)
     window.addEventListener('keydown', _keyDown)
@@ -520,7 +524,6 @@ export default function useScrollVirtual() {
 
   function _removeEventListeners(): void {
     _log('_removeEventListeners()')
-    destroyPan()
     _el.removeEventListener('wheel', _onWheel)
     window.addEventListener('keyup', _keyUp)
     window.addEventListener('keydown', _keyDown)

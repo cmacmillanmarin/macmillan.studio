@@ -25,6 +25,7 @@
       </ClientOnly>
 
       <div ref="hintEl" class="home__hero__content__hint">
+        <!-- <p class="home__hero__content__hint__label" v-html="isMobileLayout" /> -->
         <p class="home__hero__content__hint__label" v-html="data.hint" />
       </div>
 

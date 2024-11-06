@@ -26,7 +26,7 @@
 }
 
 @function toScale($size, $base: 144rem) {
-  @return min(calc(100vw * $size / $base), calc(180rem * $size / 144rem));
+  @return min(calc(100vw * $size / $base), calc(180rem * $size / $base));
 }
 
 @function toScaleUp($size, $base: 37.5rem) {

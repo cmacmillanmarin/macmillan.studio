@@ -20,7 +20,7 @@ export default function useDevice() {
   const isTabletPortrait = ref<boolean>(false)
   const isTabletLandscape = ref<boolean>(false)
   const isMobile = ref<boolean>(false)
-  const isMobileLayout = computed<boolean>(() => isMobile.value || isTablet.value)
+  const isMobileLayout = computed<boolean>(() => isMobile.value || isTabletPortrait.value)
 
   // Device
   const isPhoneOrTablet = ref<boolean>(false)
