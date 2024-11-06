@@ -59,8 +59,8 @@ import { toPx, toPercentage } from '~/utils'
 
 const { $scene }: any = useNuxtApp()
 
-const { section, gridType, isInProject, isInReel } = storeToRefs(useStore())
-const { current, bounding, disabled } = storeToRefs(useScrollStore())
+const { header, section, gridType, isInProject, isInReel } = storeToRefs(useStore())
+const { current, bounding } = storeToRefs(useScrollStore())
 
 const { vh } = useResize()
 const { layoutMargin } = useCss()
@@ -68,8 +68,8 @@ const { layoutMargin } = useCss()
 const el = ref<HTMLElement>()
 const entered = ref<boolean>(false)
 
-watch(disabled, () => {
-  !disabled.value && !entered.value && enter()
+watch(header, () => {
+  header.value && !entered.value && enter()
 })
 
 watch(current, () => {

@@ -3,8 +3,8 @@
     ref="el"
     :class="[
       'project__asset',
-      `project__asset--layout-${data.layout}`,
       `project__asset--gap-${data.gap}`,
+      `project__asset--layout-${data.layout}`,
     ]">
     <div class="project__asset__content">
       <ProjectVideo
@@ -13,6 +13,7 @@
         :ready="ready"
         :bg-color="bgColor"
         :layout="data.layout"
+        :transparent="data.transparent"
         @update-scroll="emit('update-scroll')" />
       <ProjectImage
         v-else
@@ -20,6 +21,7 @@
         :bg-color="bgColor"
         :ready="ready"
         :layout="data.layout"
+        :transparent="data.transparent"
         @update-scroll="emit('update-scroll')" />
     </div>
   </div>
@@ -64,6 +66,12 @@ const emit = defineEmits(['update-scroll'])
   &--layout-top {
     .project__asset__content {
       align-items: flex-start;
+    }
+  }
+
+  &--layout-center {
+    .project__asset__content {
+      align-items: center;
     }
   }
 

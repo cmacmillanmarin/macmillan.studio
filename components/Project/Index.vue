@@ -51,7 +51,7 @@ const { addTicker, killTicker } = useRaf()
 const { onResize } = useResize()
 
 const store = useStore()
-const { updateCursor, updateSection, updateInProjectScroll } = store
+const { updateHeader, updateCursor, updateSection, updateInProjectScroll } = store
 const { isInProject, isInProjectEntered, cursor, gridType } = storeToRefs(store)
 
 const { disableScroll, updateScrollFixedTargetId } = useScrollStore()
@@ -175,6 +175,7 @@ onBeforeUnmount(() => {
     const target = toProjects ? 'projects' : `${props.list}-${props.data.slug}-anchor`
     updateScrollFixedTargetId(target)
     disableScroll(false)
+    updateHeader(true)
   }
   killTicker(_onRaf)
   killScroll()

@@ -67,16 +67,18 @@ export interface WP_Project_Thumbnail {
   video?: WP_Video
 }
 export interface WP_Project_Asset {
-  layout: 'full' | 'top' | 'bottom' | 'scroll'
+  layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   gap: 'l' | 'm' | 's'
+  transparent: boolean
   type: 'img' | 'vid'
   image?: WP_Image
   video?: WP_Video
 }
 
 export interface ProjectAsset {
-  layout: 'full' | 'top' | 'bottom' | 'scroll'
+  layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   gap: 'l' | 'm' | 's'
+  transparent: boolean
   type: 'img' | 'vid'
   image: Image
   video: Video
@@ -184,6 +186,7 @@ export function parseProject(params: {
       return {
         layout: asset.layout,
         gap: asset.gap,
+        transparent: !!asset.transparent,
         type: asset.type,
         image: parseImage(asset.image),
         video: parseVideo(asset.video),

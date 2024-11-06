@@ -12,6 +12,7 @@ export default defineStore('use-store', {
     section: 'hero',
     sectionThrottle: false,
     cursor: 'default',
+    header: false,
     inReel: false,
     inProject: false,
     inProjectEntered: false,
@@ -62,6 +63,9 @@ export default defineStore('use-store', {
     },
     updateSectionThrottle(state: boolean) {
       this.sectionThrottle = state
+    },
+    updateHeader(state: boolean) {
+      this.header = state
     },
     updateCursor(state: Cursor) {
       this.cursor = state

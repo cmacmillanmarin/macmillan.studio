@@ -34,6 +34,7 @@ export interface State {
   grid: GridType
   section: Section
   sectionThrottle: boolean
+  header: boolean
   cursor: Cursor
   inReel: boolean
   inProject: boolean

@@ -241,9 +241,11 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
     &__link {
       position: absolute;
       top: 50%;
-      left: 40vw;
+      z-index: 9;
+      left: calc(40vw - toScale(3rem));
       transform: translateY(-60%);
       @include will-fade;
+      padding: toScale(3rem);
 
       &__label {
         display: flex;

@@ -58,7 +58,7 @@ const router = useRouter()
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateLoading, updateSection, updateInReel } = store
+const { updateHeader, updateLoading, updateSection, updateInReel } = store
 const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -71,7 +71,9 @@ const { lvw, vw, vh } = useResize()
 const firstTransition = reactive<FirstTransition>({ state: false, step: 1, progress: 0, steps: [] })
 
 const hideComponents = computed<boolean>(
-  () => (scrollProgress.value < 1 && videoInProject.value) || firstTransition.state
+  () =>
+    (scrollProgress.value < 1 && videoInProject.value) ||
+    ((firstTransition.step === 1 || firstTransition.progress < 0.5) && firstTransition.state)
 )
 const reelVideoActive = computed(
   () =>
@@ -85,6 +87,7 @@ const videoEl = ref<HTMLVideoElement>()
 const videoPlaying = ref<boolean>(false)
 const videoInView = ref<boolean>(false)
 const videoInProject = ref<boolean>(false)
+const heroAnimation = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
 const verticalGapPx = computed<string>(() => toPx(lvw.value * 0.082 * 1.5))
@@ -328,13 +331,24 @@ function onVideoReady() {
         onStart: () => {
           firstTransition.step = i
         },
+        onUpdate: () => {
+          i === firstTransition.steps.length - 1 &&
+            firstTransition.progress > 0.2 &&
+            !heroAnimation.value &&
+            onLastAnimationStepDone()
+        },
         onComplete: () => {
-          i === firstTransition.steps.length - 2 && fadeIn({ el: hintEl.value })
           i === firstTransition.steps.length - 1 && onFirstAnimationDone()
         },
       })
     }
   }
+}
+
+async function onLastAnimationStepDone() {
+  heroAnimation.value = true
+  fadeIn({ el: hintEl.value })
+  updateHeader(true)
 }
 
 async function onFirstAnimationDone() {

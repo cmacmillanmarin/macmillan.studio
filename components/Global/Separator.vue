@@ -17,7 +17,7 @@ defineProps<{
   top: 0;
   left: 0;
   width: 100%;
-  height: toScale(0.2rem);
+  height: max(0.2rem, toScale(0.2rem));
   background-color: var(--black);
 
   .svg__square {
