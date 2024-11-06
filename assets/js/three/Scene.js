@@ -35,6 +35,7 @@ class Controller {
     this.bounding = null
     this.main = null
     this.frame = 0
+    this.isMobileLayout = false
 
     this.logo = null
     this.logoScene = null
@@ -464,30 +465,56 @@ class Controller {
       this.renderer.render(this.scene, this.camera)
     }
 
-    if (this.logo) {
-      const logoTargetScale = 0.25
-      const scrollTarget = this.size.y
-      const scrollProgress = Math.min(1, this.y / scrollTarget)
-      const scrollDistance = this.size.y - this.logoSize * logoTargetScale - this.logoMargin * 2
-      const scrollGap = scrollDistance * scrollProgress
-      const logoCurrentScale = 1 - (1 - logoTargetScale) * scrollProgress
-      const logoGap = this.logoSize * logoCurrentScale * 0.5 + this.logoMargin
-      const screenGap = Math.max(0, this.size.x - 1800) * 0.5
+    this.logo && this.renderLogo()
+  }
 
-      this.logo.scale.set(
-        this.logoScale * logoCurrentScale * this.logoAnimation.value,
-        this.logoScale * logoCurrentScale * this.logoAnimation.value,
-        this.logoScale * logoCurrentScale * this.logoAnimation.value * 0.5
-      )
+  renderLogo() {
+    let scrollTarget = this.size.y
+    let scrollProgress = Math.min(1, this.y / scrollTarget)
+    let scrollDistance = 0
+    let scrollGap = 0
+    let logoCurrentScale = 1 - (1 - this.logoTargetScale) * scrollProgress
+    let logoGap = 0
+    let screenGap = 0
+    let xOffset = 0
+    let yOffset = 0
 
-      this.renderer.setViewport(
-        this.size.x * 0.5 - logoGap - screenGap,
-        this.size.y * -0.5 + logoGap + scrollGap,
-        this.size.x,
-        this.size.y
-      )
-      this.renderer.render(this.logoScene, this.logoCamera)
+    if (!this.isMobileLayout) {
+      scrollDistance = this.size.y - this.logoSize * this.logoTargetScale - this.logoMargin * 2
+      scrollGap = scrollDistance * scrollProgress
+      logoGap = this.logoSize * logoCurrentScale * 0.5 + this.logoMargin
+      screenGap = Math.max(0, this.size.x - 1800) * 0.5
+      xOffset = -logoGap - screenGap
+      yOffset = logoGap + scrollGap
+    } else {
+      const mobileVideoBottom = this.toScale(260 + 200)
+      const mobileHeaderTop = this.toScale(65)
+      const mobileSpace = this.size.y - mobileVideoBottom - mobileHeaderTop
+      const mobileInitY = mobileHeaderTop + mobileSpace * 0.5
+      const scrollDistanceX =
+        this.size.x * 0.5 - this.logoSize * this.logoTargetScale * 0.5 - this.toScale(16)
+      const scrollGapX = scrollDistanceX * scrollProgress
+      scrollDistance =
+        this.size.y - mobileInitY - this.logoSize * this.logoTargetScale * 0.5 - this.toScale(16)
+      scrollGap = scrollDistance * scrollProgress
+
+      xOffset = this.size.x * -0.5 + scrollGapX
+      yOffset = mobileInitY + scrollGap
     }
+
+    this.logo.scale.set(
+      this.logoScale * logoCurrentScale * this.logoAnimation.value,
+      this.logoScale * logoCurrentScale * this.logoAnimation.value,
+      this.logoScale * logoCurrentScale * this.logoAnimation.value * 0.5
+    )
+
+    this.renderer.setViewport(
+      this.size.x * 0.5 + xOffset,
+      this.size.y * -0.5 + yOffset,
+      this.size.x,
+      this.size.y
+    )
+    this.renderer.render(this.logoScene, this.logoCamera)
   }
 
   getAvailablePlane(id) {
@@ -631,6 +658,12 @@ class Controller {
     }
   }
 
+  updateMobileLayout(value) {
+    this.isMobileLayout = value
+    this.logoSize = value ? 96 : 160
+    this.logoTargetScale = value ? 0.416666 : 0.25
+  }
+
   updateLogoLight() {
     if (!this.logo) return
     const maxIntensity = 0.25
@@ -647,6 +680,11 @@ class Controller {
         return
       }
     }
+  }
+
+  toScale(n) {
+    const mvw = Math.min(this.size.x, 1800)
+    return (n * mvw) / (this.isMobileLayout ? 375 : 1440)
   }
 
   onMouseMovement(e) {

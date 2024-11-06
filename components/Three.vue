@@ -13,6 +13,7 @@ const scrollStore = useScrollStore()
 const { bounding } = storeToRefs(scrollStore)
 
 const { $scene }: any = useNuxtApp()
+const { isMobileLayout } = useDevice()
 const { onResize, vw, vh } = useResize()
 
 const el = ref<HTMLCanvasElement>()
@@ -33,6 +34,10 @@ watch(onResize, () => {
   })
 })
 
+watch(isMobileLayout, () => {
+  $scene.updateMobileLayout(isMobileLayout.value)
+})
+
 onMounted(() => {
   $scene.create({
     el: el.value,
@@ -48,6 +53,7 @@ onMounted(() => {
     fade: true,
     order: 50,
   })
+  $scene.updateMobileLayout(isMobileLayout.value)
 })
 
 onUnmounted(() => {

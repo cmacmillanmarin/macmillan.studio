@@ -512,7 +512,7 @@ export default function useScrollVirtual() {
   function _addEventListeners(): void {
     _log('_addEventListeners()')
     const disablePassive = { passive: false }
-    // initPan({ el: document.body, cursor: false })
+    initPan({ el: _el, cursor: false })
     _el.addEventListener('wheel', _onWheel, disablePassive)
     window.addEventListener('keyup', _keyUp)
     window.addEventListener('keydown', _keyDown)
@@ -520,11 +520,10 @@ export default function useScrollVirtual() {
 
   function _removeEventListeners(): void {
     _log('_removeEventListeners()')
-    // destroyPan()
+    destroyPan()
     _el.removeEventListener('wheel', _onWheel)
     window.addEventListener('keyup', _keyUp)
     window.addEventListener('keydown', _keyDown)
-    // _stopRaf()
   }
 
   function _log(msg: string): void {

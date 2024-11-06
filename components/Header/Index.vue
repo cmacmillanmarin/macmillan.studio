@@ -49,11 +49,13 @@
         </CustomLink>
       </div>
     </nav>
-    <nav v-show="isMobileLayout" class="header__nav--scroll">
-      <NuxtLink to="/#projects">
-        <SvgPixelArrow />
-      </NuxtLink>
-    </nav>
+    <ClientOnly>
+      <nav v-if="isMobileLayout" class="header__nav--scroll">
+        <NuxtLink to="/#projects">
+          <SvgPixelArrow />
+        </NuxtLink>
+      </nav>
+    </ClientOnly>
 
     <div class="header__bottom" />
   </header>
@@ -107,7 +109,8 @@ function enter() {
   if (!el.value) return
   entered.value = true
   gsap.set(el.value, { pointerEvents: 'auto' })
-  const links = el.value.querySelectorAll('.header__bottom, .header__link__anchor') || []
+  const links =
+    el.value.querySelectorAll('.header__bottom, .header__link__anchor, .header__nav--scroll') || []
   const hints = el.value.querySelectorAll('.header__hint') || []
   shuffleElsIn({ els: hints, fast: true })
   shuffleElsIn({ els: links, fast: true })
@@ -117,7 +120,8 @@ function enter() {
 function leave() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'none' })
-  const links = el.value.querySelectorAll('.header__bottom, .header__link__anchor') || []
+  const links =
+    el.value.querySelectorAll('.header__bottom, .header__link__anchor, .header__nav--scroll') || []
   const hints = el.value.querySelectorAll('.header__hint') || []
   shuffleElsOut({ els: hints, fast: true })
   shuffleElsOut({ els: links, fast: true })
@@ -177,7 +181,8 @@ function leave() {
       display: flex;
       width: 100%;
       justify-content: center;
-      padding-top: toScale(3.2rem, 37.5rem);
+      padding-top: toScale(2.4rem, 37.5rem);
+      @include will-fade;
       .svg__pixel-arrow {
         width: toScale(2.4rem, 37.5rem);
         display: block;
