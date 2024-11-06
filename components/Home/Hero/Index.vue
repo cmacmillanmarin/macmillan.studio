@@ -32,7 +32,16 @@
         <p class="home__hero__content__hint__label" v-html="data.hint" />
       </div>
 
-      <video ref="videoEl" class="home__hero__content__video" width="1920" height="1080" muted loop>
+      <video
+        ref="videoEl"
+        class="home__hero__content__video"
+        width="1920"
+        height="1080"
+        preload="true"
+        autoplay
+        muted
+        loop
+        playsinline>
         <source src="/assets/video/short.webm" type="video/webm" />
       </video>
     </div>
@@ -115,7 +124,7 @@ const size = computed<{ x: number; y: number; z: number }>(() => {
   const incrementWidth = finalWidth - initWidth
 
   const initHeight = isMobileLayout.value
-    ? ((lvw.value - layoutMargin.value * 2) * 9) / 16
+    ? vh.value - toScale(244) - toScale(208)
     : vh.value * 0.666666 - verticalGap.value
   const finalHeight = vh.value
   const incrementHeight = finalHeight - initHeight
@@ -145,7 +154,7 @@ const position = computed<{ x: number; y: number }>(() => {
     incrementGap * (scrollProgress.value - 1) +
     layoutMargin.value * scrollProgress.value
 
-  const initY = isMobileLayout.value ? toScale(260) : verticalGap.value
+  const initY = isMobileLayout.value ? toScale(244) : verticalGap.value
   const finalY = 0
   const incrementY = finalY - initY
 
@@ -304,17 +313,17 @@ function updateFirstTransitionSteps() {
     ? lvw.value - layoutMargin.value * 2
     : lvw.value * 0.666666 - layoutMargin.value
 
-  const initHeight = isMobileLayout
-    ? (lvw.value * initWidthRatio * 9) / 16
-    : vh.value * initWidthRatio
   const finalHeight = isMobileLayout.value
-    ? ((lvw.value - layoutMargin.value * 2) * 9) / 16
+    ? vh.value - toScale(244) - toScale(208)
     : vh.value * 0.666666 - verticalGap.value
+  const initHeight = isMobileLayout
+    ? (initWidth * finalHeight) / finalWidth
+    : vh.value * initWidthRatio
 
   const layoutGap = Math.min(0, lvw.value - vw.value) * -0.5
 
   const finalX = vw.value - layoutMargin.value - finalWidth - layoutGap
-  const finalY = isMobileLayout.value ? toScale(260) : verticalGap.value
+  const finalY = isMobileLayout.value ? toScale(244) : verticalGap.value
 
   firstTransition.steps = [
     {
@@ -457,6 +466,7 @@ onUnmounted(() => {
       svg {
         display: block;
         width: 146.65vw;
+        height: auto;
         will-change: transform;
         transform-origin: top right;
         &:nth-child(2) {
@@ -499,7 +509,7 @@ onUnmounted(() => {
     &__hint {
       position: absolute;
       width: calc(100vw - var(--layout-margin) * 2);
-      top: toScale(19.65rem, 37.5rem);
+      top: toScale(18.6rem, 37.5rem);
       left: var(--layout-margin);
       padding: 0 var(--layout-margin);
       text-align: center;

@@ -85,6 +85,8 @@
         :alt="video.alt"
         :width="video.width"
         :height="video.height"
+        preload="true"
+        autoplay
         muted
         loop
         playsinline

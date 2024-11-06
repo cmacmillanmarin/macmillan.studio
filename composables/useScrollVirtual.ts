@@ -78,8 +78,7 @@ export default function useScrollVirtual() {
 
   watch(panVertical, (): void => {
     if (_disabled || Math.abs(panVertical.value) < 20) return
-    if (_panTarget === -1) _panTarget = target.value
-    target.value = _clampTarget(_panTarget - panVertical.value)
+    target.value = _clampTarget(_panTarget - panVertical.value * 2)
   })
 
   watch([panStart, panEnd], (): void => {

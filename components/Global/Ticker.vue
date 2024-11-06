@@ -44,7 +44,7 @@ const lastItem = computed<TickerItem | undefined>(() => items.value[items.value.
 let _current: number = 0
 let _target: number = 0
 let _direction: number = -1
-let _speed: number = 2
+let _speed: number = 1.25
 let _speedInit: number = _speed
 let _panInit: number = 0
 let _panSpeed: number = 0

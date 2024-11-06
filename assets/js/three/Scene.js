@@ -488,9 +488,9 @@ class Controller {
       yOffset = logoGap + scrollGap
     } else {
       const mobileVideoBottom = this.toScale(260 + 200)
-      const mobileHeaderTop = this.toScale(65)
+      const mobileHeaderTop = this.toScale(67) + this.logoSize * 0.5 + this.toScale(20)
       const mobileSpace = this.size.y - mobileVideoBottom - mobileHeaderTop
-      const mobileInitY = mobileHeaderTop + mobileSpace * 0.5
+      const mobileInitY = mobileHeaderTop
       const scrollDistanceX =
         this.size.x * 0.5 - this.logoSize * this.logoTargetScale * 0.5 - this.toScale(16)
       const scrollGapX = scrollDistanceX * scrollProgress

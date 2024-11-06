@@ -237,7 +237,7 @@ function mobileLeave(el: Element, done: () => void) {
       display: flex;
       width: 100%;
       justify-content: center;
-      padding-top: toScale(2.4rem, 37.5rem);
+      padding-top: toScale(2rem, 37.5rem);
       @include will-fade;
       .svg__pixel-arrow {
         width: toScale(2.4rem, 37.5rem);
