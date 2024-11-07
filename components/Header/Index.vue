@@ -6,7 +6,7 @@
 
     <div v-show="!isMobileLayout" class="header__hint">
       <SvgPixelArrow />
-      <p class="header__hint__label">Independent Tech Lead ~ Developer</p>
+      <p class="header__hint__label">Independent Tech Lead—Developer</p>
     </div>
 
     <ClientOnly>

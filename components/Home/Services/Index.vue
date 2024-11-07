@@ -88,9 +88,12 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     display: flex;
     align-items: center;
     column-gap: toScale(0.6rem);
-    padding-top: toScale(6.8rem);
+    padding-top: toScale(7.1rem);
     @include will-fade;
     @include t-number;
+    .svg__square {
+      transform: translateY(5%);
+    }
   }
 
   &__title {

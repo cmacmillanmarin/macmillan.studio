@@ -122,8 +122,9 @@ const { section } = storeToRefs(store)
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollFixedTargetId } = scrollStore
 const { scrollUpdated, direction } = storeToRefs(scrollStore)
-const { vh } = useResize()
 
+const { vh } = useResize()
+const { isMobileLayout } = useDevice()
 const { getColumnWidth, layoutGutter } = useCss()
 
 const { getBounding } = useVirtualScrollAndThreeTools()
@@ -248,7 +249,8 @@ function getAnchorTop(position: number): string {
   let top = getOffset()
   for (let i = 0; i < position; i++) {
     const { selected } = activeListProjects.value[i]
-    top += getColumnWidth(selected ? 3.5 : 3) + layoutGutter.value
+    const columns = isMobileLayout.value ? (selected ? 6 : 5) : selected ? 3.5 : 3
+    top += getColumnWidth(columns) + layoutGutter.value
   }
   // if (position > 0) {
   //   const { selected } = activeListProjects.value[position]
@@ -258,7 +260,8 @@ function getAnchorTop(position: number): string {
 }
 
 function getOffset(): number {
-  return (vh.value - (getColumnWidth(3.5) * 7) / 5) * 0.5
+  const columns = isMobileLayout.value ? 6 : 3.5
+  return (vh.value - (getColumnWidth(columns) * 7) / 5) * 0.5
 }
 
 async function updateBounding() {
@@ -295,9 +298,13 @@ const emit = defineEmits(['update-list', 'update-active'])
         display: inline-block;
         white-space: nowrap;
         // border: 1px solid blue;
-        padding-left: calc(50vw - #{toColumns(3.5)} * 0.5);
-        padding-right: calc(50vw - #{toColumns(3)} * 0.5);
+        padding-left: calc(50vw - #{toColumns(6)} * 0.5);
+        padding-right: calc(50vw - #{toColumns(5)} * 0.5);
         height: max-content;
+        @include from__tablet--landscape {
+          padding-left: calc(50vw - #{toColumns(3.5)} * 0.5);
+          padding-right: calc(50vw - #{toColumns(3)} * 0.5);
+        }
         .home__projects__project {
           display: inline-block;
           vertical-align: top;
@@ -307,17 +314,24 @@ const emit = defineEmits(['update-list', 'update-active'])
     }
     .home__projects__anchor {
       position: absolute;
-      // top: 0;
-      left: calc(50vw - #{toColumns(3.5)} * 0.5);
       display: block;
-      width: toColumns(3);
       aspect-ratio: 5/7;
-      // border: 2px solid red;
-      border-radius: toScale(1.6rem);
+      width: toColumns(5);
+      left: calc(50vw - #{toColumns(6)} * 0.5);
+      border-radius: toScale(0.8rem);
       pointer-events: none;
 
+      @include from__tablet--landscape {
+        width: toColumns(3);
+        left: calc(50vw - #{toColumns(3.5)} * 0.5);
+        border-radius: toScale(1.6rem);
+      }
+
       &--selected {
-        width: toColumns(3.5);
+        width: toColumns(6);
+        @include from__tablet--landscape {
+          width: toColumns(3.5);
+        }
       }
     }
   }
@@ -326,9 +340,12 @@ const emit = defineEmits(['update-list', 'update-active'])
   &__date {
     display: flex;
     align-items: center;
-    column-gap: toScale(0.6rem);
+    column-gap: toScale(0.6rem, 37.5rem);
     @include will-fade;
     @include t-number;
+    @include from__tablet--landscape {
+      column-gap: toScale(0.6rem);
+    }
   }
 
   &__index {

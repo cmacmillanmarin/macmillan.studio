@@ -7,8 +7,12 @@
 <style lang="scss">
 .svg__square {
   display: block;
-  width: toScale(1.2rem);
-  height: toScale(1.2rem);
+  width: toScale(0.8rem, 37.5rem);
+  height: toScale(0.8rem, 37.5rem);
+  @include from__tablet--landscape {
+    width: toScale(1.2rem);
+    height: toScale(1.2rem);
+  }
   rect {
     fill: var(--black);
   }

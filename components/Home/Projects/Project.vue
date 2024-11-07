@@ -110,8 +110,9 @@ const { disableScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { current } = storeToRefs(scrollStore)
 const { getBounding } = useVirtualScrollAndThreeTools()
 
-const { toScale, getColumnWidth, layoutGutter } = useCss()
 const { vw, vh } = useResize()
+const { isMobileLayout } = useDevice()
+const { toScale, getColumnWidth, layoutGutter } = useCss()
 
 const inProject = ref<boolean>(false)
 const inAllProjectsList = computed<boolean>(() => props.list === 'all')
@@ -162,8 +163,12 @@ const inActiveSection = computed<boolean>(
   () => section.value.includes('project') || section.value === 'reel'
 )
 
+const borderRadius = computed<number>(() => (isMobileLayout.value ? 8 : 16))
+
 const size = computed<{ x: number; y: number }>(() => {
-  const width = getColumnWidth(inAllProjectsList.value && props.data.selected ? 3.5 : 3)
+  let columns = isMobileLayout.value ? 5 : 3
+  if (inAllProjectsList.value && props.data.selected) columns = isMobileLayout.value ? 6 : 3.5
+  const width = getColumnWidth(columns)
   return { x: width, y: (width * 7) / 5 }
 })
 
@@ -387,7 +392,7 @@ function getInAllProjectsListPlane(): Plane {
     position: { x: left - y + extra, y: top },
     size: { x: size.value.x, y: size.value.y, z: 1 },
     rotate: { x: 0, y: 0, z: 0 },
-    border: toScale(16),
+    border: toScale(borderRadius.value),
     order: props.of - props.i,
     zoom: 1,
   }
@@ -413,13 +418,13 @@ function getInSelectedProjectsListPlane(): Plane {
       z: 0,
     },
     order: props.of - props.i,
-    border: toScale(16) * (progress.value + leaveProgress.value),
+    border: toScale(borderRadius.value) * (progress.value + leaveProgress.value),
     zoom: 1.4 - 0.4 * progress.value,
   }
 }
 
 function getClientAndCollaborator(params?: { to?: Plane }): ClientAndCollaborator {
-  const margin = toScale(12)
+  const margin = toScale(isMobileLayout.value ? 8 : 12)
 
   if (inAllProjectsList.value) {
     const source: Plane = params?.to || _plane
@@ -544,24 +549,35 @@ defineExpose({
     .home__projects__project__anchor,
     .home__projects__project__vid,
     .home__projects__project__img {
-      width: toColumns(3.5);
+      width: toColumns(6);
+      @include from__tablet--landscape {
+        width: toColumns(3.5);
+      }
     }
   }
 
   &__anchor {
     display: block;
     pointer-events: none;
-    width: toColumns(3);
+    width: toColumns(5);
     aspect-ratio: 5/7;
-    border-radius: 1.6rem;
+    border-radius: 0.8rem;
+    @include from__tablet--landscape {
+      border-radius: 1.6rem;
+      width: toColumns(3);
+    }
   }
 
   &__vid,
   &__img {
     opacity: 0;
     pointer-events: none;
-    width: toColumns(3);
+    width: toColumns(5);
     @include absolute-center;
+    @include from__tablet--landscape {
+      border-radius: 1.6rem;
+      width: toColumns(3);
+    }
   }
 
   &__client,
@@ -571,10 +587,13 @@ defineExpose({
     left: 50%;
     display: flex;
     align-items: center;
-    column-gap: toScale(0.8rem);
-
+    column-gap: toScale(0.6rem, 37.5rem);
     opacity: 0.000001;
     will-change: opacity, transform;
+
+    @include from__tablet--landscape {
+      column-gap: toScale(0.8rem);
+    }
 
     &--all {
       top: 0;
@@ -582,9 +601,13 @@ defineExpose({
     }
 
     &__logo {
-      width: toScale(2.4rem);
-      height: toScale(2.4rem);
+      width: toScale(2.4rem, 37.5rem);
+      height: toScale(2.4rem, 37.5rem);
       border-radius: 50%;
+      @include from__tablet--landscape {
+        width: toScale(2.4rem);
+        height: toScale(2.4rem);
+      }
       img {
         will-change: transform;
       }

@@ -118,19 +118,48 @@ const emit = defineEmits(['update-list'])
   left: 50%;
   width: 100vw;
   max-width: var(--layout-max-width);
-  transform: translate(-50%, 0);
-  height: var(--vh);
+
+  transform: translate(-50%, 0%);
+
   display: flex;
-  justify-content: space-around;
-  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
+  height: var(--vh);
+
   pointer-events: none;
+
+  @include from__tablet--landscape {
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+  }
 
   &__button {
     width: max-content;
-    width: toScale(40rem);
+    width: 100%;
     border: none;
-    @include will-fade;
     pointer-events: auto;
+    @include will-fade;
+
+    &:first-child {
+      align-self: flex-end;
+      @include from__tablet--landscape {
+        align-self: center;
+      }
+    }
+
+    &:last-child {
+      align-self: flex-start;
+      @include from__tablet--landscape {
+        align-self: center;
+      }
+    }
+
+    @include from__tablet--landscape {
+      width: toScale(40rem);
+    }
 
     &--active {
       pointer-events: none;
@@ -149,15 +178,30 @@ const emit = defineEmits(['update-list'])
         position: absolute;
         top: 50%;
         left: 0;
-        transform: translate(calc(-100% - toScale(0.6rem)), -50%);
+        transform: translate(calc(-100% - toScale(0.4rem, 37.5rem)), -50%);
         @include will-fade;
+        @include from__tablet--landscape {
+          transform: translate(calc(-100% - toScale(0.6rem)), -50%);
+        }
       }
 
       &__count {
         position: absolute;
-        transform: translate(toScale(0.6rem), toScale(-0.4rem));
+        transform: translate(toScale(0.4rem, 37.5rem), toScale(-0.1rem, 37.5rem));
         @include t-b3;
+        @include from__tablet--landscape {
+          transform: translate(toScale(0.6rem), toScale(-0.4rem));
+        }
       }
+    }
+  }
+
+  &__separator {
+    width: 100%;
+    height: calc(toColumns(6) * 7 / 5 + toScale(1.2rem, 37.5rem));
+    @include from__tablet--landscape {
+      width: 0;
+      height: 0;
     }
   }
 }
