@@ -7,7 +7,9 @@
           :css="false"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
-          <p v-if="activeService > 0 && section === 'services'" class="home__services__index">
+          <p
+            v-if="activeService > 0 && section === 'services' && !isMobileLayout"
+            class="home__services__index">
             <SvgSquare />
             <span v-html="`{${startWithZero(activeService)}—${startWithZero(data.list.length)}}`" />
           </p>
@@ -22,7 +24,7 @@
       </h3>
     </div>
 
-    <div class="home__services__list">
+    <div v-show="!isMobileLayout" class="home__services__list">
       <HomeServicesService
         v-for="(service, i) in data.list"
         :i="i"
@@ -32,6 +34,17 @@
         data-scroll-sticky
         @update-active="updateActive" />
     </div>
+    <ClientOnly>
+      <div v-if="isMobileLayout" class="home__services__mobile-list">
+        <Accordion
+          v-for="(service, i) in data.list"
+          :i="i"
+          :number="i + 1"
+          :title="service.title"
+          :content="service.description"
+          :html="true" />
+      </div>
+    </ClientOnly>
 
     <div class="home__services__intersect" v-intersect="{ callback: onIntersect }" />
   </div>
@@ -53,6 +66,8 @@ const store = useStore()
 const { updateSection } = store
 const { section } = storeToRefs(store)
 const { direction } = storeToRefs(useScrollStore())
+
+const { isMobileLayout } = useDevice()
 
 const activeService = ref<number>(0)
 
@@ -126,6 +141,13 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     .home__services__service {
       position: sticky;
       top: calc(var(--layout-margin) * 2);
+    }
+  }
+
+  &__mobile-list {
+    padding: 4rem var(--layout-margin) 0;
+    .accordion__title__content__label {
+      @include t-b1;
     }
   }
 

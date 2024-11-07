@@ -17,13 +17,18 @@ defineProps<{
   top: 0;
   left: 0;
   width: 100%;
-  height: max(0.2rem, toScale(0.2rem));
+  height: toScaleUp(0.2rem);
   background-color: var(--black);
+
+  @include from__tablet--landscape {
+    height: max(0.2rem, toScale(0.2rem));
+  }
 
   .svg__square {
     position: absolute;
-    top: toScale(0.1rem);
-    width: toScale(1.2rem);
+    top: 0;
+    width: toScale(0.8rem, 37.5rem);
+    height: toScale(0.8rem, 37.5rem);
     background-color: var(--black);
 
     left: calc(
@@ -31,6 +36,12 @@ defineProps<{
     );
     transform: translate(-100%, -100%);
     will-change: transform;
+
+    @include from__tablet--landscape {
+      top: toScale(0.1rem);
+      width: toScale(1.2rem);
+      height: toScale(1.2rem);
+    }
 
     &.separator__dot--start {
       transform: translate(0%, -100%);

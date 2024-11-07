@@ -41,7 +41,7 @@
         muted
         loop
         playsinline>
-        <source src="/assets/video/short.webm" type="video/webm" />
+        <source src="/assets/video/reel--short.webm" type="video/webm" />
       </video>
     </div>
 
@@ -514,7 +514,7 @@ onUnmounted(() => {
       width: calc(100vw - var(--layout-margin) * 2);
       top: toScale(18.6rem, 37.5rem);
       left: var(--layout-margin);
-      padding: 0 var(--layout-margin);
+      padding: 0 var(--layout-gutter);
       text-align: center;
       @include will-fade;
 

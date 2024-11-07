@@ -96,14 +96,14 @@
         v-for="(video, i) in instancedVideos"
         :id="slugify(video.src)"
         :alt="video.alt"
-        :width="video.width"
-        :height="video.height"
+        :width="810"
+        :height="1080"
         preload="true"
         muted
         loop
         playsinline
         crossorigin="anonymous">
-        <source :src="video.src" :type="video.mime" />
+        <source :src="video.src" type="video/webm" />
       </video>
     </div>
   </div>
@@ -122,7 +122,6 @@ import {
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
-import type { Video } from '~/types/wordpress'
 import { toPx, slugify } from '~/utils'
 import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
 
@@ -168,14 +167,15 @@ const activeList = ref<'selected' | 'all'>('selected')
 const active = ref<number>(0)
 const activeOf = ref<number>(activeListProjects.value.length)
 
-const instancedVideos = ref<Array<Video>>([])
+const instancedVideos = ref<Array<{ src: string; alt: string }>>([])
 
 watchEffect(() => {
   activeListProjects.value.forEach(item => {
-    const isVideoProject = item.thumbnail.type === 'vid' && item.thumbnail.video.src
-    if (isVideoProject && instancedVideos.value.indexOf(item.thumbnail.video) === -1) {
-      instancedVideos.value.push(item.thumbnail.video)
-    }
+    const src = `/assets/video/${item.slug}.webm`
+    const alt = `${item.title} thumbnail`
+    const isVideoProject = item.thumbnail.type === 'vid'
+    const isVideoInstanced = !!instancedVideos.value.find(video => video.src === src)
+    isVideoProject && !isVideoInstanced && instancedVideos.value.push({ src, alt })
   })
 })
 

@@ -50,8 +50,9 @@
 }
 
 @mixin t-h2 {
-  font-size: toScaleUp(4.5rem);
-  line-height: toScaleUp(3.8rem);
+  font-size: toScaleUp(2.4rem);
+  line-height: toScaleUp(2.8rem);
+  letter-spacing: toScaleUp(-0.03rem);
 
   @include t-h;
 
@@ -135,8 +136,8 @@
 @mixin t-number {
   font-variant-numeric: tabular-nums;
 
-  font-size: toScaleUp(1.5rem);
-  line-height: toScaleUp(1.5rem);
+  font-size: toScaleUp(1.4rem);
+  line-height: toScaleUp(1.4rem);
 
   @include t-b;
 

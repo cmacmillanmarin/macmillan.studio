@@ -4,7 +4,13 @@
       :class="['accordion__title', { 'accordion__title--open': open }]"
       :aria-label="`${open ? 'Close' : 'Open'} ${title} accordion`"
       @click="toggle">
-      <p class="accordion__title__label">{{ title }}</p>
+      <div class="accordion__title__content">
+        <p
+          v-if="number"
+          class="accordion__title__content__number"
+          v-text="`{${startWithZero(number)}}`" />
+        <p class="accordion__title__content__label">{{ title }}</p>
+      </div>
       <SvgPlaySmall />
     </button>
     <div
@@ -18,6 +24,7 @@
 </template>
 
 <script lang="ts" setup>
+import { startWithZero } from '~/utils'
 import { shuffleIn } from '~/utils/animations'
 
 const props = defineProps<{
@@ -27,6 +34,7 @@ const props = defineProps<{
   first?: boolean
   open?: boolean
   animation?: boolean
+  number?: number
 }>()
 
 const open = ref<boolean>(!!props.open)
@@ -54,11 +62,22 @@ function toggle() {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    @include t-b3;
+
+    &__content {
+      display: flex;
+      align-items: center;
+      &__number {
+        width: calc(var(--layout-column-width) * 2 + var(--layout-gutter) * 2);
+        text-align: left;
+        @include t-number;
+      }
+      &__label {
+        @include t-b3;
+      }
+    }
 
     .svg__play--small {
-      width: 1.2rem;
-      transform: rotate(90deg) translateY(0.4rem);
+      transform: rotate(90deg) translateY(24%);
       path {
         fill: var(--black);
       }
@@ -66,15 +85,18 @@ function toggle() {
 
     &--open {
       .svg__play--small {
-        transform: rotate(-90deg) translateY(-0.4rem);
+        transform: rotate(-90deg) translateY(-24%);
       }
     }
   }
+
   &__content {
     padding-bottom: 1.6rem;
+
     &--animated {
       @include will-fade;
     }
+
     &__html,
     &__label {
       @include t-b2;

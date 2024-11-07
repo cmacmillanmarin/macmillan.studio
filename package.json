@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "nuxt build",
-    "dev": "OFFLINE=1 nuxt dev",
+    "dev": "OFFLINE=0 nuxt dev",
     "dev-host": "OFFLINE=1 HOST=0 npm run dev",
     "dev-https": "NODE_TLS_REJECT_UNAUTHORIZED=0 OFFLINE=1 FE_PROTOCOL=https:// nuxt dev --https --ssl-cert localhost.pem --ssl-key localhost-key.pem",
     "generate": "nuxt generate",

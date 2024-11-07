@@ -296,7 +296,7 @@ onMounted(async () => {
   leaveProgress.value = getLeaveProgress()
   inView.value = getInView()
 
-  const id = slugify(props.data.thumbnail.video.src)
+  const id = slugify(`/assets/video/${props.data.slug}.webm`)
 
   if (!!id) {
     const video = document.getElementById(slugify(id)) as HTMLVideoElement | undefined
