@@ -8,7 +8,7 @@
     ]"
     data-scroll-set-position>
     <CustomImage
-      v-if="data.thumbnail.image.src"
+      v-if="data.thumbnail.image.src && imageReady"
       ref="customImageEl"
       :data="data.thumbnail.image"
       class="home__projects__project__img"
@@ -81,7 +81,7 @@ import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { slugify, hexToRgb, rbgToVec4 } from '~/utils'
+import { slugify, hexToRgb, rbgToVec4, sleep } from '~/utils'
 import { fadeIn, fadeOut } from '~/utils/animations'
 import type { Plane, ClientAndCollaborator } from '~/types/front/project'
 import type { Project } from '~/types/wordpress/project'
@@ -130,6 +130,14 @@ const collaboratorNameVisible = computed<boolean>(
 
 const projectId = ref<string>(slugify(props.data.title))
 const projectColor = ref<string>(props.data.color)
+const projectVideo = computed<{ id: string; src: string; alt: string }>(() => {
+  const src = `/assets/video/${props.data.slug}.webm`
+  return {
+    id: slugify(src),
+    src: src,
+    alt: `${props.data.title} video`,
+  }
+})
 
 const el = ref<HTMLElement>()
 const clientEl = ref<HTMLElement>()
@@ -140,7 +148,8 @@ const customImageEl = ref<typeof CustomImage>()
 const inView = ref<boolean>(false)
 const isLoaded = ref<boolean>(false)
 const inTransition = ref<boolean>(false)
-
+const inTransitionReady = ref<boolean>(true)
+const imageReady = ref<boolean>(true)
 const opacity = ref<number>(1)
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
@@ -193,7 +202,7 @@ let _target: Plane = {
 }
 
 let playPromise: Promise<void> | undefined = undefined
-watch([inView, inTransition], () => {
+watch([inView, inTransition, videoEl], () => {
   if (inTransition.value) return
   if (videoEl.value) {
     if (inView.value) {
@@ -228,7 +237,7 @@ watch(section, () => {
   if (inAllProjectsList.value) {
     if (inActiveSection.value && opacity.value === 0) {
       gsap.killTweensOf(opacity)
-      gsap.to(opacity, { value: 1, duration: 1, onUpdate: onOpacityUpdate })
+      gsap.to(opacity, { value: 1, duration: 1.2, onUpdate: onOpacityUpdate })
     } else if (!inActiveSection.value && opacity.value === 1) {
       gsap.killTweensOf(opacity)
       gsap.to(opacity, { value: 0, duration: 0.6, onUpdate: onOpacityUpdate })
@@ -265,6 +274,20 @@ watch(inTransition, async () => {
   collaboratorEl.value && fadeOut({ el: collaboratorEl.value, duration: 0.1 })
 })
 
+watch([inTransitionReady, active], async () => {
+  const { type } = props.data.thumbnail
+  if (type === 'vid' && inTransitionReady.value && active.value && !videoEl.value) {
+    emit('request-video', projectVideo.value)
+    await nextTick()
+    const video = document.getElementById(projectVideo.value.id) as HTMLVideoElement | undefined
+    if (video) {
+      videoEl.value = video
+      $scene.updateObject({ id: projectId.value, video: videoEl.value })
+    }
+  }
+  if (!imageReady.value) imageReady.value = inTransitionReady.value && active.value
+})
+
 watch(inAllProjectsList, () => {
   inTransition.value = true
 })
@@ -289,24 +312,30 @@ watch(
   }
 )
 
+onBeforeMount(() => {
+  if (inAllProjectsList.value) {
+    inTransition.value = true
+    inTransitionReady.value = false
+    imageReady.value = false
+  }
+})
+
 onMounted(async () => {
+  const { type } = props.data.thumbnail
+  if (type === 'vid' && !inTransition.value) {
+    emit('request-video', projectVideo.value)
+  }
   await nextTick()
+  const video = document.getElementById(projectVideo.value.id) as HTMLVideoElement | undefined
+  if (video) videoEl.value = video
 
   progress.value = getProgress()
   leaveProgress.value = getLeaveProgress()
   inView.value = getInView()
 
-  const id = slugify(`/assets/video/${props.data.slug}.webm`)
-
-  if (!!id) {
-    const video = document.getElementById(slugify(id)) as HTMLVideoElement | undefined
-    if (video) videoEl.value = video
-  }
-
   createPlane()
 
   if (inAllProjectsList.value) {
-    inTransition.value = true
     _plane.position.x = vw.value * 0.5
     _plane.position.y = props.top + vh.value * 0.5
   }
@@ -321,6 +350,8 @@ function updateDom() {
 }
 
 function onImageLoaded() {
+  console.log('Image loaded', projectId.value)
+  $scene.updateObject({ id: projectId.value, img: customImageEl.value?.el })
   customImageEl.value?.el && $scene.preload(customImageEl.value.el)
 }
 
@@ -497,9 +528,15 @@ function animate() {
     },
     onComplete: () => {
       inTransition.value = false
+      setTransitionReady()
       disableScroll(false)
     },
   })
+}
+
+async function setTransitionReady() {
+  await sleep(400)
+  inTransitionReady.value = true
 }
 
 function prepareClientIn(el: Element) {
@@ -525,6 +562,7 @@ onBeforeUnmount(() => {
 
 const emit = defineEmits<{
   (e: 'update-active', value: number): void
+  (e: 'request-video', value: { id: string; src: string; alt: string }): void
 }>()
 
 defineExpose({

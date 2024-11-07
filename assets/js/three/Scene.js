@@ -198,6 +198,8 @@ class Controller {
     size,
     cursor,
     fade,
+    img,
+    video,
     border,
     order,
     multiplyColor,
@@ -214,6 +216,8 @@ class Controller {
       object.position = position || object.position
       object.parallax = parallax || object.parallax
       object.rotate = rotate || object.rotate
+      object.img = img || object.img
+      object.video = video || object.video
       object.size = size || object.size
       object.fade = fade !== undefined ? fade : object.fade
       object.fixed = fixed || object.fixed
@@ -278,26 +282,32 @@ class Controller {
           object.mesh.material.uniforms.uTextureFade.value = 0
           object.mesh.material.uniforms.uTextureLoaded.value = 0
 
-          if (object.video) {
-            object.mesh.material.uniforms.uTextureType.value = 0
-            object.mesh.material.uniforms.uTextureVideo.value.image = object.video
-            object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
-            object.mesh.material.uniforms.uTextureSize.value.y =
-              (object.size.x * object.video.height) / object.video.width
-            object.mesh.material.uniforms.uTextureLoaded.value = videoLoaded(object.video) ? 1 : 0
-          } else if (object.img) {
-            object.mesh.material.uniforms.uTextureType.value = 1
-            object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
-            object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
-            if (this.imageLoaded(object.img)) {
-              object.mesh.material.uniforms.uTextureLoaded.value = 1
-              texture = this.loadedTextures.find(t => t.id === slugify(object.img.currentSrc))
-              object.mesh.material.uniforms.uTextureImage.value = texture.txt
-            }
-          }
+          object.firstFrame = true
+          object.videoAssigned = object.imgAssigned = false
 
           if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
           else object.mesh.material.uniforms.uFade.value = 1
+        }
+
+        if (object.video && !object.videoAssigned) {
+          object.videoAssigned = true
+          object.mesh.material.uniforms.uTextureType.value = 0
+          object.mesh.material.uniforms.uTextureVideo.value.image = object.video
+          object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
+          object.mesh.material.uniforms.uTextureSize.value.y =
+            (object.size.x * object.video.height) / object.video.width
+          object.mesh.material.uniforms.uTextureLoaded.value =
+            videoLoaded(object.video) && object.firstFrame ? 1 : 0
+        } else if (object.img && !object.imgAssigned) {
+          object.imgAssigned = true
+          object.mesh.material.uniforms.uTextureType.value = 1
+          object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
+          object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
+          if (this.imageLoaded(object.img) && object.firstFrame) {
+            object.mesh.material.uniforms.uTextureLoaded.value = 1
+            texture = this.loadedTextures.find(t => t.id === slugify(object.img.currentSrc))
+            object.mesh.material.uniforms.uTextureImage.value = texture.txt
+          }
         }
 
         const { uniforms } = object.mesh.material
@@ -315,7 +325,6 @@ class Controller {
 
         if (isLoaded && uniforms.uTextureFade.value === 0) {
           const fade = isLoaded !== uniforms.uTextureLoaded.value
-          // console.log(`${object.id} ${fade ? 'just loaded' : 'was already loaded'}!`)
           uniforms.uTextureLoaded.value = 1
           gsap.killTweensOf(uniforms.uTextureFade)
           gsap[fade ? 'to' : 'set'](uniforms.uTextureFade, { value: 1 })
@@ -416,6 +425,7 @@ class Controller {
         } else if (!clickable && !object.inZoomTransition) {
           uniforms.uZoom.value = object.zoom
         }
+        object.firstFrame = false
         object.wasPixelated = pixelated
         object.wasHovered = hovered
         object.wasClickable = clickable
@@ -636,7 +646,7 @@ class Controller {
   planeIn(prop) {
     gsap.killTweensOf(prop)
     const duration = 1.2
-    gsap.fromTo(prop, { value: 0 }, { value: 1, duration })
+    gsap.fromTo(prop, { value: 0 }, { value: 1, duration, delay: 0.1 })
   }
 
   updateLogoState(value) {

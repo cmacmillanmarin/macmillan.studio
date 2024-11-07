@@ -73,7 +73,8 @@
           :bottom="bottom"
           :side-x="i % 2 === 0 ? -1 : 1"
           :side-y="-1"
-          @update-active="updateActive" />
+          @update-active="updateActive"
+          @request-video="addVideo" />
       </div>
     </div>
 
@@ -93,9 +94,9 @@
 
     <div class="home__projects__videos" data-scroll-sticky>
       <video
-        v-for="(video, i) in instancedVideos"
-        :id="slugify(video.src)"
-        :alt="video.alt"
+        v-for="{ id, src, alt } in instancedVideos"
+        :id="id"
+        :alt="alt"
         :width="810"
         :height="1080"
         preload="true"
@@ -103,7 +104,7 @@
         loop
         playsinline
         crossorigin="anonymous">
-        <source :src="video.src" type="video/webm" />
+        <source :src="src" type="video/webm" />
       </video>
     </div>
   </div>
@@ -167,17 +168,7 @@ const activeList = ref<'selected' | 'all'>('selected')
 const active = ref<number>(0)
 const activeOf = ref<number>(activeListProjects.value.length)
 
-const instancedVideos = ref<Array<{ src: string; alt: string }>>([])
-
-watchEffect(() => {
-  activeListProjects.value.forEach(item => {
-    const src = `/assets/video/${item.slug}.webm`
-    const alt = `${item.title} thumbnail`
-    const isVideoProject = item.thumbnail.type === 'vid'
-    const isVideoInstanced = !!instancedVideos.value.find(video => video.src === src)
-    isVideoProject && !isVideoInstanced && instancedVideos.value.push({ src, alt })
-  })
-})
+const instancedVideos = ref<Array<{ id: string; src: string; alt: string }>>([])
 
 watch(
   () => route.params.slug,
@@ -269,10 +260,6 @@ function getAnchorTop(position: number): string {
     const columns = isMobileLayout.value ? (selected ? 6 : 5) : selected ? 3.5 : 3
     top += getColumnWidth(columns) + layoutGutter.value
   }
-  // if (position > 0) {
-  //   const { selected } = activeListProjects.value[position]
-  //   // if (!selected) top -= getColumnWidth(0.333333)
-  // }
   return toPx(top)
 }
 
@@ -285,6 +272,12 @@ async function updateBounding() {
   const bounding = getBounding(el.value as HTMLElement)
   top.value = bounding.top
   bottom.value = bounding.bottom - vh.value
+}
+
+function addVideo(params: { id: string; src: string; alt: string }) {
+  const { id, src, alt } = params
+  const isVideoInstanced = !!instancedVideos.value.find(v => v.id === id)
+  !isVideoInstanced && instancedVideos.value.push({ id, src, alt })
 }
 
 onBeforeUnmount(() => {
@@ -403,7 +396,8 @@ const emit = defineEmits(['update-list', 'update-active'])
     flex-wrap: wrap;
     width: 100%;
     height: max-content;
-    opacity: 1;
+    opacity: 0;
+    display: none;
     pointer-events: none;
     video {
       display: block;
