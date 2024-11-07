@@ -61,8 +61,6 @@ const { direction } = storeToRefs(scrollStore)
 const { vw } = useResize()
 const { x: mouseX } = useMouse()
 
-// const { init, swipeLeft, swipeRight } = useSwipe({})
-
 const el = ref<HTMLElement>()
 const contentEl = ref<HTMLElement>()
 

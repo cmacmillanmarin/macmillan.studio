@@ -56,3 +56,10 @@ export interface FirstTransition {
     size: { x: number; y: number; z: number }
   }>
 }
+
+export type HeaderLinks = Array<HeaderLink>
+
+export interface HeaderLink {
+  label: string
+  slug: string
+}

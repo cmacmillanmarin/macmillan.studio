@@ -5,7 +5,9 @@
     <div class="header__top" />
 
     <div v-show="!isMobileLayout" class="header__hint">
-      <SvgPixelArrow />
+      <button @click="scrollDown">
+        <SvgPixelArrow />
+      </button>
       <p class="header__hint__label">Independent Tech Lead—Developer</p>
     </div>
 
@@ -13,22 +15,10 @@
       <nav class="header__nav--main">
         <ul class="header__nav__list">
           <HeaderLink
-            label="Projects,"
-            to="/#projects"
-            :active="section === 'projects' && activeDots" />
-          <HeaderLink
-            label="Services,"
-            to="/#services"
-            :active="section === 'services' && activeDots" />
-          <HeaderLink
-            :label="`About${isMobileLayout ? ',' : ''}`"
-            to="/#about"
-            :active="section.includes('about') && activeDots" />
-          <HeaderLink
-            v-if="isMobileLayout"
-            label="Contact"
-            to="/#contact"
-            :active="section.includes('contact') && activeDots" />
+            v-for="({ label, slug }, i) in links"
+            :to="`/#${slug}`"
+            :label="`${label}${i === links.length - 1 ? '' : ','}`"
+            :active="section === slug && activeDots" />
         </ul>
       </nav>
     </ClientOnly>
@@ -43,16 +33,15 @@
           type="referral"
           :content="true"
           aria-label="MacMillan Studio logo"
-          data-tab-fixed>
-          <SvgLogo />
-        </CustomLink>
+          data-tab-fixed />
       </div>
     </nav>
+
     <ClientOnly>
       <nav v-if="isMobileLayout" class="header__nav--scroll">
-        <NuxtLink to="/#projects">
+        <button @click="scrollDown">
           <SvgPixelArrow />
-        </NuxtLink>
+        </button>
       </nav>
       <transition mode="out-in" :css="false" @enter="mobileEnter" @leave="mobileLeave">
         <nav v-if="mobileButton" class="header__nav--mobile">
@@ -61,12 +50,15 @@
               mode="out-in"
               :css="false"
               @enter="transitionShuffleIn"
-              @leave="transitionDone">
-              <SvgDots v-if="mobileButtonIcon" />
+              @leave="transitionDone"
+              @click="toggleMobileOverlay">
+              <SvgDots v-if="mobileButtonIcon && !mobileOverlay" />
+              <SvgAspa v-else />
             </transition>
           </button>
         </nav>
       </transition>
+      <HeaderMobileOverlay v-if="mobileOverlay" :data="links" @close="toggleMobileOverlay" />
     </ClientOnly>
 
     <div class="header__bottom" />
@@ -84,19 +76,34 @@ import {
   transitionShuffleIn,
   transitionDone,
 } from '~/utils/animations'
+import { type HeaderLinks } from '~/types/front'
 import { toPx, toPercentage } from '~/utils'
 
 const { $scene }: any = useNuxtApp()
 
 const { header, section, gridType, isInProject, isInReel } = storeToRefs(useStore())
-const { current, bounding } = storeToRefs(useScrollStore())
+
+const scrollStore = useScrollStore()
+const { updateScrollTarget } = scrollStore
+const { current, bounding } = storeToRefs(scrollStore)
 
 const { vh } = useResize()
 const { isMobileLayout } = useDevice()
 const { layoutMargin } = useCss()
 
+const links = computed<HeaderLinks>(() => {
+  const links = [
+    { label: 'Projects', slug: 'projects' },
+    { label: 'Services', slug: 'services' },
+    { label: 'About', slug: 'about' },
+  ]
+  isMobileLayout.value && links.push({ label: 'Contact', slug: 'contact' })
+  return links
+})
+
 const el = ref<HTMLElement>()
 const entered = ref<boolean>(false)
+const mobileOverlay = ref<boolean>(false)
 const mobileButton = ref<boolean>(false)
 const mobileButtonIcon = ref<boolean>(false)
 const activeDots = computed<boolean>(
@@ -183,6 +190,14 @@ function mobileLeave(el: Element, done: () => void) {
     },
   })
 }
+
+function toggleMobileOverlay() {
+  mobileOverlay.value = !mobileOverlay.value
+}
+
+function scrollDown() {
+  updateScrollTarget(vh.value * 2)
+}
 </script>
 
 <style lang="scss">
@@ -213,9 +228,14 @@ function mobileLeave(el: Element, done: () => void) {
     p {
       @include t-b1;
     }
-
-    .svg__pixel-arrow {
-      width: toScale(2.4rem);
+    button {
+      display: block;
+      padding: 0;
+      border: none;
+      width: max-content;
+      .svg__pixel-arrow {
+        width: toScale(2.4rem);
+      }
     }
   }
 
@@ -239,9 +259,15 @@ function mobileLeave(el: Element, done: () => void) {
       justify-content: center;
       padding-top: toScale(2rem, 37.5rem);
       @include will-fade;
-      .svg__pixel-arrow {
-        width: toScale(2.4rem, 37.5rem);
+      button {
         display: block;
+        padding: 0;
+        border: none;
+        width: max-content;
+        .svg__pixel-arrow {
+          width: toScale(2.4rem, 37.5rem);
+          display: block;
+        }
       }
     }
 
@@ -253,6 +279,7 @@ function mobileLeave(el: Element, done: () => void) {
       transform: translate(-50%, 0) scale(0);
       will-change: transform;
       pointer-events: auto;
+
       button {
         background-color: var(--black);
         border-radius: 100%;
@@ -299,11 +326,6 @@ function mobileLeave(el: Element, done: () => void) {
         height: 16rem;
         will-change: transform;
         transform-origin: top right;
-
-        .svg__logo {
-          width: 16rem;
-          @include will-fade;
-        }
       }
     }
   }

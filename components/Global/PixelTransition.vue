@@ -1,6 +1,6 @@
 <template>
-  <div ref="el" class="project__transition">
-    <div v-for="i in boxes" class="project__transition__box" :style="boxStyle" />
+  <div ref="el" class="pixel-transition">
+    <div v-for="i in boxes" class="pixel-transition__box" :style="boxStyle" />
   </div>
 </template>
 
@@ -8,11 +8,14 @@
 import { gsap } from 'gsap'
 import { toPx, shuffle, splitArray } from '~/utils'
 
-defineProps<{
-  color: string
+const props = defineProps<{
+  color?: string
 }>()
 
+const { isMobileLayout } = useDevice()
 const { vw, vh, onResize } = useResize()
+
+const bgColor = ref<string>(props.color || '#c5ff20')
 
 const el = ref<HTMLElement>()
 const boxes = ref<number>(0)
@@ -37,7 +40,7 @@ function enter(): Promise<void> {
     if (!el.value) {
       return resolve()
     }
-    const boxes = Array.from(el.value.querySelectorAll('.project__transition__box'))
+    const boxes = Array.from(el.value.querySelectorAll('.pixel-transition__box'))
     const logoBox = boxes[xBoxes.value - 1]
     boxes.splice(boxes.indexOf(logoBox), 1)
     const shuffleBoxes = shuffle(boxes)
@@ -58,7 +61,7 @@ function enter(): Promise<void> {
 }
 
 function updateSize() {
-  const idealSize = 100
+  const idealSize = isMobileLayout.value ? 40 : 80
   xBoxes.value = Math.round(vw.value / idealSize)
   yBoxes.value = Math.round(vh.value / idealSize)
   boxes.value = xBoxes.value * yBoxes.value
@@ -70,7 +73,7 @@ const emit = defineEmits(['done'])
 </script>
 
 <style lang="scss">
-.project__transition {
+.pixel-transition {
   position: fixed;
   top: 0;
   left: 0;
@@ -80,7 +83,7 @@ const emit = defineEmits(['done'])
   display: flex;
   flex-wrap: wrap;
   &__box {
-    background-color: v-bind(color);
+    background-color: v-bind(bgColor);
     @include will-fade;
   }
 }

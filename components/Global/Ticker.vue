@@ -15,9 +15,11 @@ import { storeToRefs } from 'pinia'
 import { toPx, round } from '~/utils/index'
 import useScrollStore from '~/store/useScrollStore'
 import type { TickerItems, TickerItem } from '~/types/front'
+import { Swiper, type PanParams } from '~/utils/swiper'
 
 const props = defineProps<{
   planesId?: string
+  dragOnTarget?: boolean
 }>()
 
 const scrollStore = useScrollStore()
@@ -27,12 +29,9 @@ const { scrollUpdated } = storeToRefs(scrollStore)
 const { isMobileLayout } = useDevice()
 const { onResize } = useResize()
 const { getBounding } = useVirtualScrollAndThreeTools()
-const { init, onPan, panStart, panEnd, panHorizontal, panHorizontalDirection } = useSwipe({
-  preventLeft: true,
-  preventRight: true,
-})
 
 const el = ref<HTMLElement>()
+const inView = ref<boolean>(false)
 
 const minHeight = ref<number>(0)
 const height = computed(() => (minHeight.value !== 0 ? toPx(minHeight.value) : 'auto'))
@@ -46,11 +45,18 @@ let _current: number = 0
 let _target: number = 0
 let _direction: number = -1
 let _speed: number = 1.25
-let _speedInit: number = _speed
 let _panInit: number = 0
 let _panSpeed: number = 0
 let _containerWidth: number = 0
 let _moving: boolean = false
+let _onPan: boolean = false
+let _panDirection: number = 0
+
+const _Swiper = new Swiper({
+  preventLeft: true,
+  preventRight: true,
+  dragOnTarget: !!props.dragOnTarget,
+})
 
 watch(onResize, () => {
   update()
@@ -61,35 +67,47 @@ watch(scrollUpdated, () => {
   move()
 })
 
-watch(panStart, () => {
-  _panInit = _current
-  _target = _current
-})
-
-watch(panHorizontal, () => {
-  _target = _panInit - panHorizontal.value
-})
-
-watch(panEnd, () => {
-  _panSpeed = Math.abs(_target - _current) * 0.12
+watch(inView, () => {
+  if (inView.value && el.value) {
+    _Swiper.init({ el: el.value, cursor: true, onPanStart, onPanMove, onPanEnd })
+    addRenderCallback(move)
+  } else {
+    removeRenderCallback(move)
+    _Swiper.destroy()
+  }
 })
 
 onMounted(async () => {
   await nextTick()
   await nextTick()
   update()
-  init({ el: el.value as HTMLElement, cursor: true })
 })
 
+function onPanStart() {
+  _panInit = _current
+  _target = _current
+  _onPan = true
+}
+
+function onPanMove(params: PanParams) {
+  _target = _panInit - params.xDiff
+  _panDirection = params.xDir
+}
+
+function onPanEnd() {
+  _panSpeed = Math.abs(_target - _current) * 0.12
+  _onPan = false
+}
+
 function onIntersect(el: HTMLElement, visible: boolean) {
-  visible ? addRenderCallback(move) : removeRenderCallback(move)
+  inView.value = visible
 }
 
 function move() {
   _moving = true
   if (!firstItem.value || !lastItem.value) return
-  if (onPan.value) {
-    _direction = panHorizontalDirection.value
+  if (_onPan) {
+    _direction = _panDirection
   } else {
     _panSpeed += (0 - _panSpeed) * 0.1
     _target += _direction * (_speed + _panSpeed)
@@ -168,6 +186,7 @@ function update(params?: { ignoreUpdateScroll: boolean }) {
 }
 
 onBeforeUnmount(() => {
+  _Swiper.destroy()
   removeRenderCallback(move)
 })
 

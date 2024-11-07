@@ -99,7 +99,6 @@
         :width="video.width"
         :height="video.height"
         preload="true"
-        autoplay
         muted
         loop
         playsinline
@@ -404,7 +403,7 @@ const emit = defineEmits(['update-list', 'update-active'])
     flex-wrap: wrap;
     width: 100%;
     height: max-content;
-    opacity: 0;
+    opacity: 1;
     pointer-events: none;
     video {
       display: block;

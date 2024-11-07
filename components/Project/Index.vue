@@ -3,7 +3,7 @@
     <ClientOnly>
       <Teleport to="#top-layer">
         <transition @leave="transitionFadeOut">
-          <ProjectTransition v-if="transition" :color="data.color" @done="enter" />
+          <PixelTransition v-if="transition" :color="data.color" @done="enter" />
         </transition>
       </Teleport>
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />

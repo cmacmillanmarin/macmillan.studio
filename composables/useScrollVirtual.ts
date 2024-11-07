@@ -3,26 +3,17 @@
 // ~/composables/useResize
 // ~/composables/useDevice
 // ~/composables/useRaf
-// ~/composables/useSwipe
 //
 
 import { gsap } from 'gsap'
 import { round, toPx, focusable } from '~/utils/index'
 import type { Direction } from '~/types/front/store/scroll'
+import { Swiper, type PanParams } from '~/utils/swiper'
 
 export default function useScrollVirtual() {
   const { vh } = useResize()
   const { safari, hasWheelEvent, isMobileLayout } = useDevice()
   const { addTicker, killTicker } = useRaf()
-  const {
-    init: initPan,
-    destroy: destroyPan,
-    panStart,
-    panVertical,
-    panEnd,
-  } = useSwipe({
-    prevent: true,
-  })
 
   const config = useRuntimeConfig()
   const { IS_DEV } = config.public
@@ -38,6 +29,10 @@ export default function useScrollVirtual() {
   let _bounding: number = 0
   let _panTarget: number = -1
   let _currentSticky: Array<number> = []
+
+  let _Swiper = new Swiper({
+    prevent: true,
+  })
 
   let _shiftPressed: boolean = false
 
@@ -73,16 +68,15 @@ export default function useScrollVirtual() {
   const direction = ref<Direction>('down')
 
   watch(isMobileLayout, () => {
-    isMobileLayout.value && _el ? initPan({ el: _el, cursor: false }) : destroyPan()
-  })
-
-  watch(panVertical, (): void => {
-    if (_disabled || Math.abs(panVertical.value) < 20) return
-    target.value = _clampTarget(_panTarget - panVertical.value * 2)
-  })
-
-  watch([panStart, panEnd], (): void => {
-    _panTarget = target.value
+    isMobileLayout.value && _el
+      ? _Swiper.init({
+          el: _el,
+          cursor: false,
+          onPanStart: _onPanStart,
+          onPanMove: _onPanMove,
+          onPanEnd: _onPanEnd,
+        })
+      : _Swiper.destroy()
   })
 
   onMounted(() => {
@@ -107,7 +101,14 @@ export default function useScrollVirtual() {
       _getChildren({ reset: true })
       await _updateSize()
       _addEventListeners()
-      isMobileLayout.value && initPan({ el: _el, cursor: false })
+      isMobileLayout.value &&
+        _Swiper.init({
+          el: _el,
+          cursor: false,
+          onPanStart: _onPanStart,
+          onPanMove: _onPanMove,
+          onPanEnd: _onPanEnd,
+        })
       if (position !== 0) {
         _previous = 0
         current.value = target.value = position
@@ -511,6 +512,19 @@ export default function useScrollVirtual() {
       default:
         break
     }
+  }
+
+  function _onPanStart(): void {
+    _panTarget = target.value
+  }
+
+  function _onPanMove(params: PanParams): void {
+    if (_disabled || Math.abs(params.yDiff) < 20) return
+    target.value = _clampTarget(_panTarget - params.yDiff * 2)
+  }
+
+  function _onPanEnd(): void {
+    _panTarget = target.value
   }
 
   function _addEventListeners(): void {
