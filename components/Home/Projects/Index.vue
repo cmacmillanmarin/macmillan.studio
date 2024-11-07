@@ -91,22 +91,24 @@
         data-scroll-target-top
         :data-scroll-target-offset="getOffset()" />
     </template>
-
-    <div class="home__projects__videos" data-scroll-sticky>
-      <video
-        v-for="{ id, src, alt } in instancedVideos"
-        :id="id"
-        :alt="alt"
-        :width="810"
-        :height="1080"
-        preload="true"
-        muted
-        loop
-        playsinline
-        crossorigin="anonymous">
-        <source :src="src" type="video/webm" />
-      </video>
-    </div>
+    <ClientOnly>
+      <div class="home__projects__videos" data-scroll-sticky>
+        <video
+          v-for="{ id, src, alt } in instancedVideos"
+          :id="id"
+          :alt="alt"
+          :width="810"
+          :height="1080"
+          :autoplay="isMobileLayout"
+          preload="true"
+          muted
+          loop
+          playsinline
+          crossorigin="anonymous">
+          <source :src="src" type="video/webm" />
+        </video>
+      </div>
+    </ClientOnly>
   </div>
 </template>
 
@@ -396,13 +398,15 @@ const emit = defineEmits(['update-list', 'update-active'])
     flex-wrap: wrap;
     width: 100%;
     height: max-content;
-    opacity: 0;
-    display: none;
+    opacity: 1;
+    // display: none;
+
     pointer-events: none;
     video {
       display: block;
-      width: toColumns(1);
+      width: toColumns(2);
       height: max-content;
+      border: 1px solid yellow;
     }
   }
 }
