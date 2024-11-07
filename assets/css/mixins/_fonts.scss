@@ -98,8 +98,8 @@
 }
 
 @mixin t-b2 {
-  font-size: toScaleUp(1.2rem);
-  line-height: toScaleUp(1.6rem);
+  font-size: toScaleUp(1.4rem);
+  line-height: toScaleUp(1.8rem);
 
   @include t-b;
 

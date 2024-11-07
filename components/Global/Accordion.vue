@@ -69,9 +69,11 @@ function toggle() {
       &__number {
         width: calc(var(--layout-column-width) * 2 + var(--layout-gutter) * 2);
         text-align: left;
+        @include t-black;
         @include t-number;
       }
       &__label {
+        @include t-black;
         @include t-b3;
       }
     }
