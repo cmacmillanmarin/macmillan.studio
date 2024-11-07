@@ -131,11 +131,11 @@ const collaboratorNameVisible = computed<boolean>(
 const projectId = ref<string>(slugify(props.data.title))
 const projectColor = ref<string>(props.data.color)
 const projectVideo = computed<{ id: string; src: string; alt: string }>(() => {
-  const src = `/assets/video/${props.data.slug}.webm`
+  const src = `/assets/video/${props.data.slug}`
   return {
     id: slugify(src),
     src: src,
-    alt: `${props.data.title} video`,
+    alt: `${props.data.title} thumbnail video`,
   }
 })
 
@@ -350,7 +350,6 @@ function updateDom() {
 }
 
 function onImageLoaded() {
-  console.log('Image loaded', projectId.value)
   $scene.updateObject({ id: projectId.value, img: customImageEl.value?.el })
   customImageEl.value?.el && $scene.preload(customImageEl.value.el)
 }

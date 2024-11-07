@@ -99,13 +99,12 @@
           :alt="alt"
           :width="810"
           :height="1080"
-          :autoplay="isMobileLayout"
           preload="true"
           muted
           loop
-          playsinline
-          crossorigin="anonymous">
-          <source :src="src" type="video/webm" />
+          playsinline>
+          <source :src="`${src}.webm`" type="video/webm" />
+          <source :src="`${src}.mp4`" type="video/mp4" />
         </video>
       </div>
     </ClientOnly>
@@ -398,9 +397,7 @@ const emit = defineEmits(['update-list', 'update-active'])
     flex-wrap: wrap;
     width: 100%;
     height: max-content;
-    opacity: 1;
-    // display: none;
-
+    display: none;
     pointer-events: none;
     video {
       display: block;
