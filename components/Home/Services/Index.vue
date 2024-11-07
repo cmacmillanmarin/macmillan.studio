@@ -92,7 +92,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     @include will-fade;
     @include t-number;
     .svg__square {
-      transform: translateY(5%);
+      transform: translateY(10%);
     }
   }
 

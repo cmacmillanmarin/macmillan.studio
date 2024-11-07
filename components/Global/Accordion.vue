@@ -1,6 +1,5 @@
 <template>
-  <div class="accordion">
-    <Separator v-if="first" :left="0" :start="true" />
+  <div :class="['accordion', { 'accordion--first': first }]">
     <button
       :class="['accordion__title', { 'accordion__title--open': open }]"
       :aria-label="`${open ? 'Close' : 'Open'} ${title} accordion`"
@@ -43,6 +42,10 @@ function toggle() {
 .accordion {
   position: relative;
   border-bottom: 0.2rem solid black;
+
+  &--first {
+    border-top: 0.2rem solid black;
+  }
 
   &__title {
     height: 4rem;

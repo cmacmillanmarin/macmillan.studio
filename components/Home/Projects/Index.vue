@@ -16,7 +16,20 @@
           @leave="transitionShuffleOut">
           <p v-if="indicators" class="home__projects__index">
             <SvgSquare />
-            <span v-text="`{${startWithZero(active)}—${startWithZero(activeOf)}}`" />
+            <transition
+              mode="out-in"
+              :css="false"
+              @before-enter="prepareFadeIn"
+              @enter="transitionShuffleIn"
+              @leave="transitionDone">
+              <span
+                :key="`${isInProject}`"
+                :class="[
+                  'home__projects__index__label',
+                  { 'home__projects__index__label--active': isInProject },
+                ]"
+                v-text="`{${startWithZero(active)}—${startWithZero(activeOf)}}`" />
+            </transition>
           </p>
         </transition>
       </Teleport>
@@ -101,7 +114,12 @@
 import { gsap } from 'gsap'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { transitionShuffleIn, transitionShuffleOut, prepareFadeIn } from '~/utils/animations'
+import {
+  transitionShuffleIn,
+  transitionShuffleOut,
+  prepareFadeIn,
+  transitionDone,
+} from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
@@ -117,7 +135,7 @@ const route = useRoute()
 
 const store = useStore()
 const { updateSection } = store
-const { section } = storeToRefs(store)
+const { section, isInProject } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollFixedTargetId } = scrollStore
@@ -312,6 +330,7 @@ const emit = defineEmits(['update-list', 'update-active'])
         }
       }
     }
+
     .home__projects__anchor {
       position: absolute;
       display: block;
@@ -351,6 +370,16 @@ const emit = defineEmits(['update-list', 'update-active'])
   &__index {
     position: absolute;
     width: max-content;
+    height: toScale(2.4rem);
+    &__label {
+      &--active {
+        transform: translateY(5%);
+        @include t-b3;
+      }
+    }
+    .svg__square {
+      transform: translateY(10%);
+    }
   }
 
   &__intersect {

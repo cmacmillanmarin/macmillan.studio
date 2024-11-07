@@ -251,11 +251,8 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
         display: flex;
         align-items: center;
         column-gap: toScale(0.7rem);
-        font-family: 'HelveticaNowDisplayBold' !important;
         @include t-black;
-        @include t-b2;
-        // @include t-b--bold;
-
+        @include t-b3;
         .svg__link-arrow {
           width: toScale(1.2rem);
           transform: translateY(0.2rem);
