@@ -28,7 +28,6 @@
       </ClientOnly>
 
       <div ref="hintEl" class="home__hero__content__hint">
-        <!-- <p class="home__hero__content__hint__label" v-html="isMobileLayout" /> -->
         <p class="home__hero__content__hint__label" v-html="data.hint" />
       </div>
 
@@ -229,6 +228,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
 
     if (from && to) {
       const progress = firstTransition.progress
+      if (progress === 0) return
       _size = {
         x: from.size.x + (to.size.x - from.size.x) * progress,
         y: from.size.y + (to.size.y - from.size.y) * progress,
@@ -316,12 +316,12 @@ function updateFirstTransitionSteps() {
     ? lvw.value - layoutMargin.value * 2
     : lvw.value * 0.666666 - layoutMargin.value
 
+  const initHeight = isMobileLayout.value
+    ? (initWidth * vh.value) / vw.value
+    : vh.value * initWidthRatio
   const finalHeight = isMobileLayout.value
     ? vh.value - toScale(244) - toScale(208)
     : vh.value * 0.666666 - verticalGap.value
-  const initHeight = isMobileLayout
-    ? (initWidth * finalHeight) / finalWidth
-    : vh.value * initWidthRatio
 
   const layoutGap = Math.min(0, lvw.value - vw.value) * -0.5
 
@@ -333,13 +333,13 @@ function updateFirstTransitionSteps() {
       position: { x: halfWidth - initWidth * 0.5, y: vh.value },
       size: { x: initWidth, y: initHeight, z: 1 },
       border: toScale(isMobileLayout.value ? 8 : 16),
-      zoom: 2,
+      zoom: isMobileLayout.value ? 1 : 2,
     },
     {
       position: { x: halfWidth - initWidth * 0.5, y: halfHeight - initHeight * 0.5 },
       size: { x: initWidth, y: initHeight, z: 1 },
       border: toScale(isMobileLayout.value ? 8 : 16),
-      zoom: 2,
+      zoom: isMobileLayout.value ? 1 : 2,
     },
     {
       position: { x: finalX, y: finalY },
