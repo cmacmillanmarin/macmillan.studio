@@ -14,16 +14,36 @@
           :active="activeEntered === i"
           :expanded="expanded && active === i"
           @mouseenter="onTestimonialMouseEnter"
-          @mouseleave="onTestimonialMouseLeave" />
+          @mouseleave="onTestimonialMouseLeave"
+          @update:expanded="updateScroll" />
       </div>
     </div>
 
     <div class="home__about__testimonials__indicator">
+      <ClientOnly>
+        <button
+          v-if="isMobileLayout"
+          class="home__about__testimonials__indicator__button--prev"
+          @click="prev">
+          <SvgPixelArrow />
+        </button>
+      </ClientOnly>
+
       <div class="home__about__testimonials__indicator__index">
         <p
           class="home__about__testimonials__indicator__index__label"
           v-text="`{${startWithZero(active + 1)}—${startWithZero(data.length)}}`" />
       </div>
+
+      <ClientOnly>
+        <button
+          v-if="isMobileLayout"
+          class="home__about__testimonials__indicator__button"
+          @click="next">
+          <SvgPixelArrow />
+        </button>
+      </ClientOnly>
+
       <div class="home__about__testimonials__indicator__buttons">
         <button
           v-for="i in data.length"
@@ -60,6 +80,7 @@ const { updateScroll } = scrollStore
 const { direction } = storeToRefs(scrollStore)
 const { vw } = useResize()
 const { x: mouseX } = useMouse()
+const { isMobileLayout } = useDevice()
 
 const el = ref<HTMLElement>()
 const contentEl = ref<HTMLElement>()
@@ -126,6 +147,14 @@ onMounted(() => {
   // el.value && init({ el: el.value, cursor: true })
 })
 
+function prev() {
+  active.value = Math.max(0, active.value - 1)
+}
+
+function next() {
+  active.value = Math.min(props.data.length - 1, active.value + 1)
+}
+
 function onIntersect(el: HTMLElement, visible: boolean) {
   if (visible) updateSection('about-testimonials')
   else if (direction.value === 'up') updateSection('about')
@@ -151,11 +180,11 @@ function updateActive(n: number) {
 }
 
 function onMouseLeave() {
-  updateCursor('default')
+  !isMobileLayout.value && updateCursor('default')
 }
 
 function onTestimonialMouseEnter() {
-  updateCursor(expanded.value ? 'close' : 'plus')
+  !isMobileLayout.value && updateCursor(expanded.value ? 'close' : 'plus')
 }
 
 function onTestimonialMouseLeave() {
@@ -163,6 +192,7 @@ function onTestimonialMouseLeave() {
 }
 
 function updateCarouselCursor() {
+  if (isMobileLayout.value) return
   if (active.value === 0) updateCursor('arrow-right')
   else if (active.value === props.data.length - 1) updateCursor('arrow-left')
   else mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
@@ -174,11 +204,17 @@ const emit = defineEmits(['update-expanded'])
 <style lang="scss">
 .home__about__testimonials {
   position: relative;
+  padding-bottom: toScale(4.8rem, 37.5rem);
   @include will-fade;
+
+  @include from__tablet--landscape {
+    padding-bottom: 0;
+  }
 
   &__container {
     cursor: pointer;
     overflow: var(--overflow--hidden);
+
     &__content {
       max-width: var(--layout-max-width);
       margin: auto;
@@ -204,23 +240,68 @@ const emit = defineEmits(['update-expanded'])
     max-width: var(--layout-max-width);
     margin: auto;
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    padding: toScale(7.2rem) var(--layout-margin) 0;
+    padding: toScale(5.2rem, 37.5rem) var(--layout-margin) 0;
+
+    @include from__tablet--landscape {
+      justify-content: space-between;
+      padding: toScale(7.2rem) var(--layout-margin) 0;
+    }
+
+    &__button {
+      position: relative;
+      width: toScale(5.6rem, 37.5rem);
+      height: toScale(5.6rem, 37.5rem);
+      background-color: var(--black);
+      border-radius: 100%;
+      padding: 0;
+      transform: rotate(-90deg);
+
+      &--prev {
+        @extend .home__about__testimonials__indicator__button;
+        transform: rotate(90deg);
+      }
+
+      .svg__pixel-arrow {
+        width: toScale(2.4rem, 37.5rem);
+        height: toScale(1.6rem, 37.5rem);
+        top: 54% !important;
+        @include absolute-center;
+        path {
+          fill: var(--lime);
+        }
+      }
+    }
 
     &__index {
-      margin-left: calc(var(--layout-column-width) + var(--layout-gutter));
+      width: calc(100% - toScale(11.2rem, 37.5rem));
+
+      @include from__tablet--landscape {
+        width: max-content;
+        margin-left: calc(var(--layout-column-width) + var(--layout-gutter));
+      }
 
       &__label {
+        text-align: center;
         @include t-black;
         @include t-number;
+        @include from__tablet--landscape {
+          text-align: left;
+        }
       }
     }
 
     &__buttons {
       display: flex;
       column-gap: 0.4rem;
-      margin-right: calc(var(--layout-column-width) + var(--layout-gutter));
+      margin-top: toScale(3.2rem, 37.5rem);
+
+      @include from__tablet--landscape {
+        margin-top: 0;
+        margin-right: calc(var(--layout-column-width) + var(--layout-gutter));
+      }
 
       &__button {
         padding: 0.2rem;

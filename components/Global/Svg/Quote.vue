@@ -9,9 +9,13 @@
 <style lang="scss">
 .svg__quote {
   fill: none;
-  width: toScale(5.8rem);
-  height: toScale(5.1rem);
+  width: toScale(3.6rem, 37.5rem);
+  height: toScale(3.2rem, 37.5rem);
   display: block;
+  @include from__tablet--landscape {
+    width: toScale(5.8rem);
+    height: toScale(5.1rem);
+  }
   &__path {
     fill: black;
   }

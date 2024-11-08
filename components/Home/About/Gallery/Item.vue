@@ -33,6 +33,7 @@ const props = defineProps<{
 const { $scene }: any = useNuxtApp()
 const { scrollUpdated } = storeToRefs(useScrollStore())
 const { toScale } = useCss()
+const { isMobileLayout } = useDevice()
 
 const width = ref<number>(0)
 const height = ref<number>(0)
@@ -55,7 +56,7 @@ watch(scrollUpdated, () => {
     $scene.updateObject({
       id: `${props.planesId}-${props.pos}`,
       size: { x: width.value, y: height.value, z: 1 },
-      border: toScale(16),
+      border: toScale(isMobileLayout.value ? 8 : 16),
     })
   }
 })
@@ -70,7 +71,7 @@ function onImageLoaded() {
     img: customImageEl.value?.el,
     position: { x: -1000, y: -1000 },
     size: { x: width.value, y: height.value, z: 1 },
-    border: toScale(16),
+    border: toScale(isMobileLayout.value ? 8 : 16),
     opacity: 0,
   })
   loaded.value = true
@@ -94,11 +95,16 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .home__about__gallery__item {
   padding-right: var(--layout-gutter);
+  width: max-content;
 
   &__content {
     width: toColumns(v-bind(columns));
-    border-radius: toScale(1.6rem);
+    border-radius: toScale(0.8rem, 37.5rem);
     pointer-events: auto;
+
+    @include from__tablet--landscape {
+      border-radius: toScale(1.6rem);
+    }
 
     .custom-image {
       width: 100%;
@@ -108,10 +114,15 @@ onBeforeUnmount(() => {
   }
 
   &__credits {
-    padding: toScale(1.2rem);
+    display: none;
+    width: toColumns(v-bind(columns));
+    padding: 1.2rem;
     pointer-events: none;
     @include will-fade;
     @include t-b3;
+    @include from__tablet--landscape {
+      display: block;
+    }
   }
 }
 </style>

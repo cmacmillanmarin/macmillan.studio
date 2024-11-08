@@ -7,6 +7,7 @@
 
 <style lang="scss">
 .svg__pixel-arrow {
+  display: block;
   fill: none;
   &__path {
     fill: black;

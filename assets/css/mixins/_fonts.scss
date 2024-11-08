@@ -110,8 +110,8 @@
 }
 
 @mixin t-b3 {
-  font-size: toScaleUp(1.1rem);
-  line-height: toScaleUp(1.3rem);
+  font-size: toScaleUp(1.4rem);
+  line-height: toScaleUp(1.6rem);
 
   @include t-b--bold;
 
