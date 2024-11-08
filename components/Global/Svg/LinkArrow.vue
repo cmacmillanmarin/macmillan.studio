@@ -7,9 +7,13 @@
 <style lang="scss">
 .svg__link-arrow {
   display: block;
-  width: toScale(1.3rem);
-  height: toScale(1.3rem);
+  width: toScale(0.9rem, 37.5rem);
+  height: toScale(0.9rem, 37.5rem);
   fill: none;
+  @include from__tablet--landscape {
+    width: toScale(1.3rem);
+    height: toScale(1.3rem);
+  }
   path {
     stroke: var(--black);
     stroke-width: 2;

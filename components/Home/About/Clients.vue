@@ -127,10 +127,12 @@ function enterMobileLogos(params: { el: HTMLElement }) {
     align-self: end;
     display: flex;
     column-gap: var(--layout-gutter);
+    margin-bottom: toScale(7.2rem, 37.5rem);
 
     @include columns(8, 'mobile');
 
     @include from__tablet--landscape {
+      margin-bottom: 0;
       @include columns(4, 'desktop');
     }
 

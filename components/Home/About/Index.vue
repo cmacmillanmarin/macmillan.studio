@@ -324,16 +324,20 @@ onBeforeUnmount(() => {
           text-decoration: underline;
           font-family: 'HelveticaNowDisplayBold' !important;
           margin-top: toScale(1.2rem, 37.5rem);
+          @include t-black;
           @include t-b1;
         }
       }
     }
 
     &__collaborator {
-      margin-top: toScale(18rem);
-      padding-bottom: toScale(8rem);
       position: relative;
       @include grid;
+
+      @include from__tablet--landscape {
+        margin-top: toScale(18rem);
+        padding-bottom: toScale(8rem);
+      }
 
       .separator {
         margin-left: var(--layout-margin);
@@ -398,12 +402,18 @@ onBeforeUnmount(() => {
   }
 
   &__testimonials {
-    padding-top: toScale(8rem);
+    padding: toScale(4rem, 37.5rem) 0 0;
+    @include from__tablet--landscape {
+      padding-top: toScale(8rem);
+    }
   }
 
   &__gallery {
-    padding-top: toScale(12rem);
-    padding-bottom: toScale(16rem);
+    padding: toScale(6rem, 37.5rem) 0 toScale(4rem, 37.5rem);
+    @include from__tablet--landscape {
+      padding-top: toScale(12rem);
+      padding-bottom: toScale(16rem);
+    }
   }
 
   &__intersect {
@@ -411,7 +421,7 @@ onBeforeUnmount(() => {
     top: calc(var(--vh) * 0.5);
     left: 0;
     width: 100%;
-    height: 1px;
+    // height: 1px;
     // background-color: red;
   }
 }

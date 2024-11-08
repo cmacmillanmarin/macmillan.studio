@@ -7,7 +7,7 @@
       { 'home__about__awards__award--hidden': hidden },
       { 'home__about__awards__award--no-bg': active === 0 },
     ]">
-    <Separator :left="4" :start="true" />
+    <Separator :left="isMobileLayout ? 8 : 4" :start="!isMobileLayout" />
 
     <div
       v-if="i === of"
@@ -71,6 +71,8 @@ const props = defineProps<{
 
 const { direction } = storeToRefs(useScrollStore())
 
+const { isMobileLayout } = useDevice()
+
 const el = ref<HTMLElement>()
 const sticky = ref<boolean>(false)
 const hidden = computed<boolean>(() => props.active > props.i + 1)
@@ -127,10 +129,14 @@ const emit = defineEmits<{
 .home__about__awards__award {
   position: relative;
   max-width: var(--layout-max-width);
-  padding-top: toScale(4rem);
+  padding-top: toScale(3.2rem, 37.5rem);
   margin: 0 auto;
 
   will-change: opacity, transform;
+
+  @include from__tablet--landscape {
+    padding-top: toScale(4rem);
+  }
 
   &--hidden {
     opacity: 0;
@@ -147,15 +153,23 @@ const emit = defineEmits<{
 
   &:last-child {
     .home__about__awards__award__content {
-      padding-bottom: toScale(18rem);
+      padding-bottom: toScale(12rem, 37.5rem);
+      @include from__tablet--landscape {
+        padding-bottom: toScale(18rem);
+      }
     }
   }
 
   .separator {
     z-index: 2;
-    top: toScale(4rem);
-    left: calc(var(--layout-column-width) * 2 + var(--layout-gutter) * 3);
-    width: calc(var(--layout-column-width) * 10 + var(--layout-gutter) * 9);
+    top: toScale(3.2rem, 37.5rem);
+    left: var(--layout-margin);
+    width: calc(100% - var(--layout-margin) * 2);
+    @include from__tablet--landscape {
+      top: toScale(4rem);
+      left: calc(var(--layout-column-width) * 2 + var(--layout-gutter) * 3);
+      width: calc(var(--layout-column-width) * 10 + var(--layout-gutter) * 9);
+    }
   }
 
   &__observer {
@@ -163,7 +177,6 @@ const emit = defineEmits<{
     top: 0;
     left: 0;
     width: 100%;
-    // height: 1px;
 
     &--in,
     &--out {
@@ -182,9 +195,13 @@ const emit = defineEmits<{
     z-index: 1;
 
     background-color: var(--light-grey);
-    padding-top: toScale(1.2rem);
+    padding-top: 1.2rem;
 
     @include grid;
+
+    @include from__tablet--landscape {
+      padding-top: toScale(1.2rem);
+    }
 
     &::after {
       content: '';
@@ -193,23 +210,48 @@ const emit = defineEmits<{
       left: 0;
       width: 100%;
       transform: translateY(100%);
-      height: toScale(10.4rem);
+      height: toScale(3.2rem, 37.5rem);
       background-color: var(--light-grey);
+      @include from__tablet--landscape {
+        height: toScale(10.4rem);
+      }
     }
 
     &__title {
+      font-family: 'HelveticaNowDisplayBold' !important;
       @include t-black;
       @include t-b1;
-      @include gap(2, 'left', 'desktop');
-      @include columns(4, 'desktop');
+      @include columns(8, 'mobile');
+      @include from__tablet--landscape {
+        font-family: inherit;
+        @include t-b1;
+        @include gap(2, 'left', 'desktop');
+        @include columns(4, 'desktop');
+      }
     }
 
     &__list {
-      @include columns(6, 'desktop');
+      @include columns(8, 'mobile');
+      @include from__tablet--landscape {
+        @include columns(6, 'desktop');
+      }
+
       &__item {
         display: flex;
         align-items: center;
         justify-content: space-between;
+
+        padding-top: 0.2rem;
+        @include from__tablet--landscape {
+          padding-top: 0;
+        }
+
+        &:first-child {
+          padding-top: 0.6rem;
+          @include from__tablet--landscape {
+            padding-top: 0;
+          }
+        }
 
         &__label {
           will-change: opacity;
@@ -219,9 +261,11 @@ const emit = defineEmits<{
 
         &__number,
         &__link {
-          width: toColumns(2);
           @include t-black;
           @include t-number;
+          @include from__tablet--landscape {
+            width: toColumns(2);
+          }
         }
 
         &__link {

@@ -8,6 +8,7 @@
     <div class="home__about__testimonials__testimonial__quote">
       <SvgQuote :data-pos="pos" />
       <p
+        ref="quoteEl"
         :class="[
           'home__about__testimonials__testimonial__quote__label',
           { 'home__about__testimonials__testimonial__quote__label--expanded': isExpanded },
@@ -18,7 +19,7 @@
     </div>
     <ClientOnly>
       <button
-        v-if="isMobileLayout && !isExpanded"
+        v-if="isMobileLayout && !isExpanded && isExpandible"
         class="home__about__testimonials__testimonial__read-more"
         @click="toggle">
         Read More
@@ -48,7 +49,11 @@ const props = defineProps<{
 }>()
 
 const { isMobileLayout } = useDevice()
+const { onResize } = useResize()
 const isExpanded = ref<boolean>(false)
+const isExpandible = ref<boolean>(true)
+
+const quoteEl = ref<HTMLElement>()
 
 watch(
   () => props.active,
@@ -69,8 +74,21 @@ watch(isExpanded, () => {
   emit('update:expanded', isExpanded.value)
 })
 
+watch(onResize, updateSize)
+
+onMounted(() => {
+  updateSize()
+})
+
 function toggle() {
   isExpanded.value = !isExpanded.value
+}
+
+function updateSize() {
+  if (quoteEl.value) {
+    const { clientHeight, scrollHeight } = quoteEl.value
+    isExpandible.value = Math.abs(clientHeight - scrollHeight) > 1
+  }
 }
 
 const emit = defineEmits(['update:expanded'])
@@ -112,12 +130,17 @@ const emit = defineEmits(['update:expanded'])
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
-      line-clamp: 5;
-      -webkit-line-clamp: 5;
+      line-clamp: 8;
+      -webkit-line-clamp: 8;
       -webkit-box-orient: vertical;
       padding-bottom: toScale(1rem);
       will-change: opacity;
       @include t-h2;
+
+      @include from__tablet--landscape {
+        line-clamp: 5;
+        -webkit-line-clamp: 5;
+      }
 
       &--expanded {
         line-clamp: unset;
@@ -135,6 +158,7 @@ const emit = defineEmits(['update:expanded'])
     text-decoration: underline;
     font-family: 'HelveticaNowDisplayBold' !important;
     margin: toScale(1.2rem, 37.5rem) auto toScale(1.2rem, 37.5rem);
+    @include t-black;
     @include t-b1;
   }
 

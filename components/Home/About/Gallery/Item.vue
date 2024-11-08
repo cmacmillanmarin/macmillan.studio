@@ -38,7 +38,13 @@ const { isMobileLayout } = useDevice()
 const width = ref<number>(0)
 const height = ref<number>(0)
 const loaded = ref<boolean>(false)
-const columns = ref<number>(props.data.columns)
+const columns = computed<number>(() => {
+  if (isMobileLayout.value) {
+    if (props.data.columns <= 3) return 4
+    else return 6
+  }
+  return props.data.columns
+})
 
 const video = ref<Video | undefined>(props.data.video)
 

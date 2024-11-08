@@ -87,9 +87,13 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 .home__about__awards {
   position: relative;
   min-height: var(--vh);
-  padding: 0 0 toScale(8rem);
   opacity: 0.000001;
+  padding: 0 0 toScale(6rem, 37.5rem);
   will-change: opacity, transform;
+
+  @include from__tablet--landscape {
+    padding: 0 0 toScale(8rem);
+  }
 
   &__hint {
     position: relative;
@@ -97,19 +101,22 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     @include grid;
 
     &__label {
-      padding-top: toScale(2rem);
-      padding-bottom: toScale(2rem);
+      @include columns(8, 'mobile');
       @include t-h2;
-      @include columns(10, 'desktop');
-      @include gap(2, 'left', 'desktop');
+
+      @include from__tablet--landscape {
+        padding-top: toScale(2rem);
+        padding-bottom: toScale(2rem);
+        @include columns(10, 'desktop');
+        @include gap(2, 'left', 'desktop');
+      }
 
       &__indent {
-        --width: calc(
-          min(100vw, var(--layout-max-width)) - var(--layout-margin) * 2 - var(--layout-gutter) * 11
-        );
-        --column-width: calc(var(--width) / 12);
-        width: calc(var(--column-width) * 4 + var(--layout-gutter) * 4);
+        width: calc(toColumns(1) + var(--layout-gutter));
         display: inline-block;
+        @include from__tablet--landscape {
+          width: calc(toColumns(4) + var(--layout-gutter));
+        }
       }
     }
   }
@@ -134,7 +141,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
     &__logo {
       position: absolute;
-      top: toScale(3.8rem);
+      top: toScale(3.2rem, 37.5rem);
       left: var(--layout-margin);
       z-index: 9;
       mix-blend-mode: color;
@@ -146,6 +153,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       }
 
       @include from__desktop--x-large {
+        top: toScale(3.8rem);
         left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
       }
 

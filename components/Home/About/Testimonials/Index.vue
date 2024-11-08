@@ -243,7 +243,7 @@ const emit = defineEmits(['update-expanded'])
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    padding: toScale(5.2rem, 37.5rem) var(--layout-margin) 0;
+    padding: toScale(4rem, 37.5rem) var(--layout-margin) 0;
 
     @include from__tablet--landscape {
       justify-content: space-between;
@@ -296,7 +296,7 @@ const emit = defineEmits(['update-expanded'])
     &__buttons {
       display: flex;
       column-gap: 0.4rem;
-      margin-top: toScale(3.2rem, 37.5rem);
+      margin-top: toScale(2.8rem, 37.5rem);
 
       @include from__tablet--landscape {
         margin-top: 0;
