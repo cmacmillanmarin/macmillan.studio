@@ -20,14 +20,28 @@
           <p class="home__about__intro__content__thumbnail__credit">{{ data.credit }}</p>
         </div>
         <div class="home__about__intro__content__detail">
-          <div class="home__about__intro__content__detail__text" v-html="data.detail" />
+          <div
+            :class="[
+              'home__about__intro__content__detail__text',
+              {
+                'home__about__intro__content__detail__text--all':
+                  isMobileLayout && allContentVisible,
+              },
+            ]"
+            v-html="data.detail" />
+          <button
+            v-if="isMobileLayout && !allContentVisible"
+            class="home__about__intro__content__detail__read-more"
+            @click="onReadMore">
+            Read More
+          </button>
         </div>
       </div>
 
       <HomeAboutClients :data="data.clients" />
 
       <div class="home__about__intro__collaborator">
-        <Separator :left="5" />
+        <Separator :left="isMobileLayout ? 8 : 5" />
         <div class="home__about__intro__collaborator__title">
           <p class="home__about__intro__collaborator__title__label">
             {{ data.collaborator.title }}
@@ -81,10 +95,15 @@ const { $scene }: any = useNuxtApp()
 const store = useStore()
 const { updateSection } = store
 const { section } = storeToRefs(store)
-const { direction, scrollUpdated } = storeToRefs(useScrollStore())
+
+const scrollStore = useScrollStore()
+const { updateScroll } = scrollStore
+const { direction, scrollUpdated } = storeToRefs(scrollStore)
 
 const { toScale } = useCss()
 const { getBounding } = useVirtualScrollAndThreeTools()
+
+const { isMobileLayout } = useDevice()
 
 const introEl = ref<HTMLElement>()
 const thumbnailImageLoaded = ref<boolean>(false)
@@ -94,6 +113,7 @@ const collaboratorImageEl = ref<typeof CustomImage>()
 const galleryEl = ref<typeof HomeAboutGallery>()
 
 const imagesFade = ref<number>(0)
+const allContentVisible = ref<boolean>(false)
 
 watch(thumbnailImageLoaded, () => {
   if (thumbnailImageEl.value && thumbnailImageLoaded.value) {
@@ -147,7 +167,7 @@ function updateImagePositions() {
     id: 'about-thumbnail',
     position: { x: thumbnailImageBounding.left, y: thumbnailImageBounding.top },
     size: { x: thumbnailImageWidth, y: thumbnailImageHeight, z: 1 },
-    border: toScale(16),
+    border: toScale(isMobileLayout.value ? 8 : 16),
   })
   const collaboratorImageBounding = getBounding(collaboratorImageEl.value.el)
   const collaboratorImageWidth = collaboratorImageEl.value.el.clientWidth
@@ -156,8 +176,14 @@ function updateImagePositions() {
     id: 'about-collaborator-thumbnail',
     position: { x: collaboratorImageBounding.left, y: collaboratorImageBounding.top },
     size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
-    border: toScale(16),
+    border: toScale(isMobileLayout.value ? 8 : 16),
   })
+}
+
+async function onReadMore() {
+  allContentVisible.value = true
+  await nextTick()
+  updateScroll()
 }
 
 function onImagesFadeUpdate() {
@@ -183,7 +209,11 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .home__about {
   position: relative;
-  padding: toScale(8rem) 0 0;
+  padding: toScale(4rem, 37.5rem) 0 0;
+
+  @include from__tablet--landscape {
+    padding: toScale(8rem) 0 0;
+  }
 
   &__intro {
     min-height: var(--vh);
@@ -197,20 +227,22 @@ onBeforeUnmount(() => {
       @include grid;
 
       &__label {
-        padding-bottom: toScale(8rem);
-
+        padding-bottom: toScale(3.2rem, 37.5rem);
+        @include columns(8, 'mobile');
         @include t-h2;
-        @include columns(10, 'desktop');
-        @include gap(2, 'left', 'desktop');
+
+        @include from__tablet--landscape {
+          padding-bottom: toScale(8rem);
+          @include columns(10, 'desktop');
+          @include gap(2, 'left', 'desktop');
+        }
 
         &__indent {
-          --width: calc(
-            min(100vw, var(--layout-max-width)) - var(--layout-margin) * 2 - var(--layout-gutter) *
-              11
-          );
-          --column-width: calc(var(--width) / 12);
-          width: calc(var(--column-width) * 4 + var(--layout-gutter) * 4);
+          width: calc(toColumns(1) + var(--layout-gutter));
           display: inline-block;
+          @include from__tablet--landscape {
+            width: calc(toColumns(4) + var(--layout-gutter));
+          }
         }
       }
     }
@@ -219,31 +251,80 @@ onBeforeUnmount(() => {
       @include grid;
 
       &__thumbnail {
-        @include columns(2, 'desktop');
-        @include gap(2, 'left', 'desktop');
+        @include columns(3, 'mobile');
+
+        @include from__tablet--landscape {
+          @include columns(2, 'desktop');
+          @include gap(2, 'left', 'desktop');
+        }
 
         .custom-image {
           aspect-ratio: 1;
           display: block;
-          margin-bottom: toScale(1.2rem);
+          margin-bottom: 1.2rem;
           opacity: 0;
+          width: calc(100% + var(--layout-gutter));
+          @include from__tablet--landscape {
+            width: 100%;
+            margin-bottom: 1.2rem;
+          }
         }
 
         &__credit {
+          white-space: nowrap;
           @include t-b1;
         }
       }
 
       &__detail {
-        @include columns(6, 'desktop');
-        @include gap(2, 'left', 'desktop');
+        @include columns(4, 'mobile');
+        @include gap(1, 'left', 'mobile');
+
+        @include from__tablet--landscape {
+          @include columns(6, 'desktop');
+          @include gap(2, 'left', 'desktop');
+        }
+
         &__text {
-          column-count: 2;
-          column-gap: var(--layout-gutter);
-          @include t-b3;
-          p {
-            margin-bottom: toScale(1rem);
+          display: -webkit-box;
+          line-clamp: 14;
+          -webkit-line-clamp: 14;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+
+          &--all {
+            display: block;
+            line-clamp: unset;
+            -webkit-box-orient: unset;
+            overflow: visible;
           }
+
+          @include from__tablet--landscape {
+            display: block;
+            line-clamp: unset;
+            -webkit-box-orient: unset;
+            overflow: visible;
+            column-count: 2;
+            column-gap: var(--layout-gutter);
+          }
+
+          p {
+            margin-bottom: toScale(1rem, 37.5rem);
+            @include t-b1;
+            @include from__tablet--landscape {
+              margin-bottom: toScale(1.2rem);
+            }
+          }
+        }
+
+        &__read-more {
+          border: none;
+          padding: 0;
+          width: max-content;
+          text-decoration: underline;
+          font-family: 'HelveticaNowDisplayBold' !important;
+          margin-top: toScale(1.2rem, 37.5rem);
+          @include t-b1;
         }
       }
     }
@@ -255,37 +336,53 @@ onBeforeUnmount(() => {
       @include grid;
 
       .separator {
-        margin-left: calc(var(--layout-column-width) * 4 + var(--layout-gutter) * 5);
-        width: calc(var(--layout-column-width) * 5 + var(--layout-gutter) * 4);
+        margin-left: var(--layout-margin);
+        width: calc(var(--layout-column-width) * 8 + var(--layout-gutter) * 7);
+        @include from__tablet--landscape {
+          margin-left: calc(var(--layout-column-width) * 4 + var(--layout-gutter) * 5);
+          width: calc(var(--layout-column-width) * 5 + var(--layout-gutter) * 4);
+        }
       }
 
       &__title {
-        @include gap(4, 'left', 'desktop');
-        @include columns(2, 'desktop');
+        @include columns(4, 'mobile');
+
+        @include from__tablet--landscape {
+          @include gap(4, 'left', 'desktop');
+          @include columns(2, 'desktop');
+        }
 
         &__label {
-          margin-top: toScale(1.2rem);
+          margin-top: 1.2rem;
           @include t-b1;
         }
       }
 
       &__content {
-        @include columns(3, 'desktop');
-        @include gap(1, 'right', 'desktop');
+        @include columns(4, 'mobile');
+        @include from__tablet--landscape {
+          @include columns(3, 'desktop');
+          @include gap(1, 'right', 'desktop');
+        }
         &__label {
-          margin-top: toScale(1.2rem);
-          @include t-b3;
-          p {
-            margin-bottom: toScale(1rem);
-          }
+          margin-top: 1.2rem;
+          @include t-b1;
         }
       }
 
       &__thumbnail {
-        @include columns(2, 'desktop');
+        margin-top: 3.2rem;
+        margin-left: calc(toColumns(4) + var(--layout-gutter));
+        @include columns(4, 'mobile');
+
+        @include from__tablet--landscape {
+          margin-top: 0;
+          margin-left: 0;
+          @include columns(2, 'desktop');
+        }
 
         .custom-image {
-          margin-bottom: toScale(1.2rem);
+          margin-bottom: 1.2rem;
           opacity: 0;
         }
 

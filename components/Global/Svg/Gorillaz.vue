@@ -15,7 +15,10 @@
 .svg__gorillaz {
   fill: none;
   display: block;
-  width: toScale(16.32rem);
+  width: toScale(8.16rem, 37.5rem);
+  @include from__tablet--landscape {
+    width: toScale(16.32rem);
+  }
   &__path {
     fill: black;
     fill-rule: evenodd;

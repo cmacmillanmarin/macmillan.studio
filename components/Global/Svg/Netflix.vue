@@ -10,7 +10,10 @@
 .svg__netflix {
   fill: none;
   display: block;
-  width: toScale(14.8rem);
+  width: toScale(7.4rem, 37.5rem);
+  @include from__tablet--landscape {
+    width: toScale(14.8rem);
+  }
   &__path {
     fill: black;
   }

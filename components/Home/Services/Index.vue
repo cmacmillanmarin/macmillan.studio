@@ -126,12 +126,11 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       @include gap(2, 'left', 'desktop');
 
       &__indent {
-        --width: calc(
-          min(100vw, var(--layout-max-width)) - var(--layout-margin) * 2 - var(--layout-gutter) * 11
-        );
-        --column-width: calc(var(--width) / 12);
-        width: calc(var(--column-width) * 4 + var(--layout-gutter) * 4);
+        width: calc(toColumns(2) + var(--layout-gutter));
         display: inline-block;
+        @include from__tablet--landscape {
+          width: calc(toColumns(4) + var(--layout-gutter));
+        }
       }
     }
   }

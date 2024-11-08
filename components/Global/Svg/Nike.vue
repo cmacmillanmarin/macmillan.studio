@@ -10,7 +10,10 @@
 .svg__nike {
   fill: none;
   display: block;
-  width: toScale(12rem);
+  width: toScale(6rem, 37.5rem);
+  @include from__tablet--landscape {
+    width: toScale(12rem);
+  }
   &__path {
     fill: black;
     fill-rule: evenodd;

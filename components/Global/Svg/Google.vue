@@ -10,7 +10,10 @@
 .svg__google {
   fill: none;
   display: block;
-  width: toScale(14rem);
+  width: toScale(7rem, 37.5rem);
+  @include from__tablet--landscape {
+    width: toScale(14rem);
+  }
   &__path {
     fill: black;
   }
