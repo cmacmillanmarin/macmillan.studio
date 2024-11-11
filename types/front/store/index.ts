@@ -35,6 +35,7 @@ export interface State {
   section: Section
   sectionThrottle: boolean
   header: boolean
+  headerOverlay: boolean
   cursor: Cursor
   inReel: boolean
   inProject: boolean

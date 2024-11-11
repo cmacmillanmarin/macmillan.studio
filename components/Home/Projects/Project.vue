@@ -104,7 +104,7 @@ const route = useRoute()
 const router = useRouter()
 
 const store = useStore()
-const { section, isInProjectEntered } = storeToRefs(store)
+const { headerOverlay, section, isInProjectEntered } = storeToRefs(store)
 const scrollStore = useScrollStore()
 const { disableScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { current } = storeToRefs(scrollStore)
@@ -154,11 +154,6 @@ const opacity = ref<number>(1)
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
 
-watch(isInProjectEntered, () => {
-  if (isInProjectEntered.value) inProject.value = true
-  else inProject.value = !!route.params.slug
-})
-
 // For selected projects
 const active = computed<boolean>(
   () =>
@@ -201,6 +196,11 @@ let _target: Plane = {
   order: 0,
 }
 
+watch(isInProjectEntered, () => {
+  if (isInProjectEntered.value) inProject.value = true
+  else inProject.value = !!route.params.slug
+})
+
 let playPromise: Promise<void> | undefined = undefined
 watch([inView, inTransition, videoEl], () => {
   if (inTransition.value) return
@@ -219,13 +219,14 @@ watch([inView, inTransition, videoEl], () => {
   }
 })
 
-watch(inProject, () => {
+watch([inProject, headerOverlay], () => {
+  const hidden = inProject.value || headerOverlay.value
   $scene.updateObject({
     id: projectId.value,
-    onClick: inProject.value ? null : openProject,
+    onClick: hidden ? null : openProject,
   })
   gsap.killTweensOf(opacity)
-  if (inProject.value) {
+  if (hidden) {
     opacity.value = 0
     onOpacityUpdate()
   } else {

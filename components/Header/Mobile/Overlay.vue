@@ -35,6 +35,7 @@ defineProps<{
 }>()
 
 const route = useRoute()
+const router = useRouter()
 
 const scrollStore = useScrollStore()
 const { disableScroll } = scrollStore
@@ -46,7 +47,7 @@ const el = ref<HTMLElement>()
 watch(
   () => route.fullPath,
   () => {
-    emit('close')
+    !transition.value && emit('close')
   }
 )
 
@@ -61,6 +62,7 @@ async function enter() {
 
 onBeforeMount(() => {
   disableScroll(true)
+  router.push({ hash: undefined })
 })
 
 onBeforeUnmount(() => {

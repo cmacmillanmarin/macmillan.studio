@@ -145,6 +145,9 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
   &__mobile-list {
     padding: 4rem var(--layout-margin) 0;
+    .accordion__title__content__number {
+      font-family: 'HelveticaNowDisplayBold' !important;
+    }
     .accordion__title__content__label {
       font-family: 'HelveticaNowDisplayBold' !important;
       @include t-b1;

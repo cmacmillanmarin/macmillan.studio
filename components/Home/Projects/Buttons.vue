@@ -187,8 +187,8 @@ const emit = defineEmits(['update-list'])
 
       &__count {
         position: absolute;
-        transform: translate(toScale(0.4rem, 37.5rem), toScale(-0.1rem, 37.5rem));
-        @include t-b3;
+        transform: translate(toScale(0.4rem, 37.5rem), toScale(0rem, 37.5rem));
+        @include t-number-small;
         @include from__tablet--landscape {
           transform: translate(toScale(0.6rem), toScale(-0.4rem));
         }

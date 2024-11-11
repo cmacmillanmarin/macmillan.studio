@@ -50,6 +50,8 @@ class Controller {
       parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
       10
 
+    this.touch = !!window.getComputedStyle(document.body, ':after').getPropertyValue('--touch')
+
     this._onClick = null
     this._onMouseMovement = null
 
@@ -367,7 +369,7 @@ class Controller {
 
         if (object.onIntersect) object.onIntersect(hovered)
 
-        const hovered = this.intersects.includes(object.mesh)
+        const hovered = this.intersects.includes(object.mesh) && !this.touch
         const clickable = hovered && object.onClick
         const pixelated = clickable && !object.noPixel
         const wasPixelated = uniforms.uPixel.value === 1
@@ -618,6 +620,8 @@ class Controller {
       parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
       10
 
+    this.touch = !!window.getComputedStyle(document.body, ':after').getPropertyValue('--touch')
+
     this.updateLogoScale()
 
     this.renderer.setSize(size.x, size.y)
@@ -683,6 +687,7 @@ class Controller {
   }
 
   onClick(e) {
+    if (this.touch) return
     for (const mesh of this.intersects) {
       const object = this.objects.find(obj => obj.mesh === mesh)
       if (object && object.onClick) {

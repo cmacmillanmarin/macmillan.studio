@@ -29,6 +29,7 @@ const { cursor, section } = storeToRefs(useStore())
 
 const { addTicker, killTicker } = useRaf()
 const { x: targetX, y: targetY } = useMouse()
+const { touch } = useDevice()
 
 const el = ref<HTMLElement>()
 
@@ -36,8 +37,12 @@ let _x: number = 0
 let _y: number = 0
 let _visible: boolean = false
 
+watch(touch, () => {
+  touch.value ? killTicker(move) : addTicker(move)
+})
+
 watch(cursor, () => {
-  if (!el.value) return
+  if (!el.value || touch.value) return
   const cursorIn = cursor.value !== 'default'
   cursorIn && (_visible = true)
   const scale = cursorIn ? 1 : 0
@@ -55,7 +60,7 @@ watch(cursor, () => {
 })
 
 onMounted(() => {
-  addTicker(move)
+  !touch.value && addTicker(move)
 })
 
 function move() {

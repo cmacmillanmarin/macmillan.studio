@@ -147,6 +147,18 @@
   }
 }
 
+@mixin t-number-small {
+  font-size: toScaleUp(1.1rem);
+  line-height: toScaleUp(1.1rem);
+
+  @include t-b--bold;
+
+  @include from__desktop {
+    font-size: toScale(1.4rem);
+    line-height: toScale(2rem);
+  }
+}
+
 @mixin t-input {
   font-size: toScaleUp(1.6rem);
   line-height: 1;

@@ -52,13 +52,13 @@
               @enter="transitionShuffleIn"
               @leave="transitionDone"
               @click="toggleMobileOverlay">
-              <SvgDots v-if="mobileButtonIcon && !mobileOverlay" />
+              <SvgDots v-if="mobileButtonIcon && !headerOverlay" />
               <SvgAspa v-else />
             </transition>
           </button>
         </nav>
       </transition>
-      <HeaderMobileOverlay v-if="mobileOverlay" :data="links" @close="toggleMobileOverlay" />
+      <HeaderMobileOverlay v-if="headerOverlay" :data="links" @close="toggleMobileOverlay" />
     </ClientOnly>
 
     <div class="header__bottom" />
@@ -81,7 +81,9 @@ import { toPx, toPercentage } from '~/utils'
 
 const { $scene }: any = useNuxtApp()
 
-const { header, section, gridType, isInProject, isInReel } = storeToRefs(useStore())
+const store = useStore()
+const { updateHeaderOverlay } = store
+const { header, headerOverlay, section, gridType, isInProject, isInReel } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScrollTarget } = scrollStore
@@ -103,7 +105,6 @@ const links = computed<HeaderLinks>(() => {
 
 const el = ref<HTMLElement>()
 const entered = ref<boolean>(false)
-const mobileOverlay = ref<boolean>(false)
 const mobileButton = ref<boolean>(false)
 const mobileButtonIcon = ref<boolean>(false)
 const activeDots = computed<boolean>(
@@ -137,7 +138,7 @@ watch(current, () => {
 })
 
 watch([isInProject, isInReel], () => {
-  if (!entered.value) return
+  if (!entered.value || mobileButton.value) return
   isInProject.value || isInReel.value ? leave() : enter()
 })
 
@@ -192,7 +193,7 @@ function mobileLeave(el: Element, done: () => void) {
 }
 
 function toggleMobileOverlay() {
-  mobileOverlay.value = !mobileOverlay.value
+  updateHeaderOverlay(!headerOverlay.value)
 }
 
 function scrollDown() {
@@ -228,6 +229,7 @@ function scrollDown() {
     p {
       @include t-b1;
     }
+
     button {
       display: block;
       padding: 0;

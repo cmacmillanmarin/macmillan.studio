@@ -43,11 +43,18 @@ function onMouseEnter() {
 <style lang="scss">
 .header__link {
   position: relative;
+
   &__anchor {
     color: var(--black);
     will-change: opacity;
+    font-family: 'HelveticaNowDisplayBold' !important;
     @include t-b1;
+    @include from__tablet--landscape {
+      font-family: 'HelveticaNowDisplayMedium' !important;
+      @include t-b1;
+    }
   }
+
   &__active {
     position: absolute;
     bottom: 0;
