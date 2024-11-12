@@ -33,7 +33,9 @@
           type="referral"
           :content="true"
           aria-label="MacMillan Studio logo"
-          data-tab-fixed />
+          data-tab-fixed
+          @mouseenter="onMouseEnter"
+          @mouseleave="onMouseLeave" />
       </div>
     </nav>
 
@@ -42,6 +44,9 @@
         <button @click="scrollDown">
           <SvgPixelArrow />
         </button>
+      </nav>
+      <nav v-if="isMobileLayout" ref="logoMobileEl" class="header__nav__logo--mobile">
+        <button @click="scrollUp" />
       </nav>
       <transition mode="out-in" :css="false" @enter="mobileEnter" @leave="mobileLeave">
         <nav v-if="mobileButton" class="header__nav--mobile">
@@ -82,16 +87,16 @@ import { toPx, toPercentage } from '~/utils'
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateHeaderOverlay } = store
+const { updateHeaderLogo, updateCursor, updateHeaderOverlay } = store
 const { header, headerOverlay, section, gridType, isInProject, isInReel } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScrollTarget } = scrollStore
 const { current, bounding } = storeToRefs(scrollStore)
 
-const { vh } = useResize()
+const { vw, vh } = useResize()
 const { isMobileLayout } = useDevice()
-const { layoutMargin } = useCss()
+const { layoutMargin, toScale } = useCss()
 
 const links = computed<HeaderLinks>(() => {
   const links = [
@@ -104,6 +109,7 @@ const links = computed<HeaderLinks>(() => {
 })
 
 const el = ref<HTMLElement>()
+const logoMobileEl = ref<HTMLElement>()
 const entered = ref<boolean>(false)
 const mobileButton = ref<boolean>(false)
 const mobileButtonIcon = ref<boolean>(false)
@@ -135,6 +141,17 @@ watch(current, () => {
     y: toPercentage(100 * progress),
     scale: 1 - 0.75 * progress,
   })
+
+  if (logoMobileEl.value) {
+    const scale = 1 - (1 - 0.416666) * progress
+    const x = vw.value * 0.5 - 96 * 0.5 - layoutMargin.value
+    const y = (vh.value - layoutMargin.value * 2 - toScale(75) - 96) * -1
+    gsap.set(logoMobileEl.value, {
+      scale,
+      x: toPx(x * progress),
+      y: toPx(y * progress),
+    })
+  }
 })
 
 watch([isInProject, isInReel], () => {
@@ -192,8 +209,23 @@ function mobileLeave(el: Element, done: () => void) {
   })
 }
 
+function onMouseEnter() {
+  updateHeaderLogo(true)
+  updateCursor('default')
+}
+
+function onMouseLeave() {
+  updateHeaderLogo(false)
+}
+
 function toggleMobileOverlay() {
   updateHeaderOverlay(!headerOverlay.value)
+}
+
+function scrollUp(e: MouseEvent | TouchEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+  updateScrollTarget(0)
 }
 
 function scrollDown() {
@@ -319,13 +351,34 @@ function scrollDown() {
       position: relative;
       will-change: transform;
 
+      &--mobile {
+        position: absolute;
+        left: 50%;
+        bottom: calc(var(--layout-margin) + toScale(7.5rem, 37.5rem));
+        width: 9.6rem;
+        height: 9.85rem;
+
+        transform: translateX(-50%);
+        transform-origin: top right;
+        will-change: transform;
+
+        button {
+          display: block;
+          width: 100%;
+          height: 100%;
+          padding: 0;
+          border: none;
+          pointer-events: auto;
+        }
+      }
+
       .custom-link {
         position: absolute;
-        bottom: 0;
+        bottom: 0.5rem;
         right: 0;
         display: block;
-        width: 16rem;
-        height: 16rem;
+        width: 16.1rem;
+        height: 16.3rem;
         will-change: transform;
         transform-origin: top right;
       }

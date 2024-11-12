@@ -71,7 +71,7 @@ const { $scene }: any = useNuxtApp()
 
 const store = useStore()
 const { updateHeader, updateLoading, updateSection, updateInReel } = store
-const { section, gridType, isInReel, isInProjectEntered } = storeToRefs(store)
+const { section, gridType, headerLogo, isInReel, isInProjectEntered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
@@ -168,8 +168,11 @@ watch(isInProjectEntered, () => {
   else videoInProject.value = !!route.params.slug
 })
 
-watch(videoInProject, () => {
-  $scene.updateObject({ id: 'reel', onClick: videoInProject.value ? undefined : goToReel })
+watch([headerLogo, videoInProject], () => {
+  $scene.updateObject({
+    id: 'reel',
+    onClick: videoInProject.value || headerLogo.value ? null : goToReel,
+  })
 })
 
 watch([section, videoInView, videoInProject], () => {

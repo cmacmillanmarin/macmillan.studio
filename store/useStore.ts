@@ -13,6 +13,7 @@ export default defineStore('use-store', {
     sectionThrottle: false,
     cursor: 'default',
     header: false,
+    headerLogo: false,
     headerOverlay: false,
     inReel: false,
     inProject: false,
@@ -67,6 +68,9 @@ export default defineStore('use-store', {
     },
     updateHeader(state: boolean) {
       this.header = state
+    },
+    updateHeaderLogo(state: boolean) {
+      this.headerLogo = state
     },
     updateHeaderOverlay(state: boolean) {
       this.headerOverlay = state
