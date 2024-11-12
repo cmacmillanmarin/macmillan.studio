@@ -27,6 +27,7 @@ export default function useScroll() {
     disableScroll,
   } = scrollStore
   const {
+    bounding,
     scrollMode,
     scrollPosition,
     scrollDisabled,
@@ -108,6 +109,11 @@ export default function useScroll() {
   watch([onResize, scrollUpdate], async () => {
     await nextTick()
     update()
+  })
+
+  watch(bounding, () => {
+    const { $scene }: any = useNuxtApp()
+    $scene?.ready && $scene.updateScrollBounding(bounding.value)
   })
 
   watch(touch, () => {

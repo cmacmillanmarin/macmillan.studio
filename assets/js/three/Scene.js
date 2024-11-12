@@ -32,7 +32,6 @@ class Controller {
     this.scene = null
     this.camera = null
     this.renderer = null
-    this.bounding = null
     this.main = null
     this.frame = 0
     this.isMobileLayout = false
@@ -56,6 +55,7 @@ class Controller {
     this.touchTime = 0
 
     this.bounding = 0
+    this.scrollBounding = 0
 
     this._onClick = null
     this._onMouseMovement = null
@@ -488,25 +488,40 @@ class Controller {
   renderLogo() {
     let scrollTarget = this.size.y
     let scrollProgress = Math.min(1, this.y / scrollTarget)
+
+    let scrollLeaveInit = this.scrollBounding - this.size.y
+    let scrollLeaveEnd = this.scrollBounding - this.logoMargin * 2 - 160
+    let scrollLeaveProgress = Math.max(
+      0,
+      Math.min(1, (this.y - scrollLeaveInit) / (scrollLeaveEnd - scrollLeaveInit))
+    )
+    let scrollLeaveGap = Math.max(0, this.y - scrollLeaveEnd)
+
     let scrollDistance = 0
     let scrollGap = 0
-    let logoCurrentScale = 1 - (1 - this.logoTargetScale) * scrollProgress
+    let logoCurrentScale =
+      1 -
+      (1 - this.logoTargetScale) * scrollProgress +
+      (1 - this.logoTargetScale) * scrollLeaveProgress
     let logoGap = 0
     let screenGap = 0
     let xOffset = 0
     let yOffset = 0
 
     if (!this.isMobileLayout) {
-      scrollDistance = this.size.y - this.logoSize * this.logoTargetScale - this.logoMargin * 2
+      if (scrollLeaveProgress === 0) {
+        scrollDistance = this.size.y - this.logoSize * this.logoTargetScale - this.logoMargin * 2
+      } else {
+        scrollDistance = this.size.y - this.logoSize * logoCurrentScale - this.logoMargin * 2
+      }
+
       scrollGap = scrollDistance * scrollProgress
       logoGap = this.logoSize * logoCurrentScale * 0.5 + this.logoMargin
       screenGap = Math.max(0, this.size.x - 1800) * 0.5
       xOffset = -logoGap - screenGap
-      yOffset = logoGap + scrollGap
+      yOffset = logoGap + scrollGap + scrollLeaveGap
     } else {
-      const mobileVideoBottom = this.toScale(260 + 200)
       const mobileHeaderTop = this.toScale(67) + this.logoSize * 0.5 + this.toScale(20)
-      const mobileSpace = this.size.y - mobileVideoBottom - mobileHeaderTop
       const mobileInitY = mobileHeaderTop
       const scrollDistanceX =
         this.size.x * 0.5 - this.logoSize * this.logoTargetScale * 0.5 - this.toScale(16)
@@ -689,6 +704,10 @@ class Controller {
     const rotation = this.logo.rotation.y % Math.PI
     const distanceToMiddlePoint = Math.abs(rotation - Math.PI * 0.5) / (Math.PI * 0.5)
     this.logoLight.intensity = maxIntensity - distanceToMiddlePoint * maxIntensity
+  }
+
+  updateScrollBounding(value) {
+    this.scrollBounding = value
   }
 
   toScale(n) {

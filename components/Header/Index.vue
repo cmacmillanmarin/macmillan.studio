@@ -133,22 +133,25 @@ watch(current, () => {
   const enterProgress = Math.min(1, current.value / vh.value)
 
   const leaveInit = bounding.value - vh.value
-  const leaveEnd = bounding.value - layoutMargin.value - 160
+  const leaveEnd = bounding.value - layoutMargin.value * 2 - 160
+  const leaveDistance = leaveEnd - leaveInit
   const leaveProgress = Math.max(
     0,
     Math.min(1, (current.value - leaveInit) / (leaveEnd - leaveInit))
   )
 
-  const progress = enterProgress - leaveProgress
+  const progress = enterProgress
 
   mobileButton.value =
     isMobileLayout.value && current.value > vh.value * 0.5 && !isInProject.value && !isInReel.value
 
   gsap.set(el.value, { y: toPx(y) })
-  gsap.set('.header__nav__logo', { y: toPx(threshold * progress * -1) })
+  gsap.set('.header__nav__logo', {
+    y: toPx(threshold * progress * -1 + leaveDistance * leaveProgress),
+  })
   gsap.set('.header__nav__logo .custom-link', {
     y: toPercentage(100 * progress),
-    scale: 1 - 0.75 * progress,
+    scale: 1 - 0.75 * progress + 0.75 * leaveProgress,
   })
 
   if (logoMobileEl.value) {
