@@ -55,6 +55,8 @@ class Controller {
     this.touchStartY = 0
     this.touchTime = 0
 
+    this.bounding = 0
+
     this._onClick = null
     this._onMouseMovement = null
 

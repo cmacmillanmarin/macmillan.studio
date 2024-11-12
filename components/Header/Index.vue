@@ -130,7 +130,16 @@ watch(current, () => {
   const y = Math.min(0, bounding.value - vh.value - current.value)
 
   const threshold = vh.value - layoutMargin.value * 2
-  const progress = Math.min(1, current.value / vh.value)
+  const enterProgress = Math.min(1, current.value / vh.value)
+
+  const leaveInit = bounding.value - vh.value
+  const leaveEnd = bounding.value - layoutMargin.value - 160
+  const leaveProgress = Math.max(
+    0,
+    Math.min(1, (current.value - leaveInit) / (leaveEnd - leaveInit))
+  )
+
+  const progress = enterProgress - leaveProgress
 
   mobileButton.value =
     isMobileLayout.value && current.value > vh.value * 0.5 && !isInProject.value && !isInReel.value
