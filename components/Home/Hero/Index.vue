@@ -297,7 +297,7 @@ function closeReel() {
   updateScrollTargetId('projects')
   $scene.updateObject({ id: 'reel', onClick: goToReel, noPixel: false, cursor: 'play' })
   if (videoEl.value) {
-    videoEl.value.src = '/assets/video/short.webm'
+    videoEl.value.src = '/assets/video/reel--short.webm'
     videoEl.value.setAttribute('type', 'video/webm')
     videoEl.value.muted = true
     videoEl.value.loop = true

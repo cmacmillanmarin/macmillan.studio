@@ -51,6 +51,9 @@ class Controller {
       10
 
     this.touch = !!window.getComputedStyle(document.body, ':after').getPropertyValue('--touch')
+    this.touchStartX = 0
+    this.touchStartY = 0
+    this.touchTime = 0
 
     this._onClick = null
     this._onMouseMovement = null
@@ -686,30 +689,9 @@ class Controller {
     this.logoLight.intensity = maxIntensity - distanceToMiddlePoint * maxIntensity
   }
 
-  onClick(e) {
-    if (this.touch) return
-    for (const mesh of this.intersects) {
-      const object = this.objects.find(obj => obj.mesh === mesh)
-      if (object && object.onClick) {
-        object.onClick()
-        return
-      }
-    }
-  }
-
   toScale(n) {
     const mvw = Math.min(this.size.x, 1800)
     return (n * mvw) / (this.isMobileLayout ? 375 : 1440)
-  }
-
-  onMouseMovement(e) {
-    if (!this.bounding) return
-    this.mouse.x =
-      ((e.clientX - this.bounding.left) / (this.bounding.right - this.bounding.left)) * 2 - 1
-    this.mouse.y =
-      -((e.clientY - this.bounding.top) / (this.bounding.bottom - this.bounding.top)) * 2 + 1
-
-    this.raycaster.setFromCamera(this.mouse, this.camera)
   }
 
   imageLoaded(img) {
@@ -720,20 +702,76 @@ class Controller {
     return 0
   }
 
+  onClick(e) {
+    for (const mesh of this.intersects) {
+      const object = this.objects.find(obj => obj.mesh === mesh)
+      if (object && object.onClick) {
+        object.onClick()
+        return
+      }
+    }
+  }
+
+  onMouseMovement(e) {
+    if (!this.bounding || this.touch) return
+    this.updateRaycaster(e)
+  }
+
+  updateRaycaster(e) {
+    this.mouse.x =
+      ((e.clientX - this.bounding.left) / (this.bounding.right - this.bounding.left)) * 2 - 1
+    this.mouse.y =
+      -((e.clientY - this.bounding.top) / (this.bounding.bottom - this.bounding.top)) * 2 + 1
+
+    this.raycaster.setFromCamera(this.mouse, this.camera)
+  }
+
+  onTouchStart(e) {
+    const { clientX, clientY } = this.getTouch(e)
+    this.touchStartX = clientX
+    this.touchStartY = clientY
+    this.touchTime = Date.now()
+  }
+
+  onTouchEnd(e) {
+    const { clientX, clientY } = this.getTouch(e)
+    const touchDifferenceX = Math.abs(clientX - this.touchStartX)
+    const touchDifferenceY = Math.abs(clientY - this.touchStartY)
+    const touchTime = Date.now() - this.touchTime
+    if (touchDifferenceX < 10 && touchDifferenceY < 10 && touchTime < 200) {
+      this.updateRaycaster({ clientX, clientY })
+      this.intersects = this.raycaster
+        .intersectObjects(this.scene.children, false)
+        .map(i => i.object)
+        .filter(o => o.position.z === 0)
+    }
+  }
+
+  getTouch(e) {
+    const touch = e.changedTouches || e.touches || (e.originalEvent && e.originalEvent.touches)
+    return touch && touch.length ? touch[0] : e
+  }
+
   bind() {
     this._render = this.render.bind(this)
     this._onClick = this.onClick.bind(this)
     this._onMouseMovement = this.onMouseMovement.bind(this)
+    this._onTouchStart = this.onTouchStart.bind(this)
+    this._onTouchEnd = this.onTouchEnd.bind(this)
   }
 
   addListeners() {
     window.addEventListener('click', this._onClick)
     window.addEventListener('mousemove', this._onMouseMovement)
+    window.addEventListener('touchstart', this._onTouchStart)
+    window.addEventListener('touchend', this._onTouchEnd)
   }
 
   removeListeners() {
     window.removeEventListener('click', this._onClick)
     window.removeEventListener('mousemove', this._onMouseMovement)
+    window.removeEventListener('touchstart', this._onTouchStart)
+    window.removeEventListener('touchend', this._onTouchEnd)
   }
 
   log(msg) {
