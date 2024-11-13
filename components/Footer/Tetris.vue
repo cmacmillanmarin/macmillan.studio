@@ -5,15 +5,22 @@
 <script lang="ts" setup>
 import { gsap } from 'gsap'
 import type { Tetris, Matrix, Piece, Position } from '~/types/front/tetris'
+import useScrollStore from '~/store/useScrollStore'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps<{
   active: boolean
 }>()
 
-const { maxWidth } = useCss()
+const scrollStore = useScrollStore()
+const { updateScrollFixedTarget } = scrollStore
+const { bounding } = storeToRefs(scrollStore)
+
+const { maxWidth, toScale } = useCss()
 const { vw, vh, onResize } = useResize()
 const { addTicker, killTicker } = useRaf()
 const { keyPressed } = useKeyboard()
+const { isMobileLayout } = useDevice()
 
 const el = ref<HTMLCanvasElement>()
 const score = ref<number>(0)
@@ -24,6 +31,8 @@ const ready = ref<boolean>(false)
 
 const inView = ref<boolean>(false)
 const opacity = ref<number>(1)
+
+const dropTimer = computed<number>(() => 1000 - level.value * 100)
 
 let to: any
 let logo: HTMLImageElement
@@ -48,8 +57,16 @@ watch(keyPressed, () => {
   else if (keyPressed.value === 'ArrowRight') move(1)
 })
 
+watch([bounding, () => props.active], () => {
+  if (props.active) updateScrollFixedTarget(bounding.value)
+})
+
 watch(onResize, () => {
   reset()
+  if (!props.active) {
+    initBoard()
+    draw()
+  }
 })
 
 watch([ready, inView, over, () => props.active], () => {
@@ -71,34 +88,45 @@ onMounted(() => {
   logo.src = '/assets/img/logo.svg'
   logo.onload = () => {
     ready.value = true
-    tetris.matrix = []
-    for (let row = 1; row <= tetris.board.rows; row++) {
-      tetris.matrix.push(new Array(tetris.board.columns).fill(0))
-    }
-    tetris.matrix.forEach((row, r) => {
-      row.forEach((column, c) => {
-        const rows = tetris.matrix.length
-        if (r + 5 === rows) {
-          const pieces = [5]
-          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
-        } else if (r + 4 === rows) {
-          const pieces = [5, 6, 11]
-          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
-        } else if (r + 3 === rows) {
-          const pieces = [0, 6, 11]
-          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
-        } else if (r + 2 === rows) {
-          const pieces = [0, 3, 4, 9, 11]
-          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
-        } else if (r + 1 === rows) {
-          const pieces = [0, 1, 3, 4, 8, 9, 10, 11]
-          tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
-        }
-      })
-    })
+    initBoard()
     draw()
   }
 })
+
+function initBoard() {
+  tetris.matrix = []
+  for (let row = 1; row <= tetris.board.rows; row++) {
+    tetris.matrix.push(new Array(tetris.board.columns).fill(0))
+  }
+  tetris.matrix.forEach((row, r) => {
+    row.forEach((column, c) => {
+      const rows = tetris.matrix.length
+      let pieces: Array<number> = []
+      if (r + 10 === rows) {
+        pieces = isMobileLayout.value ? [2] : []
+      } else if (r + 9 === rows) {
+        pieces = isMobileLayout.value ? [1, 2] : []
+      } else if (r + 8 === rows) {
+        pieces = isMobileLayout.value ? [2] : []
+      } else if (r + 7 === rows) {
+        pieces = isMobileLayout.value ? [0, 7] : []
+      } else if (r + 6 === rows) {
+        pieces = isMobileLayout.value ? [0, 7] : []
+      } else if (r + 5 === rows) {
+        pieces = isMobileLayout.value ? [0, 7] : [5]
+      } else if (r + 4 === rows) {
+        pieces = isMobileLayout.value ? [0, 4, 5, 7] : [5, 6, 11]
+      } else if (r + 3 === rows) {
+        pieces = isMobileLayout.value ? [0, 3, 4, 5, 6, 7] : [0, 6, 11]
+      } else if (r + 2 === rows) {
+        pieces = isMobileLayout.value ? [0, 3, 4, 5, 6, 7] : [0, 3, 4, 9, 11]
+      } else if (r + 1 === rows) {
+        pieces = isMobileLayout.value ? [0, 1, 3, 4, 5, 6, 7] : [0, 1, 3, 4, 8, 9, 10, 11]
+      }
+      tetris.matrix[r][c] = pieces.includes(c) ? 1 : 0
+    })
+  })
+}
 
 function onIntersect(el: HTMLElement, visible: boolean) {
   inView.value = visible
@@ -190,8 +218,10 @@ function reset() {
   tetris.size.x = Math.min(vw.value, maxWidth.value)
   tetris.size.y = vh.value
 
+  const size = isMobileLayout.value ? toScale(45) : toScale(80)
+
   for (let i = 12; i >= 0; i--) {
-    if (tetris.size.x / i > 80) {
+    if (tetris.size.x / i > size) {
       tetris.board.columns = i
       tetris.size.piece = tetris.size.x / tetris.board.columns
       break
@@ -254,7 +284,7 @@ function move(dir: number) {
 
 async function drop() {
   to && clearTimeout(to)
-  to = setTimeout(drop, 1000)
+  to = setTimeout(drop, dropTimer.value)
 
   score.value++
 
