@@ -168,10 +168,10 @@ watch(isInProjectEntered, () => {
   else videoInProject.value = !!route.params.slug
 })
 
-watch([headerLogo, videoInProject], () => {
+watch([headerLogo, videoInProject, isMobileLayout], () => {
   $scene.updateObject({
     id: 'reel',
-    onClick: videoInProject.value || headerLogo.value ? null : goToReel,
+    onClick: videoInProject.value || headerLogo.value || isMobileLayout.value ? null : goToReel,
   })
 })
 

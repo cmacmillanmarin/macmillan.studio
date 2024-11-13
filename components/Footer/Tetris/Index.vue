@@ -25,7 +25,7 @@ const { maxWidth, toScale } = useCss()
 const { vw, vh, onResize } = useResize()
 const { addTicker, killTicker } = useRaf()
 const { keyPressed } = useKeyboard()
-const { touch, isMobileLayout } = useDevice()
+const { touch, isMobileLayout, dpr } = useDevice()
 
 const el = ref<HTMLCanvasElement>()
 const score = ref<number>(0)
@@ -83,9 +83,11 @@ watch([ready, inView, over, () => props.active], () => {
   if (ready.value && inView.value && props.active && !over.value) {
     addTicker(draw)
     drop()
+    el.value && gsap.to(el.value, { opacity: 1, duration: 0.4 })
   } else {
     killTicker(draw)
     to && clearTimeout(to)
+    el.value && gsap.to(el.value, { opacity: 0.3, duration: 0.4 })
   }
 })
 
@@ -183,8 +185,9 @@ function drawBoard() {
 
 function drawLogo(position: Position) {
   const gap = 0.6
+  const color = 66
   tetris.ctx?.drawImage(
-    tint(logo, 26, 26, 26),
+    tint(logo, color, color, color),
     position.x + gap * 0.5,
     position.y + gap * 0.5,
     tetris.size.piece - gap,
@@ -531,3 +534,10 @@ defineExpose({
   drop,
 })
 </script>
+
+<style lang="scss">
+.footer__tetris {
+  opacity: 0.3;
+  will-change: opacity;
+}
+</style>

@@ -341,7 +341,7 @@ export class Swiper {
   isSwipeLeft(): number {
     const isCorrectDirection: boolean = !this.isVertical() && this.xDir === -1
     const isFastEnough: boolean = this.xVel > 0.5 * this.resistance
-    const thereIsEnoughDisplacement: boolean = this.xDiff > 100 * this.resistance
+    const thereIsEnoughDisplacement: boolean = this.xDiff > 50 * this.resistance
 
     if (isCorrectDirection && (isFastEnough || thereIsEnoughDisplacement)) return 1
     return 0
@@ -350,7 +350,7 @@ export class Swiper {
   isSwipeRight(): number {
     const isCorrectDirection: boolean = !this.isVertical() && this.xDir === 1
     const isFastEnough: boolean = this.xVel > 0.5 * this.resistance
-    const thereIsEnoughDisplacement: boolean = Math.abs(this.xDiff) > 100 * this.resistance
+    const thereIsEnoughDisplacement: boolean = Math.abs(this.xDiff) > 50 * this.resistance
 
     if (isCorrectDirection && (isFastEnough || thereIsEnoughDisplacement)) return 1
     return 0
