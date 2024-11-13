@@ -4,23 +4,34 @@
       <div class="grid__columns">
         <div v-for="i in columns" class="grid__columns__column" />
       </div>
+      <div class="grid__vertical">
+        <div v-for="i in vertical" class="grid__vertical__line" />
+      </div>
     </ClientOnly>
   </div>
 </template>
 
 <script lang="ts" setup>
-const columns = computed(() => 12)
+const { vh } = useResize()
+const { isMobileLayout } = useDevice()
+const columns = computed(() => (isMobileLayout.value ? 8 : 12))
+const vertical = computed(() => Math.ceil(vh.value / 16))
 </script>
 
 <style lang="scss" scoped>
 .grid {
-  position: absolute;
   pointer-events: none;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   z-index: 999999;
+  @include absolute-fill();
+  &__vertical {
+    @include absolute-fill();
+    &__line {
+      height: 1px;
+      opacity: 0.4;
+      background-color: magenta;
+      margin-top: 15px;
+    }
+  }
   &__columns {
     height: 100%;
     border-left: 1px solid magenta;

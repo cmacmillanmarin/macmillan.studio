@@ -490,7 +490,9 @@ class Controller {
     let scrollProgress = Math.min(1, this.y / scrollTarget)
 
     let scrollLeaveInit = this.scrollBounding - this.size.y
-    let scrollLeaveEnd = this.scrollBounding - this.logoMargin * 2 - 160
+    let scrollLeaveEnd = !this.isMobileLayout
+      ? this.scrollBounding - this.logoMargin * 2 - 160
+      : this.scrollBounding - 16 - 56
     let scrollLeaveProgress = Math.max(
       0,
       Math.min(1, (this.y - scrollLeaveInit) / (scrollLeaveEnd - scrollLeaveInit))
@@ -499,23 +501,21 @@ class Controller {
 
     let scrollDistance = 0
     let scrollGap = 0
-    let logoCurrentScale =
-      1 -
-      (1 - this.logoTargetScale) * scrollProgress +
-      (1 - this.logoTargetScale) * scrollLeaveProgress
+    let logoCurrentScale = 1 - (1 - this.logoTargetScale) * scrollProgress
     let logoGap = 0
     let screenGap = 0
     let xOffset = 0
     let yOffset = 0
 
     if (!this.isMobileLayout) {
+      logoCurrentScale += (1 - this.logoTargetScale) * scrollLeaveProgress
       if (scrollLeaveProgress === 0) {
         scrollDistance = this.size.y - this.logoSize * this.logoTargetScale - this.logoMargin * 2
       } else {
         scrollDistance = this.size.y - this.logoSize * logoCurrentScale - this.logoMargin * 2
       }
 
-      scrollGap = scrollDistance * scrollProgress
+      scrollGap = scrollDistance * scrollProgress - 8 + 4 * scrollProgress - 4 * scrollLeaveProgress
       logoGap = this.logoSize * logoCurrentScale * 0.5 + this.logoMargin
       screenGap = Math.max(0, this.size.x - 1800) * 0.5
       xOffset = -logoGap - screenGap
@@ -524,14 +524,16 @@ class Controller {
       const mobileHeaderTop = this.toScale(67) + this.logoSize * 0.5 + this.toScale(20)
       const mobileInitY = mobileHeaderTop
       const scrollDistanceX =
-        this.size.x * 0.5 - this.logoSize * this.logoTargetScale * 0.5 - this.toScale(16)
+        this.size.x * 0.5 - this.logoSize * this.logoTargetScale * 0.5 - this.logoMargin
       const scrollGapX = scrollDistanceX * scrollProgress
       scrollDistance =
-        this.size.y - mobileInitY - this.logoSize * this.logoTargetScale * 0.5 - this.toScale(16)
+        this.size.y - mobileInitY - this.logoSize * this.logoTargetScale * 0.5 - this.logoMargin
       scrollGap = scrollDistance * scrollProgress
 
+      const leaveGap = this.y > scrollLeaveEnd ? this.y - scrollLeaveEnd : 0
+
       xOffset = this.size.x * -0.5 + scrollGapX
-      yOffset = mobileInitY + scrollGap
+      yOffset = mobileInitY + scrollGap + leaveGap
     }
 
     this.logo.scale.set(

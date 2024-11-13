@@ -133,7 +133,9 @@ watch(current, () => {
   const enterProgress = Math.min(1, current.value / vh.value)
 
   const leaveInit = bounding.value - vh.value
-  const leaveEnd = bounding.value - layoutMargin.value * 2 - 160
+  const leaveEnd = !isMobileLayout.value
+    ? bounding.value - layoutMargin.value * 2 - 160
+    : bounding.value - layoutMargin.value - 56
   const leaveDistance = leaveEnd - leaveInit
   const leaveProgress = Math.max(
     0,
@@ -161,7 +163,7 @@ watch(current, () => {
     gsap.set(logoMobileEl.value, {
       scale,
       x: toPx(x * progress),
-      y: toPx(y * progress),
+      y: toPx(y * progress + leaveDistance * leaveProgress),
     })
   }
 })
@@ -232,6 +234,9 @@ function onMouseLeave() {
 
 function toggleMobileOverlay() {
   updateHeaderOverlay(!headerOverlay.value)
+  if (headerOverlay.value && current.value > bounding.value - vh.value) {
+    updateScrollTarget(bounding.value - vh.value)
+  }
 }
 
 function scrollUp(e: MouseEvent | TouchEvent) {
@@ -373,6 +378,7 @@ function scrollDown() {
         transform: translateX(-50%);
         transform-origin: top right;
         will-change: transform;
+        // border: 1px solid red;
 
         button {
           display: block;
@@ -386,13 +392,14 @@ function scrollDown() {
 
       .custom-link {
         position: absolute;
-        bottom: 0.5rem;
+        bottom: -0.3rem;
         right: 0;
         display: block;
         width: 16.1rem;
         height: 16.3rem;
         will-change: transform;
         transform-origin: top right;
+        // border: 1px solid red;
       }
     }
   }
