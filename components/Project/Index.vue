@@ -195,19 +195,24 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
 
   &__content {
     will-change: transform;
-    display: inline-block;
-    white-space: nowrap;
+
+    @include from__tablet--landscape {
+      display: inline-block;
+      white-space: nowrap;
+    }
 
     .project__landing {
       z-index: 2;
     }
 
     > div {
-      white-space: normal;
-      display: inline-block;
-      vertical-align: top;
-      width: max-content;
-      height: var(--vh);
+      @include from__tablet--landscape {
+        white-space: normal;
+        display: inline-block;
+        vertical-align: top;
+        width: max-content;
+        height: var(--vh);
+      }
     }
 
     &__gap {

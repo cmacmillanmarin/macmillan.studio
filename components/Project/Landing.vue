@@ -63,7 +63,10 @@
       </div>
 
       <transition :css="false" @leave="transitionFadeOut">
-        <div v-if="inProjectScroll" ref="scrollEl" class="project__landing__info__scroll">
+        <div
+          v-if="inProjectScroll && !isMobileLayout"
+          ref="scrollEl"
+          class="project__landing__info__scroll">
           <p>Scroll</p>
           <div class="project__landing__info__scroll__bar">
             <div ref="scrollLineEl" class="project__landing__info__scroll__bar__line" />
@@ -98,6 +101,8 @@ import { slugify } from '~/utils'
 const store = useStore()
 const { updateCursor } = store
 const { gridType, inProjectScroll } = storeToRefs(store)
+
+const { isMobileLayout } = useDevice()
 
 const props = defineProps<{
   data: Project
@@ -152,7 +157,11 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
 <style lang="scss">
 .project__landing {
   position: relative;
-  height: var(--vh);
+
+  @include from__tablet--landscape {
+    height: var(--vh);
+  }
+
   @include from__desktop--x-large {
     padding-left: calc((100vw - var(--layout-max-width)) * 0.5);
   }
@@ -194,20 +203,36 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
   &__info {
     position: relative;
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-start;
-    width: 75vw;
-    height: var(--vh);
+    padding: 19.2rem var(--layout-margin) 0;
+
+    @include from__tablet--landscape {
+      flex-wrap: nowrap;
+      width: 75vw;
+      height: var(--vh);
+      padding: 0;
+    }
 
     &__stack,
     &__content {
       display: flex;
-      height: calc(var(--vh) * 0.33);
+      flex-wrap: wrap;
+      height: max-content;
       align-items: flex-end;
+      width: 100%;
+      @include from__tablet--landscape {
+        flex-wrap: nowrap;
+        height: calc(var(--vh) * 0.33);
+      }
     }
 
     &__stack {
-      margin-left: 3vw;
-      width: 22vw;
+      width: 100%;
+      @include from__tablet--landscape {
+        margin-left: 3vw;
+        width: 22vw;
+      }
       &__content {
         width: 100%;
       }
@@ -216,9 +241,13 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
     &__content {
       align-content: space-between;
       flex-wrap: wrap;
-      margin-left: 15vw;
-      width: 20vw;
+
       @include t-b3;
+
+      @include from__tablet--landscape {
+        margin-left: 15vw;
+        width: 20vw;
+      }
 
       &__services,
       &__description {
@@ -239,13 +268,17 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
     }
 
     &__link {
-      position: absolute;
-      top: 50%;
-      z-index: 9;
-      left: calc(40vw - toScale(3rem));
-      transform: translateY(-60%);
+      padding: 2rem 0 2rem;
       @include will-fade;
-      padding: toScale(3rem);
+
+      @include from__tablet--landscape {
+        position: absolute;
+        top: 50%;
+        z-index: 9;
+        left: calc(40vw - toScale(3rem));
+        transform: translateY(-60%);
+        padding: toScale(3rem);
+      }
 
       &__label {
         display: flex;
@@ -291,8 +324,12 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
 
   &__title {
     position: absolute;
-    bottom: var(--layout-margin);
+    top: 7rem;
     left: var(--layout-margin);
+    @include from__tablet--landscape {
+      bottom: var(--layout-margin);
+      top: auto;
+    }
     @include from__desktop--x-large {
       left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
     }
