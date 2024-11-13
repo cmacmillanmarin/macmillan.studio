@@ -103,7 +103,14 @@ onMounted(() => {
     initBoard()
     draw()
     touch.value &&
-      _Swiper.init({ el: el.value, cursor: false, onSwipeUp, onSwipeLeft, onSwipeRight })
+      _Swiper.init({
+        el: el.value,
+        cursor: false,
+        onSwipeUp,
+        onSwipeDown,
+        onSwipeLeft,
+        onSwipeRight,
+      })
   }
 })
 
@@ -148,7 +155,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
 function draw() {
   // Clear
-  tetris.ctx?.clearRect(0, 0, tetris.size.x, tetris.size.y)
+  tetris.ctx?.clearRect(0, 0, tetris.size.x * dpr.value, tetris.size.y * dpr.value)
 
   // Draw Pieces
   tetris.matrix.forEach((row, y) => {
@@ -174,10 +181,10 @@ function drawBoard() {
       tetris.ctx.lineWidth = 1
       tetris.ctx.strokeStyle = 'grey'
       tetris.ctx.strokeRect(
-        tetris.size.piece * column,
-        tetris.size.y - tetris.size.piece * row,
-        tetris.size.piece,
-        tetris.size.piece
+        tetris.size.piece * column * dpr.value,
+        (tetris.size.y - tetris.size.piece * row) * dpr.value,
+        tetris.size.piece * dpr.value,
+        tetris.size.piece * dpr.value
       )
     }
   }
@@ -188,10 +195,10 @@ function drawLogo(position: Position) {
   const color = 66
   tetris.ctx?.drawImage(
     tint(logo, color, color, color),
-    position.x + gap * 0.5,
-    position.y + gap * 0.5,
-    tetris.size.piece - gap,
-    tetris.size.piece - gap
+    (position.x + gap * 0.5) * dpr.value,
+    (position.y + gap * 0.5) * dpr.value,
+    (tetris.size.piece - gap) * dpr.value,
+    (tetris.size.piece - gap) * dpr.value
   )
 }
 
@@ -250,8 +257,8 @@ function reset() {
     tetris.matrix.push(new Array(tetris.board.columns).fill(0))
   }
 
-  el.value.width = tetris.size.x
-  el.value.height = tetris.size.y
+  el.value.width = tetris.size.x * dpr.value
+  el.value.height = tetris.size.y * dpr.value
   gsap.set(el.value, { width: tetris.size.x, height: tetris.size.y })
 }
 
@@ -503,11 +510,14 @@ function getPiece(): Piece {
 }
 
 function onClick() {
-  console.log('onClick')
   touch.value && rotate()
 }
 
 function onSwipeUp() {
+  drop()
+}
+
+function onSwipeDown() {
   drop()
 }
 

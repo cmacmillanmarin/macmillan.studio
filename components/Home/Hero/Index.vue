@@ -392,7 +392,7 @@ async function onFirstAnimationDone() {
   await nextTick()
   updateScroll()
   disableScroll(false)
-  $scene.updateObject({ id: 'reel', onClick: goToReel })
+  $scene.updateObject({ id: 'reel', onClick: isMobileLayout.value ? null : goToReel })
 }
 
 function onPlay() {
