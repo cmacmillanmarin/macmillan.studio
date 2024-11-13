@@ -20,14 +20,21 @@ defineProps<{
 <style lang="scss">
 .project__recognitions {
   &__content {
-    height: var(--vh);
     display: flex;
     align-items: flex-end;
-    padding: 0 12rem 4.4rem 16rem;
+    padding: 6rem var(--layout-margin) 8rem;
+    @include from__tablet--landscape {
+      height: var(--vh);
+      padding: 0 12rem 4.4rem 16rem;
+    }
     &__list {
-      max-width: 36rem;
+      width: 100%;
       position: relative;
       padding-top: 1rem;
+      @include from__tablet--landscape {
+        max-width: 36rem;
+        padding-top: 1rem;
+      }
       &__label {
         @include t-b3;
       }

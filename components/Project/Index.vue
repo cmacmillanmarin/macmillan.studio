@@ -45,16 +45,17 @@ const props = defineProps<{
   nextProject?: Project
 }>()
 
-const route = useRoute()
-const router = useRouter()
-const { addTicker, killTicker } = useRaf()
-const { onResize } = useResize()
-
 const store = useStore()
 const { updateHeader, updateCursor, updateSection, updateInProjectScroll } = store
 const { isInProject, isInProjectEntered, cursor, gridType } = storeToRefs(store)
 
 const { disableScroll, updateScrollFixedTargetId } = useScrollStore()
+
+const route = useRoute()
+const router = useRouter()
+const { addTicker, killTicker } = useRaf()
+const { onResize } = useResize()
+const { isMobileLayout } = useDevice()
 
 const el = ref<HTMLElement>()
 const contentEl = ref<HTMLElement>()
@@ -115,7 +116,9 @@ function _clampTarget(value: number): number {
 
 function _onRaf() {
   _scroll.current += (_scroll.target - _scroll.current) * 0.1
-  contentEl.value && gsap.set(contentEl.value, { x: _scroll.current * -1 })
+  const x = isMobileLayout.value ? 0 : _scroll.current * -1
+  const y = isMobileLayout.value ? _scroll.current * -1 : 0
+  contentEl.value && gsap.set(contentEl.value, { x, y })
   if (toNextProject.value && Math.abs(_scroll.target - _scroll.current) < 0.5) {
     emit('next')
     killTicker(_onRaf)
@@ -132,7 +135,13 @@ function createScroll() {
 }
 
 function updateScroll() {
-  _scroll.bounding = (contentEl.value?.clientWidth || 0) - (el.value?.clientWidth || 0)
+  console.log(isMobileLayout.value)
+  if (isMobileLayout.value) {
+    _scroll.bounding = (contentEl.value?.clientHeight || 0) - (el.value?.clientHeight || 0)
+  } else {
+    _scroll.bounding = (contentEl.value?.clientWidth || 0) - (el.value?.clientWidth || 0)
+  }
+
   _scroll.target = _clampTarget(_scroll.target)
 }
 

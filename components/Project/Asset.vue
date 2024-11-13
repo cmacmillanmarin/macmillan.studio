@@ -65,32 +65,53 @@ const emit = defineEmits(['update-scroll'])
 
   &--layout-top {
     .project__asset__content {
-      align-items: flex-start;
+      justify-content: flex-start;
+      @include from__tablet--landscape {
+        align-items: flex-start;
+      }
     }
   }
 
   &--layout-center {
     .project__asset__content {
-      align-items: center;
+      justify-content: center;
+      @include from__tablet--landscape {
+        align-items: center;
+      }
     }
   }
 
   &--layout-bottom {
     .project__asset__content {
-      align-items: flex-end;
+      justify-content: flex-end;
+      @include from__tablet--landscape {
+        align-items: flex-end;
+      }
     }
   }
 
   &--gap-s {
-    padding-right: 4rem;
+    padding-bottom: 2rem;
+    @include from__tablet--landscape {
+      padding-right: 4rem;
+      padding-bottom: 0;
+    }
   }
 
   &--gap-m {
-    padding-right: 20rem;
+    padding-bottom: 8rem;
+    @include from__tablet--landscape {
+      padding-right: 20rem;
+      padding-bottom: 0;
+    }
   }
 
   &--gap-l {
-    padding-right: 36rem;
+    padding-bottom: 12rem;
+    @include from__tablet--landscape {
+      padding-right: 36rem;
+      padding-bottom: 0;
+    }
   }
 }
 </style>

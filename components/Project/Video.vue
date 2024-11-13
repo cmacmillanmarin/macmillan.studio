@@ -27,19 +27,25 @@ const props = defineProps<{
   bgColor: string
 }>()
 
-const { vh } = useResize()
+const { vw, vh } = useResize()
 const { toScale } = useCss()
+const { isMobileLayout } = useDevice()
 
 const gap = computed<number>(() =>
   props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center'
-    ? toScale(260)
+    ? toScale(isMobileLayout.value ? 125 : 260)
     : 0
 )
 
-const height = computed<string>(() => toPx(vh.value - gap.value))
-const width = computed<string>(() =>
-  toPx(((vh.value - gap.value) * props.data.width) / props.data.height)
-)
+const height = computed<string>(() => {
+  if (isMobileLayout.value)
+    return toPx(((vw.value - gap.value) * props.data.height) / props.data.width)
+  return toPx(vh.value - gap.value)
+})
+const width = computed<string>(() => {
+  if (isMobileLayout.value) return toPx(vw.value - gap.value)
+  return toPx(((vh.value - gap.value) * props.data.width) / props.data.height)
+})
 
 const videoEl = ref<HTMLVideoElement>()
 
