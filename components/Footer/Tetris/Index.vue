@@ -1,5 +1,9 @@
 <template>
-  <canvas ref="el" class="footer__tetris" v-intersect="{ callback: onIntersect }" />
+  <canvas
+    ref="el"
+    class="footer__tetris"
+    v-intersect="{ callback: onIntersect }"
+    @click="onClick" />
 </template>
 
 <script lang="ts" setup>
@@ -7,6 +11,7 @@ import { gsap } from 'gsap'
 import type { Tetris, Matrix, Piece, Position } from '~/types/front/tetris'
 import useScrollStore from '~/store/useScrollStore'
 import { storeToRefs } from 'pinia'
+import { Swiper } from '~/utils/swiper'
 
 const props = defineProps<{
   active: boolean
@@ -20,7 +25,7 @@ const { maxWidth, toScale } = useCss()
 const { vw, vh, onResize } = useResize()
 const { addTicker, killTicker } = useRaf()
 const { keyPressed } = useKeyboard()
-const { isMobileLayout } = useDevice()
+const { touch, isMobileLayout } = useDevice()
 
 const el = ref<HTMLCanvasElement>()
 const score = ref<number>(0)
@@ -49,9 +54,14 @@ const tetris: Tetris = {
   freezed: false,
 }
 
+const _Swiper = new Swiper({
+  prevent: true,
+  dragOnTarget: true,
+})
+
 watch(keyPressed, () => {
   if (tetris.freezed || over.value) return
-  if (keyPressed.value === ' ') rotate()
+  if (keyPressed.value === ' ' || keyPressed.value === 'Enter') rotate()
   else if (keyPressed.value === 'ArrowDown') drop()
   else if (keyPressed.value === 'ArrowLeft') move(-1)
   else if (keyPressed.value === 'ArrowRight') move(1)
@@ -90,6 +100,8 @@ onMounted(() => {
     ready.value = true
     initBoard()
     draw()
+    touch.value &&
+      _Swiper.init({ el: el.value, cursor: false, onSwipeUp, onSwipeLeft, onSwipeRight })
   }
 })
 
@@ -212,7 +224,7 @@ function reset() {
   if (!el.value) return
 
   score.value = 0
-  level.value = 0
+  level.value = 1
   over.value = false
 
   tetris.size.x = Math.min(vw.value, maxWidth.value)
@@ -335,8 +347,7 @@ async function drop() {
     else if (linesOut === 3) score.value += 300 * (level.value + 1)
     else if (linesOut === 4) score.value += 1200 * (level.value + 1)
     tetris.linesInLevel += linesOut
-    linesOut > 0 && console.log(linesOut, tetris.linesInLevel)
-    if (tetris.linesInLevel >= 10) {
+    if (tetris.linesInLevel >= 10 || score.value % 1000 === 0) {
       level.value++
       tetris.linesInLevel = 0
     }
@@ -486,6 +497,23 @@ function getPiece(): Piece {
     },
   ]
   return pieces[Math.floor(Math.random() * pieces.length)]
+}
+
+function onClick() {
+  console.log('onClick')
+  touch.value && rotate()
+}
+
+function onSwipeUp() {
+  drop()
+}
+
+function onSwipeLeft() {
+  move(-1)
+}
+
+function onSwipeRight() {
+  move(1)
 }
 
 onBeforeUnmount(() => {

@@ -1,9 +1,9 @@
 <template>
   <footer
     ref="el"
-    :class="['footer', { 'footer--game-over': tetris && over }]"
+    :class="['footer', { 'footer--tetris': tetris }, { 'footer--game-over': tetris && over }]"
     id="contact-target"
-    @click="playClick && resetTetris()">
+    @click="onClick">
     <div class="footer__intersect" v-intersect="{ callback: onIntersect }" />
 
     <transition
@@ -120,37 +120,14 @@
       :css="false"
       @enter="transitionShuffleIn"
       @leave="transitionShuffleOut">
-      <div
+      <FooterTetrisLayout
         v-if="tetris"
-        class="footer__close"
-        @mouseenter="onCloseMouseEnter"
-        @mouseleave="onCloseMouseLeave">
-        <button @click="closeTetris">CLOSE</button>
-      </div>
-    </transition>
-
-    <transition
-      mode="out-in"
-      :css="false"
-      @enter="transitionShuffleIn"
-      @leave="transitionShuffleOut">
-      <div v-if="tetris && !over" class="footer__score">
-        <p>score: {{ score }}</p>
-        <p>level: {{ level }}</p>
-        <p>next Piece: {{ nextPiece?.name }}</p>
-      </div>
-    </transition>
-
-    <transition
-      mode="out-in"
-      :css="false"
-      @enter="transitionShuffleIn"
-      @leave="transitionShuffleOut"
-      @after-enter="waitPlayClick"
-      @after-leave="ignorePlayClick">
-      <div v-if="tetris && over" class="footer__game-over">
-        <p>GAME OVERRRRR! {{ score }}</p>
-      </div>
+        :over="over"
+        :next-piece="nextPiece"
+        :score="score"
+        :level="level"
+        @play="resetTetris"
+        @close="closeTetris" />
     </transition>
 
     <Tetris ref="tetrisEl" :active="tetris" />
@@ -163,7 +140,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { shuffleElsIn, fadeIn, fadeOut } from '~/utils/animations'
-import Tetris from '~/components/Footer/Tetris.vue'
+import Tetris from '~/components/Footer/Tetris/Index.vue'
 import type { Piece } from '~/types/front/tetris'
 
 const store = useStore()
@@ -202,11 +179,6 @@ const rrss = ref([
     to: 'https://unsplash.com/@cmacmillanmarin',
     type: 'external',
   },
-  // {
-  //   label: 'Strava',
-  //   to: 'https://www.strava.com/athletes/3509285',
-  //   type: 'external',
-  // },
 ])
 
 const el = ref<HTMLElement>()
@@ -218,24 +190,27 @@ const tetris = ref<boolean>(false)
 const tetrisEl = ref<typeof Tetris>()
 const score = computed<number>(() => tetrisEl.value?.score || 0)
 const level = computed<number>(() => tetrisEl.value?.level || 0)
-const nextPiece = computed<Piece | null>(() => tetrisEl.value?.nextPiece || null)
+const nextPiece = computed<Piece | undefined>(() => tetrisEl.value?.nextPiece || undefined)
 const over = computed<boolean>(() => tetrisEl.value?.over || false)
 const playClick = ref<boolean>(false)
 
-watch(tetris, () => {
+watch([tetris, over], () => {
   disableScroll(tetris.value)
-  tetris.value && over.value && updateCursor('play')
-})
-
-watch(over, () => {
-  updateCursor(over.value ? 'play' : 'default')
+  if (tetris.value) {
+    updateCursor(over.value ? 'play' : 'close')
+  } else {
+    updateCursor('default')
+  }
 })
 
 onMounted(() => {
   updateHour()
 })
 
-function playTetris() {
+function playTetris(e: MouseEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+
   tetris.value = true
 }
 
@@ -269,18 +244,22 @@ function onEmailMouseLeave() {
 }
 
 function copyEmail() {
-  navigator.clipboard
-    .writeText('christian@macmillan.studio')
-    .then(() => {
-      updateCursor('copied')
-      _to2 && clearTimeout(_to2)
-      _to2 = setTimeout(() => {
-        cursor.value === 'copied' && updateCursor('copy')
-      }, 2000)
-    })
-    .catch(err => {
-      console.error('Failed to copy text: ', err)
-    })
+  if (isMobileLayout.value) {
+    window.location.href = "mailto:christian@macmillan.studio?body=Hey%20Christian,%20I'm..."
+  } else {
+    navigator.clipboard
+      .writeText('christian@macmillan.studio')
+      .then(() => {
+        updateCursor('copied')
+        _to2 && clearTimeout(_to2)
+        _to2 = setTimeout(() => {
+          cursor.value === 'copied' && updateCursor('copy')
+        }, 2000)
+      })
+      .catch(err => {
+        console.error('Failed to copy text: ', err)
+      })
+  }
 }
 
 function updateHour() {
@@ -311,26 +290,14 @@ function squareIn(el: HTMLElement, visible: boolean) {
   visible ? shuffleElsIn({ els: [el] }) : fadeOut({ el })
 }
 
-function waitPlayClick() {
-  playClick.value = true
-}
-
-function ignorePlayClick() {
-  playClick.value = false
-}
-
 function resetTetris() {
   tetrisEl.value?.reset()
 }
 
-function onCloseMouseEnter() {
-  playClick.value = false
-  updateCursor('default')
-}
-
-function onCloseMouseLeave() {
-  playClick.value = over.value
-  over.value ? updateCursor('play') : updateCursor('default')
+function onClick() {
+  if (isMobileLayout.value) return
+  cursor.value === 'play' && resetTetris()
+  cursor.value === 'close' && closeTetris()
 }
 
 onBeforeUnmount(() => {
@@ -347,6 +314,7 @@ onBeforeUnmount(() => {
 
   background-color: black;
 
+  &--tetris,
   &--game-over {
     cursor: pointer;
   }
@@ -650,6 +618,10 @@ onBeforeUnmount(() => {
   &__tetris {
     z-index: 1;
     @include absolute-center;
+    &__layout {
+      @include absolute-fill;
+      z-index: 9;
+    }
   }
 
   &__intersect {
