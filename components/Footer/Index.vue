@@ -65,6 +65,25 @@
             <DecorativeLink :label="label" :to="to" :type="type" />
           </li>
         </ul>
+        <ul v-show="!isMobileLayout" class="footer__nav__credits">
+          <li class="footer__nav__credits__link">
+            <button
+              class="footer__nav__credits__link__btn--tetris"
+              @mouseenter="shuffle"
+              @click="playTetris">
+              <span>Play Tetris</span>
+              <SvgPlaySmall />
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </transition>
+
+    <transition mode="out-in" :css="false" @leave="transitionShuffleOut">
+      <nav
+        v-if="!tetris && isMobileLayout"
+        class="footer__nav--tetris-mobile"
+        v-transition:in="{ callback: fadeIn }">
         <ul class="footer__nav__credits">
           <li class="footer__nav__credits__link">
             <button
@@ -150,11 +169,24 @@ import type { Piece } from '~/types/front/tetris'
 const store = useStore()
 const { updateSection, updateCursor } = store
 const { cursor, section, gridType } = storeToRefs(store)
+
 const scrollStore = useScrollStore()
 const { disableScroll } = scrollStore
 const { direction } = storeToRefs(scrollStore)
 
+const { isMobileLayout } = useDevice()
+
 const rrss = ref([
+  {
+    label: 'Instagram',
+    to: 'https://www.instagram.com/cmacmillanmarin',
+    type: 'external',
+  },
+  {
+    label: 'Twitter',
+    to: 'https://www.twitter.com/cmacmillanmarin',
+    type: 'external',
+  },
   {
     label: 'GitHub',
     to: 'https://www.github.com/cmacmillanmarin',
@@ -165,27 +197,16 @@ const rrss = ref([
     to: 'https://www.linkedin.com/in/cmacmillanmarin/',
     type: 'external',
   },
-
-  {
-    label: 'Twitter',
-    to: 'https://www.twitter.com/cmacmillanmarin',
-    type: 'external',
-  },
   {
     label: 'Unsplash',
     to: 'https://unsplash.com/@cmacmillanmarin',
     type: 'external',
   },
-  {
-    label: 'Strava',
-    to: 'https://www.strava.com/cmacmillanmarin',
-    type: 'external',
-  },
-  {
-    label: 'Instagram',
-    to: 'https://www.instagram.com/cmacmillanmarin',
-    type: 'external',
-  },
+  // {
+  //   label: 'Strava',
+  //   to: 'https://www.strava.com/athletes/3509285',
+  //   type: 'external',
+  // },
 ])
 
 const el = ref<HTMLElement>()
@@ -343,12 +364,17 @@ onBeforeUnmount(() => {
   &__squares {
     position: absolute;
     z-index: 9;
-    bottom: 20%;
-    left: 3.1%;
-    height: 47%;
+    bottom: 33.5%;
+    left: var(--layout-margin);
+    height: 43.2%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    @include from__tablet--landscape {
+      left: 3.1%;
+      height: 47%;
+      bottom: 20%;
+    }
     @include from__desktop--x-large {
       left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-max-width) * 0.031);
     }
@@ -357,11 +383,26 @@ onBeforeUnmount(() => {
     }
   }
 
+  &__score {
+    top: var(--layout-margin);
+    right: var(--layout-margin);
+  }
+
+  &__hour {
+    bottom: toScale(11rem, 37.5rem);
+    right: var(--layout-margin);
+  }
+
   &__hour,
   &__score {
     position: absolute;
-    top: var(--layout-margin);
-    right: var(--layout-margin);
+
+    @include from__tablet--landscape {
+      top: toScale(2.4rem);
+      right: var(--layout-margin);
+      bottom: auto;
+    }
+
     z-index: 9;
     display: flex;
     align-items: center;
@@ -426,8 +467,13 @@ onBeforeUnmount(() => {
     &__domain,
     &__extension {
       width: max-content;
-      padding-bottom: toScale(1rem);
+      padding-bottom: toScale(0.6rem, 37.5rem);
       pointer-events: auto;
+
+      @include from__tablet--landscape {
+        padding-bottom: toScale(1rem);
+      }
+
       button {
         padding: 0;
         margin: 0;
@@ -436,21 +482,40 @@ onBeforeUnmount(() => {
     }
 
     &__christian {
-      margin-top: toScale(3rem);
+      margin-top: toScale(2rem, 37.5rem);
+      @include from__tablet--landscape {
+        margin-top: toScale(3rem);
+      }
       .svg__christian {
-        width: toScale(84.8rem);
+        width: toScale(27rem, 37.5rem);
+        @include from__tablet--landscape {
+          width: toScale(84.8rem);
+        }
       }
     }
+
     &__domain {
-      margin-left: calc(var(--col-s));
+      @include from__tablet--landscape {
+        margin-left: calc(var(--col-s));
+      }
       .svg__domain {
-        width: toScale(110.4rem);
+        width: toScale(35.2rem, 37.5rem);
+        @include from__tablet--landscape {
+          width: toScale(110.4rem);
+        }
       }
     }
+
     &__extension {
-      margin-left: calc(var(--col-s) + var(--col-l) * 2 + var(--col-xs) + var(--col-m));
+      margin-left: calc(var(--col-s) + var(--col-l) * 2 + var(--col-xs));
+      @include from__tablet--landscape {
+        margin-left: calc(var(--col-s) + var(--col-l) * 2 + var(--col-xs) + var(--col-m));
+      }
       .svg__extension {
-        width: toScale(62.5rem);
+        width: toScale(21.2rem, 37.5rem);
+        @include from__tablet--landscape {
+          width: toScale(62.5rem);
+        }
       }
     }
   }
@@ -461,7 +526,7 @@ onBeforeUnmount(() => {
     pointer-events: none;
 
     position: absolute;
-    bottom: 0;
+
     width: 100%;
     max-width: var(--layout-max-width);
     padding: var(--layout-margin);
@@ -470,6 +535,10 @@ onBeforeUnmount(() => {
     transform: translateX(-50%);
 
     @include will-fade;
+
+    @include from__tablet--landscape {
+      bottom: 0;
+    }
 
     a,
     p {
@@ -483,14 +552,33 @@ onBeforeUnmount(() => {
     left: 50% !important;
     align-items: flex-end !important;
 
-    padding-bottom: 1.6rem;
+    bottom: 33.5%;
+
+    padding-bottom: 0;
 
     @include grid('golden-ratio');
+
+    @include from__tablet--landscape {
+      bottom: 0;
+      padding-bottom: 1.6rem;
+    }
+
+    &--tetris-mobile {
+      position: absolute;
+      z-index: 9;
+      bottom: var(--layout-margin);
+      left: var(--layout-margin);
+      @include will-fade;
+    }
 
     &__social,
     &__credits {
       pointer-events: auto;
       &__link {
+        margin-top: 1rem;
+        @include from__tablet--landscape {
+          margin-top: 0.2rem;
+        }
         span {
           will-change: opacity;
         }
@@ -503,6 +591,7 @@ onBeforeUnmount(() => {
           border: none;
           will-change: opacity;
           @include t-b1;
+
           &--tetris {
             display: flex;
             align-items: center;
@@ -510,8 +599,12 @@ onBeforeUnmount(() => {
             line-height: 1 !important;
             @extend .footer__nav__credits__link__btn;
             .svg__play--small {
-              width: toScale(1.1rem);
+              width: toScale(0.8rem, 37.5rem);
               transform: translateY(0.15rem);
+              @include from__tablet--landscape {
+                width: toScale(1.1rem);
+                transform: translateY(0.15rem);
+              }
             }
           }
         }
@@ -519,8 +612,11 @@ onBeforeUnmount(() => {
     }
 
     &__social {
-      width: var(--col-m);
+      width: calc(var(--col-xl) + var(--col-s));
       margin-left: calc(var(--col-s) + var(--col-l) * 2 + var(--col-xs) + var(--col-m));
+      @include from__tablet--landscape {
+        width: var(--col-m);
+      }
     }
 
     &__credits {
@@ -532,11 +628,19 @@ onBeforeUnmount(() => {
   &__location {
     display: flex;
     justify-content: space-between;
+    align-items: flex-end;
+    bottom: 0;
     &__coordinates,
     &__year {
       pointer-events: auto;
     }
     &__coordinates {
+      padding-bottom: toScale(9.4rem, 37.5rem);
+      width: 14rem;
+      @include from__tablet--landscape {
+        width: auto;
+        padding-bottom: 0;
+      }
       a {
         will-change: opacity;
       }

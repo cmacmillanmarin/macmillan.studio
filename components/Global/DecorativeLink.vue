@@ -28,9 +28,15 @@ function shuffle(e: MouseEvent) {
 .decorative-link {
   display: flex;
   align-items: center;
-  column-gap: toScale(0.7rem);
+  column-gap: toScale(0.5rem, 37.5rem);
+  @include from__tablet--landscape {
+    column-gap: toScale(0.7rem);
+  }
   .svg__link-arrow {
-    transform: translateY(0.3rem);
+    transform: translateY(0.2rem);
+    @include from__tablet--landscape {
+      transform: translateY(0.3rem);
+    }
     path {
       stroke: var(--lime);
     }

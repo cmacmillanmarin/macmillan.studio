@@ -32,7 +32,7 @@ $layouts: (
 
     --col: 33.3333%;
   } @else if $type == 'golden-ratio' {
-    --layout-margin: 3.1%;
+    --layout-margin: min(3.1%, 5.58rem);
     --col-xs: 2.65%;
     --col-s: 10%;
     --col-m: 10.65%;

@@ -16,9 +16,20 @@
     <path
       class="svg__extension__path"
       d="M51 0h62v17H51zM51 50h62v17H51zM51 103h62v17H51zM113 103V67h17v36zM34 50V16h17v34zM113 34V17h17v17zM34 103V86h17v17z" />
-    <path class="svg__extension__path" d="M17 120v-17H0v17z" />
+    <path v-show="!isMobileLayout" class="svg__extension__path" d="M17 120v-17H0v17z" />
+    <rect
+      v-show="isMobileLayout"
+      class="svg__extension__path"
+      x="0"
+      y="99"
+      width="23"
+      height="23" />
   </svg>
 </template>
+
+<script lang="ts" setup>
+const { isMobileLayout } = useDevice()
+</script>
 
 <style lang="scss">
 .svg__extension {
