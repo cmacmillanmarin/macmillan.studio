@@ -3,7 +3,15 @@
     ref="el"
     class="footer__tetris"
     v-intersect="{ callback: onIntersect }"
-    @click="onClick" />
+    @touchstart="onTouchStart"
+    @touchend="onTouchEnd" />
+  <div
+    v-show="active && isMobileLayout && !over"
+    ref="domEl"
+    class="footer__tetris__dom"
+    @touchend="onPieceClick">
+    <div ref="domPieceEl" class="footer__tetris__dom__piece" />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -11,7 +19,7 @@ import { gsap } from 'gsap'
 import type { Tetris, Matrix, Piece, Position } from '~/types/front/tetris'
 import useScrollStore from '~/store/useScrollStore'
 import { storeToRefs } from 'pinia'
-import { Swiper } from '~/utils/swiper'
+import { toPx } from '~/utils'
 
 const props = defineProps<{
   active: boolean
@@ -25,11 +33,18 @@ const { maxWidth, toScale } = useCss()
 const { vw, vh, onResize } = useResize()
 const { addTicker, killTicker } = useRaf()
 const { keyPressed } = useKeyboard()
-const { touch, isMobileLayout, dpr } = useDevice()
+const { isMobileLayout, dpr } = useDevice()
 
 const el = ref<HTMLCanvasElement>()
+const domEl = ref<HTMLElement>()
+const domPieceEl = ref<HTMLElement>()
+
 const score = ref<number>(0)
 const level = ref<number>(0)
+const pieceWidth = ref<number>(0)
+const pieceHeight = ref<number>(0)
+const pieceWidthToPx = computed<string>(() => toPx(pieceWidth.value))
+const pieceHeightToPx = computed<string>(() => toPx(pieceHeight.value))
 const nextPiece = ref<Piece>(getPiece())
 const over = ref<boolean>(false)
 const ready = ref<boolean>(false)
@@ -40,6 +55,8 @@ const opacity = ref<number>(1)
 const dropTimer = computed<number>(() => 1000 - level.value * 100)
 
 let to: any
+let dropTo: any
+let longPress: boolean = false
 let logo: HTMLImageElement
 const tetris: Tetris = {
   ctx: null,
@@ -54,14 +71,9 @@ const tetris: Tetris = {
   freezed: false,
 }
 
-const _Swiper = new Swiper({
-  prevent: true,
-  dragOnTarget: true,
-})
-
 watch(keyPressed, () => {
   if (tetris.freezed || over.value) return
-  if (keyPressed.value === ' ' || keyPressed.value === 'Enter') rotate()
+  if (keyPressed.value === ' ') rotate()
   else if (keyPressed.value === 'ArrowDown') drop()
   else if (keyPressed.value === 'ArrowLeft') move(-1)
   else if (keyPressed.value === 'ArrowRight') move(1)
@@ -81,22 +93,13 @@ watch(onResize, () => {
 
 watch([ready, inView, over, () => props.active], () => {
   if (ready.value && inView.value && props.active && !over.value) {
-    touch.value &&
-      _Swiper.init({
-        el: el.value,
-        cursor: false,
-        onSwipeUp,
-        onSwipeDown,
-        onSwipeLeft,
-        onSwipeRight,
-      })
     addTicker(draw)
     drop()
     el.value && gsap.to(el.value, { opacity: 1, duration: 0.4 })
   } else {
-    _Swiper.destroy()
     killTicker(draw)
     to && clearTimeout(to)
+    dropTo && clearTimeout(dropTo)
     el.value && gsap.to(el.value, { opacity: 0.3, duration: 0.4 })
   }
 })
@@ -159,9 +162,17 @@ function draw() {
   tetris.ctx?.clearRect(0, 0, tetris.size.x * dpr.value, tetris.size.y * dpr.value)
 
   // Draw Pieces
+  let _row = 0
+  let _column = tetris.board.columns
   tetris.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value !== 0) {
+        if (value === 1 && _row < y) {
+          _row = y
+        }
+        if (value === 1 && _column > x) {
+          _column = x
+        }
         if (tetris.ctx) tetris.ctx.globalAlpha = value === 3 ? opacity.value : 1
         drawLogo({
           x: tetris.size.piece * x,
@@ -170,6 +181,16 @@ function draw() {
       }
     })
   })
+
+  if (tetris.active.piece && domEl.value) {
+    const { piece } = tetris.active
+    pieceWidth.value = tetris.size.piece * piece.matrix[0].length
+    pieceHeight.value = tetris.size.piece * piece.matrix.length
+    gsap.set(domEl.value, {
+      x: toPx(_column * tetris.size.piece),
+      y: toPx((tetris.board.rows - _row - 1) * -tetris.size.piece),
+    })
+  }
 
   // Draw helpers
   // drawBoard()
@@ -510,28 +531,43 @@ function getPiece(): Piece {
   return pieces[Math.floor(Math.random() * pieces.length)]
 }
 
-function onClick() {
-  touch.value && rotate()
+function onTouchStart(e: TouchEvent) {
+  if (over.value) return
+  e.preventDefault()
+  clearTimeout(dropTo)
+  dropTo = setTimeout(extraDrop, 200)
 }
 
-function onSwipeUp() {
+function getTouch(e: TouchEvent): Touch | undefined {
+  const touch = e.changedTouches || e.touches
+  return touch && touch.length ? touch[0] : undefined
+}
+
+function extraDrop() {
+  longPress = true
   drop()
+  dropTo = setTimeout(extraDrop, 200)
 }
 
-function onSwipeDown() {
-  drop()
+function onTouchEnd(e: TouchEvent) {
+  if (over.value) return
+  if (!longPress) {
+    const touch = getTouch(e)
+    touch && move(touch.clientX > tetris.size.x / 2 ? 1 : -1)
+  }
+  dropTo && clearTimeout(dropTo)
+  longPress = false
 }
 
-function onSwipeLeft() {
-  move(1)
-}
-
-function onSwipeRight() {
-  move(-1)
+function onPieceClick(e: TouchEvent) {
+  if (over.value) return
+  e.preventDefault()
+  e.stopPropagation()
+  rotate()
 }
 
 onBeforeUnmount(() => {
-  _Swiper.destroy()
+  dropTo && clearTimeout(dropTo)
   killTicker(draw)
   to && clearTimeout(to)
   gsap.killTweensOf(opacity)
@@ -551,5 +587,16 @@ defineExpose({
 .footer__tetris {
   opacity: 0.3;
   will-change: opacity;
+
+  &__dom {
+    position: absolute;
+    bottom: 0;
+    z-index: 9999;
+
+    &__piece {
+      width: v-bind(pieceWidthToPx);
+      height: v-bind(pieceHeightToPx);
+    }
+  }
 }
 </style>
