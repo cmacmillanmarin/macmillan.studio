@@ -33,7 +33,7 @@
           @mouseenter="onButtonMouseEnter"
           @mouseleave="onButtonMouseLeave">
           <button @click="onMuteButtonClick">
-            <SvgClose />
+            <SvgMute :state="muted || !playing" />
           </button>
         </div>
       </div>
@@ -46,7 +46,7 @@ import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { toPercentage } from '~/utils'
-import { shuffleIn, shuffleElsIn, fadeOut } from '~/utils/animations'
+import { fadeIn, shuffleIn, fadeOut } from '~/utils/animations'
 
 const props = defineProps<{
   progress: number
@@ -62,6 +62,7 @@ const { addTicker, killTicker } = useRaf()
 const progress = ref<number>(0)
 const visible = ref<boolean>(true)
 const playing = ref<boolean>(true)
+const muted = ref<boolean>(false)
 
 const el = ref<HTMLElement>()
 const barEl = ref<HTMLElement>()
@@ -88,7 +89,7 @@ watch(visible, () => {
   el.value && els.push(el.value)
   closeEl.value && els.push(closeEl.value)
   muteEl.value && els.push(muteEl.value)
-  visible.value ? shuffleElsIn({ els: els }) : fadeOut({ el: els })
+  visible.value ? fadeIn({ el: els }) : fadeOut({ el: els })
   updateCursor(visible.value ? 'pause' : 'default')
 })
 
@@ -130,7 +131,7 @@ function onButtonMouseEnter() {
 }
 
 function onButtonMouseLeave() {
-  updateCursor('pause')
+  updateCursor(playing.value ? 'pause' : 'play')
 }
 
 function onCloseButtonClick(e: MouseEvent) {
@@ -142,6 +143,7 @@ function onCloseButtonClick(e: MouseEvent) {
 function onMuteButtonClick(e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
+  muted.value = !muted.value
   emit('mute')
 }
 
@@ -176,7 +178,6 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
       border-radius: 100%;
 
       svg {
-        width: toScale(3.2rem);
         @include absolute-center;
       }
     }
@@ -189,6 +190,9 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
     padding-bottom: toScale(3rem);
     button {
       rotate: 45deg;
+      svg {
+        width: toScale(3.2rem);
+      }
     }
   }
 

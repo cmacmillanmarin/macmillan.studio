@@ -41,7 +41,8 @@
         muted
         loop
         playsinline
-        @timeupdate="onVideoPlaying">
+        @timeupdate="onVideoPlaying"
+        @ended="closeReel">
         <source src="/assets/video/reel--short.webm" type="video/webm" />
       </video>
     </div>

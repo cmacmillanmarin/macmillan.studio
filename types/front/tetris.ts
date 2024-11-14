@@ -6,8 +6,10 @@ export interface Size {
   piece: number
 }
 
+export type PieceType = 'o' | 'i' | 's' | 'z' | 'l' | 'j' | 't'
+
 export interface Piece {
-  name: 'o' | 'i' | 's' | 'z' | 'l' | 'j' | 't'
+  name: PieceType
   matrix: Matrix
 }
 
