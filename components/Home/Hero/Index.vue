@@ -347,7 +347,12 @@ function closeReel() {
   updateInReel(false)
   disableScroll(false)
   updateScrollTargetId('projects')
-  $scene.updateObject({ id: 'reel', onClick: goToReel, noPixel: false, cursor: 'play' })
+  $scene.updateObject({
+    id: 'reel',
+    onClick: isMobileLayout.value ? null : goToReel,
+    noPixel: false,
+    cursor: 'play',
+  })
   if (videoEl.value) {
     videoEl.value.src = '/assets/video/reel--short.webm'
     videoEl.value.setAttribute('type', 'video/webm')
