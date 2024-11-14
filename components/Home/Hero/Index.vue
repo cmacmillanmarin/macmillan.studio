@@ -24,6 +24,9 @@
               <SvgStudio />
             </div>
           </div>
+          <button ref="reelButtonEl" class="home__hero__content__reel-button" @click="goToReel">
+            <SvgPlay />
+          </button>
         </Teleport>
       </ClientOnly>
 
@@ -69,6 +72,7 @@ import useScrollStore from '~/store/useScrollStore'
 import { toPx, round } from '~/utils'
 import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
+import { shuffleIn, shuffleElsOut } from '~/utils/animations'
 
 defineProps<{
   data: HomepageHero
@@ -107,11 +111,13 @@ const reelVideoActive = computed(
 
 const hintEl = ref<HTMLElement>()
 const videoEl = ref<HTMLVideoElement>()
+const reelButtonEl = ref<HTMLElement>()
 const videoPlaying = ref<boolean>(false)
 const videoInView = ref<boolean>(false)
 const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
 const reelProgress = ref<number>(0)
+const reelButtonVisible = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
 const verticalGapPx = computed<string>(() =>
@@ -186,6 +192,14 @@ watch([headerLogo, videoInProject, isMobileLayout], () => {
   })
 })
 
+watch(reelButtonVisible, () => {
+  if (!reelButtonEl.value) return
+  gsap.set(reelButtonEl.value, { pointerEvents: reelButtonVisible.value ? 'auto' : 'none' })
+  reelButtonVisible.value
+    ? shuffleIn({ el: reelButtonEl.value })
+    : shuffleElsOut({ els: [reelButtonEl.value] })
+})
+
 watch([section, videoInView, videoInProject], () => {
   const play = videoInView.value && !videoInProject.value
   if (!play) {
@@ -204,6 +218,8 @@ watch(current, () => {
   const scale = initScale - incrementScale * scaleProgress
 
   videoInView.value = current.value < componentHeight.value
+  reelButtonVisible.value =
+    isMobileLayout.value && current.value > vh.value * 0.66 && !isInReel.value
 
   const scroll = Math.min(0, scrollThreshold.value - current.value) * 0.5
 
@@ -216,6 +232,13 @@ watch(current, () => {
   const titleY = toPx(current.value + scroll)
 
   const videoY = Math.min(current.value, vh.value * 2 - (200 * 9) / 16)
+
+  if (isMobileLayout.value && reelButtonEl.value) {
+    const offset = Math.max(0, current.value - vh.value)
+    gsap.set(reelButtonEl.value, {
+      y: position.value.y + size.value.y * 0.5 - toScale(56) * 0.5 - offset,
+    })
+  }
 
   gsap.set('.home__hero__content__video', { y: videoY })
   gsap.set('.svg__macmillan, .svg__studio', { scale })
@@ -292,6 +315,7 @@ onMounted(() => {
 
 function goToReel() {
   reelProgress.value = 0
+  reelButtonVisible.value = false
   updateInReel(true)
   disableScroll(true)
   $scene.updateObject({ id: 'reel', onClick: null, noPixel: true, cursor: null })
@@ -572,6 +596,32 @@ onUnmounted(() => {
         color: var(--black);
         height: max-content;
         @include t-b1;
+      }
+    }
+
+    &__reel-button {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: toScale(5.6rem, 37.5rem);
+      height: toScale(5.6rem, 37.5rem);
+      border: 0;
+      padding: 0;
+      background-color: black;
+      border: none;
+      border-radius: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      opacity: 0.000001;
+      will-change: opacity, transform;
+
+      .svg__play {
+        width: toScale(1.6rem, 37.5rem);
+        height: auto;
+        transform: translateX(15%);
       }
     }
 

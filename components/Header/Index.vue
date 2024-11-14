@@ -406,6 +406,7 @@ function scrollDown() {
 
   &__top,
   &__bottom {
+    pointer-events: none;
     position: absolute;
     padding: var(--layout-margin);
   }

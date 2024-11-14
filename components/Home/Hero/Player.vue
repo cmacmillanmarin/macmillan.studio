@@ -58,6 +58,7 @@ const { cursor } = storeToRefs(store)
 
 const { x, y } = useMouse()
 const { addTicker, killTicker } = useRaf()
+const { isMobileLayout } = useDevice()
 
 const progress = ref<number>(0)
 const visible = ref<boolean>(true)
@@ -78,7 +79,7 @@ watch(
     visible.value = true
     _to && clearTimeout(_to)
     _to = setTimeout(() => {
-      visible.value = cursor.value !== 'pause'
+      visible.value = cursor.value !== 'pause' || isMobileLayout.value
     }, 2000)
   },
   { immediate: true }
@@ -103,6 +104,7 @@ onMounted(() => {
 })
 
 function onClick(e: MouseEvent) {
+  if (isMobileLayout.value) return
   if (cursor.value === 'pause' || cursor.value === 'play') {
     e.preventDefault()
     e.stopPropagation()
@@ -157,28 +159,30 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
 
 <style lang="scss">
 .home__hero__player {
-  z-index: 9999999;
   width: 100%;
   height: var(--vh);
+  z-index: 9999999;
   pointer-events: auto;
-  @include absolute-center;
   @include will-fade;
+  @include absolute-center;
 
   &__close,
   &__mute {
     position: absolute;
     will-change: opacity;
+
     button {
       position: relative;
-      width: toScale(5.6rem);
-      height: toScale(5.6rem);
+      width: toScale(4.4rem, 37.5rem);
+      height: toScale(4.4rem, 37.5rem);
       background-color: black;
       border: none;
       padding: 0;
       border-radius: 100%;
 
-      svg {
-        @include absolute-center;
+      @include from__tablet--landscape {
+        width: toScale(5.6rem);
+        height: toScale(5.6rem);
       }
     }
   }
@@ -186,12 +190,26 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
   &__close {
     top: var(--layout-margin);
     right: var(--layout-margin);
-    padding-left: toScale(3rem);
-    padding-bottom: toScale(3rem);
+
+    @include from__tablet--landscape {
+      padding-left: toScale(3rem);
+      padding-bottom: toScale(3rem);
+    }
+
+    @include from__desktop--x-large {
+      right: calc((100% - var(--layout-max-width)) * 0.5 + var(--layout-margin));
+    }
+
     button {
       rotate: 45deg;
-      svg {
-        width: toScale(3.2rem);
+
+      .svg__close {
+        width: toScale(2.4rem, 37.5rem);
+        height: auto;
+        @include absolute-center;
+        @include from__tablet--landscape {
+          width: toScale(3.2rem);
+        }
       }
     }
   }
@@ -199,32 +217,58 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
   &__mute {
     left: var(--layout-margin);
     bottom: var(--layout-margin);
-    padding-top: toScale(3rem);
-    padding-right: toScale(3rem);
+
+    @include from__tablet--landscape {
+      padding-top: toScale(3rem);
+      padding-right: toScale(3rem);
+    }
+
+    @include from__desktop--x-large {
+      left: calc((100% - var(--layout-max-width)) * 0.5 + var(--layout-margin));
+    }
+
+    button {
+      svg {
+        @include absolute-center;
+      }
+    }
   }
 
   &__timeline {
-    max-width: calc(180rem - 180rem * 0.062);
-    width: calc(93.8%);
-    height: toScale(6rem);
+    width: calc(100% - var(--layout-margin) * 2);
+    height: toScale(6rem, 37.5rem);
     overflow: var(--overflow--hidden);
     will-change: opacity;
     @include absolute-center;
 
+    @include from__tablet--landscape {
+      height: toScale(6rem);
+      max-width: calc(180rem - 180rem * 0.062);
+      width: calc(93.8%);
+    }
+
     &__progress {
       width: 100%;
-      height: toScale(0.2rem);
+      height: toScale(0.2rem, 37.5rem);
       background-color: rgba(255, 255, 255, 0.5);
       @include absolute-center;
+
+      @include from__tablet--landscape {
+        height: toScale(0.2rem);
+      }
 
       &::before {
         content: ' ';
         position: absolute;
         left: 0;
         bottom: 0.1rem;
-        width: toScale(0.2rem);
-        height: toScale(1.2rem);
+        width: toScale(0.2rem, 37.5rem);
+        height: toScale(0.8rem, 37.5rem);
         background-color: white;
+        @include from__tablet--landscape {
+          width: toScale(0.2rem);
+          height: toScale(1.2rem);
+        }
       }
 
       &__bar {
@@ -233,10 +277,14 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
         transform: translateX(-100%);
         will-change: transform;
         @include absolute-fill;
+
         .svg__square {
           position: absolute;
           right: 0;
-          bottom: 0.2rem;
+          bottom: toScale(0.2rem, 37.5rem);
+          @include from__tablet--landscape {
+            bottom: toScale(0.2rem);
+          }
           rect {
             fill: white;
           }

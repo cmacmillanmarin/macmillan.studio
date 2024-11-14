@@ -91,8 +91,9 @@ export function transitionShuffleOut(el: Element, done: Function) {
   shuffleElsOut({ els: [el], done })
 }
 
-export function shuffleIn(params: { el: HTMLElement }) {
+export function shuffleIn(params: { el?: HTMLElement }) {
   const { el } = params
+  if (!el) return
   const paths = shuffle(
     Array.from(el.querySelectorAll(':scope > path, :scope > g, :scope > span, :scope > rect'))
   )
