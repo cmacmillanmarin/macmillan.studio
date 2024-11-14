@@ -93,9 +93,13 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 .home__services {
   position: relative;
   min-height: var(--vh);
-  padding: toScale(4rem) 0 0;
+  padding: toScale(6rem, 37.5rem) 0 0;
   opacity: 0.000001;
   will-change: opacity, transform;
+
+  @include from__tablet--landscape {
+    padding: toScale(4rem) 0 0;
+  }
 
   &__index {
     position: absolute;
@@ -144,7 +148,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   }
 
   &__mobile-list {
-    padding: 4rem var(--layout-margin) 0;
+    padding: 3.2rem var(--layout-margin) 0;
     .accordion__title__content__number {
       font-family: 'HelveticaNowDisplayBold' !important;
     }

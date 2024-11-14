@@ -192,7 +192,6 @@ const score = computed<number>(() => tetrisEl.value?.score || 0)
 const level = computed<number>(() => tetrisEl.value?.level || 0)
 const nextPiece = computed<Piece | undefined>(() => tetrisEl.value?.nextPiece || undefined)
 const over = computed<boolean>(() => tetrisEl.value?.over || false)
-const playClick = ref<boolean>(false)
 
 watch([tetris, over], () => {
   disableScroll(tetris.value)
@@ -543,7 +542,7 @@ onBeforeUnmount(() => {
     &__credits {
       pointer-events: auto;
       &__link {
-        margin-top: 1rem;
+        margin-top: 0.8rem;
         @include from__tablet--landscape {
           margin-top: 0.2rem;
         }

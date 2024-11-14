@@ -219,14 +219,16 @@ const emit = defineEmits<{
 
     &__title {
       font-family: 'HelveticaNowDisplayBold' !important;
+      @include columns(8, 'mobile');
       @include t-black;
       @include t-b1;
-      @include columns(8, 'mobile');
+
       @include from__tablet--landscape {
         font-family: inherit;
-        @include t-b1;
+
         @include gap(2, 'left', 'desktop');
         @include columns(4, 'desktop');
+        @include t-b1;
       }
     }
 

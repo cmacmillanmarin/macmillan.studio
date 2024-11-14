@@ -12,6 +12,7 @@ const props = defineProps<{
   color?: string
 }>()
 
+const { toScale } = useCss()
 const { isMobileLayout } = useDevice()
 const { vw, vh, onResize } = useResize()
 
@@ -61,7 +62,7 @@ function enter(): Promise<void> {
 }
 
 function updateSize() {
-  const idealSize = isMobileLayout.value ? 40 : 80
+  const idealSize = toScale(isMobileLayout.value ? 45 : 80)
   xBoxes.value = Math.round(vw.value / idealSize)
   yBoxes.value = Math.round(vh.value / idealSize)
   boxes.value = xBoxes.value * yBoxes.value

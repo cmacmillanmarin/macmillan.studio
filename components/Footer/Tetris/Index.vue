@@ -81,10 +81,20 @@ watch(onResize, () => {
 
 watch([ready, inView, over, () => props.active], () => {
   if (ready.value && inView.value && props.active && !over.value) {
+    touch.value &&
+      _Swiper.init({
+        el: el.value,
+        cursor: false,
+        onSwipeUp,
+        onSwipeDown,
+        onSwipeLeft,
+        onSwipeRight,
+      })
     addTicker(draw)
     drop()
     el.value && gsap.to(el.value, { opacity: 1, duration: 0.4 })
   } else {
+    _Swiper.destroy()
     killTicker(draw)
     to && clearTimeout(to)
     el.value && gsap.to(el.value, { opacity: 0.3, duration: 0.4 })
@@ -102,15 +112,6 @@ onMounted(() => {
     ready.value = true
     initBoard()
     draw()
-    touch.value &&
-      _Swiper.init({
-        el: el.value,
-        cursor: false,
-        onSwipeUp,
-        onSwipeDown,
-        onSwipeLeft,
-        onSwipeRight,
-      })
   }
 })
 
@@ -522,14 +523,15 @@ function onSwipeDown() {
 }
 
 function onSwipeLeft() {
-  move(-1)
-}
-
-function onSwipeRight() {
   move(1)
 }
 
+function onSwipeRight() {
+  move(-1)
+}
+
 onBeforeUnmount(() => {
+  _Swiper.destroy()
   killTicker(draw)
   to && clearTimeout(to)
   gsap.killTweensOf(opacity)

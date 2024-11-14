@@ -84,12 +84,17 @@ onMounted(async () => {
 })
 
 function onPanStart() {
-  _panInit = _current
-  _target = _current
-  _onPan = true
+  // _panInit = _current
+  // _target = _current
 }
 
 function onPanMove(params: PanParams) {
+  if (Math.abs(params.yDiff) >= Math.abs(params.xDiff)) return
+  if (!_onPan) {
+    _panInit = _current
+    _target = _current
+  }
+  _onPan = true
   _target = _panInit - params.xDiff
   _panDirection = params.xDir
 }

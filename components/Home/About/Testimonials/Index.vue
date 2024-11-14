@@ -67,6 +67,7 @@ import useScrollStore from '~/store/useScrollStore'
 import type { Testimonials } from '~/types/wordpress/testimonial'
 import { storeToRefs } from 'pinia'
 import { startWithZero } from '~/utils'
+import { Swiper } from '~/utils/swiper'
 
 const props = defineProps<{
   data: Testimonials
@@ -89,6 +90,8 @@ const x = ref<number>(0)
 const active = ref<number>(0)
 const activeEntered = ref<number>(0)
 const expanded = ref<boolean>(false)
+
+let _Swiper = new Swiper({ preventLeft: true, preventRight: true, dragOnTarget: true })
 
 watch(x, () => {
   const items = contentEl.value?.querySelectorAll('.home__about__testimonials__testimonial')
@@ -121,16 +124,7 @@ watch(expanded, () => {
   onTestimonialMouseEnter()
   updateScroll()
   emit('update-expanded', expanded.value)
-  // updateCarouselCursor()
 })
-
-// watch(swipeRight, () => {
-//   active.value = Math.max(0, active.value - 1)
-// })
-
-// watch(swipeLeft, () => {
-//   active.value = Math.min(props.data.length - 1, active.value + 1)
-// })
 
 watch(mouseX, () => {
   if (
@@ -144,7 +138,9 @@ watch(mouseX, () => {
 })
 
 onMounted(() => {
-  // el.value && init({ el: el.value, cursor: true })
+  el.value &&
+    isMobileLayout.value &&
+    _Swiper.init({ el: el.value, cursor: false, onSwipeLeft, onSwipeRight })
 })
 
 function prev() {
@@ -153,6 +149,14 @@ function prev() {
 
 function next() {
   active.value = Math.min(props.data.length - 1, active.value + 1)
+}
+
+function onSwipeLeft() {
+  next()
+}
+
+function onSwipeRight() {
+  prev()
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -197,6 +201,10 @@ function updateCarouselCursor() {
   else if (active.value === props.data.length - 1) updateCursor('arrow-left')
   else mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
 }
+
+onBeforeUnmount(() => {
+  _Swiper.destroy()
+})
 
 const emit = defineEmits(['update-expanded'])
 </script>
