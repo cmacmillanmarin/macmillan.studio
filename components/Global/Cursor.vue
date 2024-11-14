@@ -8,6 +8,7 @@
         <div v-if="cursor !== 'default'" :key="cursor" class="cursor__dot__icon">
           <SvgPlay v-if="cursor === 'play'" />
           <SvgPlus v-else-if="cursor === 'plus'" />
+          <SvgPause v-else-if="cursor === 'pause'" />
           <SvgArrowBig v-else-if="cursor === 'arrow-left'" key="left-arrow" :side="1" />
           <SvgArrowBig v-else-if="cursor === 'arrow-right'" key="right-arrow" :side="-1" />
           <SvgCopy v-else-if="cursor === 'copy'" />

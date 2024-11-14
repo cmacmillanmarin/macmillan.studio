@@ -40,10 +40,19 @@
         autoplay
         muted
         loop
-        playsinline>
+        playsinline
+        @timeupdate="onVideoPlaying">
         <source src="/assets/video/reel--short.webm" type="video/webm" />
       </video>
     </div>
+
+    <HomeHeroPlayer
+      v-if="isInReel"
+      :progress="reelProgress"
+      @close="closeReel"
+      @mute="muteReel"
+      @toggle="toggleReel"
+      @update="updateReel" />
 
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
     <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersectTop }" />
@@ -101,6 +110,7 @@ const videoPlaying = ref<boolean>(false)
 const videoInView = ref<boolean>(false)
 const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
+const reelProgress = ref<number>(0)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
 const verticalGapPx = computed<string>(() =>
@@ -280,9 +290,10 @@ onMounted(() => {
 })
 
 function goToReel() {
+  reelProgress.value = 0
   updateInReel(true)
   disableScroll(true)
-  $scene.updateObject({ id: 'reel', onClick: closeReel, noPixel: true, cursor: 'close' })
+  $scene.updateObject({ id: 'reel', onClick: null, noPixel: true, cursor: null })
   if (route.hash === '#reel') updateScrollTargetId('reel')
   else router.push('/#reel')
   if (videoEl.value) {
@@ -291,6 +302,19 @@ function goToReel() {
     videoEl.value.muted = false
     videoEl.value.loop = false
     videoEl.value.play()
+  }
+}
+
+function updateReel(progress: number) {
+  if (videoEl.value) {
+    videoEl.value.currentTime = videoEl.value.duration * progress
+    reelProgress.value = progress
+  }
+}
+
+function muteReel() {
+  if (videoEl.value) {
+    videoEl.value.muted = !videoEl.value.muted
   }
 }
 
@@ -305,6 +329,12 @@ function closeReel() {
     videoEl.value.muted = true
     videoEl.value.loop = true
     videoEl.value.play()
+  }
+}
+
+function toggleReel() {
+  if (videoEl.value) {
+    videoEl.value.paused ? videoEl.value.play() : videoEl.value.pause()
   }
 }
 
@@ -378,6 +408,12 @@ function onVideoReady() {
         },
       })
     }
+  }
+}
+
+function onVideoPlaying() {
+  if (videoEl.value && isInReel.value && videoEl.value.duration) {
+    reelProgress.value = round(videoEl.value.currentTime / videoEl.value.duration, 4)
   }
 }
 

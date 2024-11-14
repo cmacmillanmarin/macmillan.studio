@@ -20,6 +20,7 @@ export type Section =
 export type Cursor =
   | 'default'
   | 'play'
+  | 'pause'
   | 'plus'
   | 'arrow-left'
   | 'arrow-right'
