@@ -12,6 +12,7 @@ export default defineStore('use-store', {
     section: 'hero',
     sectionThrottle: false,
     cursor: 'default',
+    activeProjectList: 'selected',
     header: false,
     headerLogo: false,
     headerOverlay: false,
@@ -65,6 +66,9 @@ export default defineStore('use-store', {
     },
     updateSectionThrottle(state: boolean) {
       this.sectionThrottle = state
+    },
+    updateActiveProjectList(state: 'all' | 'selected') {
+      this.activeProjectList = state
     },
     updateHeader(state: boolean) {
       this.header = state

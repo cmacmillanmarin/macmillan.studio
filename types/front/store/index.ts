@@ -35,6 +35,7 @@ export interface State {
   grid: GridType
   section: Section
   sectionThrottle: boolean
+  activeProjectList: 'all' | 'selected'
   header: boolean
   headerLogo: boolean
   headerOverlay: boolean

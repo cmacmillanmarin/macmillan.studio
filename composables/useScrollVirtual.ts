@@ -9,11 +9,15 @@ import { gsap } from 'gsap'
 import { round, toPx, focusable } from '~/utils/index'
 import type { Direction } from '~/types/front/store/scroll'
 import { Swiper, type PanParams } from '~/utils/swiper'
+import useStore from '~/store/useStore'
+import { storeToRefs } from 'pinia'
 
 export default function useScrollVirtual() {
   const { vh } = useResize()
   const { safari, hasWheelEvent, isMobileLayout } = useDevice()
   const { addTicker, killTicker } = useRaf()
+  const store = useStore()
+  const { section, activeProjectList } = storeToRefs(store)
 
   const config = useRuntimeConfig()
   const { IS_DEV } = config.public
@@ -519,8 +523,14 @@ export default function useScrollVirtual() {
   }
 
   function _onPanMove(params: PanParams): void {
-    if (_disabled || Math.abs(params.yDiff) < 20) return
-    target.value = _clampTarget(_panTarget - params.yDiff * 2)
+    if (_disabled) return
+    const { yDiff, xDiff } = params
+    let pan = yDiff
+    const direction = Math.abs(yDiff) >= Math.abs(xDiff) ? 'vertical' : 'horizontal'
+    const allowHorizontal = section.value === 'projects' && activeProjectList.value === 'all'
+    if (!allowHorizontal && direction === 'horizontal') return
+    else if (direction === 'horizontal') pan = xDiff * -1
+    target.value = _clampTarget(_panTarget - pan * 2)
   }
 
   function _onPanEnd(): void {

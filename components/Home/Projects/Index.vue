@@ -23,10 +23,10 @@
               @enter="transitionShuffleIn"
               @leave="transitionDone">
               <span
-                :key="`${isInProject}`"
+                :key="`${isMobileLayout ? 'indicators' : isInProject}`"
                 :class="[
                   'home__projects__index__label',
-                  { 'home__projects__index__label--active': isInProject },
+                  { 'home__projects__index__label--active': isInProject && !isMobileLayout },
                 ]"
                 v-text="`{${startWithZero(active)}—${startWithZero(activeOf)}}`" />
             </transition>
@@ -124,7 +124,7 @@ import {
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { Projects } from '~/types/wordpress/project'
-import { toPx, slugify } from '~/utils'
+import { toPx } from '~/utils'
 import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
 
 const props = defineProps<{
@@ -134,7 +134,7 @@ const props = defineProps<{
 const route = useRoute()
 
 const store = useStore()
-const { updateSection } = store
+const { updateSection, updateActiveProjectList } = store
 const { section, isInProject } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -204,6 +204,7 @@ watch(scrollUpdated, () => {
 })
 
 watch(activeList, () => {
+  updateActiveProjectList(activeList.value)
   emit('update-list', activeList.value)
   updateActiveListProjects()
 })

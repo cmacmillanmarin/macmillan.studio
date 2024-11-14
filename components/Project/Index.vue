@@ -135,7 +135,6 @@ function createScroll() {
 }
 
 function updateScroll() {
-  console.log(isMobileLayout.value)
   if (isMobileLayout.value) {
     _scroll.bounding = (contentEl.value?.clientHeight || 0) - (el.value?.clientHeight || 0)
   } else {

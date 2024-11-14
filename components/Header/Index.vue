@@ -27,7 +27,7 @@
       <ul class="header__nav__list">
         <HeaderLink label="Contact" to="/#contact" :active="section === 'contact' && !activeDots" />
       </ul>
-      <div class="header__nav__logo">
+      <div v-show="logoVisible" class="header__nav__logo">
         <CustomLink
           to="/#hero"
           type="referral"
@@ -45,10 +45,14 @@
           <SvgPixelArrow />
         </button>
       </nav>
-      <nav v-if="isMobileLayout" ref="logoMobileEl" class="header__nav__logo--mobile">
+      <nav
+        v-if="isMobileLayout"
+        v-show="!isInProject && logoVisible"
+        ref="logoMobileEl"
+        class="header__nav__logo--mobile">
         <button @click="scrollUp" />
       </nav>
-      <transition mode="out-in" :css="false" @enter="mobileEnter" @leave="mobileLeave">
+      <transition mode="out-in" :css="false" @enter="mobileButtonEnter" @leave="mobileButtonLeave">
         <nav v-if="mobileButton" class="header__nav--mobile">
           <button>
             <transition
@@ -111,18 +115,33 @@ const links = computed<HeaderLinks>(() => {
 const el = ref<HTMLElement>()
 const logoMobileEl = ref<HTMLElement>()
 const entered = ref<boolean>(false)
+const logoVisible = ref<boolean>(false)
+const linksVisible = ref<boolean>(false)
 const mobileButton = ref<boolean>(false)
 const mobileButtonIcon = ref<boolean>(false)
 const activeDots = computed<boolean>(
   () => !isInProject.value && entered.value && !mobileButton.value
 )
 
-watch(header, () => {
-  header.value && !entered.value && enter()
+watch(linksVisible, () => {
+  linksVisible.value ? enterLinks() : leaveLinks()
 })
 
-watch(mobileButton, () => {
-  mobileButton.value ? leave() : enter()
+watch(logoVisible, () => {
+  $scene.updateLogoState(logoVisible.value)
+})
+
+watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], async () => {
+  mobileButton.value =
+    isMobileLayout.value && current.value > vh.value * 0.5 && !isInProject.value && !isInReel.value
+  isMobileLayout.value && (await nextTick())
+  logoVisible.value = header.value && !isInProject.value && !isInReel.value && !headerOverlay.value
+  linksVisible.value =
+    header.value &&
+    !isInProject.value &&
+    !isInReel.value &&
+    !mobileButton.value &&
+    !headerOverlay.value
 })
 
 watch(current, () => {
@@ -143,9 +162,6 @@ watch(current, () => {
   )
 
   const progress = enterProgress
-
-  mobileButton.value =
-    isMobileLayout.value && current.value > vh.value * 0.5 && !isInProject.value && !isInReel.value
 
   gsap.set(el.value, { y: toPx(y) })
   gsap.set('.header__nav__logo', {
@@ -168,12 +184,7 @@ watch(current, () => {
   }
 })
 
-watch([isInProject, isInReel], () => {
-  if (!entered.value || mobileButton.value) return
-  isInProject.value || isInReel.value ? leave() : enter()
-})
-
-function enter() {
+function enterLinks() {
   if (!el.value) return
   entered.value = true
   gsap.set(el.value, { pointerEvents: 'auto' })
@@ -182,10 +193,9 @@ function enter() {
   const hints = el.value.querySelectorAll('.header__hint') || []
   shuffleElsIn({ els: hints, fast: true })
   shuffleElsIn({ els: links, fast: true })
-  $scene.updateLogoState(true)
 }
 
-function leave() {
+function leaveLinks() {
   if (!el.value) return
   gsap.set(el.value, { pointerEvents: 'none' })
   const links =
@@ -193,14 +203,13 @@ function leave() {
   const hints = el.value.querySelectorAll('.header__hint') || []
   shuffleElsOut({ els: hints, fast: true })
   shuffleElsOut({ els: links, fast: true })
-  !isMobileLayout.value && $scene.updateLogoState(false)
 }
 
-function mobileEnter(el: Element, done: () => void) {
+function mobileButtonEnter(el: Element, done: () => void) {
   gsap.killTweensOf(el)
   gsap.to(el, {
     scale: 1,
-    delay: 1,
+    delay: logoVisible.value ? 1 : 0,
     duration: 0.4,
     onStart: () => {
       mobileButtonIcon.value = true
@@ -211,7 +220,7 @@ function mobileEnter(el: Element, done: () => void) {
   })
 }
 
-function mobileLeave(el: Element, done: () => void) {
+function mobileButtonLeave(el: Element, done: () => void) {
   gsap.killTweensOf(el)
   gsap.to(el, {
     scale: 0,
