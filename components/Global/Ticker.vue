@@ -21,6 +21,8 @@ const props = defineProps<{
   planesId?: string
   dragOnTarget?: boolean
   ignoreUpdateScroll?: boolean
+  startingPoint?: number
+  startingDirection?: number
 }>()
 
 const scrollStore = useScrollStore()
@@ -79,9 +81,16 @@ watch(inView, () => {
 })
 
 onMounted(async () => {
-  await nextTick()
-  await nextTick()
-  update()
+  if (props.startingDirection !== undefined && props.startingPoint !== undefined) {
+    _direction = props.startingDirection || -1
+    _target = _current = props.startingPoint || 0
+    update()
+    move()
+  } else {
+    await nextTick()
+    await nextTick()
+    update()
+  }
 })
 
 function onPanStart() {
@@ -141,10 +150,10 @@ function move() {
     if (props.planesId) {
       const { $scene }: any = useNuxtApp()
       const index = items.value.indexOf(item)
-      const totalDistance = _containerWidth + item.width
-      const current = x + item.width
-      const progress = current / totalDistance
-      const distanceToCenter = distanceToMidpoint(progress)
+      // const totalDistance = _containerWidth + item.width
+      // const current = x + item.width
+      // const progress = current / totalDistance
+      // const distanceToCenter = distanceToMidpoint(progress)
       $scene.updateObject({
         id: `${props.planesId}-${index + 1}`,
         position: { x: x, y: y.value },
@@ -193,6 +202,17 @@ async function update(params?: { ignoreUpdateScroll: boolean }) {
   emit('update')
 }
 
+function pause() {
+  removeRenderCallback(move)
+}
+
+function get(): { point: number; direction: number } {
+  return {
+    point: _current,
+    direction: _direction,
+  }
+}
+
 onBeforeUnmount(() => {
   _Swiper.destroy()
   removeRenderCallback(move)
@@ -200,6 +220,8 @@ onBeforeUnmount(() => {
 
 defineExpose({
   update,
+  pause,
+  get,
 })
 
 const emit = defineEmits(['update'])

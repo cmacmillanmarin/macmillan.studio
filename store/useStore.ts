@@ -22,6 +22,8 @@ export default defineStore('use-store', {
     inProjectEntered: false,
     inProjectScroll: true,
     inProjectNextProjectInView: false,
+    inProjectNextProjectTickerStartingPoint: 0,
+    inProjectNextProjectTickerStartingDirection: -1,
   }),
   getters: {
     isPreloaded(): boolean {
@@ -81,6 +83,9 @@ export default defineStore('use-store', {
     updateHeaderOverlay(state: boolean) {
       this.headerOverlay = state
     },
+    headerButtonClicked() {
+      this.headerMobileButtonClicked = !this.headerMobileButtonClicked
+    },
     updateCursor(state: Cursor) {
       this.cursor = state
     },
@@ -99,8 +104,9 @@ export default defineStore('use-store', {
     updateInProjectNextProjectInView(state: boolean) {
       this.inProjectNextProjectInView = state
     },
-    headerButtonClicked() {
-      this.headerMobileButtonClicked = !this.headerMobileButtonClicked
+    updateInProjectNextProjectTicker(params: { point: number; direction: number }) {
+      this.inProjectNextProjectTickerStartingPoint = params.point
+      this.inProjectNextProjectTickerStartingDirection = params.direction
     },
   },
 })

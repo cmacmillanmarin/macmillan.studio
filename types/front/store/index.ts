@@ -45,4 +45,7 @@ export interface State {
   inProject: boolean
   inProjectEntered: boolean
   inProjectScroll: boolean
+  inProjectNextProjectInView: boolean
+  inProjectNextProjectTickerStartingPoint: number
+  inProjectNextProjectTickerStartingDirection: number
 }

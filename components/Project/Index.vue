@@ -62,6 +62,7 @@ const {
   updateSection,
   updateInProjectScroll,
   updateInProjectNextProjectInView,
+  updateInProjectNextProjectTicker,
 } = store
 const { isInProject, isInProjectEntered, cursor, gridType, headerMobileButtonClicked } =
   storeToRefs(store)
@@ -105,7 +106,10 @@ watch(onResize, updateScroll)
 
 watch(headerMobileButtonClicked, () => {
   if (props.nextProject && nextProjectInView.value) goToNextProject()
-  else closeProject()
+  else {
+    updateInProjectNextProjectTicker({ point: 0, direction: -1 })
+    closeProject()
+  }
 })
 
 watch(nextProjectInView, () => {
@@ -237,7 +241,7 @@ async function goToNextProject() {
   const nextProject = el.value?.querySelector('.project__next')
   if (isMobileLayout.value && nextProject && gapNextEl.value) {
     const { height } = nextProject.getBoundingClientRect()
-    gsap.set(gapNextEl.value, { height: toPx(vh.value - height) })
+    gsap.set(gapNextEl.value, { height: toPx(vh.value - height + 1) })
     await nextTick()
   }
   updateScroll()

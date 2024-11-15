@@ -4,8 +4,11 @@
     v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
   <Ticker
     v-else
+    ref="tickerEl"
     :drag-on-target="true"
     :ignore-update-scroll="true"
+    :starting-point="inProjectNextProjectTickerStartingPoint"
+    :starting-direction="inProjectNextProjectTickerStartingDirection"
     class="svg__project__wallpapers__ticker"
     @update="emit('update-scroll')">
     <div v-for="i in 2" :key="i">
@@ -17,13 +20,31 @@
 </template>
 
 <script lang="ts" setup>
+import useStore from '~/store/useStore'
 import { shuffleIn } from '~/utils/animations'
+import Ticker from '~/components/Global/Ticker.vue'
+import { storeToRefs } from 'pinia'
 
-defineProps<{
+const props = defineProps<{
+  next: boolean
   animation: boolean
 }>()
 
+const store = useStore()
+const { updateInProjectNextProjectTicker } = store
+const { inProjectNextProjectTickerStartingPoint, inProjectNextProjectTickerStartingDirection } =
+  storeToRefs(store)
+
 const { isMobileLayout } = useDevice()
+
+const tickerEl = ref<typeof Ticker>()
+
+onBeforeUnmount(() => {
+  if (props.next && tickerEl.value) {
+    tickerEl.value.pause()
+    updateInProjectNextProjectTicker(tickerEl.value.get())
+  }
+})
 
 const emit = defineEmits(['update-scroll'])
 </script>

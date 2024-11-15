@@ -7,7 +7,10 @@
       { 'project__landing--animation': animation },
     ]">
     <div v-show="ready || isMobileLayout" class="project__landing__title" @click="onTitleClick">
-      <SvgProjectWallpapers :animation="animation" @update-scroll="emit('update-scroll')" />
+      <SvgProjectWallpapers
+        :animation="animation"
+        :next="!!next"
+        @update-scroll="emit('update-scroll')" />
     </div>
 
     <div class="project__landing__info">
