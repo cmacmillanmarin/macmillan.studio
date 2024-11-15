@@ -99,14 +99,15 @@ function onPanStart() {
 }
 
 function onPanMove(params: PanParams) {
-  if (Math.abs(params.yDiff) >= Math.abs(params.xDiff)) return
+  const { xDir, xDiff, yDiff, inertia } = params
+  if (Math.abs(yDiff) >= Math.abs(xDiff)) return
   if (!_onPan) {
     _panInit = _current
     _target = _current
   }
   _onPan = true
-  _target = _panInit - params.xDiff
-  _panDirection = params.xDir
+  _target = _panInit - xDiff * inertia
+  _panDirection = xDir
 }
 
 function onPanEnd() {

@@ -524,13 +524,13 @@ export default function useScrollVirtual() {
 
   function _onPanMove(params: PanParams): void {
     if (_disabled) return
-    const { yDiff, xDiff } = params
+    const { yDiff, xDiff, inertia } = params
     let pan = yDiff
     const direction = Math.abs(yDiff) >= Math.abs(xDiff) ? 'vertical' : 'horizontal'
     const allowHorizontal = section.value === 'projects' && activeProjectList.value === 'all'
     if (!allowHorizontal && direction === 'horizontal') return
     else if (direction === 'horizontal') pan = xDiff * -1
-    target.value = _clampTarget(_panTarget - pan * 2)
+    target.value = _clampTarget(_panTarget - pan * (1 + inertia))
   }
 
   function _onPanEnd(): void {

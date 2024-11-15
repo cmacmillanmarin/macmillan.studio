@@ -30,6 +30,7 @@ export type PanParams = {
   yDir: number
   xVel: number
   yVel: number
+  inertia: number
   speed?: number
 }
 
@@ -66,6 +67,7 @@ export class Swiper {
   yDiff: number
   xVel: number
   yVel: number
+  inertia: number
   time: number
   to: any
   timer: number
@@ -118,6 +120,7 @@ export class Swiper {
     this.yDir = 0
     this.xDiff = 0
     this.yDiff = 0
+    this.inertia = 1
     this.xVel = 0
     this.yVel = 0
     this.time = 0
@@ -225,6 +228,12 @@ export class Swiper {
     this.yDiff = 0
     this.log('touchStart', { x: this.xDown, y: this.yDown })
     this.checkVelocity()
+    if (this.timer !== 0 && Math.abs(this.timer - Date.now()) < 500) {
+      this.inertia += 0.25
+    } else {
+      this.inertia = 1
+    }
+
     this.timer = Date.now()
 
     this.onPanStart()
@@ -256,6 +265,7 @@ export class Swiper {
       yDir: this.yDir,
       xVel: this.xVel,
       yVel: this.yVel,
+      inertia: this.inertia,
       event: e,
     })
 
@@ -273,6 +283,7 @@ export class Swiper {
       yDir: this.yDir,
       xVel: this.xVel,
       yVel: this.yVel,
+      inertia: this.inertia,
     })
   }
 
@@ -294,6 +305,7 @@ export class Swiper {
       yDir: this.yDir,
       xVel: this.xVel,
       yVel: this.yVel,
+      inertia: this.inertia,
       time,
     })
 
