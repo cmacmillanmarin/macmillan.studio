@@ -11,7 +11,7 @@ export type Opts = {
 
 export type Params = {
   el: HTMLElement | undefined
-  cursor: boolean
+  cursor?: boolean
   onPanStart?: Function
   onPanMove?: Function
   onPanEnd?: Function

@@ -22,7 +22,7 @@ defineProps<{
   &__content {
     display: flex;
     align-items: flex-end;
-    padding: 6rem var(--layout-margin) 8rem;
+    padding: toScale(6rem, 37.5rem) var(--layout-margin) toScale(6rem, 37.5rem);
     @include from__tablet--landscape {
       height: var(--vh);
       padding: 0 12rem 4.4rem 16rem;

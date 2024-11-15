@@ -40,10 +40,17 @@ const props = defineProps<{
 const open = ref<boolean>(!!props.open)
 const animated = ref<boolean>(!!props.animation)
 
+watch(open, async () => {
+  await nextTick()
+  emit('toggle')
+})
+
 function toggle() {
   open.value = !open.value
   animated.value = true
 }
+
+const emit = defineEmits(['toggle'])
 </script>
 
 <style lang="scss">

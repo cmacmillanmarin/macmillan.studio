@@ -3,47 +3,17 @@
     :class="[
       'project__landing',
       `project__landing--${data.slug}`,
+      { 'project__landing--next': next },
       { 'project__landing--animation': animation },
     ]">
+    <div v-show="ready || isMobileLayout" class="project__landing__title">
+      <!-- <SvgProjectWallpapers v-if="data.slug === 'pixel-wallpapers'" :animation="animation" /> -->
+      <h2 v-transition:in="{ callback: animation ? shuffleIn : () => {} }" @click="onTitleClick">
+        <span v-for="letter in data.title">{{ letter }}</span>
+      </h2>
+    </div>
+
     <div class="project__landing__info">
-      <div ref="stackEl" class="project__landing__info__stack">
-        <div
-          class="project__landing__info__stack__content"
-          @mouseenter="onMouseEnter"
-          @mouseleave="onMouseLeave">
-          <Accordion
-            v-if="data.techStack.length"
-            title="Tech Stack"
-            :content="data.techStack.join(', ')"
-            :first="true"
-            :open="!next"
-            :animation="!next" />
-          <Accordion
-            title="Client"
-            :content="client"
-            :first="!data.techStack.length"
-            :open="!data.techStack.length"
-            :animation="!next && !!data.techStack.length" />
-          <Accordion
-            v-for="info in data.info"
-            :title="info.title"
-            :content="info.label"
-            :animation="true" />
-        </div>
-      </div>
-
-      <div ref="contentEl" class="project__landing__info__content">
-        <div class="project__landing__info__content__services">
-          <p
-            v-for="service in data.services"
-            class="project__landing__info__content__services__label">
-            #{{ slugify(service) }}
-          </p>
-        </div>
-
-        <div class="project__landing__info__content__description" v-html="data.description" />
-      </div>
-
       <div
         v-if="data.link && !next"
         ref="linkEl"
@@ -60,6 +30,54 @@
           <span>Launch Project</span>
           <SvgLinkArrow />
         </a>
+        <ClientOnly>
+          <div v-if="next && isMobileLayout" class="project__landing__info__link">
+            <SvgArrow />
+          </div>
+        </ClientOnly>
+      </div>
+
+      <div ref="stackEl" class="project__landing__info__stack">
+        <div
+          class="project__landing__info__stack__content"
+          @mouseenter="onMouseEnter"
+          @mouseleave="onMouseLeave">
+          <ClientOnly>
+            <Accordion
+              v-if="data.techStack.length"
+              title="Tech Stack"
+              :content="data.techStack.join(', ')"
+              :first="true"
+              :open="!next && !isMobileLayout"
+              :animation="!next && !isMobileLayout"
+              @toggle="onAccordionToggle" />
+          </ClientOnly>
+          <Accordion
+            title="Client"
+            :content="client"
+            :first="!data.techStack.length"
+            :open="!data.techStack.length"
+            :animation="!next && !!data.techStack.length"
+            @toggle="onAccordionToggle" />
+          <Accordion
+            v-for="info in data.info"
+            :title="info.title"
+            :content="info.label"
+            :animation="true"
+            @toggle="onAccordionToggle" />
+        </div>
+      </div>
+
+      <div ref="contentEl" class="project__landing__info__content">
+        <div v-show="!isMobileLayout" class="project__landing__info__content__services">
+          <p
+            v-for="service in data.services"
+            class="project__landing__info__content__services__label">
+            #{{ slugify(service) }}
+          </p>
+        </div>
+
+        <div class="project__landing__info__content__description" v-html="data.description" />
       </div>
 
       <transition :css="false" @leave="transitionFadeOut">
@@ -73,13 +91,6 @@
           </div>
         </div>
       </transition>
-    </div>
-
-    <div v-if="ready" class="project__landing__title">
-      <!-- <SvgProjectWallpapers v-if="data.slug === 'pixel-wallpapers'" :animation="animation" /> -->
-      <h2 v-transition:in="{ callback: animation ? shuffleIn : () => {} }">
-        <span v-for="letter in data.title">{{ letter }}</span>
-      </h2>
     </div>
 
     <ClientOnly>
@@ -98,18 +109,18 @@ import { type Project } from '~/types/wordpress/project'
 import { fadeIn, shuffleIn } from '~/utils/animations'
 import { slugify } from '~/utils'
 
-const store = useStore()
-const { updateCursor } = store
-const { gridType, inProjectScroll } = storeToRefs(store)
-
-const { isMobileLayout } = useDevice()
-
 const props = defineProps<{
   data: Project
   ready: boolean
   animation: boolean
   next?: boolean
 }>()
+
+const store = useStore()
+const { updateCursor } = store
+const { gridType, inProjectScroll } = storeToRefs(store)
+
+const { isMobileLayout } = useDevice()
 
 const stackEl = ref<HTMLElement>()
 const contentEl = ref<HTMLElement>()
@@ -152,6 +163,16 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
   label && gsap.set(label, { opacity: 0 })
   shuffleIn({ el: e.target as HTMLElement })
 }
+
+function onTitleClick() {
+  emit('next-project')
+}
+
+function onAccordionToggle() {
+  emit('update-scroll')
+}
+
+const emit = defineEmits(['update-scroll', 'next-project'])
 </script>
 
 <style lang="scss">
@@ -164,6 +185,15 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
 
   @include from__desktop--x-large {
     padding-left: calc((100vw - var(--layout-max-width)) * 0.5);
+  }
+
+  &--next {
+    .project__landing__title {
+      padding-top: toScale(4rem, 37.5rem);
+      @include from__tablet--landscape {
+        padding-top: 0;
+      }
+    }
   }
 
   &--animation {
@@ -200,15 +230,45 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
     }
   }
 
+  &__title {
+    text-align: center;
+    padding-top: toScale(8rem, 37.5rem);
+
+    @include from__tablet--landscape {
+      text-align: left;
+      position: absolute;
+      left: var(--layout-margin);
+      bottom: var(--layout-margin);
+      padding-top: 0;
+    }
+
+    @include from__desktop--x-large {
+      left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
+    }
+
+    svg {
+      &:nth-child(1) {
+        margin-bottom: 1.2rem;
+      }
+    }
+
+    h2 {
+      text-transform: uppercase;
+      @include t-project;
+    }
+  }
+
   &__info {
     position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
-    padding: 19.2rem var(--layout-margin) 0;
+    flex-direction: column-reverse;
+    padding: toScale(4rem, 37.5rem) var(--layout-margin) 0;
 
     @include from__tablet--landscape {
       flex-wrap: nowrap;
+      flex-direction: row;
       width: 75vw;
       height: var(--vh);
       padding: 0;
@@ -229,10 +289,13 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
 
     &__stack {
       width: 100%;
+      padding-bottom: toScale(4rem, 37.5rem);
       @include from__tablet--landscape {
         margin-left: 3vw;
         width: 22vw;
+        padding-bottom: 0;
       }
+
       &__content {
         width: 100%;
       }
@@ -241,12 +304,14 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
     &__content {
       align-content: space-between;
       flex-wrap: wrap;
+      padding: 0 toScale(2.8rem, 37.5rem) toScale(4rem, 37.5rem);
 
       @include t-b3;
 
       @include from__tablet--landscape {
         margin-left: 15vw;
         width: 20vw;
+        padding: 0;
       }
 
       &__services,
@@ -268,7 +333,7 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
     }
 
     &__link {
-      padding: 2rem 0 2rem;
+      padding: 0 0 toScale(4rem, 37.5rem);
       @include will-fade;
 
       @include from__tablet--landscape {
@@ -282,13 +347,21 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
 
       &__label {
         display: flex;
+        justify-content: center;
         align-items: center;
         column-gap: toScale(0.7rem);
         @include t-black;
         @include t-b3;
+        @include from__tablet--landscape {
+          justify-content: flex-start;
+        }
         .svg__link-arrow {
-          width: toScale(1.2rem);
-          transform: translateY(0.2rem);
+          width: toScale(1.2rem, 37.5rem);
+          // transform: translateY(-0.2rem, 37.5rem);
+          @include from__tablet--landscape {
+            width: toScale(1.2rem);
+            transform: translateY(0.2rem);
+          }
         }
       }
     }
@@ -319,28 +392,6 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
           will-change: transform;
         }
       }
-    }
-  }
-
-  &__title {
-    position: absolute;
-    top: 7rem;
-    left: var(--layout-margin);
-    @include from__tablet--landscape {
-      bottom: var(--layout-margin);
-      top: auto;
-    }
-    @include from__desktop--x-large {
-      left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
-    }
-    svg {
-      &:nth-child(1) {
-        margin-bottom: 1.2rem;
-      }
-    }
-    h2 {
-      text-transform: uppercase;
-      @include t-project;
     }
   }
 

@@ -39,9 +39,10 @@ watch([width, height], async () => {
   emit('update-scroll')
 })
 
-watch([loaded, () => props.ready], () => {
+watch([loaded, () => props.ready], async () => {
   const img = el.value?.querySelector('.custom-image')
   props.ready && loaded.value && img && fadeIn({ el: img })
+  await nextTick()
   emit('update-scroll')
 })
 

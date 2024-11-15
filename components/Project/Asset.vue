@@ -14,7 +14,7 @@
         :bg-color="bgColor"
         :layout="data.layout"
         :transparent="data.transparent"
-        @update-scroll="emit('update-scroll')" />
+        @update-scroll="$emit('update-scroll')" />
       <ProjectImage
         v-else
         :data="data.image"
@@ -22,7 +22,7 @@
         :ready="ready"
         :layout="data.layout"
         :transparent="data.transparent"
-        @update-scroll="emit('update-scroll')" />
+        @update-scroll="$emit('update-scroll')" />
     </div>
   </div>
 </template>
@@ -49,8 +49,6 @@ watch(
 onMounted(() => {
   props.ready && fadeIn({ el: el.value })
 })
-
-const emit = defineEmits(['update-scroll'])
 </script>
 
 <style lang="scss">
