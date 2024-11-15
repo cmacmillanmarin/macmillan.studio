@@ -30,7 +30,8 @@
         @mouseenter="onMouseEnter"
         @mouseleave="onMouseLeave"
         @next-project="goToNextProject"
-        @update-scroll="updateScroll" />
+        @update-scroll="updateScroll"
+        @in-view="onNextProjectInViewUpdated" />
       <ClientOnly>
         <div v-if="toNextProject" ref="gapNextEl" class="project__content__gap--next" />
       </ClientOnly>
@@ -55,7 +56,13 @@ const props = defineProps<{
 }>()
 
 const store = useStore()
-const { updateHeader, updateCursor, updateSection, updateInProjectScroll } = store
+const {
+  updateHeader,
+  updateCursor,
+  updateSection,
+  updateInProjectScroll,
+  updateInProjectNextProjectInView,
+} = store
 const { isInProject, isInProjectEntered, cursor, gridType, headerMobileButtonClicked } =
   storeToRefs(store)
 
@@ -77,7 +84,7 @@ const svgAnimation = ref<boolean>(transition.value)
 const ready = ref<boolean>(!transition.value)
 
 const scrollOnTop = ref<boolean>(true)
-const scrollOnBottom = ref<boolean>(false)
+const nextProjectInView = ref<boolean>(false)
 
 const toNextProject = ref<boolean>(false)
 const backgroundColor = ref<string>(props.data.color || '')
@@ -97,14 +104,19 @@ let _panTarget: number = 0
 watch(onResize, updateScroll)
 
 watch(headerMobileButtonClicked, () => {
-  if (props.nextProject && scrollOnBottom.value) goToNextProject()
+  if (props.nextProject && nextProjectInView.value) goToNextProject()
   else closeProject()
+})
+
+watch(nextProjectInView, () => {
+  updateInProjectNextProjectInView(nextProjectInView.value)
 })
 
 onBeforeMount(() => {
   console.log(props.data.title)
   updateCursor('default')
   updateSection('projects')
+  updateInProjectNextProjectInView(false)
 })
 
 onMounted(() => {
@@ -159,7 +171,6 @@ function _onRaf() {
   const y = isMobileLayout.value ? _scroll.current * -1 : 0
   contentEl.value && gsap.set(contentEl.value, { x, y })
   scrollOnTop.value = _scroll.target === 0
-  scrollOnBottom.value = _scroll.target === _scroll.bounding
   if (toNextProject.value && Math.abs(_scroll.target - _scroll.current) < 0.5) {
     _scroll.current = _scroll.target
 
@@ -215,13 +226,8 @@ function onClick() {
   cursor.value === 'arrow-right' && props.nextProject && goToNextProject()
 }
 
-function onPixelArrowClick() {
-  if (scrollOnTop.value) {
-    const asset = el.value?.querySelector('.project__asset') as HTMLElement
-    const { top } = asset.getBoundingClientRect()
-    _scroll.target = top
-  }
-  scrollOnBottom.value && goToNextProject()
+function onNextProjectInViewUpdated(value: boolean) {
+  nextProjectInView.value = value
 }
 
 async function goToNextProject() {

@@ -249,7 +249,9 @@ const emit = defineEmits(['update-scroll', 'next-project'])
     }
 
     svg {
-      margin-bottom: 1.2rem;
+      @include from__tablet--landscape {
+        margin-bottom: 1.2rem;
+      }
       &:last-child {
         margin-bottom: 0;
       }
@@ -347,15 +349,19 @@ const emit = defineEmits(['update-scroll', 'next-project'])
         display: flex;
         justify-content: center;
         align-items: center;
-        column-gap: toScale(0.6rem);
+        column-gap: toScale(0.6rem, 37.5rem);
+        width: max-content;
+        margin: auto;
         @include t-black;
         @include t-b3;
         @include from__tablet--landscape {
+          margin: 0;
           justify-content: flex-start;
+          column-gap: toScale(0.6rem);
         }
         .svg__link-arrow {
-          width: toScale(1.2rem, 37.5rem);
-          // transform: translateY(-0.2rem, 37.5rem);
+          width: toScale(1rem, 37.5rem);
+          transform: translateY(10%);
           @include from__tablet--landscape {
             width: toScale(1rem);
             transform: translateY(5%);

@@ -1,5 +1,8 @@
 <template>
-  <div class="project__next" v-transition:in="{ callback: enter }">
+  <div
+    class="project__next"
+    v-transition:in="{ callback: enter }"
+    v-intersect="{ callback: onIntersect }">
     <ProjectLanding
       :data="data"
       :ready="ready"
@@ -17,6 +20,8 @@ const props = defineProps<{
   data: Project
 }>()
 
+const { isMobileLayout } = useDevice()
+
 const ready = ref<boolean>(false)
 const backgroundColor = ref<string>(props.data.color)
 
@@ -24,7 +29,11 @@ function enter() {
   ready.value = true
 }
 
-const emit = defineEmits(['update-scroll', 'next-project'])
+function onIntersect(el: HTMLElement, visible: boolean) {
+  emit('in-view', isMobileLayout.value && visible)
+}
+
+const emit = defineEmits(['in-view', 'update-scroll', 'next-project'])
 </script>
 
 <style lang="scss">

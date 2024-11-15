@@ -21,6 +21,7 @@ export default defineStore('use-store', {
     inProject: false,
     inProjectEntered: false,
     inProjectScroll: true,
+    inProjectNextProjectInView: false,
   }),
   getters: {
     isPreloaded(): boolean {
@@ -94,6 +95,9 @@ export default defineStore('use-store', {
     },
     updateInProjectScroll(state: boolean) {
       this.inProjectScroll = state
+    },
+    updateInProjectNextProjectInView(state: boolean) {
+      this.inProjectNextProjectInView = state
     },
     headerButtonClicked() {
       this.headerMobileButtonClicked = !this.headerMobileButtonClicked

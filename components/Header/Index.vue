@@ -65,7 +65,8 @@
               @leave="transitionDone"
               @click="onMobileButtonClick">
               <SvgDots v-if="mobileButtonIcon && !headerOverlay && !isInProject && !isInReel" />
-              <SvgAspa v-else />
+              <SvgAspa v-else-if="!inProjectNextProjectInView" />
+              <SvgPixelArrow v-else />
             </transition>
           </button>
         </nav>
@@ -96,7 +97,15 @@ const { $scene }: any = useNuxtApp()
 const store = useStore()
 const { updateHeader, updateHeaderLogo, updateCursor, headerButtonClicked, updateHeaderOverlay } =
   store
-const { header, headerOverlay, section, gridType, isInProject, isInReel } = storeToRefs(store)
+const {
+  header,
+  headerOverlay,
+  section,
+  gridType,
+  isInProject,
+  isInReel,
+  inProjectNextProjectInView,
+} = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScrollTarget } = scrollStore
@@ -362,6 +371,12 @@ function scrollDown() {
         align-items: center;
         svg {
           @include will-fade;
+        }
+        .svg__pixel-arrow {
+          transform: translateY(10%);
+          path {
+            fill: var(--lime);
+          }
         }
       }
     }

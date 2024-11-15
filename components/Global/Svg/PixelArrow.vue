@@ -9,6 +9,11 @@
 .svg__pixel-arrow {
   display: block;
   fill: none;
+  width: toScale(2.4rem, 37.5rem);
+  height: auto;
+  @include from__tablet--landscape {
+    width: toScale(3.6rem);
+  }
   &__path {
     fill: black;
   }
