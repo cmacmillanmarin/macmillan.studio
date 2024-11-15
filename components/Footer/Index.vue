@@ -308,9 +308,7 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .footer {
   position: relative;
-
   height: calc(var(--vh) + 0.1rem);
-
   background-color: black;
 
   &--tetris,
@@ -322,6 +320,7 @@ onBeforeUnmount(() => {
   p {
     color: var(--lime);
   }
+
   .svg__square {
     rect {
       fill: var(--lime);
@@ -337,14 +336,17 @@ onBeforeUnmount(() => {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
     @include from__tablet--landscape {
       left: 3.1%;
       height: 47%;
       bottom: 20%;
     }
+
     @include from__desktop--x-large {
       left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-max-width) * 0.031);
     }
+
     .svg__square {
       @include will-fade;
     }
@@ -364,12 +366,6 @@ onBeforeUnmount(() => {
   &__score {
     position: absolute;
 
-    @include from__tablet--landscape {
-      top: toScale(2.4rem);
-      right: var(--layout-margin);
-      bottom: auto;
-    }
-
     z-index: 9;
     display: flex;
     align-items: center;
@@ -379,8 +375,15 @@ onBeforeUnmount(() => {
     svg {
       will-change: opacity;
     }
+
     p {
       @include t-number;
+    }
+
+    @include from__tablet--landscape {
+      top: toScale(2.4rem);
+      right: var(--layout-margin);
+      bottom: auto;
     }
 
     @include from__desktop--x-large {
@@ -503,14 +506,14 @@ onBeforeUnmount(() => {
 
     @include will-fade;
 
-    @include from__tablet--landscape {
-      bottom: 0;
-    }
-
     a,
     p {
       color: var(--lime);
       @include t-b1;
+    }
+
+    @include from__tablet--landscape {
+      bottom: 0;
     }
   }
 
@@ -546,12 +549,15 @@ onBeforeUnmount(() => {
         @include from__tablet--landscape {
           margin-top: 0.2rem;
         }
+
         span {
           will-change: opacity;
         }
+
         .svg__arrow line {
           stroke: var(--lime);
         }
+
         &__btn {
           color: var(--lime);
           padding: 0;
@@ -565,6 +571,7 @@ onBeforeUnmount(() => {
             column-gap: 0.8rem;
             line-height: 1 !important;
             @extend .footer__nav__credits__link__btn;
+
             .svg__play--small {
               width: toScale(0.8rem, 37.5rem);
               transform: translateY(0.15rem);
@@ -581,6 +588,7 @@ onBeforeUnmount(() => {
     &__social {
       width: calc(var(--col-xl) + var(--col-s));
       margin-left: calc(var(--col-s) + var(--col-l) * 2 + var(--col-xs) + var(--col-m));
+
       @include from__tablet--landscape {
         width: var(--col-m);
       }
@@ -597,10 +605,12 @@ onBeforeUnmount(() => {
     justify-content: space-between;
     align-items: flex-end;
     bottom: 0;
+
     &__coordinates,
     &__year {
       pointer-events: auto;
     }
+
     &__coordinates {
       padding-bottom: toScale(9.4rem, 37.5rem);
       width: 14rem;
@@ -617,9 +627,10 @@ onBeforeUnmount(() => {
   &__tetris {
     z-index: 1;
     @include absolute-center;
+
     &__layout {
-      @include absolute-fill;
       z-index: 9;
+      @include absolute-fill;
     }
   }
 
