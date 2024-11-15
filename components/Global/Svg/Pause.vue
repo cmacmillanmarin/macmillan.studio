@@ -8,9 +8,12 @@
 <style lang="scss">
 .svg__pause {
   display: block;
-  width: toScale(2.6rem);
-  height: toScale(4rem);
+  width: toScale(1.8rem, 37.5rem);
+  height: auto;
   fill: none;
+  @include from__tablet--landscape {
+    width: toScale(2.6rem);
+  }
   path {
     fill: var(--lime);
   }

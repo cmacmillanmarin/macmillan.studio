@@ -23,10 +23,10 @@
               @enter="transitionShuffleIn"
               @leave="transitionDone">
               <span
-                :key="`${isMobileLayout ? 'indicators' : isInProject}`"
+                :key="`${isInProject}`"
                 :class="[
                   'home__projects__index__label',
-                  { 'home__projects__index__label--active': isInProject && !isMobileLayout },
+                  { 'home__projects__index__label--active': isInProject },
                 ]"
                 v-text="`{${startWithZero(active)}—${startWithZero(activeOf)}}`" />
             </transition>
@@ -157,7 +157,9 @@ const listEl = ref<HTMLElement>()
 const listContainerEl = ref<HTMLElement>()
 const projectEls = ref<Array<typeof HomeProjectsProject>>([])
 
-const indicators = computed<boolean>(() => section.value === 'projects')
+const indicators = computed<boolean>(
+  () => section.value === 'projects' && !(isInProject.value && isMobileLayout.value)
+)
 
 const year = ref<string>(new Date().getFullYear().toString())
 

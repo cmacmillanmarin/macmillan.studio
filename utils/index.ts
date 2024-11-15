@@ -326,3 +326,36 @@ export function rbgToVec4(color: { r: number; g: number; b: number; a?: number }
 export function videoLoaded(video: HTMLVideoElement): boolean {
   return !!(video.currentTime > 0 && video.readyState > 2)
 }
+
+export function orderArrayWithKeywords(params: {
+  array: Array<string>
+  keywordsStart: Array<string>
+  keywordsEnd: Array<string>
+}): Array<string> {
+  const { array, keywordsStart, keywordsEnd } = params
+
+  // Reorder the array
+  const reorderedArray = array.sort((a, b) => {
+    // Determine the index in the `keywordsStart` and `keywordsEnd` arrays
+    const aStartIndex = keywordsStart.indexOf(a)
+    const bStartIndex = keywordsStart.indexOf(b)
+
+    const aEndIndex = keywordsEnd.indexOf(a)
+    const bEndIndex = keywordsEnd.indexOf(b)
+
+    // Handle elements in `keywordsStart` (prioritize at beginning, respect order)
+    if (aStartIndex !== -1 && bStartIndex === -1) return -1
+    if (aStartIndex === -1 && bStartIndex !== -1) return 1
+    if (aStartIndex !== -1 && bStartIndex !== -1) return aStartIndex - bStartIndex
+
+    // Handle elements in `keywordsEnd` (prioritize at end, respect order)
+    if (aEndIndex !== -1 && bEndIndex === -1) return 1
+    if (aEndIndex === -1 && bEndIndex !== -1) return -1
+    if (aEndIndex !== -1 && bEndIndex !== -1) return aEndIndex - bEndIndex
+
+    // Maintain original order for elements not in `keywordsStart` or `keywordsEnd`
+    return 0
+  })
+
+  return reorderedArray
+}

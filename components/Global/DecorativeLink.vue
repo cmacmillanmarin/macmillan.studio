@@ -38,7 +38,7 @@ function shuffle(e: MouseEvent) {
       transform: translateY(0.3rem);
     }
     path {
-      stroke: var(--lime);
+      fill: var(--lime);
     }
   }
 }

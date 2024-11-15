@@ -9,17 +9,12 @@
       <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
     </ClientOnly>
 
-    <ClientOnly>
-      <button v-if="isMobileLayout" class="project__close-button" @click="closeProject">
-        <SvgClose />
-      </button>
-    </ClientOnly>
-
     <div ref="contentEl" class="project__content">
       <ProjectLanding
         :data="data"
         :ready="ready"
         :animation="svgAnimation"
+        :scroll-on-top="scrollOnTop"
         @update-scroll="updateScroll" />
       <ProjectAsset
         v-for="asset in data.assets"
@@ -61,7 +56,8 @@ const props = defineProps<{
 
 const store = useStore()
 const { updateHeader, updateCursor, updateSection, updateInProjectScroll } = store
-const { isInProject, isInProjectEntered, cursor, gridType } = storeToRefs(store)
+const { isInProject, isInProjectEntered, cursor, gridType, headerMobileButtonClicked } =
+  storeToRefs(store)
 
 const { disableScroll, updateScrollFixedTargetId } = useScrollStore()
 
@@ -80,6 +76,9 @@ const transition = ref<boolean>(!isInProject.value)
 const svgAnimation = ref<boolean>(transition.value)
 const ready = ref<boolean>(!transition.value)
 
+const scrollOnTop = ref<boolean>(true)
+const scrollOnBottom = ref<boolean>(false)
+
 const toNextProject = ref<boolean>(false)
 const backgroundColor = ref<string>(props.data.color || '')
 const nextProjectBackgroundColor = ref<string>(props.nextProject?.color || '')
@@ -91,13 +90,19 @@ let _scroll: any = {
   bounding: 0,
 }
 
-let _Swiper = new Swiper({ prevent: true, dragOnTarget: true })
+let _Swiper = new Swiper({ prevent: false, dragOnTarget: true })
 
 let _panTarget: number = 0
 
 watch(onResize, updateScroll)
 
+watch(headerMobileButtonClicked, () => {
+  if (props.nextProject && scrollOnBottom.value) goToNextProject()
+  else closeProject()
+})
+
 onBeforeMount(() => {
+  console.log(props.data.title)
   updateCursor('default')
   updateSection('projects')
 })
@@ -153,10 +158,13 @@ function _onRaf() {
   const x = isMobileLayout.value ? 0 : _scroll.current * -1
   const y = isMobileLayout.value ? _scroll.current * -1 : 0
   contentEl.value && gsap.set(contentEl.value, { x, y })
+  scrollOnTop.value = _scroll.target === 0
+  scrollOnBottom.value = _scroll.target === _scroll.bounding
   if (toNextProject.value && Math.abs(_scroll.target - _scroll.current) < 0.5) {
+    _scroll.current = _scroll.target
+
     emit('next')
     killTicker(_onRaf)
-    _scroll.current = _scroll.target
     router.push(`/${props.nextProject?.slug}`)
   }
 }
@@ -207,6 +215,15 @@ function onClick() {
   cursor.value === 'arrow-right' && props.nextProject && goToNextProject()
 }
 
+function onPixelArrowClick() {
+  if (scrollOnTop.value) {
+    const asset = el.value?.querySelector('.project__asset') as HTMLElement
+    const { top } = asset.getBoundingClientRect()
+    _scroll.target = top
+  }
+  scrollOnBottom.value && goToNextProject()
+}
+
 async function goToNextProject() {
   killScroll()
   toNextProject.value = true
@@ -216,8 +233,6 @@ async function goToNextProject() {
     const { height } = nextProject.getBoundingClientRect()
     gsap.set(gapNextEl.value, { height: toPx(vh.value - height) })
     await nextTick()
-    const nextProjectLanding = nextProject.querySelector('.project__landing')
-    nextProjectLanding && gsap.to(nextProjectLanding, { y: toScale(40) })
   }
   updateScroll()
   !isMobileLayout.value && updateCursor('default')
@@ -237,7 +252,7 @@ onBeforeUnmount(() => {
     const target = toProjects ? 'projects' : `${props.list}-${props.data.slug}-anchor`
     updateScrollFixedTargetId(target)
     disableScroll(false)
-    updateHeader(true)
+    updateHeader(!isMobileLayout.value)
   }
   killTicker(_onRaf)
   killScroll()
@@ -268,11 +283,7 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
     padding: 0;
     border-radius: 100%;
 
-    rotate: 45deg;
-
-    .svg__close {
-      width: toScale(2.4rem, 37.5rem);
-      height: auto;
+    .svg__aspa {
       @include absolute-center;
     }
   }
@@ -310,6 +321,21 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
           width: calc(25vw - ((100vw - var(--layout-max-width)) * 0.5)) !important;
         }
       }
+    }
+  }
+  &__arrow {
+    position: absolute;
+    z-index: 9999;
+    bottom: var(--layout-margin);
+    left: 50%;
+    width: max-content;
+    transform: translate(-50%);
+    padding: 0;
+    border: none;
+    @include will-fade;
+    .svg__pixel-arrow {
+      width: toScale(2.4rem, 37.5rem);
+      height: auto;
     }
   }
 }

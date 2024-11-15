@@ -77,8 +77,8 @@ onBeforeUnmount(() => {
 .svg__mute {
   fill: none;
   display: block;
-  width: toScale(2rem, 37.5rem);
-  height: toScale(2rem, 37.5rem);
+  width: toScale(2.8rem, 37.5rem);
+  height: toScale(2.8rem, 37.5rem);
   @include from__tablet--landscape {
     width: toScale(2.8rem);
     height: toScale(2.8rem);

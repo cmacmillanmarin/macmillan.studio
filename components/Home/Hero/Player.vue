@@ -7,6 +7,7 @@
         v-transition:in="{ callback: shuffleIn }"
         @click="onClick">
         <div
+          v-if="!isMobileLayout"
           ref="closeEl"
           class="home__hero__player__close"
           @mouseenter="onButtonMouseEnter"
@@ -15,6 +16,20 @@
             <SvgClose />
           </button>
         </div>
+        <div v-else ref="toggleEl" class="home__hero__player__toggle">
+          <button @click="onToggleButtonClick">
+            <transition
+              mode="out-in"
+              :css="false"
+              :appear="true"
+              @leave="transitionDone"
+              @enter="transitionShuffleIn">
+              <SvgPause v-if="playing" />
+              <SvgPlay v-else />
+            </transition>
+          </button>
+        </div>
+
         <div
           ref="timelineEl"
           class="home__hero__player__timeline"
@@ -27,6 +42,7 @@
             </div>
           </div>
         </div>
+
         <div
           ref="muteEl"
           class="home__hero__player__mute"
@@ -54,7 +70,7 @@ const props = defineProps<{
 
 const store = useStore()
 const { updateCursor } = store
-const { cursor } = storeToRefs(store)
+const { cursor, headerMobileButtonClicked } = storeToRefs(store)
 
 const { x, y } = useMouse()
 const { addTicker, killTicker } = useRaf()
@@ -72,6 +88,10 @@ const closeEl = ref<HTMLElement>()
 const timelineEl = ref<HTMLElement>()
 
 let _to: any
+
+watch(headerMobileButtonClicked, () => {
+  emit('close')
+})
 
 watch(
   [x, y],
@@ -136,6 +156,13 @@ function onButtonMouseLeave() {
   updateCursor(playing.value ? 'pause' : 'play')
 }
 
+function onToggleButtonClick(e: MouseEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+  playing.value = !playing.value
+  emit('toggle')
+}
+
 function onCloseButtonClick(e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
@@ -154,7 +181,7 @@ onBeforeUnmount(() => {
   killTicker(updateProgress)
 })
 
-const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
+const emit = defineEmits(['close', 'pause', 'toggle', 'mute', 'update'])
 </script>
 
 <style lang="scss">
@@ -167,14 +194,15 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
   @include absolute-center;
 
   &__close,
-  &__mute {
+  &__mute,
+  &__toggle {
     position: absolute;
     will-change: opacity;
 
     button {
       position: relative;
-      width: toScale(4.4rem, 37.5rem);
-      height: toScale(4.4rem, 37.5rem);
+      width: toScale(5.6rem, 37.5rem);
+      height: toScale(5.6rem, 37.5rem);
       background-color: black;
       border: none;
       padding: 0;
@@ -183,6 +211,20 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
       @include from__tablet--landscape {
         width: toScale(5.6rem);
         height: toScale(5.6rem);
+      }
+    }
+  }
+
+  &__toggle {
+    right: var(--layout-margin);
+    top: var(--layout-margin);
+    button {
+      svg {
+        @include will-fade;
+        @include absolute-center;
+      }
+      .svg__play {
+        transform: translate(-35%, -50%);
       }
     }
   }
@@ -215,10 +257,11 @@ const emit = defineEmits(['close', 'toggle', 'mute', 'update'])
   }
 
   &__mute {
+    top: var(--layout-margin);
     left: var(--layout-margin);
-    bottom: var(--layout-margin);
-
     @include from__tablet--landscape {
+      top: auto;
+      bottom: var(--layout-margin);
       padding-top: toScale(3rem);
       padding-right: toScale(3rem);
     }

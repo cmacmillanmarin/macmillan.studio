@@ -6,11 +6,8 @@
       { 'project__landing--next': next },
       { 'project__landing--animation': animation },
     ]">
-    <div v-show="ready || isMobileLayout" class="project__landing__title">
-      <!-- <SvgProjectWallpapers v-if="data.slug === 'pixel-wallpapers'" :animation="animation" /> -->
-      <h2 v-transition:in="{ callback: animation ? shuffleIn : () => {} }" @click="onTitleClick">
-        <span v-for="letter in data.title">{{ letter }}</span>
-      </h2>
+    <div v-show="ready || isMobileLayout" class="project__landing__title" @click="onTitleClick">
+      <SvgProjectWallpapers :animation="animation" @update-scroll="emit('update-scroll')" />
     </div>
 
     <div class="project__landing__info">
@@ -30,11 +27,6 @@
           <span>Launch Project</span>
           <SvgLinkArrow />
         </a>
-        <ClientOnly>
-          <div v-if="next && isMobileLayout" class="project__landing__info__link">
-            <SvgArrow />
-          </div>
-        </ClientOnly>
       </div>
 
       <div ref="stackEl" class="project__landing__info__stack">
@@ -80,17 +72,20 @@
         <div class="project__landing__info__content__description" v-html="data.description" />
       </div>
 
-      <transition :css="false" @leave="transitionFadeOut">
-        <div
-          v-if="inProjectScroll && !isMobileLayout"
-          ref="scrollEl"
-          class="project__landing__info__scroll">
-          <p>Scroll</p>
-          <div class="project__landing__info__scroll__bar">
-            <div ref="scrollLineEl" class="project__landing__info__scroll__bar__line" />
+      <ClientOnly>
+        <transition :css="false" @leave="transitionFadeOut">
+          <div
+            v-if="!next && !isMobileLayout && ready && scrollOnTop"
+            ref="scrollEl"
+            class="project__landing__info__scroll"
+            v-transition:in="{ callback: enterScroll }">
+            <p>Scroll</p>
+            <div class="project__landing__info__scroll__bar">
+              <div ref="scrollLineEl" class="project__landing__info__scroll__bar__line" />
+            </div>
           </div>
-        </div>
-      </transition>
+        </transition>
+      </ClientOnly>
     </div>
 
     <ClientOnly>
@@ -113,6 +108,7 @@ const props = defineProps<{
   data: Project
   ready: boolean
   animation: boolean
+  scrollOnTop?: boolean
   next?: boolean
 }>()
 
@@ -136,12 +132,12 @@ const client = ref<string>(
 
 watch(
   () => props.ready,
-  () => {
+  async () => {
+    await nextTick()
     fadeIn({ el: stackEl.value })
     fadeIn({ el: contentEl.value, delay: 0.2 })
     linkEl.value && shuffleIn({ el: linkEl.value })
     fadeIn({ el: scrollEl.value, delay: 0.4 })
-    scrollLineEl.value && gsap.to(scrollLineEl.value, { x: toPercentage(0), delay: 0.6 })
   }
 )
 
@@ -155,6 +151,11 @@ function onMouseEnter() {
 
 function onMouseLeave() {
   updateCursor(props.next ? 'arrow-right' : 'close')
+}
+
+function enterScroll(params: { el: HTMLElement }) {
+  fadeIn({ el: params.el, delay: 0.2 })
+  scrollLineEl.value && gsap.to(scrollLineEl.value, { x: toPercentage(0), delay: 0.6 })
 }
 
 function onLaunchProjectMouseEnter(e: MouseEvent) {
@@ -188,21 +189,22 @@ const emit = defineEmits(['update-scroll', 'next-project'])
   }
 
   &--next {
-    .project__landing__title {
-      padding-top: toScale(4rem, 37.5rem);
+    // .project__landing__title {
+    //   padding-top: toScale(4rem, 37.5rem);
+    //   @include from__tablet--landscape {
+    //     padding-top: 0;
+    //   }
+    // }
+    .project__landing__info__stack {
+      padding-bottom: toScale(10rem, 37.5rem);
       @include from__tablet--landscape {
-        padding-top: 0;
+        padding-bottom: 0;
       }
     }
   }
 
   &--animation {
     .project__landing__title {
-      h2 {
-        span {
-          @include will-fade;
-        }
-      }
       svg {
         > path,
         > g {
@@ -220,19 +222,19 @@ const emit = defineEmits(['update-scroll', 'next-project'])
     }
   }
 
-  &--nike-trail-challenge {
-    .project__landing__title {
-      svg {
-        &:nth-child(1) {
-          margin-bottom: 1.2rem;
-        }
-      }
-    }
-  }
+  // &--nike-trail-challenge {
+  //   .project__landing__title {
+  //     svg {
+  //       &:nth-child(1) {
+  //         margin-bottom: 1.2rem;
+  //       }
+  //     }
+  //   }
+  // }
 
   &__title {
     text-align: center;
-    padding-top: toScale(8rem, 37.5rem);
+    padding-top: var(--layout-margin);
 
     @include from__tablet--landscape {
       text-align: left;
@@ -247,14 +249,10 @@ const emit = defineEmits(['update-scroll', 'next-project'])
     }
 
     svg {
-      &:nth-child(1) {
-        margin-bottom: 1.2rem;
+      margin-bottom: 1.2rem;
+      &:last-child {
+        margin-bottom: 0;
       }
-    }
-
-    h2 {
-      text-transform: uppercase;
-      @include t-project;
     }
   }
 
@@ -349,7 +347,7 @@ const emit = defineEmits(['update-scroll', 'next-project'])
         display: flex;
         justify-content: center;
         align-items: center;
-        column-gap: toScale(0.7rem);
+        column-gap: toScale(0.6rem);
         @include t-black;
         @include t-b3;
         @include from__tablet--landscape {
@@ -359,8 +357,8 @@ const emit = defineEmits(['update-scroll', 'next-project'])
           width: toScale(1.2rem, 37.5rem);
           // transform: translateY(-0.2rem, 37.5rem);
           @include from__tablet--landscape {
-            width: toScale(1.2rem);
-            transform: translateY(0.2rem);
+            width: toScale(1rem);
+            transform: translateY(5%);
           }
         }
       }
@@ -370,8 +368,8 @@ const emit = defineEmits(['update-scroll', 'next-project'])
       position: absolute;
       left: 62.5vw;
       width: 14vw;
-      will-change: opacity;
       padding-top: var(--layout-margin);
+      @include will-fade;
       @include t-b3;
 
       &__bar {

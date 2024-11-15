@@ -624,8 +624,6 @@ onUnmounted(() => {
       will-change: opacity, transform;
 
       .svg__play {
-        width: toScale(1.6rem, 37.5rem);
-        height: auto;
         transform: translateX(15%);
       }
     }

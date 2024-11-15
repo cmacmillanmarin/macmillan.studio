@@ -20,6 +20,7 @@ import { Swiper, type PanParams } from '~/utils/swiper'
 const props = defineProps<{
   planesId?: string
   dragOnTarget?: boolean
+  ignoreUpdateScroll?: boolean
 }>()
 
 const scrollStore = useScrollStore()
@@ -159,7 +160,7 @@ function distanceToMidpoint(value: number): number {
   return Math.abs(value - 0.5)
 }
 
-function update(params?: { ignoreUpdateScroll: boolean }) {
+async function update(params?: { ignoreUpdateScroll: boolean }) {
   if (!el.value) return
 
   const { top } = getBounding(el.value)
@@ -187,7 +188,9 @@ function update(params?: { ignoreUpdateScroll: boolean }) {
   minHeight.value = maxHeight
   _containerWidth = el.value.clientWidth
 
-  !params?.ignoreUpdateScroll && updateScroll()
+  if (!(params?.ignoreUpdateScroll || props.ignoreUpdateScroll)) updateScroll()
+  await nextTick()
+  emit('update')
 }
 
 onBeforeUnmount(() => {
@@ -198,6 +201,8 @@ onBeforeUnmount(() => {
 defineExpose({
   update,
 })
+
+const emit = defineEmits(['update'])
 </script>
 
 <style lang="scss">

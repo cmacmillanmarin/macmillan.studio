@@ -59,9 +59,11 @@
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
             data-scroll-set-position
             @load="collaboratorImageLoaded = true" />
-          <p class="home__about__intro__collaborator__thumbnail__credit">
-            {{ data.collaborator.credit }}
-          </p>
+          <DecorativeLink
+            class="home__about__intro__collaborator__thumbnail__credit"
+            type="external"
+            to="https://xaviercusso.com"
+            :label="data.collaborator.credit" />
         </div>
       </div>
     </div>
@@ -391,7 +393,22 @@ onBeforeUnmount(() => {
         }
 
         &__credit {
+          display: flex;
+          align-items: center;
+          padding: 0;
+          border: none;
+          @include t-black;
           @include t-b1;
+          .svg__link-arrow {
+            width: toScale(1.1rem, 37.5rem);
+            transform: translateY(0.1rem);
+            @include from__tablet--landscape {
+              width: toScale(1.5rem);
+            }
+            path {
+              fill: var(--black);
+            }
+          }
         }
       }
     }

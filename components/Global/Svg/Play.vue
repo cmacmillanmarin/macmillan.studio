@@ -10,8 +10,11 @@
 .svg__play {
   display: block;
   fill: none;
-  width: toScale(2.4rem);
-  height: toScale(4rem);
+  width: toScale(1.6rem, 37.5rem);
+  height: auto;
+  @include from__tablet--landscape {
+    width: toScale(2.4rem);
+  }
   path {
     fill: var(--lime);
   }

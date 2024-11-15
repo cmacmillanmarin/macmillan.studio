@@ -14,6 +14,7 @@ import {
   type WP_Client,
   parseClient,
 } from '~/types/wordpress/client'
+import { orderArrayWithKeywords } from '~/utils'
 
 export type WP_Projects = Array<WP_Project>
 
@@ -153,7 +154,7 @@ export function parseProject(params: {
     service && services.push(service.title.rendered)
   }
 
-  const techStack: Array<string> = []
+  let techStack: Array<string> = []
   for (const tag of project?._embedded?.['wp:term'] || []) {
     for (const t of tag) {
       if (t.taxonomy === 'tech_stack_tag') {
@@ -161,6 +162,13 @@ export function parseProject(params: {
       }
     }
   }
+
+  techStack = orderArrayWithKeywords({
+    array: techStack,
+    keywordsStart: ['Nuxt', 'Vue', 'React', 'Three.js', 'Gsap'],
+    keywordsEnd: ['Vercel'],
+  })
+
   return {
     slug: parseText(project?.slug),
     link: parseText(project?.acf.link),

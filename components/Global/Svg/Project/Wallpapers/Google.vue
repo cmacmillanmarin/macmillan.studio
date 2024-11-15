@@ -27,9 +27,12 @@
 <style lang="scss">
 .svg__project__wallpapers__google {
   display: block;
-  width: 74rem;
-  height: 13.9rem;
   fill: none;
+  width: toScale(41rem, 37.5rem);
+  height: auto;
+  @include from__tablet--landscape {
+    width: toScale(74rem);
+  }
   path {
     fill: var(--black);
   }

@@ -554,10 +554,6 @@ onBeforeUnmount(() => {
           will-change: opacity;
         }
 
-        .svg__arrow line {
-          stroke: var(--lime);
-        }
-
         &__btn {
           color: var(--lime);
           padding: 0;

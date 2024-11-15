@@ -39,6 +39,7 @@ export interface State {
   header: boolean
   headerLogo: boolean
   headerOverlay: boolean
+  headerMobileButtonClicked: boolean
   cursor: Cursor
   inReel: boolean
   inProject: boolean

@@ -4,7 +4,7 @@
     :class="['header__mobile__overlay', { 'header__mobile__overlay--bg': !transition }]">
     <PixelTransition v-if="transition" @done="enter" />
     <div v-if="!transition" class="header__mobile__overlay__content">
-      <Ticker :drag-on-target="true">
+      <Ticker :drag-on-target="true" :ignore-update-scroll="true">
         <div v-for="i in 2" :key="i"><SvgMacMillan /></div>
       </Ticker>
       <SvgStudio />

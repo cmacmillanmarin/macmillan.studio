@@ -17,8 +17,11 @@
 .svg__project__wallpapers__pixels {
   display: block;
   fill: none;
-  width: 59.4rem;
-  height: 13.4rem;
+  width: toScale(32.6rem, 37.5rem);
+  height: auto;
+  @include from__tablet--landscape {
+    width: toScale(59.4rem);
+  }
   path {
     fill: var(--black);
   }

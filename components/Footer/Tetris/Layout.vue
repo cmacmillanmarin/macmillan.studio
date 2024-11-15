@@ -14,7 +14,7 @@
             :appear="true"
             @enter="transitionShuffleIn"
             @leave="transitionDone">
-            <SvgClose v-if="!over" />
+            <SvgAspa v-if="!over" />
             <SvgPlay v-else />
           </transition>
         </button>
@@ -160,7 +160,8 @@ function getMessage(): string {
   &__mobile-button {
     position: absolute;
     top: var(--layout-margin);
-    right: var(--layout-margin);
+    left: 50%;
+    transform: translateX(-50%);
     @include will-fade;
 
     button {
@@ -168,28 +169,20 @@ function getMessage(): string {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: toScale(4.4rem, 37.5rem);
-      height: toScale(4.4rem, 37.5rem);
-      background: var(--lime);
+      width: toScale(5.6rem, 37.5rem);
+      height: toScale(5.6rem, 37.5rem);
+      background: rgba(0, 0, 0, 0.5);
       border: 0;
       padding: 0;
       border-radius: 50%;
 
-      .svg__close {
-        width: toScale(3rem, 37.5rem);
-      }
-
       .svg__play {
-        width: toScale(1.6rem, 37.5rem);
         transform: translateX(15%);
       }
 
       svg {
         height: auto;
         @include will-fade;
-        path {
-          fill: var(--black);
-        }
       }
     }
   }

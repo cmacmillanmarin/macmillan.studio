@@ -45,6 +45,7 @@
           <SvgPixelArrow />
         </button>
       </nav>
+
       <nav
         v-if="isMobileLayout"
         v-show="!isInProject && logoVisible"
@@ -52,16 +53,18 @@
         class="header__nav__logo--mobile">
         <button @click="scrollUp" />
       </nav>
+
       <transition mode="out-in" :css="false" @enter="mobileButtonEnter" @leave="mobileButtonLeave">
         <nav v-if="mobileButton" class="header__nav--mobile">
           <button>
             <transition
               mode="out-in"
               :css="false"
+              :appear="true"
               @enter="transitionShuffleIn"
               @leave="transitionDone"
-              @click="toggleMobileOverlay">
-              <SvgDots v-if="mobileButtonIcon && !headerOverlay" />
+              @click="onMobileButtonClick">
+              <SvgDots v-if="mobileButtonIcon && !headerOverlay && !isInProject && !isInReel" />
               <SvgAspa v-else />
             </transition>
           </button>
@@ -91,7 +94,8 @@ import { toPx, toPercentage } from '~/utils'
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateHeaderLogo, updateCursor, updateHeaderOverlay } = store
+const { updateHeader, updateHeaderLogo, updateCursor, headerButtonClicked, updateHeaderOverlay } =
+  store
 const { header, headerOverlay, section, gridType, isInProject, isInReel } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -132,10 +136,9 @@ watch(logoVisible, () => {
 })
 
 watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], async () => {
-  mobileButton.value =
-    isMobileLayout.value && current.value > vh.value * 0.5 && !isInProject.value && !isInReel.value
+  mobileButton.value = isMobileLayout.value && (current.value > vh.value * 0.5 || isInProject.value)
   isMobileLayout.value && (await nextTick())
-  logoVisible.value = header.value && !isInProject.value && !isInReel.value && !headerOverlay.value
+  logoVisible.value = !isInProject.value && !isInReel.value && !headerOverlay.value
   linksVisible.value =
     header.value &&
     !isInProject.value &&
@@ -147,6 +150,8 @@ watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], asy
 watch(current, () => {
   if (!el.value) return
   const y = Math.min(0, bounding.value - vh.value - current.value)
+
+  if (current.value <= vh.value * 0.5) updateHeader(true)
 
   const threshold = vh.value - layoutMargin.value * 2
   const enterProgress = Math.min(1, current.value / vh.value)
@@ -239,6 +244,11 @@ function onMouseEnter() {
 
 function onMouseLeave() {
   updateHeaderLogo(false)
+}
+
+function onMobileButtonClick() {
+  if (!isInProject.value && !isInReel.value) toggleMobileOverlay()
+  else headerButtonClicked()
 }
 
 function toggleMobileOverlay() {
