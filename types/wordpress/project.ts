@@ -1,3 +1,4 @@
+import { parse } from 'vue/compiler-sfc'
 import {
   parseText,
   type Image,
@@ -66,6 +67,10 @@ export interface WP_Project_Thumbnail {
   type: 'img' | 'vid'
   image?: WP_Image
   video?: WP_Video
+  video_gruop?: {
+    mp4?: WP_Video
+    webm?: WP_Video
+  }
 }
 export interface WP_Project_Asset {
   layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
@@ -89,6 +94,10 @@ export interface ProjectThumbnail {
   type: 'img' | 'vid'
   image: Image
   video: Video
+  videoGroup: {
+    mp4: Video
+    webm: Video
+  }
 }
 
 export type Projects = Array<Project>
@@ -180,6 +189,10 @@ export function parseProject(params: {
       type: project?.acf.thumbnail.type || 'img',
       image: parseImage(project?.acf.thumbnail.image),
       video: parseVideo(project?.acf.thumbnail.video),
+      videoGroup: {
+        mp4: parseVideo(project?.acf.thumbnail.video_gruop?.mp4),
+        webm: parseVideo(project?.acf.thumbnail.video_gruop?.webm),
+      },
     },
     description: parseText(project?.acf.description),
     info: project?.acf.info
