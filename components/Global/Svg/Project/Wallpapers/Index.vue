@@ -7,8 +7,7 @@
     ref="tickerEl"
     :drag-on-target="true"
     :ignore-update-scroll="true"
-    :starting-point="inProjectNextProjectTickerStartingPoint"
-    :starting-direction="inProjectNextProjectTickerStartingDirection"
+    :ticker="!next ? inProjectNextProjectTicker : undefined"
     class="svg__project__wallpapers__ticker"
     @update="emit('update-scroll')">
     <div v-for="i in 2" :key="i">
@@ -32,8 +31,7 @@ const props = defineProps<{
 
 const store = useStore()
 const { updateInProjectNextProjectTicker } = store
-const { inProjectNextProjectTickerStartingPoint, inProjectNextProjectTickerStartingDirection } =
-  storeToRefs(store)
+const { inProjectNextProjectTicker } = storeToRefs(store)
 
 const { isMobileLayout } = useDevice()
 
@@ -42,7 +40,7 @@ const tickerEl = ref<typeof Ticker>()
 onBeforeUnmount(() => {
   if (props.next && tickerEl.value) {
     tickerEl.value.pause()
-    updateInProjectNextProjectTicker(tickerEl.value.get())
+    updateInProjectNextProjectTicker(tickerEl.value.getNextProjectTicker())
   }
 })
 

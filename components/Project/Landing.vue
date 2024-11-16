@@ -7,10 +7,13 @@
       { 'project__landing--animation': animation },
     ]">
     <div v-show="ready || isMobileLayout" class="project__landing__title" @click="onTitleClick">
-      <SvgProjectWallpapers
-        :animation="animation"
-        :next="!!next"
-        @update-scroll="emit('update-scroll')" />
+      <ClientOnly>
+        <SvgProjectWallpapers
+          :animation="animation"
+          :next="!!next"
+          @update-scroll="emit('update-scroll')" />
+      </ClientOnly>
+      <h2 v-html="data.title" />
     </div>
 
     <div class="project__landing__info">
@@ -249,6 +252,10 @@ const emit = defineEmits(['update-scroll', 'next-project'])
 
     @include from__desktop--x-large {
       left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
+    }
+
+    h2 {
+      @include t-seo;
     }
 
     svg {

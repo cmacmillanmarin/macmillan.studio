@@ -535,7 +535,7 @@ function onTouchStart(e: TouchEvent) {
   if (over.value) return
   e.preventDefault()
   clearTimeout(dropTo)
-  dropTo = setTimeout(extraDrop, 200)
+  dropTo = setTimeout(extraDrop, 250)
 }
 
 function getTouch(e: TouchEvent): Touch | undefined {
@@ -546,7 +546,7 @@ function getTouch(e: TouchEvent): Touch | undefined {
 function extraDrop() {
   longPress = true
   drop()
-  dropTo = setTimeout(extraDrop, 200)
+  dropTo = setTimeout(extraDrop, 100)
 }
 
 function onTouchEnd(e: TouchEvent) {

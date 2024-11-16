@@ -107,7 +107,13 @@ watch(onResize, updateScroll)
 watch(headerMobileButtonClicked, () => {
   if (props.nextProject && nextProjectInView.value) goToNextProject()
   else {
-    updateInProjectNextProjectTicker({ point: 0, direction: -1 })
+    updateInProjectNextProjectTicker({
+      items: [],
+      current: 0,
+      target: 0,
+      speed: 1.25,
+      direction: -1,
+    })
     closeProject()
   }
 })
@@ -156,9 +162,9 @@ function _onPanStart(): void {
 }
 
 function _onPanMove(params: PanParams): void {
-  const { yDiff, xDiff } = params
+  const { yDiff, xDiff, inertia } = params
   if (Math.abs(xDiff) > Math.abs(yDiff)) return
-  _scroll.target = _clampTarget(_panTarget - yDiff * 2)
+  _scroll.target = _clampTarget(_panTarget - yDiff * (1 + inertia))
 }
 
 function _onPanEnd(): void {

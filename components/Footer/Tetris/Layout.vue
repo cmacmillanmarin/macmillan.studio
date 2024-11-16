@@ -190,18 +190,20 @@ function getMessage(): string {
   &__info {
     display: flex;
     justify-content: space-between;
-    margin: calc(var(--vh) * 0.5) var(--layout-margin) 0;
-    transform: translateY(-50%);
+    // margin: calc(var(--vh) * 0.5) var(--layout-margin) 0;
+    // transform: translateY(-50%);
+    padding: toScale(2.4rem, 37.5rem) var(--layout-margin) 0;
 
     @include from__tablet--landscape {
-      margin: 0;
-      transform: none;
+      // margin: 0;
+      // transform: none;
       padding: toScale(3rem) toScale(4.6rem) 0;
     }
 
     &__piece {
       display: flex;
       align-items: center;
+      transform: translateY(-0.1rem);
       @include will-fade;
     }
 

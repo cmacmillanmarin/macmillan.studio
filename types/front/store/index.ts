@@ -1,9 +1,3 @@
-export interface Transition {
-  el: HTMLElement
-  transition: (params: { el: HTMLElement }) => void
-  duration: number
-}
-
 export type GridType = 'none' | 'default' | 'rule-of-thirds' | 'golden-ratio'
 
 export type Section =
@@ -28,6 +22,22 @@ export type Cursor =
   | 'copied'
   | 'close'
 
+export interface NextProjectTickerItem {
+  init: number
+  width: number
+  position: number
+  reset: number
+  x: number
+}
+
+export interface NextProjectTicker {
+  items: Array<NextProjectTickerItem>
+  current: number
+  direction: number
+  target: number
+  speed: number
+}
+
 export interface State {
   preloadedFonts: boolean
   preloadedTextures: boolean
@@ -46,6 +56,5 @@ export interface State {
   inProjectEntered: boolean
   inProjectScroll: boolean
   inProjectNextProjectInView: boolean
-  inProjectNextProjectTickerStartingPoint: number
-  inProjectNextProjectTickerStartingDirection: number
+  inProjectNextProjectTicker: NextProjectTicker
 }

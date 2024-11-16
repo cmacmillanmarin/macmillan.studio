@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { State, Transition, GridType, Section, Cursor } from '~/types/front/store'
+import type { State, GridType, Section, Cursor, NextProjectTicker } from '~/types/front/store'
 
 let _to: any
 
@@ -22,8 +22,13 @@ export default defineStore('use-store', {
     inProjectEntered: false,
     inProjectScroll: true,
     inProjectNextProjectInView: false,
-    inProjectNextProjectTickerStartingPoint: 0,
-    inProjectNextProjectTickerStartingDirection: -1,
+    inProjectNextProjectTicker: {
+      items: [],
+      current: 0,
+      target: 0,
+      speed: 1.25,
+      direction: -1,
+    },
   }),
   getters: {
     isPreloaded(): boolean {
@@ -104,9 +109,8 @@ export default defineStore('use-store', {
     updateInProjectNextProjectInView(state: boolean) {
       this.inProjectNextProjectInView = state
     },
-    updateInProjectNextProjectTicker(params: { point: number; direction: number }) {
-      this.inProjectNextProjectTickerStartingPoint = params.point
-      this.inProjectNextProjectTickerStartingDirection = params.direction
+    updateInProjectNextProjectTicker(params: NextProjectTicker) {
+      this.inProjectNextProjectTicker = params
     },
   },
 })

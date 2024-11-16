@@ -16,13 +16,13 @@ import { toPx, round } from '~/utils/index'
 import useScrollStore from '~/store/useScrollStore'
 import type { TickerItems, TickerItem } from '~/types/front'
 import { Swiper, type PanParams } from '~/utils/swiper'
+import type { NextProjectTicker, NextProjectTickerItem } from '~/types/front/store'
 
 const props = defineProps<{
   planesId?: string
   dragOnTarget?: boolean
   ignoreUpdateScroll?: boolean
-  startingPoint?: number
-  startingDirection?: number
+  ticker?: NextProjectTicker
 }>()
 
 const scrollStore = useScrollStore()
@@ -44,10 +44,10 @@ const items = ref<TickerItems>([])
 const firstItem = computed<TickerItem | undefined>(() => items.value[0])
 const lastItem = computed<TickerItem | undefined>(() => items.value[items.value.length - 1])
 
-let _current: number = 0
-let _target: number = 0
-let _direction: number = -1
-let _speed: number = 1.25
+let _current: number = props.ticker?.current || 0
+let _target: number = props.ticker?.target || 0
+let _direction: number = props.ticker?.direction || 1
+let _speed: number = props.ticker?.speed || 1.25
 let _panInit: number = 0
 let _panSpeed: number = 0
 let _containerWidth: number = 0
@@ -66,13 +66,12 @@ watch(onResize, () => {
 })
 
 watch(scrollUpdated, () => {
-  update({ ignoreUpdateScroll: true })
-  move()
+  update({ ticker: props.ticker, ignoreUpdateScroll: true })
 })
 
 watch(inView, () => {
   if (inView.value && el.value) {
-    _Swiper.init({ el: el.value, cursor: true, onPanStart, onPanMove, onPanEnd })
+    _Swiper.init({ el: el.value, cursor: true, onPanMove, onPanEnd })
     addRenderCallback(move)
   } else {
     removeRenderCallback(move)
@@ -81,22 +80,14 @@ watch(inView, () => {
 })
 
 onMounted(async () => {
-  if (props.startingDirection !== undefined && props.startingPoint !== undefined) {
-    _direction = props.startingDirection || -1
-    _target = _current = props.startingPoint || 0
-    update()
-    move()
+  if (props.ticker?.items.length) {
+    update({ ticker: props.ticker })
   } else {
     await nextTick()
     await nextTick()
     update()
   }
 })
-
-function onPanStart() {
-  // _panInit = _current
-  // _target = _current
-}
 
 function onPanMove(params: PanParams) {
   const { xDir, xDiff, yDiff, inertia } = params
@@ -170,7 +161,7 @@ function distanceToMidpoint(value: number): number {
   return Math.abs(value - 0.5)
 }
 
-async function update(params?: { ignoreUpdateScroll: boolean }) {
+async function update(params?: { ticker?: NextProjectTicker; ignoreUpdateScroll?: boolean }) {
   if (!el.value) return
 
   const { top } = getBounding(el.value)
@@ -186,14 +177,24 @@ async function update(params?: { ignoreUpdateScroll: boolean }) {
     if (height > maxHeight) maxHeight = height
     items.value.push({ el: child, width: Math.ceil(width), position: 0, init: 0, reset: 0, x: 0 })
   }
+
   for (let i = 0; i < items.value.length; i++) {
     const item = items.value[i]
-    for (let j = 0; j < i; j++) {
-      item.init += items.value[j].width
-      item.reset = item.init
+    const nextProjectItem = props.ticker?.items[i]
+    if (nextProjectItem) {
+      item.x = nextProjectItem.x
+      item.init = nextProjectItem.init
+      item.reset = nextProjectItem.reset
+      item.width = nextProjectItem.width
+      item.position = nextProjectItem.position
+      gsap.set(item.el, { x: item.x })
+    } else {
+      for (let j = 0; j < i; j++) {
+        item.init += items.value[j].width
+        item.reset = item.init
+      }
+      gsap.set(item.el, { x: item.init })
     }
-
-    gsap.set(item.el, { x: item.init })
   }
   minHeight.value = maxHeight
   _containerWidth = el.value.clientWidth
@@ -207,9 +208,22 @@ function pause() {
   removeRenderCallback(move)
 }
 
-function get(): { point: number; direction: number } {
+function getNextProjectTicker(): NextProjectTicker {
+  const _items: Array<NextProjectTickerItem> = []
+  for (const item of items.value) {
+    _items.push({
+      width: item.width,
+      position: item.position,
+      init: item.init,
+      reset: item.reset,
+      x: item.x,
+    })
+  }
   return {
-    point: _current,
+    items: _items,
+    target: _target,
+    speed: _speed,
+    current: _current,
     direction: _direction,
   }
 }
@@ -222,7 +236,7 @@ onBeforeUnmount(() => {
 defineExpose({
   update,
   pause,
-  get,
+  getNextProjectTicker,
 })
 
 const emit = defineEmits(['update'])
