@@ -6,7 +6,13 @@
       :appear="true"
       @enter="transitionShuffleIn"
       @leave="transitionDone">
-      <div v-if="isMobileLayout" class="footer__tetris__layout__mobile-button">
+      <div
+        v-if="isMobileLayout"
+        :key="`${over}`"
+        :class="[
+          'footer__tetris__layout__mobile-button',
+          { 'footer__tetris__layout__mobile-button--over': over },
+        ]">
         <button @click="$emit(over ? 'play' : 'close')">
           <transition
             mode="out-in"
@@ -80,7 +86,8 @@
         </div>
       </div>
     </div>
-    <SvgGameOver v-if="over" />
+    <SvgGameOver v-if="over && !isMobileLayout" />
+    <SvgGameOverMobile v-else-if="over" />
   </div>
 </template>
 
@@ -164,6 +171,17 @@ function getMessage(): string {
     transform: translateX(-50%);
     @include will-fade;
 
+    &--over {
+      top: 45%;
+      transform: translate(-50%, -50%);
+      button {
+        background-color: var(--lime) !important;
+        svg path {
+          fill: var(--black);
+        }
+      }
+    }
+
     button {
       pointer-events: auto;
       display: flex;
@@ -242,11 +260,11 @@ function getMessage(): string {
     }
   }
 
-  .svg__game-over {
+  .svg__game-over,
+  .svg__game-over--mobile {
     position: absolute;
     bottom: var(--layout-margin);
     left: var(--layout-margin);
-    width: calc(100% - var(--layout-margin) * 2);
     @include from__tablet--landscape {
       width: toScale(94.1rem);
       left: toScale(4.6rem);
