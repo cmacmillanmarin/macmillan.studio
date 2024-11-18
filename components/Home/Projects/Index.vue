@@ -95,19 +95,22 @@
 
     <ClientOnly>
       <div class="home__projects__videos" data-scroll-sticky>
-        <video
-          v-for="{ id, src, alt } in instancedVideos"
-          :id="id"
-          :alt="alt"
-          :width="810"
-          :height="1080"
-          preload="true"
-          muted
-          loop
-          playsinline>
-          <source :src="`${src}.webm`" type="video/webm" />
-          <source :src="`${src}.mp4`" type="video/mp4" />
-        </video>
+        <template v-for="{ id, video } in instancedVideos">
+          <video
+            v-if="video && video.mp4 && video.webm"
+            :id="id"
+            :alt="video.alt"
+            :width="video.width"
+            :height="video.height"
+            preload="true"
+            muted
+            loop
+            playsinline
+            crossorigin="anonymous">
+            <source :src="video.webm" type="video/webm" />
+            <source :src="video.mp4" type="video/mp4" />
+          </video>
+        </template>
       </div>
     </ClientOnly>
   </div>
@@ -125,6 +128,7 @@ import {
 } from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
+import type { File, FileVideo } from '~/types/wordpress'
 import type { Projects } from '~/types/wordpress/project'
 import { toPx } from '~/utils'
 import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
@@ -173,7 +177,7 @@ const activeList = ref<'selected' | 'all'>('selected')
 const active = ref<number>(0)
 const activeOf = ref<number>(activeListProjects.value.length)
 
-const instancedVideos = ref<Array<{ id: string; src: string; alt: string }>>([])
+const instancedVideos = ref<Array<{ id: string; video: FileVideo }>>([])
 
 watch(
   () => route.params.slug,
@@ -280,10 +284,11 @@ async function updateBounding() {
   bottom.value = bounding.bottom - vh.value
 }
 
-function addVideo(params: { id: string; src: string; alt: string }) {
-  const { id, src, alt } = params
-  const isVideoInstanced = !!instancedVideos.value.find(v => v.id === id)
-  !isVideoInstanced && instancedVideos.value.push({ id, src, alt })
+function addVideo(params: { id: string; video?: FileVideo }) {
+  const isVideoInstanced = !!instancedVideos.value.find(v => v.id === params.id)
+  !isVideoInstanced &&
+    params.video &&
+    instancedVideos.value.push({ id: params.id, video: params.video })
 }
 
 onBeforeUnmount(() => {

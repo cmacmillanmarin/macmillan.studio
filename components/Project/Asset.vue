@@ -8,16 +8,16 @@
     ]">
     <div class="project__asset__content">
       <ProjectVideo
-        v-if="data.type === 'vid'"
-        :data="data.video"
+        v-if="data.file.type === 'vid' && data.file.video"
+        :data="data.file.video"
         :ready="ready"
         :bg-color="bgColor"
         :layout="data.layout"
         :transparent="data.transparent"
         @update-scroll="$emit('update-scroll')" />
       <ProjectImage
-        v-else
-        :data="data.image"
+        v-else-if="data.file.type === 'img' && data.file.image"
+        :data="data.file.image"
         :bg-color="bgColor"
         :ready="ready"
         :layout="data.layout"

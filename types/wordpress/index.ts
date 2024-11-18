@@ -107,21 +107,50 @@ export function parseVideo(data?: WP_Video): Video {
   }
 }
 
-export type WP_Media = WP_Image | WP_Video
+export type MediaType = 'img' | 'vid'
 
-export type MediaType = 'image' | 'video'
-
-export interface Media {
+export interface WP_File {
   type: MediaType
-  image?: Image
-  video?: Video
+  image?: WP_Image
+  videos: {
+    webm?: WP_Video
+    mp4?: WP_Video
+  }
 }
 
-export function parseMedia(data?: WP_Image | WP_Video): Media {
+export interface FileVideo {
+  mp4: string
+  webm: string
+  alt: string
+  width: number
+  height: number
+}
+
+export interface File {
+  type: MediaType
+  image?: Image
+  video?: FileVideo
+}
+
+export function parseFile(data?: WP_File): File {
+  const type = data?.type || 'img'
+  const image = type === 'img' ? parseImage(data?.image) : undefined
+  const mp4 = parseVideo(data?.videos.mp4)
+  const webm = parseVideo(data?.videos.webm)
+  const video =
+    data?.type === 'vid'
+      ? {
+          mp4: mp4.src,
+          webm: webm.src,
+          alt: webm.alt,
+          width: webm.width,
+          height: webm.height,
+        }
+      : undefined
   return {
-    type: data?.type || 'image',
-    image: data?.type === 'image' ? parseImage(data as WP_Image) : undefined,
-    video: data?.type === 'video' ? parseVideo(data as WP_Video) : undefined,
+    type,
+    image,
+    video,
   }
 }
 

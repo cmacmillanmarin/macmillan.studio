@@ -1,13 +1,4 @@
-import { parse } from 'vue/compiler-sfc'
-import {
-  parseText,
-  type Image,
-  type WP_Image,
-  parseImage,
-  type Video,
-  type WP_Video,
-  parseVideo,
-} from '~/types/wordpress'
+import { parseText, parseFile, type File, type WP_File } from '~/types/wordpress'
 import {
   type WP_Client_Object,
   type Client,
@@ -33,7 +24,7 @@ export interface WP_Project {
     link: string
     primary_color: string
     secondary_color: string
-    thumbnail: WP_Project_Thumbnail
+    thumbnail: WP_File
     info?: Array<{ title: string; label: string }>
     description: string
     assets?: Array<WP_Project_Asset>
@@ -63,41 +54,18 @@ export interface WP_Project_Object {
   post_name: string
 }
 
-export interface WP_Project_Thumbnail {
-  type: 'img' | 'vid'
-  image?: WP_Image
-  video?: WP_Video
-  video_gruop?: {
-    mp4?: WP_Video
-    webm?: WP_Video
-  }
-}
 export interface WP_Project_Asset {
   layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   gap: 'l' | 'm' | 's'
   transparent: boolean
-  type: 'img' | 'vid'
-  image?: WP_Image
-  video?: WP_Video
+  file: WP_File
 }
 
 export interface ProjectAsset {
   layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   gap: 'l' | 'm' | 's'
   transparent: boolean
-  type: 'img' | 'vid'
-  image: Image
-  video: Video
-}
-
-export interface ProjectThumbnail {
-  type: 'img' | 'vid'
-  image: Image
-  video: Video
-  videoGroup: {
-    mp4: Video
-    webm: Video
-  }
+  file: File
 }
 
 export type Projects = Array<Project>
@@ -109,7 +77,7 @@ export interface Project {
   link: string
   color: string
   secondaryColor: string
-  thumbnail: ProjectThumbnail
+  thumbnail: File
   description: string
   info: Array<{ title: string; label: string }>
   assets: Array<ProjectAsset>
@@ -153,7 +121,8 @@ export function parseProject(params: {
   const assets: Array<WP_Project_Asset> = project?.acf.assets
     ? project?.acf.assets.filter(
         asset =>
-          (asset.type === 'img' && asset.image?.url) || (asset.type === 'vid' && asset.video?.url)
+          (asset.file.type === 'img' && asset.file.image?.url) ||
+          (asset.file.type === 'vid' && asset.file.videos.mp4?.url && asset.file.videos.webm?.url)
       )
     : []
 
@@ -185,15 +154,7 @@ export function parseProject(params: {
     selected: !!project?.acf.selected_project,
     color: parseText(project?.acf.primary_color),
     secondaryColor: parseText(project?.acf.secondary_color),
-    thumbnail: {
-      type: project?.acf.thumbnail.type || 'img',
-      image: parseImage(project?.acf.thumbnail.image),
-      video: parseVideo(project?.acf.thumbnail.video),
-      videoGroup: {
-        mp4: parseVideo(project?.acf.thumbnail.video_gruop?.mp4),
-        webm: parseVideo(project?.acf.thumbnail.video_gruop?.webm),
-      },
-    },
+    thumbnail: parseFile(project?.acf.thumbnail),
     description: parseText(project?.acf.description),
     info: project?.acf.info
       ? project?.acf.info.map(i => {
@@ -208,9 +169,7 @@ export function parseProject(params: {
         layout: asset.layout,
         gap: asset.gap,
         transparent: !!asset.transparent,
-        type: asset.type,
-        image: parseImage(asset.image),
-        video: parseVideo(asset.video),
+        file: parseFile(asset.file),
       }
     }),
     recognitions: project?.acf.recognitions?.length

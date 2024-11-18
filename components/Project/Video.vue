@@ -5,22 +5,24 @@
       class="project__video__el"
       :width="data.width"
       :height="data.height"
+      :alt="data.alt"
       muted
       loop
       playsinline
       v-intersect="{ callback: onIntersect }"
       @playing="enter">
-      <source :src="data.src" :type="data.mime" />
+      <source :src="data.webm" type="video/webm" />
+      <source :src="data.mp4" type="video/mp4" />
     </video>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { Video } from '~/types/wordpress'
+import type { FileVideo } from '~/types/wordpress'
 import { fadeIn } from '~/utils/animations'
 
 const props = defineProps<{
-  data: Video
+  data: FileVideo
   ready?: boolean
   layout?: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   transparent: boolean

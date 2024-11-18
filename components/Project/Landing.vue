@@ -392,9 +392,9 @@ const emit = defineEmits(['update-scroll', 'next-project'])
       left: 62.5vw;
       width: 14vw;
       padding-top: var(--layout-margin);
+      @include will-fade;
       @include t-black;
       @include t-b3;
-      @include will-fade;
 
       &__bar {
         position: absolute;

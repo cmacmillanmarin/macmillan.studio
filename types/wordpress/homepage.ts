@@ -5,9 +5,6 @@ import {
   type WP_Image,
   type Image,
   parseImage,
-  type MediaType,
-  type Video,
-  parseMedia,
 } from '~/types/wordpress'
 import {
   type WP_Projects,
@@ -132,9 +129,7 @@ export interface HomepageAboutAwards {
 export type HomepageAboutGallery = Array<HomepageAboutGalleryItem>
 
 export interface HomepageAboutGalleryItem {
-  type: MediaType
-  image?: Image
-  video?: Video
+  image: Image
   columns: number
 }
 
@@ -142,7 +137,7 @@ function parseGallery(data?: Array<WP_Homepage_About_Gallery_Image>): HomepageAb
   const gallery: HomepageAboutGallery = []
   for (const item of data || []) {
     gallery.push({
-      ...parseMedia(item.type === 'img' ? item.image : item.video),
+      image: parseImage(item.image),
       columns: parseFloat(item.columns || '3'),
     })
   }

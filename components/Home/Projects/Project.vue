@@ -8,7 +8,7 @@
     ]"
     data-scroll-set-position>
     <CustomImage
-      v-if="data.thumbnail.image.src && imageReady"
+      v-if="data.thumbnail.image && imageReady"
       ref="customImageEl"
       :data="data.thumbnail.image"
       class="home__projects__project__img"
@@ -84,6 +84,7 @@ import useScrollStore from '~/store/useScrollStore'
 import { slugify, hexToRgb, rbgToVec4, sleep } from '~/utils'
 import { fadeIn, fadeOut } from '~/utils/animations'
 import type { Plane, ClientAndCollaborator } from '~/types/front/project'
+import type { FileVideo } from '~/types/wordpress'
 import type { Project } from '~/types/wordpress/project'
 import CustomImage from '~/components/Global/CustomImage.vue'
 
@@ -130,12 +131,11 @@ const collaboratorNameVisible = computed<boolean>(
 
 const projectId = ref<string>(slugify(props.data.title))
 const projectColor = ref<string>(props.data.color)
-const projectVideo = computed<{ id: string; src: string; alt: string }>(() => {
+const projectVideo = computed<{ id: string; video?: FileVideo }>(() => {
   const src = `/assets/video/${props.data.slug}`
   return {
     id: slugify(src),
-    src: src,
-    alt: `${props.data.title} thumbnail video`,
+    video: props.data.thumbnail.video,
   }
 })
 
@@ -562,7 +562,7 @@ onBeforeUnmount(() => {
 
 const emit = defineEmits<{
   (e: 'update-active', value: number): void
-  (e: 'request-video', value: { id: string; src: string; alt: string }): void
+  (e: 'request-video', value: { id: string; video?: FileVideo }): void
 }>()
 
 defineExpose({
