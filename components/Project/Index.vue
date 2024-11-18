@@ -46,7 +46,7 @@ import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { transitionFadeOut } from '~/utils/animations'
 import { storeToRefs } from 'pinia'
-import { toPx } from '~/utils'
+import { toPx, getKeyboardFocusableElements } from '~/utils'
 import { Swiper, type PanParams } from '~/utils/swiper'
 
 const props = defineProps<{
@@ -72,9 +72,10 @@ const { disableScroll, updateScrollFixedTargetId } = useScrollStore()
 const route = useRoute()
 const router = useRouter()
 const { addTicker, killTicker } = useRaf()
-const { vh, onResize } = useResize()
+const { vw, vh, onResize } = useResize()
 const { touch, isMobileLayout } = useDevice()
-const { toScale } = useCss()
+// const { toScale } = useCss()
+const { keyPressed } = useKeyboard()
 
 const el = ref<HTMLElement>()
 const contentEl = ref<HTMLElement>()
@@ -101,6 +102,13 @@ let _scroll: any = {
 let _Swiper = new Swiper({ prevent: false, dragOnTarget: true })
 
 let _panTarget: number = 0
+
+watch(ready, async () => {
+  await nextTick()
+  getKeyboardFocusableElements(el.value).forEach(el => {
+    el.addEventListener('focus', onElementFocus)
+  })
+})
 
 watch(onResize, updateScroll)
 
@@ -129,10 +137,16 @@ onBeforeMount(() => {
   updateInProjectNextProjectInView(false)
 })
 
-onMounted(() => {
+onMounted(async () => {
   disableScroll(true)
   emit('mounted')
   !transition.value && enter()
+  if (ready.value) {
+    await nextTick()
+    getKeyboardFocusableElements(el.value).forEach(el => {
+      el.addEventListener('focus', onElementFocus)
+    })
+  }
 })
 
 function enter() {
@@ -222,6 +236,15 @@ function killScroll() {
   contentEl.value?.removeEventListener('wheel', _onWheel)
 }
 
+function onElementFocus(e: Event) {
+  const target = (e.target || e.currentTarget) as HTMLElement | undefined
+  const tabFixed = !!(target?.dataset.tabFixed === '')
+  if (!target || tabFixed) return
+  const { left, width } = target.getBoundingClientRect()
+  _scroll.target = _clampTarget(_scroll.target + left - vw.value * 0.5 + width * 0.5)
+  updateCursor('default')
+}
+
 function onMouseEnter() {
   updateCursor('arrow-right')
 }
@@ -261,6 +284,9 @@ function closeProject() {
 }
 
 onBeforeUnmount(() => {
+  getKeyboardFocusableElements(el.value).forEach(el => {
+    el.removeEventListener('focus', onElementFocus)
+  })
   if (!route.params.slug) {
     emit('closed')
     updateCursor('default')

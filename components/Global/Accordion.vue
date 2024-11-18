@@ -1,9 +1,10 @@
 <template>
   <div :class="['accordion', { 'accordion--first': first }]">
-    <button
+    <div
       :class="['accordion__title', { 'accordion__title--open': open }]"
       :aria-label="`${open ? 'Close' : 'Open'} ${title} accordion`"
-      @click="toggle">
+      @click="toggle"
+      tabindex="-1">
       <div class="accordion__title__content">
         <p
           v-if="number"
@@ -11,8 +12,12 @@
           v-text="`{${startWithZero(number)}}`" />
         <p class="accordion__title__content__label">{{ title }}</p>
       </div>
-      <SvgPlaySmall />
-    </button>
+      <button
+        class="accordion__title__content__button"
+        :aria-label="`${open ? 'Close' : 'Open'} ${title} accordion`">
+        <SvgPlaySmall />
+      </button>
+    </div>
     <div
       v-if="open"
       :class="['accordion__content', { 'accordion__content--animated': animated }]"
@@ -45,7 +50,9 @@ watch(open, async () => {
   emit('toggle')
 })
 
-function toggle() {
+function toggle(e: MouseEvent) {
+  e.preventDefault()
+  e.stopPropagation()
   open.value = !open.value
   animated.value = true
 }
@@ -85,15 +92,20 @@ const emit = defineEmits(['toggle'])
       }
     }
 
-    .svg__play--small {
+    button {
+      padding: 0;
+      border: none;
+      width: max-content;
       transform: rotate(90deg) translateY(24%);
-      path {
-        fill: var(--black);
+      .svg__play--small {
+        path {
+          fill: var(--black);
+        }
       }
     }
 
     &--open {
-      .svg__play--small {
+      button {
         transform: rotate(-90deg) translateY(-24%);
       }
     }

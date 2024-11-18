@@ -80,3 +80,20 @@ details {
     outline: 0;
   }
 }
+
+footer,
+.home__hero__player {
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  embed,
+  object,
+  iframe,
+  details {
+    &:focus-visible {
+      outline: 2px solid var(--lime);
+    }
+  }
+}

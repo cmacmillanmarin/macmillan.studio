@@ -71,7 +71,7 @@
       :id="targetify(`selected-${data.slug}-anchor`)"
       :aria-label="`Go to ${data.title} project`"
       :content="true"
-      :tabindex="inAllProjectsList ? -1 : undefined"
+      :tabindex="inAllProjectsList ? -1 : landingTabIndex"
       class="home__projects__project__anchor" />
   </div>
 </template>
@@ -104,7 +104,7 @@ const route = useRoute()
 const router = useRouter()
 
 const store = useStore()
-const { headerOverlay, section, isInProjectEntered } = storeToRefs(store)
+const { headerOverlay, section, isInProjectEntered, landingTabIndex } = storeToRefs(store)
 const scrollStore = useScrollStore()
 const { disableScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { current } = storeToRefs(scrollStore)

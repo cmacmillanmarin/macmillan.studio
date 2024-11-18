@@ -41,17 +41,17 @@
         <GridGoldenRatio v-if="gridType === 'golden-ratio'" />
         <GridRuleOfThirds v-else-if="gridType === 'rule-of-thirds'" />
         <div class="footer__email__christian">
-          <button aria-label="Copy email">
+          <button aria-label="Copy email" :tabindex="landingTabIndex">
             <SvgChristian />
           </button>
         </div>
         <div class="footer__email__domain">
-          <button aria-label="Copy email">
+          <button aria-label="Copy email" :tabindex="landingTabIndex">
             <SvgDomain />
           </button>
         </div>
         <div class="footer__email__extension">
-          <button aria-label="Copy email">
+          <button aria-label="Copy email" :tabindex="landingTabIndex">
             <SvgExtension />
           </button>
         </div>
@@ -62,7 +62,7 @@
       <nav v-if="!tetris" class="footer__nav" v-transition:in="{ callback: fadeIn }">
         <ul class="footer__nav__social">
           <li v-for="{ to, type, label } in rrss" class="footer__nav__social__link">
-            <DecorativeLink :label="label" :to="to" :type="type" />
+            <DecorativeLink :label="label" :to="to" :type="type" :tabindex="landingTabIndex" />
           </li>
         </ul>
         <ul v-show="!isMobileLayout" class="footer__nav__credits">
@@ -70,7 +70,8 @@
             <button
               class="footer__nav__credits__link__btn--tetris"
               @mouseenter="shuffle"
-              @click="playTetris">
+              @click="playTetris"
+              :tabindex="landingTabIndex">
               <span>Play Tetris</span>
               <SvgPlaySmall />
             </button>
@@ -89,7 +90,8 @@
             <button
               class="footer__nav__credits__link__btn--tetris"
               @mouseenter="shuffle"
-              @click="playTetris">
+              @click="playTetris"
+              :tabindex="landingTabIndex">
               <span>Play Tetris</span>
               <SvgPlaySmall />
             </button>
@@ -105,7 +107,8 @@
             href="https://maps.app.goo.gl/osjpdZpbnTjgLg7h7"
             target="__blank"
             rel="noopener"
-            @mouseenter="shuffle">
+            @mouseenter="shuffle"
+            :tabindex="landingTabIndex">
             Cádiz—36.5282º N, 6.18892º W
           </a>
         </div>
@@ -145,7 +148,7 @@ import type { Piece } from '~/types/front/tetris'
 
 const store = useStore()
 const { updateSection, updateCursor } = store
-const { cursor, section, gridType } = storeToRefs(store)
+const { cursor, section, gridType, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { disableScroll } = scrollStore

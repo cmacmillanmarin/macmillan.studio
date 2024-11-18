@@ -34,7 +34,8 @@
             :href="item.link"
             :data-link="i"
             target="_blank"
-            @mouseenter="shuffle">
+            @mouseenter="shuffle"
+            :tabindex="landingTabIndex">
             {{ item.label }}
           </a>
           <p
@@ -45,7 +46,8 @@
             <button
               class="home__about__awards__award__content__list__item__link__button"
               @mouseenter="shuffle"
-              :data-link="i">
+              :data-link="i"
+              tabindex="-1">
               {<SvgLinkArrow />}
             </button>
           </div>
@@ -58,6 +60,7 @@
 <script lang="ts" setup>
 import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
+import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAboutAwardsAward } from '~/types/wordpress/homepage'
 import { shuffleElsIn } from '~/utils/animations'
@@ -69,6 +72,7 @@ const props = defineProps<{
   data: HomepageAboutAwardsAward
 }>()
 
+const { landingTabIndex } = storeToRefs(useStore())
 const { direction } = storeToRefs(useScrollStore())
 
 const { isMobileLayout } = useDevice()

@@ -5,7 +5,11 @@
     <div class="header__top" />
 
     <div v-show="!isMobileLayout" class="header__hint">
-      <button @click="scrollDown">
+      <button
+        @click="scrollDown"
+        data-tab-fixed
+        :tabindex="landingTabIndex"
+        aria-label="Scroll down">
         <SvgPixelArrow />
       </button>
       <p class="header__hint__label">Independent Tech Lead—Developer</p>
@@ -18,14 +22,19 @@
             v-for="({ label, slug }, i) in links"
             :to="`/#${slug}`"
             :label="`${label}${i === links.length - 1 ? '' : ','}`"
-            :active="section === slug && activeDots" />
+            :active="section === slug && activeDots"
+            :tabindex="landingTabIndex" />
         </ul>
       </nav>
     </ClientOnly>
 
     <nav v-show="!isMobileLayout" class="header__nav--sub">
       <ul class="header__nav__list">
-        <HeaderLink label="Contact" to="/#contact" :active="section === 'contact' && !activeDots" />
+        <HeaderLink
+          label="Contact"
+          to="/#contact"
+          :active="section === 'contact' && !activeDots"
+          :tabindex="landingTabIndex" />
       </ul>
       <div v-show="logoVisible" class="header__nav__logo">
         <CustomLink
@@ -34,6 +43,7 @@
           :content="true"
           aria-label="MacMillan Studio logo"
           data-tab-fixed
+          :tabindex="landingTabIndex"
           @mouseenter="onMouseEnter"
           @mouseleave="onMouseLeave" />
       </div>
@@ -41,7 +51,7 @@
 
     <ClientOnly>
       <nav v-if="isMobileLayout" class="header__nav--scroll">
-        <button @click="scrollDown">
+        <button @click="scrollDown" :tabindex="landingTabIndex">
           <SvgPixelArrow />
         </button>
       </nav>
@@ -51,19 +61,20 @@
         v-show="!isInProject && logoVisible"
         ref="logoMobileEl"
         class="header__nav__logo--mobile">
-        <button @click="scrollUp" />
+        <button @click="scrollUp" :tabindex="landingTabIndex" aria-label="Scroll up" />
       </nav>
 
       <transition mode="out-in" :css="false" @enter="mobileButtonEnter" @leave="mobileButtonLeave">
         <nav v-if="mobileButton" class="header__nav--mobile">
-          <button>
+          <button aria-label="Mobile button">
             <transition
               mode="out-in"
               :css="false"
               :appear="true"
               @enter="transitionShuffleIn"
               @leave="transitionDone"
-              @click="onMobileButtonClick">
+              @click="onMobileButtonClick"
+              :tabindex="landingTabIndex">
               <SvgDots v-if="mobileButtonIcon && !headerOverlay && !isInProject && !isInReel" />
               <SvgAspa v-else-if="!inProjectNextProjectInView" />
               <SvgPixelArrow v-else />
@@ -105,6 +116,7 @@ const {
   isInProject,
   isInReel,
   inProjectNextProjectInView,
+  landingTabIndex,
 } = storeToRefs(store)
 
 const scrollStore = useScrollStore()

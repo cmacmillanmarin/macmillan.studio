@@ -118,9 +118,13 @@ watch(playing, () => {
   updateCursor(playing.value ? 'pause' : 'play')
 })
 
-onMounted(() => {
+onMounted(async () => {
   updateCursor('pause')
   addTicker(updateProgress)
+  await nextTick()
+  getKeyboardFocusableElements(el.value).forEach(el => {
+    el.addEventListener('focus', onElementFocus)
+  })
 })
 
 function onClick(e: MouseEvent) {
@@ -146,6 +150,10 @@ function onTimelineClick(e: MouseEvent) {
   const current = (e.clientX - left) / width
   progress.value = current
   emit('update', current)
+}
+
+function onElementFocus() {
+  visible.value = true
 }
 
 function onButtonMouseEnter() {
@@ -179,6 +187,9 @@ function onMuteButtonClick(e: MouseEvent) {
 onBeforeUnmount(() => {
   _to && clearTimeout(_to)
   killTicker(updateProgress)
+  getKeyboardFocusableElements(el.value).forEach(el => {
+    el.removeEventListener('focus', onElementFocus)
+  })
 })
 
 const emit = defineEmits(['close', 'pause', 'toggle', 'mute', 'update'])

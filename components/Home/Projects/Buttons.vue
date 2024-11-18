@@ -14,7 +14,8 @@
           { 'home__projects__buttons__button--active': activeList === 'selected' },
         ]"
         @mouseenter="onButtonMouseEnter"
-        @click="updateActiveListToSelected">
+        @click="updateActiveListToSelected"
+        :tabindex="landingTabIndex">
         <span class="home__projects__buttons__button__label">
           <transition
             mode="out-in"
@@ -46,7 +47,8 @@
           { 'home__projects__buttons__button--active': activeList === 'all' },
         ]"
         @mouseenter="onButtonMouseEnter"
-        @click="updateActiveListToAll">
+        @click="updateActiveListToAll"
+        :tabindex="landingTabIndex">
         <span class="home__projects__buttons__button__label">
           <transition
             mode="out-in"
@@ -80,8 +82,7 @@ defineProps<{
 }>()
 
 const store = useStore()
-
-const { cursor } = storeToRefs(store)
+const { cursor, landingTabIndex } = storeToRefs(store)
 
 function updateActiveListToSelected(e: MouseEvent) {
   if (cursor.value === 'plus') return

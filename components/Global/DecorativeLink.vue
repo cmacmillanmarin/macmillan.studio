@@ -1,5 +1,11 @@
 <template>
-  <CustomLink class="decorative-link" :to="to" :type="type" :content="true" @mouseenter="shuffle">
+  <CustomLink
+    class="decorative-link"
+    :to="to"
+    :type="type"
+    :content="true"
+    @mouseenter="shuffle"
+    :tabindex="tabindex">
     <span ref="spanEl">{{ label }}</span>
     <SvgLinkArrow />
   </CustomLink>
@@ -12,6 +18,7 @@ defineProps<{
   label: string
   to: string
   type: string
+  tabindex?: number
 }>()
 
 const spanEl = ref<HTMLElement>()

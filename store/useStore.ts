@@ -49,6 +49,9 @@ export default defineStore('use-store', {
     isInProjectEntered(): boolean {
       return this.inProjectEntered
     },
+    landingTabIndex(): number | undefined {
+      return this.inProject || this.inReel ? -1 : undefined
+    },
   },
   actions: {
     updatePreloadedFonts(value: boolean) {

@@ -88,9 +88,11 @@
           { 'home__projects__anchor--selected': project.selected },
         ]"
         :style="`top: ${getAnchorTop(i)}`"
+        :tabindex="landingTabIndex"
         data-scroll-target-top
         :data-scroll-target-offset="getOffset()" />
     </template>
+
     <ClientOnly>
       <div class="home__projects__videos" data-scroll-sticky>
         <video
@@ -135,7 +137,7 @@ const route = useRoute()
 
 const store = useStore()
 const { updateSection, updateActiveProjectList } = store
-const { section, isInProject } = storeToRefs(store)
+const { section, isInProject, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollFixedTargetId } = scrollStore

@@ -6,7 +6,8 @@
       :to="to"
       :label="label"
       @mouseenter="!touch ? onMouseEnter : () => {}"
-      data-tab-fixed />
+      data-tab-fixed
+      :tabindex="tabindex" />
     <transition
       mode="out-in"
       :css="false"
@@ -25,6 +26,7 @@ defineProps<{
   label: string
   to: string
   active: boolean
+  tabindex?: number
 }>()
 
 const { touch } = useDevice()

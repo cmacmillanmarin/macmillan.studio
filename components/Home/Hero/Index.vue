@@ -24,7 +24,13 @@
               <SvgStudio />
             </div>
           </div>
-          <button ref="reelButtonEl" class="home__hero__content__reel-button" @click="goToReel">
+          <button
+            v-show="isMobileLayout"
+            ref="reelButtonEl"
+            class="home__hero__content__reel-button"
+            @click="goToReel"
+            aria-label="Play reel"
+            :tabindex="landingTabIndex">
             <SvgPlay />
           </button>
         </Teleport>
@@ -85,7 +91,8 @@ const { $scene }: any = useNuxtApp()
 
 const store = useStore()
 const { updateHeader, updateLoading, updateSection, updateInReel } = store
-const { section, gridType, headerLogo, isInReel, isInProjectEntered } = storeToRefs(store)
+const { section, gridType, headerLogo, isInReel, isInProjectEntered, landingTabIndex } =
+  storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore

@@ -66,7 +66,7 @@ export function round(n: number, decimals?: number): number {
 export const focusable =
   'a[href], button, input, textarea, select, embed, object, iframe, details,[tabindex]:not([tabindex="-1"])'
 
-export function getKeyboardFocusableElements(element: HTMLElement | undefined): Array<Element> {
+export function getKeyboardFocusableElements(element?: HTMLElement): Array<Element> {
   const el = element || document
   return [...el.querySelectorAll(focusable)].filter(
     el =>

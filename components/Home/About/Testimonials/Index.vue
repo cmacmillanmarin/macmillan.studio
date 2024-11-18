@@ -24,7 +24,8 @@
         <button
           v-if="isMobileLayout"
           class="home__about__testimonials__indicator__button--prev"
-          @click="prev">
+          @click="prev"
+          :tabindex="landingTabIndex">
           <SvgPixelArrow />
         </button>
       </ClientOnly>
@@ -39,7 +40,8 @@
         <button
           v-if="isMobileLayout"
           class="home__about__testimonials__indicator__button"
-          @click="next">
+          @click="next"
+          :tabindex="landingTabIndex">
           <SvgPixelArrow />
         </button>
       </ClientOnly>
@@ -52,7 +54,8 @@
             'home__about__testimonials__indicator__buttons__button',
             { 'home__about__testimonials__indicator__buttons__button--active': i - 1 === active },
           ]"
-          @click="updateActive(i - 1)">
+          @click="updateActive(i - 1)"
+          :tabindex="landingTabIndex">
           <SvgSquare />
         </button>
       </div>
@@ -75,7 +78,7 @@ const props = defineProps<{
 
 const store = useStore()
 const { updateCursor, updateSection } = store
-const { cursor, section } = storeToRefs(store)
+const { cursor, section, landingTabIndex } = storeToRefs(store)
 const scrollStore = useScrollStore()
 const { updateScroll } = scrollStore
 const { direction } = storeToRefs(scrollStore)

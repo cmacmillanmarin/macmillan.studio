@@ -63,7 +63,8 @@
             class="home__about__intro__collaborator__thumbnail__credit"
             type="external"
             to="https://xaviercusso.com"
-            :label="data.collaborator.credit" />
+            :label="data.collaborator.credit"
+            :tabindex="landingTabIndex" />
         </div>
       </div>
     </div>
@@ -96,7 +97,7 @@ const { $scene }: any = useNuxtApp()
 
 const store = useStore()
 const { updateSection } = store
-const { section } = storeToRefs(store)
+const { section, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll } = scrollStore

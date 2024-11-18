@@ -6,14 +6,17 @@
       { 'project__landing--next': next },
       { 'project__landing--animation': animation },
     ]">
-    <div v-show="ready || isMobileLayout" class="project__landing__title" @click="onTitleClick">
+    <div class="project__landing__title" @click="onTitleClick">
+      <h2 v-if="!next" v-html="data.title" />
       <ClientOnly>
-        <SvgProjectWallpapers
-          :animation="animation"
-          :next="!!next"
-          @update-scroll="emit('update-scroll')" />
+        <button
+          v-if="next"
+          class="project__landing__title__button"
+          :aria-label="`Go to ${data.title} project`">
+          <SvgProject :project="data.slug" :animation="animation" :next="true" />
+        </button>
+        <SvgProject v-else :project="data.slug" :animation="animation" :next="false" />
       </ClientOnly>
-      <h2 v-html="data.title" />
     </div>
 
     <div class="project__landing__info">
@@ -40,16 +43,14 @@
           class="project__landing__info__stack__content"
           @mouseenter="onMouseEnter"
           @mouseleave="onMouseLeave">
-          <ClientOnly>
-            <Accordion
-              v-if="data.techStack.length"
-              title="Tech Stack"
-              :content="data.techStack.join(', ')"
-              :first="true"
-              :open="!next && !isMobileLayout"
-              :animation="!next && !isMobileLayout"
-              @toggle="onAccordionToggle" />
-          </ClientOnly>
+          <Accordion
+            v-if="data.techStack.length"
+            title="Tech Stack"
+            :content="data.techStack.join(', ')"
+            :first="true"
+            :open="!next && !isMobileLayout"
+            :animation="!next && !isMobileLayout"
+            @toggle="onAccordionToggle" />
           <Accordion
             title="Client"
             :content="client"
@@ -258,6 +259,12 @@ const emit = defineEmits(['update-scroll', 'next-project'])
       @include t-seo;
     }
 
+    &__button {
+      display: block;
+      padding: 0;
+      border: none;
+    }
+
     svg {
       @include from__tablet--landscape {
         margin-bottom: 1.2rem;
@@ -385,8 +392,9 @@ const emit = defineEmits(['update-scroll', 'next-project'])
       left: 62.5vw;
       width: 14vw;
       padding-top: var(--layout-margin);
-      @include will-fade;
+      @include t-black;
       @include t-b3;
+      @include will-fade;
 
       &__bar {
         position: absolute;
