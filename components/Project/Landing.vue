@@ -43,14 +43,16 @@
           class="project__landing__info__stack__content"
           @mouseenter="onMouseEnter"
           @mouseleave="onMouseLeave">
-          <Accordion
-            v-if="data.techStack.length"
-            title="Tech Stack"
-            :content="data.techStack.join(', ')"
-            :first="true"
-            :open="!next && !isMobileLayout"
-            :animation="!next && !isMobileLayout"
-            @toggle="onAccordionToggle" />
+          <ClientOnly>
+            <Accordion
+              v-if="data.techStack.length"
+              title="Tech Stack"
+              :content="data.techStack.join(', ')"
+              :first="true"
+              :open="!next && !isMobileLayout"
+              :animation="!next && !isMobileLayout"
+              @toggle="onAccordionToggle" />
+          </ClientOnly>
           <Accordion
             title="Client"
             :content="client"
