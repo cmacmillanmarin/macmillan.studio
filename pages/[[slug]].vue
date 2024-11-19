@@ -19,7 +19,8 @@
       v-if="data.projects.list.length"
       data-scroll
       :data="data.projects"
-      @update-list="onProjectListUpdated" />
+      @update-list="onProjectListUpdated"
+      @update-temporary-project-list="updateTemporaryProjectList" />
 
     <HomeServices v-if="data.services.list.length" data-scroll :data="data.services" />
 
@@ -36,7 +37,7 @@
 <script lang="ts" setup>
 import { gsap } from 'gsap'
 import { type Homepage } from '~/types/wordpress/homepage'
-import { type Project } from '~/types/wordpress/project'
+import { type Project, type Projects } from '~/types/wordpress/project'
 import useStore from '~/store/useStore'
 import { storeToRefs } from 'pinia'
 
@@ -54,10 +55,15 @@ const inProject = ref<boolean>(false)
 const inProjectEntered = ref<boolean>(false)
 const projectList = ref<'selected' | 'all'>('selected')
 const projectSlug = computed<string>(() => `${route.params.slug}`)
+const temporaryProjectList = ref<Projects>([])
 const project = computed<Project | undefined>(() => {
   return data.value?.projects.list.find(project => project.slug === projectSlug.value)
 })
 const nextProject = computed<Project | undefined>(() => {
+  if (temporaryProjectList.value.length) {
+    const index = temporaryProjectList.value.findIndex(p => p.slug === projectSlug.value)
+    return temporaryProjectList.value[index + 1]
+  }
   const selectedList = data.value?.projects.list.filter(project => project.selected)
   const inSelectedProjectLists =
     projectList.value === 'selected' && !!selectedList?.find(p => p.slug === projectSlug.value)
@@ -123,6 +129,10 @@ function onNextProject() {
 function onProjectClosed() {
   inProject.value = false
   inProjectEntered.value = false
+}
+
+function updateTemporaryProjectList(list: Projects) {
+  temporaryProjectList.value = list
 }
 
 definePageMeta({

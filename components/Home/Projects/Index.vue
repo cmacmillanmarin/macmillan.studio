@@ -128,8 +128,8 @@ import {
 } from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
-import type { File, FileVideo } from '~/types/wordpress'
-import type { Projects } from '~/types/wordpress/project'
+import type { FileVideo } from '~/types/wordpress'
+import type { Project, Projects } from '~/types/wordpress/project'
 import { toPx } from '~/utils'
 import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
 
@@ -138,6 +138,7 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
+const firstRouteIsProject = ref<boolean>(!!route.params.slug)
 
 const store = useStore()
 const { updateSection, updateActiveProjectList } = store
@@ -172,6 +173,7 @@ const year = ref<string>(new Date().getFullYear().toString())
 let _to: any
 const selectedProjectsList = ref<Projects>(props.data.list.filter(project => project.selected))
 const activeListProjects = ref<Projects>(selectedProjectsList.value)
+const temporaryProjectList = ref<Projects>([])
 const activeList = ref<'selected' | 'all'>('selected')
 
 const active = ref<number>(0)
@@ -182,24 +184,36 @@ const instancedVideos = ref<Array<{ id: string; video: FileVideo }>>([])
 watch(
   () => route.params.slug,
   (to, from) => {
-    if (from) {
+    if (from && !to) {
       const inActiveList = !!activeListProjects.value.find(p => p.slug === from)
-      if (!inActiveList) {
-        active.value = 1
-        activeOf.value = activeListProjects.value.length
-      }
+      if (!inActiveList) active.value = 1
+      activeOf.value = activeListProjects.value.length
     }
   }
 )
 
+watch(temporaryProjectList, () => {
+  emit('update-temporary-project-list', temporaryProjectList.value)
+})
+
 watchEffect(() => {
   if (route.params.slug) {
-    let index = activeListProjects.value.findIndex(project => project.slug === route.params.slug)
-    if (index === -1) {
-      index = props.data.list.findIndex(project => project.slug === route.params.slug)
-      activeOf.value = props.data.list.length
+    const inActiveList = !!activeListProjects.value.find(p => p.slug === route.params.slug)
+    if (!inActiveList && firstRouteIsProject.value && !temporaryProjectList.value.length) {
+      temporaryProjectList.value = props.data.list
     }
+    const list = temporaryProjectList.value.length
+      ? temporaryProjectList.value
+      : inActiveList
+      ? activeListProjects.value
+      : props.data.list
+
+    const index = list.findIndex(p => p.slug === route.params.slug)
     active.value = index + 1
+    activeOf.value = list.length
+  } else {
+    firstRouteIsProject.value = false
+    temporaryProjectList.value = []
   }
 })
 
@@ -295,7 +309,7 @@ onBeforeUnmount(() => {
   _to && clearTimeout(_to)
 })
 
-const emit = defineEmits(['update-list', 'update-active'])
+const emit = defineEmits(['update-list', 'update-active', 'update-temporary-project-list'])
 </script>
 
 <style lang="scss">
