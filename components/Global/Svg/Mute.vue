@@ -22,7 +22,7 @@ const props = defineProps<{
 const groupEl = ref<Array<SVGElement>>()
 
 onMounted(() => {
-  play()
+  props.state ? pause() : play()
 })
 
 watch(
@@ -64,6 +64,7 @@ function pause() {
   for (const el of groupEl.value || []) {
     const dots = el.querySelectorAll('rect')
     gsap.killTweensOf(dots)
+    gsap.set(dots[2], { opacity: 1 })
     gsap.to([dots[0], dots[1], dots[3], dots[4]], { opacity: 0, duration: 0.2 })
   }
 }

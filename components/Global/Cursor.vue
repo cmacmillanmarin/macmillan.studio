@@ -14,6 +14,7 @@
           <SvgCopy v-else-if="cursor === 'copy'" />
           <SvgTick v-else-if="cursor === 'copied'" />
           <SvgClose v-else-if="cursor === 'close'" />
+          <SvgLoading v-else-if="cursor === 'loading'" />
         </div>
       </transition>
     </div>

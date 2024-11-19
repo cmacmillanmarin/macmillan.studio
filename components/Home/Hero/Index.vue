@@ -58,6 +58,7 @@
 
     <HomeHeroPlayer
       v-if="isInReel"
+      :ready="reelReady"
       :progress="reelProgress"
       @close="closeReel"
       @mute="muteReel"
@@ -125,6 +126,7 @@ const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
 const reelProgress = ref<number>(0)
 const reelButtonVisible = ref<boolean>(false)
+const reelReady = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.082)
 const verticalGapPx = computed<string>(() =>
@@ -321,6 +323,7 @@ onMounted(() => {
 })
 
 function goToReel() {
+  reelReady.value = false
   reelProgress.value = 0
   reelButtonVisible.value = false
   updateInReel(true)
@@ -334,7 +337,13 @@ function goToReel() {
     videoEl.value.muted = false
     videoEl.value.loop = false
     videoEl.value.play()
+    videoEl.value.addEventListener('canplaythrough', onReelReady)
   }
+}
+
+function onReelReady() {
+  reelReady.value = true
+  videoEl.value?.removeEventListener('canplaythrough', onReelReady)
 }
 
 function updateReel(progress: number) {

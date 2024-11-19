@@ -21,6 +21,7 @@ export type Cursor =
   | 'copy'
   | 'copied'
   | 'close'
+  | 'loading'
 
 export interface NextProjectTickerItem {
   init: number

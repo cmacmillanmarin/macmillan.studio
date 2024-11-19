@@ -49,7 +49,7 @@
           @mouseenter="onButtonMouseEnter"
           @mouseleave="onButtonMouseLeave">
           <button @click="onMuteButtonClick">
-            <SvgMute :state="muted || !playing" />
+            <SvgMute :state="muted || !playing || !ready" />
           </button>
         </div>
       </div>
@@ -65,6 +65,7 @@ import { toPercentage } from '~/utils'
 import { fadeIn, shuffleIn, fadeOut } from '~/utils/animations'
 
 const props = defineProps<{
+  ready: boolean
   progress: number
 }>()
 
@@ -114,12 +115,12 @@ watch(visible, () => {
   updateCursor(visible.value ? 'pause' : 'default')
 })
 
-watch(playing, () => {
-  updateCursor(playing.value ? 'pause' : 'play')
+watch([() => props.ready, playing], () => {
+  updateCursor(!props.ready ? 'loading' : playing.value ? 'pause' : 'play')
 })
 
 onMounted(async () => {
-  updateCursor('pause')
+  updateCursor('loading')
   addTicker(updateProgress)
   await nextTick()
   getKeyboardFocusableElements(el.value).forEach(el => {
@@ -161,7 +162,7 @@ function onButtonMouseEnter() {
 }
 
 function onButtonMouseLeave() {
-  updateCursor(playing.value ? 'pause' : 'play')
+  updateCursor(!props.ready ? 'loading' : playing.value ? 'pause' : 'play')
 }
 
 function onToggleButtonClick(e: MouseEvent) {
