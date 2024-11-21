@@ -1,9 +1,7 @@
 <template>
-  <div ref="el" :class="['cursor', { 'cursor--lime': section === 'contact' }]">
+  <div ref="el" :class="['cursor', { 'cursor--lime': cursorColor === 'lime' }]">
     <div class="cursor__dot">
-      <transition mode="out-in" :css="false" @enter="limeEnter" @leave="limeLeave">
-        <div v-if="section === 'contact'" class="cursor__dot__lime" />
-      </transition>
+      <div v-if="cursorColor === 'lime'" class="cursor__dot__lime" />
       <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
         <div v-if="cursor !== 'default'" :key="cursor" class="cursor__dot__icon">
           <SvgPlay v-if="cursor === 'play'" />
@@ -27,9 +25,11 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { transitionShuffleIn, transitionDone } from '~/utils/animations'
 
-const { cursor, section } = storeToRefs(useStore())
+const { cursor, cursorColor } = storeToRefs(useStore())
 
 const { addTicker, killTicker } = useRaf()
+
+const { toScale } = useCss()
 const { x: targetX, y: targetY } = useMouse()
 const { touch } = useDevice()
 
@@ -47,7 +47,7 @@ watch(cursor, () => {
   if (!el.value || touch.value) return
   const cursorIn = cursor.value !== 'default'
   cursorIn && (_visible = true)
-  const scale = cursorIn ? 1 : 0
+  const scale = cursorIn ? 1 : getScale()
   const duration = cursorIn ? 0.4 : 0.3
   gsap.killTweensOf(el.value)
   gsap.to(el.value, {
@@ -62,13 +62,22 @@ watch(cursor, () => {
 })
 
 onMounted(() => {
-  !touch.value && addTicker(move)
+  if (!touch.value && el.value) {
+    addTicker(move)
+    gsap.set(el.value, { scale: getScale() })
+  }
 })
 
 function move() {
   _x += (targetX.value - _x) * 0.2
   _y += (targetY.value - _y) * 0.2
-  el.value && _visible && gsap.set(el.value, { x: _x, y: _y })
+  el.value && gsap.set(el.value, { x: _x, y: _y })
+}
+
+function getScale(): number {
+  const size = toScale(80)
+  const targetSize = toScale(12)
+  return targetSize / size
 }
 
 function limeEnter(el: Element, done: Function) {

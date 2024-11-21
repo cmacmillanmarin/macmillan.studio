@@ -126,7 +126,7 @@ const emit = defineEmits(['update:expanded'])
       margin: 0 auto toScale(1.6rem, 37.5rem);
       @include from__tablet--landscape {
         position: absolute;
-        top: 0;
+        top: 0.1rem;
         left: 0;
         margin: 0;
         transform: translate(calc(-100% - var(--layout-gutter)), -5%);

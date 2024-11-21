@@ -1,16 +1,24 @@
 <template>
   <div class="separator">
-    <SvgSquare :class="{ 'separator__dot--start': start }" />
+    <SvgSquare
+      :class="{ 'separator__dot--start': start }"
+      v-transition:in="{ callback: squareIn }" />
   </div>
 </template>
 
 <script lang="ts" setup>
+import { shuffleElsIn } from '~/utils/animations'
+
 const props = defineProps<{
   left?: number
   start?: boolean
 }>()
 
 const position = computed<number>(() => (props.left ? props.left : 0))
+
+function squareIn(params: { el: HTMLElement }) {
+  shuffleElsIn({ els: [params.el] })
+}
 </script>
 
 <style lang="scss">
@@ -38,6 +46,8 @@ const position = computed<number>(() => (props.left ? props.left : 0))
     );
     transform: translate(-100%, -100%);
     will-change: transform;
+
+    @include will-fade;
 
     @include from__tablet--landscape {
       top: toScale(0.1rem);

@@ -12,6 +12,7 @@ export default defineStore('use-store', {
     section: 'hero',
     sectionThrottle: false,
     cursor: 'default',
+    cursorColor: 'black',
     activeProjectList: 'selected',
     header: false,
     headerLogo: false,
@@ -97,6 +98,9 @@ export default defineStore('use-store', {
     },
     updateCursor(state: Cursor) {
       this.cursor = state
+    },
+    updateCursorColor(state: 'lime' | 'black') {
+      this.cursorColor = state
     },
     updateInReel(state: boolean) {
       this.inReel = state

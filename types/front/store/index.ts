@@ -52,6 +52,7 @@ export interface State {
   headerOverlay: boolean
   headerMobileButtonClicked: boolean
   cursor: Cursor
+  cursorColor: 'lime' | 'black'
   inReel: boolean
   inProject: boolean
   inProjectEntered: boolean

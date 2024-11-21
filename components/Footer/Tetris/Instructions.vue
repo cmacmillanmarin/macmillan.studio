@@ -1,6 +1,10 @@
 <template>
   <div class="footer__tetris__instructions">
-    <div class="footer__tetris__instructions__content" v-transition:in="{ callback: shuffleIn }">
+    <div
+      class="footer__tetris__instructions__content"
+      @mouseenter="onMouseEnter"
+      @mouseleave="onMouseLeave"
+      v-transition:in="{ callback: shuffleIn }">
       <button class="footer__tetris__instructions__content__close" @click="close">
         <SvgAspa />
       </button>
@@ -59,7 +63,7 @@
 import useStore from '~/store/useStore'
 
 const store = useStore()
-const { updateCursor } = store
+const { updateCursor, updateCursorColor } = store
 
 const { isMobileLayout } = useDevice()
 
@@ -71,6 +75,14 @@ function close(e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
   emit('close')
+}
+
+function onMouseEnter() {
+  updateCursorColor('black')
+}
+
+function onMouseLeave() {
+  updateCursorColor('lime')
 }
 
 onBeforeUnmount(() => {

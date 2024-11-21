@@ -311,7 +311,8 @@ const emit = defineEmits(['update-expanded'])
 
       @include from__tablet--landscape {
         margin-top: 0;
-        margin-right: calc(var(--layout-column-width) + var(--layout-gutter));
+        margin-right: calc(var(--layout-column-width) * 2 + var(--layout-gutter));
+        transform: translateX(100%);
       }
 
       &__button {

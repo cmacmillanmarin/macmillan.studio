@@ -88,6 +88,7 @@ import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAbout } from '~/types/wordpress/homepage'
 import CustomImage from '~/components/Global/CustomImage.vue'
 import HomeAboutGallery from '~/components/Home/About/Gallery/Index.vue'
+import { hexToRgb, rbgToVec4 } from '~/utils'
 
 defineProps<{
   data: HomepageAbout
@@ -127,6 +128,7 @@ watch(thumbnailImageLoaded, () => {
       img: thumbnailImageEl.value.el,
       position: { x: 0, y: 0 },
       size: { x: 0, y: 0, z: 1 },
+      multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
     })
     updateImagePositions()
   }
@@ -141,6 +143,7 @@ watch(collaboratorImageLoaded, () => {
       img: collaboratorImageEl.value.el,
       position: { x: 0, y: 0 },
       size: { x: 0, y: 0, z: 1 },
+      multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
     })
     updateImagePositions()
   }

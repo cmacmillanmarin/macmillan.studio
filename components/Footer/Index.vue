@@ -3,7 +3,9 @@
     ref="el"
     :class="['footer', { 'footer--tetris': tetris }, { 'footer--game-over': tetris && over }]"
     id="contact-target"
-    @click="onClick">
+    @click="onClick"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave">
     <div class="footer__intersect" v-intersect="{ callback: onIntersect }" />
 
     <transition
@@ -153,7 +155,7 @@ import Tetris from '~/components/Footer/Tetris/Index.vue'
 import type { Piece } from '~/types/front/tetris'
 
 const store = useStore()
-const { updateSection, updateCursor, updateInTetris } = store
+const { updateSection, updateCursor, updateCursorColor, updateInTetris } = store
 const { cursor, section, gridType, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -316,6 +318,14 @@ function onClick() {
   if (isMobileLayout.value) return
   cursor.value === 'play' && resetTetris()
   cursor.value === 'close' && closeTetris()
+}
+
+function onMouseEnter() {
+  updateCursorColor('lime')
+}
+
+function onMouseLeave() {
+  updateCursorColor('black')
 }
 
 onBeforeUnmount(() => {

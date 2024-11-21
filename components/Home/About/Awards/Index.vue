@@ -152,8 +152,11 @@ function onIntersect(el: HTMLElement, visible: boolean) {
         mix-blend-mode: color-burn;
       }
 
-      @include from__desktop--x-large {
+      @include from__tablet--landscape {
         top: toScale(3.8rem);
+      }
+
+      @include from__desktop--x-large {
         left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
       }
 

@@ -412,7 +412,8 @@ class Controller {
         } else if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
           if (clickable && !object.wasClickable) {
             gsap.to(uniforms.uZoom, {
-              value: object.zoom + 0.2,
+              value: object.zoom,
+              // value: object.img ? object.zoom + 0.2 : object.zoom,
               duration: 1,
               onStart: () => {
                 object.inZoomTransition = true

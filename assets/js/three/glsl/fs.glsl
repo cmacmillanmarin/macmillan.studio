@@ -85,7 +85,7 @@ void main() {
   vec4 coveredTexture = texture2D(uTextureVideo, uv);
   if (uTextureType == 1) {
     coveredTexture = vec4(1.0, 0.0, 0.0, 1.0);
-    coveredTexture = texture2D(uTextureImage, uv);
+    coveredTexture = texture2D(uTextureImage, uv) * uMultiplyColor;
   }
   vec4 pixelatedTexture = texture2D(uTextureVideo, pixel) * uMultiplyColor;
   if (uTextureType == 1) {
