@@ -64,8 +64,8 @@ watch(scrollUpdated, () => {
 })
 
 function onImageLoaded() {
-  width.value = customImageEl.value?.el ? customImageEl.value.el.width : video.value?.width || 0
-  height.value = customImageEl.value?.el ? customImageEl.value.el.height : video.value?.height || 0
+  width.value = customImageEl.value?.el ? customImageEl.value.el.width : 0
+  height.value = customImageEl.value?.el ? customImageEl.value.el.height : 0
   customImageEl.value?.el && $scene.preload(customImageEl.value.el)
   $scene.addObject({
     id: `${props.planesId}-${props.pos}`,
