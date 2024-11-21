@@ -5,10 +5,12 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
+const props = defineProps<{
   left?: number
   start?: boolean
 }>()
+
+const position = computed<number>(() => (props.left ? props.left : 0))
 </script>
 
 <style lang="scss">
@@ -32,7 +34,7 @@ defineProps<{
     background-color: var(--black);
 
     left: calc(
-      var(--layout-column-width) * v-bind(left) + var(--layout-gutter) * (v-bind(left) - 1)
+      var(--layout-column-width) * v-bind(position) + var(--layout-gutter) * (v-bind(position) - 1)
     );
     transform: translate(-100%, -100%);
     will-change: transform;

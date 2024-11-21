@@ -1,7 +1,7 @@
 <template>
   <div ref="el" class="home__about__clients">
     <div class="home__about__clients__headline">
-      <Separator :left="isMobileLayout ? 8 : 4" />
+      <Separator :left="isMobileLayout ? 8 : 6" />
       <p class="home__about__clients__headline__title">{{ data.title }}</p>
     </div>
 
