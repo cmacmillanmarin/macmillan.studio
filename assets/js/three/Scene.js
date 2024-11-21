@@ -212,6 +212,7 @@ class Controller {
     multiplyColor,
     color,
     noPixel,
+    forcePixelated,
     onClick,
     onIntersect,
   }) {
@@ -235,6 +236,7 @@ class Controller {
       object.color = color || object.color
       object.cursor = cursor || object.cursor
       object.noPixel = noPixel !== undefined ? noPixel : object.noPixel
+      object.forcePixelated = forcePixelated !== undefined ? forcePixelated : object.forcePixelated
       object.onIntersect = onIntersect !== undefined ? onIntersect : object.onIntersect
     }
   }
@@ -376,7 +378,7 @@ class Controller {
 
         const hovered = this.intersects.includes(object.mesh) && !this.touch
         const clickable = hovered && object.onClick
-        const pixelated = clickable && !object.noPixel
+        const pixelated = (clickable && !object.noPixel) || object.forcePixelated
         const wasPixelated = uniforms.uPixel.value === 1
         const wasntPixelated = uniforms.uPixel.value === 0
         const pixelatedTransition = (pixelated && wasntPixelated) || (!pixelated && wasPixelated)

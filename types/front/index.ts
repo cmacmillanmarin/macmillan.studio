@@ -54,6 +54,7 @@ export interface FirstTransition {
     border: number
     position: { x: number; y: number }
     size: { x: number; y: number; z: number }
+    forcePixelated?: boolean
   }>
 }
 

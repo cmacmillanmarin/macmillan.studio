@@ -403,9 +403,8 @@ function getProgress(): number {
 
 function getLeaveProgress(): number {
   if (inAllProjectsList.value) return 1
-  let { top, bottom } = getBounding(el.value as HTMLElement)
-  top -= vh.value
-  bottom -= vh.value
+  let { bottom } = getBounding(el.value as HTMLElement)
+  bottom -= vh.value - 1
   const leave = bottom + vh.value
   return Math.min(Math.max(0, (current.value - bottom) / (leave - bottom)), 1)
 }
@@ -426,6 +425,7 @@ function getInAllProjectsListPlane(): Plane {
     border: toScale(borderRadius.value),
     order: props.of - props.i,
     zoom: 1,
+    forcePixelated: false,
   }
 }
 
@@ -451,6 +451,7 @@ function getInSelectedProjectsListPlane(): Plane {
     order: props.of - props.i,
     border: toScale(borderRadius.value) * (progress.value + leaveProgress.value),
     zoom: 1.4 - 0.4 * progress.value,
+    forcePixelated: isMobileLayout.value && leaveProgress.value !== 0,
   }
 }
 

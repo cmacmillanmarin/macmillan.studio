@@ -267,6 +267,8 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
   let _opacity = 1
   let _fixed = { from: 0, to: vh.value * scrollGap.value }
   let _parallax = { x: 0, y: 0 }
+  let _forcePixelated =
+    current.value >= vh.value * scrollGap.value && isMobileLayout.value && !isInReel.value
 
   if (firstTransition.state) {
     const from = firstTransition.steps[firstTransition.step - 1]
@@ -275,6 +277,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
     if (from && to) {
       const progress = firstTransition.progress
       if (progress === 0) return
+      _forcePixelated = !!from.forcePixelated
       _size = {
         x: from.size.x + (to.size.x - from.size.x) * progress,
         y: from.size.y + (to.size.y - from.size.y) * progress,
@@ -301,6 +304,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
     zoom: _zoom,
     opacity: _opacity,
     parallax: _parallax,
+    forcePixelated: _forcePixelated,
   })
 })
 
@@ -413,18 +417,21 @@ function updateFirstTransitionSteps() {
       size: { x: initWidth, y: initHeight, z: 1 },
       border: toScale(isMobileLayout.value ? 8 : 16),
       zoom: isMobileLayout.value ? 1 : 2,
+      forcePixelated: isMobileLayout.value,
     },
     {
       position: { x: halfWidth - initWidth * 0.5, y: halfHeight - initHeight * 0.5 },
       size: { x: initWidth, y: initHeight, z: 1 },
       border: toScale(isMobileLayout.value ? 8 : 16),
       zoom: isMobileLayout.value ? 1 : 2,
+      forcePixelated: false,
     },
     {
       position: { x: finalX, y: finalY },
       size: { x: finalWidth, y: finalHeight, z: 1 },
       border: 0,
       zoom: 1,
+      forcePixelated: false,
     },
   ]
 }
