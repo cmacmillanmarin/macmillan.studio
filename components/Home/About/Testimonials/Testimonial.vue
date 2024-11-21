@@ -33,7 +33,9 @@
           loading="lazy"
           class="home__about__testimonials__testimonial__credit__thumbnail__image" />
       </div>
-      <p class="home__about__testimonials__testimonial__credit__role">{{ data.credit }}</p>
+      <ClientOnly>
+        <p class="home__about__testimonials__testimonial__credit__role" v-html="credit" />
+      </ClientOnly>
     </div>
   </div>
 </template>
@@ -50,6 +52,11 @@ const props = defineProps<{
 
 const { isMobileLayout } = useDevice()
 const { onResize } = useResize()
+
+const credit = computed<string>(() => {
+  return isMobileLayout.value ? props.data.credit.replace(/@/g, '<br>@') : props.data.credit
+})
+
 const isExpanded = ref<boolean>(false)
 const isExpandible = ref<boolean>(true)
 
