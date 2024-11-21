@@ -8,10 +8,11 @@
         ref="customImageEl"
         v-if="!!data.image"
         :data="data.image"
+        :lazy="true"
         @load="onImageLoaded" />
     </div>
     <div ref="creditsEl" class="home__about__gallery__item__credits">
-      {{ data.type === 'image' ? data.image?.alt : data.video?.alt }}
+      {{ data.image.alt }}
     </div>
   </div>
 </template>
@@ -19,7 +20,6 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import useScrollStore from '~/store/useScrollStore'
-import type { Video } from '~/types/wordpress'
 import type { HomepageAboutGalleryItem } from '~/types/wordpress/homepage'
 import { shuffleElsIn, fadeOut } from '~/utils/animations'
 import CustomImage from '~/components/Global/CustomImage.vue'
@@ -46,8 +46,6 @@ const columns = computed<number>(() => {
   return props.data.columns
 })
 
-const video = ref<Video | undefined>(props.data.video)
-
 const customImageEl = ref<InstanceType<typeof CustomImage>>()
 
 const el = ref<HTMLElement>()
@@ -55,10 +53,8 @@ const creditsEl = ref<HTMLElement>()
 
 watch(scrollUpdated, () => {
   if (loaded.value) {
-    width.value = customImageEl.value?.el ? customImageEl.value.el.width : video.value?.width || 0
-    height.value = customImageEl.value?.el
-      ? customImageEl.value.el.height
-      : video.value?.height || 0
+    width.value = customImageEl.value?.el ? customImageEl.value.el.width : 0
+    height.value = customImageEl.value?.el ? customImageEl.value.el.height : 0
     $scene.updateObject({
       id: `${props.planesId}-${props.pos}`,
       size: { x: width.value, y: height.value, z: 1 },
