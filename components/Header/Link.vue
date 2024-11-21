@@ -5,7 +5,7 @@
       type="referral"
       :to="to"
       :label="label"
-      @mouseenter="!touch ? onMouseEnter : () => {}"
+      @mouseenter="!touch ? onMouseEnter() : () => {}"
       data-tab-fixed
       :tabindex="tabindex" />
     <transition
