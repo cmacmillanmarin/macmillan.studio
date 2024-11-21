@@ -107,7 +107,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     display: flex;
     align-items: center;
     column-gap: toScale(0.6rem);
-    padding-top: toScale(7.1rem);
+    padding-top: toScale(6.9rem);
     @include will-fade;
     @include t-number;
     .svg__square {

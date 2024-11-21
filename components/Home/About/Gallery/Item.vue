@@ -8,7 +8,6 @@
         ref="customImageEl"
         v-if="!!data.image"
         :data="data.image"
-        :lazy="true"
         @load="onImageLoaded" />
     </div>
     <div ref="creditsEl" class="home__about__gallery__item__credits">

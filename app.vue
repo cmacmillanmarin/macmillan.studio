@@ -44,6 +44,10 @@ watch(keyPressed, () => {
 .__main {
   will-change: opacity;
 
+  // * {
+  //   cursor: none !important;
+  // }
+
   &--loading {
     * {
       cursor: progress !important;

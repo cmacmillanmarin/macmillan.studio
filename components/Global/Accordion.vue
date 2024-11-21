@@ -80,12 +80,14 @@ const emit = defineEmits(['toggle'])
     &__content {
       display: flex;
       align-items: center;
+
       &__number {
         width: calc(var(--layout-column-width) * 2 + var(--layout-gutter) * 2);
         text-align: left;
         @include t-black;
         @include t-number;
       }
+
       &__label {
         @include t-black;
         @include t-b3;
@@ -121,6 +123,18 @@ const emit = defineEmits(['toggle'])
     &__html,
     &__label {
       @include t-b2;
+    }
+
+    &__html {
+      p {
+        margin-bottom: toScale(0.4rem, 37.5rem);
+        @include from__tablet--landscape {
+          margin-bottom: toScale(0.8rem);
+        }
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
     }
   }
 }

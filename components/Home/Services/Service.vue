@@ -140,9 +140,13 @@ const emit = defineEmits<{
     z-index: 1;
 
     background-color: var(--light-grey);
-    padding-top: toScale(1.2rem);
+    padding-top: toScale(1.2rem, 37.5rem);
 
     @include grid;
+
+    @include from__tablet--landscape {
+      padding-top: toScale(1.2rem);
+    }
 
     &::after {
       content: '';
@@ -160,11 +164,13 @@ const emit = defineEmits<{
       @include gap(2, 'left', 'desktop');
       @include columns(4, 'desktop');
     }
+
     &__description {
       @include t-b1;
       @include columns(6, 'desktop');
+
       p {
-        margin-bottom: toScale(1.6rem);
+        margin-bottom: toScale(0.8rem);
         &:last-child {
           margin-bottom: 0;
         }
