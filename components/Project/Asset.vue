@@ -57,14 +57,17 @@ onMounted(() => {
 
   &__content {
     display: flex;
+    justify-content: center;
     width: 100%;
     height: 100%;
   }
 
   &--layout-top {
     .project__asset__content {
+      padding-left: var(--layout-margin);
       justify-content: flex-start;
       @include from__tablet--landscape {
+        padding-left: 0;
         align-items: flex-start;
       }
     }
@@ -81,17 +84,19 @@ onMounted(() => {
 
   &--layout-bottom {
     .project__asset__content {
+      padding-right: var(--layout-margin);
       justify-content: flex-end;
       @include from__tablet--landscape {
+        padding-right: 0;
         align-items: flex-end;
       }
     }
   }
 
   &--gap-s {
-    padding-bottom: 2rem;
+    padding-bottom: 4rem;
     @include from__tablet--landscape {
-      padding-right: 4rem;
+      padding-right: 8rem;
       padding-bottom: 0;
     }
   }

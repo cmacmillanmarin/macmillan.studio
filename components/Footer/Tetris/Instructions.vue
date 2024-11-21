@@ -183,8 +183,8 @@ const emit = defineEmits(['close'])
 
         &__label {
           &__title {
-            @include t-b3;
             margin-bottom: 0.1rem;
+            @include t-b3;
           }
           &__arrow {
             @include t-b1;

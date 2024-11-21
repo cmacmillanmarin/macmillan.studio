@@ -35,8 +35,8 @@ const { isMobileLayout } = useDevice()
 
 const gap = computed<number>(() =>
   props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center'
-    ? toScale(isMobileLayout.value ? 125 : 260)
-    : 0
+    ? toScale(isMobileLayout.value ? 150 : 260)
+    : toScale(isMobileLayout.value ? 32 : 0)
 )
 
 const height = computed<string>(() => {
