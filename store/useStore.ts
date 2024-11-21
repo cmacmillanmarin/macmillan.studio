@@ -29,6 +29,7 @@ export default defineStore('use-store', {
       speed: 1.25,
       direction: -1,
     },
+    inTetris: false,
   }),
   getters: {
     isPreloaded(): boolean {
@@ -50,7 +51,7 @@ export default defineStore('use-store', {
       return this.inProjectEntered
     },
     landingTabIndex(): number | undefined {
-      return this.inProject || this.inReel ? -1 : undefined
+      return this.inProject || this.inReel || this.inTetris ? -1 : undefined
     },
   },
   actions: {
@@ -114,6 +115,9 @@ export default defineStore('use-store', {
     },
     updateInProjectNextProjectTicker(params: NextProjectTicker) {
       this.inProjectNextProjectTicker = params
+    },
+    updateInTetris(state: boolean) {
+      this.inTetris = state
     },
   },
 })

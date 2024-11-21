@@ -34,16 +34,36 @@
         :appear="true"
         @enter="transitionShuffleIn"
         @leave="transitionDone">
-        <div v-if="nextPiece && !over" class="footer__tetris__layout__info__piece">
-          <p>Next Piece:</p>
-          <transition
-            mode="out-in"
-            :css="false"
-            :appear="true"
-            @enter="transitionShuffleIn"
-            @leave="transitionDone">
-            <FooterTetrisPiece :key="nextPiece.name" :piece="nextPiece" />
-          </transition>
+        <div v-if="!over" class="footer__tetris__layout__info__left">
+          <div v-if="nextPiece" class="footer__tetris__layout__info__left__piece">
+            <p>Next Piece:</p>
+            <transition
+              mode="out-in"
+              :css="false"
+              :appear="true"
+              @enter="transitionShuffleIn"
+              @leave="transitionDone">
+              <FooterTetrisPiece :key="nextPiece.name" :piece="nextPiece" />
+            </transition>
+          </div>
+          <button
+            :class="[
+              'footer__tetris__layout__info__left__instructions',
+              { 'footer__tetris__layout__info__left__instructions--active': instructions },
+            ]"
+            @click="$emit('open-instructions')"
+            @mouseenter="onInstructionsEnter"
+            @mouseleave="onInstructionsLeave">
+            <transition
+              mode="out-in"
+              :css="false"
+              :appear="true"
+              @enter="transitionShuffleIn"
+              @leave="transitionDone">
+              <SvgSquare v-if="!instructions" />
+            </transition>
+            <span>Info</span>
+          </button>
         </div>
         <div v-else class="footer__tetris__layout__info__message">
           <template v-if="over">
@@ -58,9 +78,10 @@
             <transition
               mode="out-in"
               :css="false"
+              @before-enter="prepareFadeIn"
               @enter="transitionShuffleIn"
               @leave="transitionDone">
-              <SvgSquare :key="score" />
+              <SvgSquare :key="startWithZero(score)" />
             </transition>
             <p>Score:</p>
           </div>
@@ -86,22 +107,31 @@
         </div>
       </div>
     </div>
+
+    <FooterTetrisInstructions v-if="instructions" @close="$emit('close-instructions')" />
+
     <SvgGameOver v-if="over && !isMobileLayout" />
     <SvgGameOverMobile v-else-if="over" />
   </div>
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap/gsap-core'
+import useStore from '~/store/useStore'
 import { startWithZero } from '~/utils'
 import type { Piece } from '~/types/front/tetris'
-import { transitionDone, transitionShuffleIn } from '~/utils/animations'
+import { prepareFadeIn, transitionDone, transitionShuffleIn, shuffleIn } from '~/utils/animations'
 
 const props = defineProps<{
   over: boolean
   score: number
   level: number
+  instructions: boolean
   nextPiece?: Piece
 }>()
+
+const store = useStore()
+const { updateCursor } = store
 
 const { isMobileLayout } = useDevice()
 
@@ -150,6 +180,21 @@ function getMessage(): string {
   previousMessageIndex = index
   return messages.value[index]
 }
+
+function onInstructionsEnter(e: MouseEvent): void {
+  if (isMobileLayout.value) return
+  const spanEl = (e.target as HTMLElement).querySelector('span')
+  if (spanEl) {
+    gsap.set(spanEl, { opacity: 0 })
+    shuffleIn({ el: spanEl })
+  }
+  updateCursor('default')
+}
+
+function onInstructionsLeave(): void {
+  if (isMobileLayout.value || props.instructions) return
+  updateCursor('close')
+}
 </script>
 
 <style lang="scss">
@@ -159,10 +204,6 @@ function getMessage(): string {
   max-width: var(--layout-max-width);
   margin: auto;
   @include will-fade;
-
-  p {
-    @include t-b1;
-  }
 
   &__mobile-button {
     position: absolute;
@@ -218,11 +259,42 @@ function getMessage(): string {
       padding: toScale(3rem) toScale(4.6rem) 0;
     }
 
-    &__piece {
-      display: flex;
-      align-items: center;
-      transform: translateY(-0.1rem);
+    &__left {
+      pointer-events: auto;
+      transform: translateY(-12%);
       @include will-fade;
+
+      &__piece {
+        display: flex;
+        align-items: center;
+        transform: translateY(-0.1rem);
+        @include t-b1;
+      }
+
+      &__instructions {
+        color: var(--lime);
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        column-gap: toScale(0.8rem, 37.5rem);
+        padding: 0;
+        transform: translateY(-15%);
+        border: none;
+        @include t-b1;
+
+        &--active {
+          padding-left: toScale(1.6rem, 37.5rem);
+          @include from__tablet--landscape {
+            padding-left: toScale(2rem);
+          }
+        }
+
+        @include from__tablet--landscape {
+          padding-right: toScale(2rem);
+          padding-bottom: toScale(2rem);
+          column-gap: toScale(0.8rem);
+        }
+      }
     }
 
     &__message {
@@ -235,17 +307,23 @@ function getMessage(): string {
       }
     }
 
+    p {
+      @include t-b1;
+    }
+
     &__score {
       &__points,
       &__level {
         display: flex;
         justify-content: space-between;
+
         &__label {
           display: flex;
           align-items: center;
+
           .svg__square {
             margin-right: 1rem;
-            @include will-fade;
+            will-change: opacity;
           }
         }
         &__value {

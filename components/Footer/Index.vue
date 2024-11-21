@@ -129,11 +129,17 @@
         :next-piece="nextPiece"
         :score="score"
         :level="level"
+        :instructions="tetrisInstructions"
         @play="resetTetris"
-        @close="closeTetris" />
+        @close="closeTetris"
+        @open-instructions="onOpenInstructions"
+        @close-instructions="onCloseInstructions" />
     </transition>
 
-    <Tetris ref="tetrisEl" :active="tetris" />
+    <Tetris
+      ref="tetrisEl"
+      :active="tetris && !tetrisInstructions"
+      :instructions="tetrisInstructions" />
   </footer>
 </template>
 
@@ -147,7 +153,7 @@ import Tetris from '~/components/Footer/Tetris/Index.vue'
 import type { Piece } from '~/types/front/tetris'
 
 const store = useStore()
-const { updateSection, updateCursor } = store
+const { updateSection, updateCursor, updateInTetris } = store
 const { cursor, section, gridType, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -186,6 +192,7 @@ const rrss = ref([
 
 const el = ref<HTMLElement>()
 const hour = ref<string>('')
+const tetrisInstructions = ref<boolean>(true)
 let _to: any
 let _to2: any
 
@@ -197,6 +204,7 @@ const nextPiece = computed<Piece | undefined>(() => tetrisEl.value?.nextPiece ||
 const over = computed<boolean>(() => tetrisEl.value?.over || false)
 
 watch([tetris, over], () => {
+  updateInTetris(tetris.value)
   disableScroll(tetris.value)
   if (tetris.value) {
     updateCursor(over.value ? 'play' : 'close')
@@ -218,6 +226,14 @@ function playTetris(e: MouseEvent) {
 
 function closeTetris() {
   tetris.value = false
+}
+
+function onOpenInstructions() {
+  tetrisInstructions.value = true
+}
+
+function onCloseInstructions() {
+  tetrisInstructions.value = false
 }
 
 function shuffle(e: MouseEvent) {
@@ -629,6 +645,11 @@ onBeforeUnmount(() => {
 
     &__layout {
       z-index: 9;
+      @include absolute-fill;
+    }
+
+    &__instructions {
+      z-index: 10;
       @include absolute-fill;
     }
   }

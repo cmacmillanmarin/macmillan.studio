@@ -23,6 +23,7 @@ import { toPx } from '~/utils'
 
 const props = defineProps<{
   active: boolean
+  instructions: boolean
 }>()
 
 const scrollStore = useScrollStore()
@@ -72,7 +73,7 @@ const tetris: Tetris = {
 }
 
 watch(keyPressed, () => {
-  if (tetris.freezed || over.value) return
+  if (!props.active || tetris.freezed || over.value) return
   if (keyPressed.value === ' ') rotate()
   else if (keyPressed.value === 'ArrowDown') drop()
   else if (keyPressed.value === 'ArrowLeft') move(-1)
