@@ -61,6 +61,7 @@
               @enter="transitionShuffleIn"
               @leave="transitionDone">
               <SvgSquare v-if="!instructions" />
+              <div v-else class="footer__tetris__layout__info__left__instructions__square" />
             </transition>
             <span>Info</span>
           </button>
@@ -272,6 +273,7 @@ function onInstructionsLeave(): void {
       }
 
       &__instructions {
+        position: relative;
         color: var(--lime);
         display: flex;
         align-items: center;
@@ -282,17 +284,30 @@ function onInstructionsLeave(): void {
         border: none;
         @include t-b1;
 
-        &--active {
-          padding-left: toScale(1.6rem, 37.5rem);
-          @include from__tablet--landscape {
-            padding-left: toScale(2rem);
-          }
-        }
+        // &--active {
+        //   padding-left: toScale(1.6rem, 37.5rem);
+        //   @include from__tablet--landscape {
+        //     padding-left: toScale(2rem);
+        //   }
+        // }
 
         @include from__tablet--landscape {
-          padding-right: toScale(2rem);
-          padding-bottom: toScale(2rem);
           column-gap: toScale(0.8rem);
+        }
+
+        &__square,
+        .svg__square {
+          @include will-fade;
+        }
+
+        &__square {
+          width: toScale(0.8rem, 37.5rem);
+          height: toScale(0.8rem, 37.5rem);
+          border: 1px solid var(--lime);
+          @include from__tablet--landscape {
+            width: toScale(1.2rem);
+            height: toScale(1.2rem);
+          }
         }
       }
     }

@@ -17,8 +17,9 @@
         :scroll-on-top="scrollOnTop"
         @update-scroll="updateScroll" />
       <ProjectAsset
-        v-for="asset in data.assets"
+        v-for="(asset, i) in data.assets"
         :data="asset"
+        :first="i === 0"
         :ready="isInProjectEntered"
         :bg-color="data.secondaryColor"
         @update-scroll="updateScroll" />

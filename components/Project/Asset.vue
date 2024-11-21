@@ -13,6 +13,7 @@
         :ready="ready"
         :bg-color="bgColor"
         :layout="data.layout"
+        :first="first"
         :transparent="data.transparent"
         @update-scroll="$emit('update-scroll')" />
       <ProjectImage
@@ -20,6 +21,7 @@
         :data="data.file.image"
         :bg-color="bgColor"
         :ready="ready"
+        :first="first"
         :layout="data.layout"
         :transparent="data.transparent"
         @update-scroll="$emit('update-scroll')" />
@@ -34,6 +36,7 @@ import { type ProjectAsset } from '~/types/wordpress/project'
 const props = defineProps<{
   data: ProjectAsset
   ready: boolean
+  first: boolean
   bgColor: string
 }>()
 

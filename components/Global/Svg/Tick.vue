@@ -8,8 +8,8 @@
 .svg__tick {
   display: block;
   fill: none;
-  width: 3.2rem;
-  height: 3.2rem;
+  width: toScale(3.2rem);
+  height: toScale(3.2rem);
   path {
     fill: var(--black);
   }

@@ -158,7 +158,7 @@ const leaveProgress = ref<number>(0)
 const active = computed<boolean>(
   () =>
     ((inAllProjectsList.value && inView.value) ||
-      (!inAllProjectsList.value && progress.value > 0.55 && leaveProgress.value === 0)) &&
+      (!inAllProjectsList.value && progress.value >= 0.55 && leaveProgress.value === 0)) &&
     !inProject.value &&
     isLoaded.value
 )

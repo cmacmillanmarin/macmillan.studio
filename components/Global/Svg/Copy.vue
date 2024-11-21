@@ -9,8 +9,8 @@
 .svg__copy {
   display: block;
   fill: none;
-  width: 3.8rem;
-  height: 3.8rem;
+  width: toScale(3.8rem);
+  height: toScale(3.8rem);
   path {
     fill: var(--black);
     &:last-child {

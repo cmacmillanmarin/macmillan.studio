@@ -24,7 +24,8 @@
               :appear="true"
               @leave="transitionDone"
               @enter="transitionShuffleIn">
-              <SvgPause v-if="playing" />
+              <SvgLoading v-if="!ready" />
+              <SvgPause v-else-if="playing" />
               <SvgPlay v-else />
             </transition>
           </button>

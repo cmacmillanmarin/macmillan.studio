@@ -27,6 +27,7 @@ const props = defineProps<{
   layout?: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   transparent: boolean
   bgColor: string
+  first?: boolean
 }>()
 
 const { vw, vh } = useResize()
@@ -36,7 +37,7 @@ const { isMobileLayout } = useDevice()
 const gap = computed<number>(() =>
   props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center'
     ? toScale(isMobileLayout.value ? 150 : 260)
-    : toScale(isMobileLayout.value ? 32 : 0)
+    : toScale(isMobileLayout.value && !!props.first ? 32 : 0)
 )
 
 const height = computed<string>(() => {

@@ -32,8 +32,12 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .svg__loading {
   display: block;
-  width: toScale(4rem);
-  height: toScale(4rem);
+  width: toScale(2.8rem, 37.5rem);
+  height: toScale(2.8rem, 37.5rem);
+  @include from__tablet--landscape {
+    width: toScale(4rem);
+    height: toScale(4rem);
+  }
   rect {
     fill: var(--lime);
     @include will-fade;
