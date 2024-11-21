@@ -216,7 +216,7 @@ watch([section, videoInView, videoInProject], () => {
   } else {
     !videoPlaying.value && videoEl.value?.play()
   }
-  updateScroll()
+  // updateScroll()
 })
 
 watch(current, () => {
