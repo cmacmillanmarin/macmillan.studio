@@ -1,5 +1,8 @@
 <template>
   <div class="separator">
+    <div class="separator__bar">
+      <div ref="barEl" class="separator__bar__bg" />
+    </div>
     <SvgSquare
       :class="{ 'separator__dot--start': start }"
       v-transition:in="{ callback: squareIn }" />
@@ -7,17 +10,32 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap/gsap-core'
+import { toPercentage } from '~/utils'
 import { shuffleElsIn } from '~/utils/animations'
 
 const props = defineProps<{
   left?: number
   start?: boolean
+  sticky?: boolean
 }>()
 
 const position = computed<number>(() => (props.left ? props.left : 0))
 
+const barEl = ref<HTMLElement>()
+
 function squareIn(params: { el: HTMLElement }) {
-  shuffleElsIn({ els: [params.el] })
+  if (barEl.value) {
+    gsap.to(barEl.value, {
+      x: toPercentage(0),
+      delay: 0.2,
+      onComplete: () => {
+        shuffleElsIn({ els: [params.el] })
+      },
+    })
+  } else {
+    shuffleElsIn({ els: [params.el] })
+  }
 }
 </script>
 
@@ -28,10 +46,20 @@ function squareIn(params: { el: HTMLElement }) {
   left: 0;
   width: 100%;
   height: toScaleUp(0.2rem);
-  background-color: var(--black);
 
   @include from__tablet--landscape {
     height: max(0.2rem, toScale(0.2rem));
+  }
+
+  &__bar {
+    overflow: var(--overflow--hidden);
+    @include absolute-fill;
+    &__bg {
+      will-change: transform;
+      background-color: var(--black);
+      transform: translate(-100%);
+      @include absolute-fill;
+    }
   }
 
   .svg__square {

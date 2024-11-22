@@ -10,7 +10,10 @@
         </h3>
       </div>
       <div class="home__about__intro__content">
-        <div class="home__about__intro__content__thumbnail">
+        <div
+          class="home__about__intro__content__thumbnail"
+          @mouseenter="onThumbnailMouseEnter"
+          @mouseleave="onThumbnailMouseLeave">
           <CustomImage
             ref="thumbnailImageEl"
             :data="data.thumbnail"
@@ -52,14 +55,19 @@
             class="home__about__intro__collaborator__content__label"
             v-html="data.collaborator.description" />
         </div>
-        <div class="home__about__intro__collaborator__thumbnail">
+        <div
+          class="home__about__intro__collaborator__thumbnail"
+          @mouseenter="onCollaboratorMouseEnter"
+          @mouseleave="onCollaboratorMouseLeave">
           <CustomImage
             ref="collaboratorImageEl"
             :data="data.collaborator.thumbnail"
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
             data-scroll-set-position
-            @load="collaboratorImageLoaded = true" />
+            @load="collaboratorImageLoaded = true"
+            @click="onCollaboratorImageClick" />
           <DecorativeLink
+            ref="collaboratorLinkEl"
             class="home__about__intro__collaborator__thumbnail__credit"
             type="external"
             to="https://xaviercusso.com"
@@ -89,6 +97,7 @@ import type { HomepageAbout } from '~/types/wordpress/homepage'
 import CustomImage from '~/components/Global/CustomImage.vue'
 import HomeAboutGallery from '~/components/Home/About/Gallery/Index.vue'
 import { hexToRgb, rbgToVec4 } from '~/utils'
+import DecorativeLink from '~/components/Global/DecorativeLink.vue'
 
 defineProps<{
   data: HomepageAbout
@@ -114,10 +123,12 @@ const thumbnailImageLoaded = ref<boolean>(false)
 const thumbnailImageEl = ref<typeof CustomImage>()
 const collaboratorImageLoaded = ref<boolean>(false)
 const collaboratorImageEl = ref<typeof CustomImage>()
+const collaboratorLinkEl = ref<typeof DecorativeLink>()
 const galleryEl = ref<typeof HomeAboutGallery>()
 
 const imagesFade = ref<number>(0)
 const allContentVisible = ref<boolean>(false)
+let _color = { vec4: rbgToVec4(hexToRgb('bdff00')), alpha: 1 }
 
 watch(thumbnailImageLoaded, () => {
   if (thumbnailImageEl.value && thumbnailImageLoaded.value) {
@@ -204,6 +215,65 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
 function onTestimonialsUpdateExpanded() {
   galleryEl.value?.update()
+}
+
+function onThumbnailMouseEnter() {
+  gsap.killTweensOf(_color)
+  gsap.to(_color, {
+    alpha: 0,
+    onUpdate: () => {
+      updateTint('about-thumbnail')
+    },
+  })
+}
+
+function onThumbnailMouseLeave() {
+  gsap.killTweensOf(_color)
+  gsap.to(_color, {
+    alpha: 1,
+    onUpdate: () => {
+      updateTint('about-thumbnail')
+    },
+  })
+}
+
+function onCollaboratorMouseEnter() {
+  collaboratorLinkEl.value?.shuffle()
+  gsap.killTweensOf(_color)
+  gsap.to(_color, {
+    alpha: 0,
+    onUpdate: () => {
+      updateTint('about-collaborator-thumbnail')
+    },
+  })
+}
+
+function onCollaboratorMouseLeave() {
+  gsap.killTweensOf(_color)
+  gsap.to(_color, {
+    alpha: 1,
+    onUpdate: () => {
+      updateTint('about-collaborator-thumbnail')
+    },
+  })
+}
+
+function onCollaboratorImageClick(e: MouseEvent) {
+  e?.preventDefault()
+  e?.stopPropagation()
+  window.open('https://xaviercusso.com', '_blank')
+}
+
+function updateTint(id: string) {
+  $scene.updateObject({
+    id,
+    multiplyColor: [
+      _color.vec4[0] + (1 - _color.vec4[0]) * (1 - _color.alpha),
+      _color.vec4[1] + (1 - _color.vec4[1]) * (1 - _color.alpha),
+      _color.vec4[2] + (1 - _color.vec4[2]) * (1 - _color.alpha),
+      _color.alpha,
+    ],
+  })
 }
 
 onBeforeUnmount(() => {
@@ -374,6 +444,7 @@ onBeforeUnmount(() => {
           @include columns(3, 'desktop');
           @include gap(1, 'right', 'desktop');
         }
+
         &__label {
           margin-top: 1.2rem;
           @include t-b1;
@@ -381,7 +452,8 @@ onBeforeUnmount(() => {
       }
 
       &__thumbnail {
-        margin-top: 3.2rem;
+        cursor: pointer;
+        margin-top: toScale(3.2rem);
         margin-left: calc(toColumns(4) + var(--layout-gutter));
         @include columns(4, 'mobile');
 

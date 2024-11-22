@@ -29,6 +29,10 @@ function shuffle(e: MouseEvent) {
     shuffleElsIn({ els: [spanEl.value] })
   }
 }
+
+defineExpose({
+  shuffle,
+})
 </script>
 
 <style lang="scss">

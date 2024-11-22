@@ -73,15 +73,14 @@ const {
 const { isInProject, isInProjectEntered, cursor, gridType, headerMobileButtonClicked } =
   storeToRefs(store)
 
-const { disableScroll, updateScrollFixedTargetId } = useScrollStore()
+const scrollStore = useScrollStore()
+const { disableScroll, updateScrollFixedTargetId } = scrollStore
 
 const route = useRoute()
 const router = useRouter()
 const { addTicker, killTicker } = useRaf()
 const { vw, vh, onResize } = useResize()
 const { touch, isMobileLayout } = useDevice()
-// const { toScale } = useCss()
-const { keyPressed } = useKeyboard()
 
 const el = ref<HTMLElement>()
 const contentEl = ref<HTMLElement>()

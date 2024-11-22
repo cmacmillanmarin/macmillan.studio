@@ -24,6 +24,7 @@ export interface WP_Project {
     link: string
     primary_color: string
     secondary_color: string
+    tertiary_color: string
     thumbnail: WP_File
     info?: Array<{ title: string; label: string }>
     description: string
@@ -77,6 +78,7 @@ export interface Project {
   link: string
   color: string
   secondaryColor: string
+  tertiaryColor: string
   thumbnail: File
   description: string
   info: Array<{ title: string; label: string }>
@@ -154,6 +156,7 @@ export function parseProject(params: {
     selected: !!project?.acf.selected_project,
     color: parseText(project?.acf.primary_color),
     secondaryColor: parseText(project?.acf.secondary_color),
+    tertiaryColor: parseText(project?.acf.tertiary_color),
     thumbnail: parseFile(project?.acf.thumbnail),
     description: parseText(project?.acf.description),
     info: project?.acf.info

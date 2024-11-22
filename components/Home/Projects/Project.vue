@@ -40,7 +40,11 @@
                 width="640"
                 height="640" />
             </div>
-            <div class="home__projects__project__client__name">{{ data.client.name }}</div>
+            <div
+              class="home__projects__project__client__name"
+              :style="{ color: projectThumbnailCopyColor }">
+              {{ data.client.name }}
+            </div>
           </div>
         </transition>
         <transition
@@ -57,7 +61,9 @@
               'home__projects__project__collaborator',
               { 'home__projects__project__collaborator--all': inAllProjectsList },
             ]">
-            <div class="home__projects__project__collaborator__name">
+            <div
+              class="home__projects__project__collaborator__name"
+              :style="{ color: projectThumbnailCopyColor }">
               {{ data.freelance ? 'w/ ' : 'at ' }}
               {{ data.collaborator.name }}
             </div>
@@ -131,6 +137,7 @@ const collaboratorNameVisible = computed<boolean>(
 
 const projectId = ref<string>(slugify(props.data.title))
 const projectColor = ref<string>(props.data.color)
+const projectThumbnailCopyColor = ref<string>(props.data.tertiaryColor)
 const projectVideo = computed<{ id: string; video?: FileVideo }>(() => {
   const src = `/assets/video/${props.data.slug}`
   return {
@@ -653,9 +660,6 @@ defineExpose({
     }
 
     &__name {
-      text-shadow: 0 0 toScale(1.2rem) rgba(0, 0, 0, 0.8);
-
-      @include t-white;
       @include t-b2;
     }
   }

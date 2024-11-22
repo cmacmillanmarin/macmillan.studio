@@ -13,9 +13,18 @@
           v-if="next"
           class="project__landing__title__button"
           :aria-label="`Go to ${data.title} project`">
-          <SvgProject :project="data.slug" :animation="animation" :next="true" />
+          <SvgProject
+            :project="data.slug"
+            :animation="animation"
+            :next="true"
+            @update-scroll="emit('update-scroll')" />
         </button>
-        <SvgProject v-else :project="data.slug" :animation="animation" :next="false" />
+        <SvgProject
+          v-else
+          :project="data.slug"
+          :animation="animation"
+          :next="false"
+          @update-scroll="emit('update-scroll')" />
       </ClientOnly>
     </div>
 
@@ -44,6 +53,7 @@
           @mouseenter="onMouseEnter"
           @mouseleave="onMouseLeave">
           <ClientOnly>
+            <SvgSquare v-if="isMobileLayout" />
             <Accordion
               v-if="data.techStack.length"
               title="Tech Stack"
@@ -123,7 +133,7 @@ const props = defineProps<{
 
 const store = useStore()
 const { updateCursor } = store
-const { gridType, inProjectScroll } = storeToRefs(store)
+const { gridType } = storeToRefs(store)
 
 const { isMobileLayout } = useDevice()
 
@@ -344,6 +354,11 @@ const emit = defineEmits(['update-scroll', 'next-project'])
         column-gap: 0.4rem;
         padding-top: var(--layout-margin);
         padding-bottom: 2rem;
+
+        &__label {
+          transform: translateY(10%);
+          line-height: 1.2;
+        }
       }
 
       &__description {
