@@ -24,6 +24,11 @@
         :bg-color="data.secondaryColor"
         @update-scroll="updateScroll" />
       <div v-if="data.assets.length === 0" class="project__content__gap" />
+      <ClientOnly>
+        <div
+          v-if="isMobileLayout && data.assets.length === 1 && !data.recognitions.length"
+          class="project__content__gap--small" />
+      </ClientOnly>
       <ProjectRecognitions v-if="data.recognitions.length" :data="data.recognitions" />
       <ProjectNext
         v-if="nextProject"
@@ -357,6 +362,12 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
       @include from__tablet--landscape {
         width: 25vw !important;
       }
+
+      &--small {
+        @extend .project__content__gap;
+        height: var(--layout-margin);
+      }
+
       &--next {
         @extend .project__content__gap;
         background-color: v-bind(nextProjectBackgroundColor);

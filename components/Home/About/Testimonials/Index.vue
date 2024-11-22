@@ -125,8 +125,8 @@ watch(section, (to, from) => {
 
 watch(expanded, () => {
   onTestimonialMouseEnter()
-  updateScroll()
   emit('update-expanded', expanded.value)
+  updateScroll()
 })
 
 watch(mouseX, () => {

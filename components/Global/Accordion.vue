@@ -29,6 +29,7 @@
 </template>
 
 <script lang="ts" setup>
+import useScrollStore from '~/store/useScrollStore'
 import { startWithZero } from '~/utils'
 import { shuffleIn } from '~/utils/animations'
 
@@ -42,22 +43,28 @@ const props = defineProps<{
   number?: number
 }>()
 
+const scrollStore = useScrollStore()
+const { updateScroll } = scrollStore
+
 const open = ref<boolean>(!!props.open)
 const animated = ref<boolean>(!!props.animation)
 
 watch(open, async () => {
   await nextTick()
   emit('toggle')
+  updateScroll()
 })
 
-function toggle(e: MouseEvent) {
-  e.preventDefault()
-  e.stopPropagation()
+function toggle(e?: MouseEvent) {
+  e?.preventDefault()
+  e?.stopPropagation()
   open.value = !open.value
   animated.value = true
 }
 
 const emit = defineEmits(['toggle'])
+
+defineExpose({ toggle, open })
 </script>
 
 <style lang="scss">
