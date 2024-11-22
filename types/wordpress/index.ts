@@ -84,6 +84,7 @@ export interface WP_Video {
   type: MediaType
   title: string
   url: string
+  caption: string
   width: number
   height: number
   mime_type: string
@@ -103,7 +104,7 @@ export function parseVideo(data?: WP_Video): Video {
     width: data?.width || 0,
     height: data?.height || 0,
     mime: data?.mime_type || '',
-    alt: data?.title || '',
+    alt: data?.caption || '',
   }
 }
 

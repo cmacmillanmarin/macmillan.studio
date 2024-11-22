@@ -92,6 +92,7 @@ class Controller {
 
     this.maxPlanes = 10
     this.batch = []
+    this.loaderRequests = 0
 
     this.objects = []
 
@@ -154,12 +155,14 @@ class Controller {
     const src = img.src || img.currentSrc
     const id = slugify(src)
     const exists = this.loadedTextures.find(t => t.id === id)
-    if (img && !exists) {
+    if (img && !exists && this.loaderRequests < 2) {
+      this.loaderRequests++
       this.loadedTextures.push({
         id,
         ready: false,
         txt: this.loader.load(img.src || img.currentSrc, async texture => {
           await this.renderer.initTexture(texture)
+          this.loaderRequests--
           const loadedTexture = this.loadedTextures.find(t => t.id === id)
           loadedTexture.ready = true
           this.loadedTexturesCount++
@@ -329,7 +332,7 @@ class Controller {
           if (isLoaded) {
             texture = this.loadedTextures.find(t => t.id === slugify(object.img.currentSrc))
             uniforms.uTextureImage.value = texture.txt
-          }
+          } else this.preload(object.img)
         }
 
         if (isLoaded && uniforms.uTextureFade.value === 0) {

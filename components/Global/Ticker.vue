@@ -46,7 +46,7 @@ const lastItem = computed<TickerItem | undefined>(() => items.value[items.value.
 
 let _current: number = props.ticker?.current || 0
 let _target: number = props.ticker?.target || 0
-let _direction: number = props.ticker?.direction || 1
+let _direction: number = props.ticker?.direction || -1
 let _speed: number = props.ticker?.speed || 1.25
 let _panInit: number = 0
 let _panSpeed: number = 0
@@ -138,7 +138,7 @@ function move() {
     if (x < item.width * -1 || x > _containerWidth) {
       x = _containerWidth
     }
-    x = round(x, isMobileLayout.value ? 1 : 0)
+    x = round(x, 2)
     if (props.planesId) {
       const { $scene }: any = useNuxtApp()
       const index = items.value.indexOf(item)

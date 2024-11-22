@@ -6,12 +6,29 @@
       @mouseleave="onMouseLeave">
       <CustomImage
         ref="customImageEl"
-        v-if="!!data.image"
+        v-if="data.type === 'img' && !!data.image"
         :data="data.image"
+        :lazy="true"
+        :size="{ d: data.columns / 12, t: data.columns / 8, m: data.columns / 8 }"
         @load="onImageLoaded" />
+      <video
+        v-else-if="data.type === 'vid' && !!data.video"
+        ref="videoEl"
+        :alt="data.video.alt"
+        :width="data.video.width"
+        :height="data.video.height"
+        muted
+        playsinline
+        loop
+        autoplay
+        crossorigin="anonymous"
+        @canplaythrough="onVideoLoaded">
+        <source :src="data.video.webm" type="video/webm" />
+        <source :src="data.video.mp4" type="video/mp4" />
+      </video>
     </div>
     <div ref="creditsEl" class="home__about__gallery__item__credits">
-      {{ data.image.alt }}
+      {{ data.type === 'img' ? data.image.alt : data.video?.alt || '' }}
     </div>
   </div>
 </template>
@@ -22,6 +39,7 @@ import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAboutGalleryItem } from '~/types/wordpress/homepage'
 import { shuffleElsIn, fadeOut } from '~/utils/animations'
 import CustomImage from '~/components/Global/CustomImage.vue'
+import { hexToRgb, rbgToVec4 } from '~/utils'
 
 const props = defineProps<{
   pos: number
@@ -31,12 +49,11 @@ const props = defineProps<{
 
 const { $scene }: any = useNuxtApp()
 const { scrollUpdated } = storeToRefs(useScrollStore())
-const { toScale } = useCss()
+const { toScale, getColumnWidth } = useCss()
 const { isMobileLayout } = useDevice()
 
 const width = ref<number>(0)
 const height = ref<number>(0)
-const loaded = ref<boolean>(false)
 const columns = computed<number>(() => {
   if (isMobileLayout.value) {
     if (props.data.columns <= 3) return 4
@@ -45,37 +62,58 @@ const columns = computed<number>(() => {
   return props.data.columns
 })
 
+const videoEl = ref<HTMLVideoElement>()
 const customImageEl = ref<InstanceType<typeof CustomImage>>()
 
 const el = ref<HTMLElement>()
 const creditsEl = ref<HTMLElement>()
 
 watch(scrollUpdated, () => {
-  if (loaded.value) {
-    width.value = customImageEl.value?.el ? customImageEl.value.el.width : 0
-    height.value = customImageEl.value?.el ? customImageEl.value.el.height : 0
-    $scene.updateObject({
-      id: `${props.planesId}-${props.pos}`,
-      size: { x: width.value, y: height.value, z: 1 },
-      border: toScale(isMobileLayout.value ? 8 : 16),
-    })
-  }
+  width.value = getWidth()
+  height.value = getHeight()
+  $scene.updateObject({
+    id: `${props.planesId}-${props.pos}`,
+    size: { x: width.value, y: height.value, z: 1 },
+    border: toScale(isMobileLayout.value ? 8 : 16),
+  })
 })
 
-function onImageLoaded() {
-  width.value = customImageEl.value?.el ? customImageEl.value.el.width : 0
-  height.value = customImageEl.value?.el ? customImageEl.value.el.height : 0
-  customImageEl.value?.el && $scene.preload(customImageEl.value.el)
+onMounted(() => {
   $scene.addObject({
     id: `${props.planesId}-${props.pos}`,
     type: 'plane',
     img: customImageEl.value?.el,
-    position: { x: -1000, y: -1000 },
-    size: { x: width.value, y: height.value, z: 1 },
-    border: toScale(isMobileLayout.value ? 8 : 16),
+    video: videoEl.value,
+    position: { x: 0, y: 0 },
+    size: { x: 0, y: 0, z: 1 },
     opacity: 0,
+    color: rbgToVec4(hexToRgb('#000000')),
   })
-  loaded.value = true
+})
+
+function getWidth() {
+  return getColumnWidth(props.data.columns)
+}
+
+function getHeight() {
+  let ar = 1
+  if (props.data.type === 'img') {
+    ar = props.data.image.height / props.data.image.width
+  } else if (props.data.video) {
+    ar = props.data.video.height / props.data.video.width
+  }
+  return width.value * ar
+}
+
+function onVideoLoaded() {
+  $scene.updateObject({
+    id: `${props.planesId}-${props.pos}`,
+    video: videoEl.value,
+  })
+}
+
+function onImageLoaded() {
+  customImageEl.value?.el && $scene.preload(customImageEl.value.el)
 }
 
 function onMouseEnter() {
@@ -107,7 +145,10 @@ onBeforeUnmount(() => {
       border-radius: toScale(1.6rem);
     }
 
-    .custom-image {
+    .custom-image,
+    video {
+      display: block;
+      height: auto;
       width: 100%;
       pointer-events: none;
       opacity: 0;

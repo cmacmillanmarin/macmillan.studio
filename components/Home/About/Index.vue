@@ -18,6 +18,7 @@
             ref="thumbnailImageEl"
             :data="data.thumbnail"
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
+            :lazy="true"
             data-scroll-set-position
             @load="thumbnailImageLoaded = true" />
           <p class="home__about__intro__content__thumbnail__credit">{{ data.credit }}</p>
@@ -64,6 +65,7 @@
             :data="data.collaborator.thumbnail"
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
             data-scroll-set-position
+            :lazy="true"
             @load="collaboratorImageLoaded = true"
             @click="onCollaboratorImageClick" />
           <DecorativeLink
@@ -133,14 +135,6 @@ let _color = { vec4: rbgToVec4(hexToRgb('bdff00')), alpha: 1 }
 watch(thumbnailImageLoaded, () => {
   if (thumbnailImageEl.value && thumbnailImageLoaded.value) {
     $scene.preload(thumbnailImageEl.value.el)
-    $scene.addObject({
-      id: 'about-thumbnail',
-      type: 'plane',
-      img: thumbnailImageEl.value.el,
-      position: { x: 0, y: 0 },
-      size: { x: 0, y: 0, z: 1 },
-      multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
-    })
     updateImagePositions()
   }
 })
@@ -148,14 +142,6 @@ watch(thumbnailImageLoaded, () => {
 watch(collaboratorImageLoaded, () => {
   if (collaboratorImageEl.value && collaboratorImageLoaded.value) {
     $scene.preload(collaboratorImageEl.value.el)
-    $scene.addObject({
-      id: 'about-collaborator-thumbnail',
-      type: 'plane',
-      img: collaboratorImageEl.value.el,
-      position: { x: 0, y: 0 },
-      size: { x: 0, y: 0, z: 1 },
-      multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
-    })
     updateImagePositions()
   }
 })
@@ -173,6 +159,28 @@ watch(section, () => {
     fadeOut({ el: introEl.value })
     gsap.to(imagesFade, { value: 0, duration: 0.6, onUpdate: onImagesFadeUpdate })
   }
+})
+
+onMounted(() => {
+  $scene.addObject({
+    id: 'about-thumbnail',
+    type: 'plane',
+    position: { x: 0, y: 0 },
+    size: { x: 0, y: 0, z: 1 },
+    img: thumbnailImageEl.value?.el,
+    color: rbgToVec4(hexToRgb('#000000')),
+    multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
+  })
+  $scene.addObject({
+    id: 'about-collaborator-thumbnail',
+    type: 'plane',
+    position: { x: 0, y: 0 },
+    size: { x: 0, y: 0, z: 1 },
+    img: collaboratorImageEl.value?.el,
+    color: rbgToVec4(hexToRgb('#000000')),
+    multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
+  })
+  updateImagePositions()
 })
 
 function updateImagePositions() {
