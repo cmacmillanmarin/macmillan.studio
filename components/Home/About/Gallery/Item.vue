@@ -92,7 +92,7 @@ onMounted(() => {
 })
 
 function getWidth() {
-  return getColumnWidth(props.data.columns)
+  return getColumnWidth(columns.value)
 }
 
 function getHeight() {
