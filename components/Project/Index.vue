@@ -275,7 +275,7 @@ async function goToNextProject() {
   const nextProject = el.value?.querySelector('.project__next')
   if (isMobileLayout.value && nextProject && gapNextEl.value) {
     const { height } = nextProject.getBoundingClientRect()
-    gsap.set(gapNextEl.value, { height: toPx(vh.value - height + 1) })
+    gsap.set(gapNextEl.value, { height: toPx(vh.value - height) })
     await nextTick()
   }
   updateScroll()

@@ -88,7 +88,10 @@
           </p>
         </div>
 
-        <div class="project__landing__info__content__description" v-html="data.description" />
+        <!-- <div class="project__landing__info__content__description" v-html="data.description" /> -->
+        <div
+          class="project__landing__info__content__description"
+          v-html="data.title + '. ' + data.description" />
       </div>
 
       <ClientOnly>
