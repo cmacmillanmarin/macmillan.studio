@@ -148,6 +148,7 @@ class Controller {
 
       this.logoScene.add(this.logoLight)
       this.logoScene.add(this.logo)
+      this.onPreloaded()
     })
   }
 
@@ -166,7 +167,7 @@ class Controller {
           const loadedTexture = this.loadedTextures.find(t => t.id === id)
           loadedTexture.ready = true
           this.loadedTexturesCount++
-          if (this.loadedTexturesCount === this.loadedTextures.length) this.onPreloaded()
+          // if (this.loadedTexturesCount === this.loadedTextures.length) this.onPreloaded()
         }),
       })
     }
@@ -682,13 +683,15 @@ class Controller {
   }
 
   updateLogoState(value) {
-    gsap.killTweensOf(this.logo.rotation)
-    gsap.killTweensOf(this.logoAnimation)
-    gsap.to(this.logoAnimation, { value: value ? 1 : 0 })
-    gsap.to(this.logo.rotation, {
-      y: value ? Math.PI : 0,
-      onUpdate: this.updateLogoLight.bind(this),
-    })
+    if (this.logo) {
+      gsap.killTweensOf(this.logo.rotation)
+      gsap.killTweensOf(this.logoAnimation)
+      gsap.to(this.logoAnimation, { value: value ? 1 : 0 })
+      gsap.to(this.logo.rotation, {
+        y: value ? Math.PI : 0,
+        onUpdate: this.updateLogoLight.bind(this),
+      })
+    }
   }
 
   updateLogoScale() {
