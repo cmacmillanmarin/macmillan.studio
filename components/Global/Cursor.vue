@@ -1,6 +1,7 @@
 <template>
   <div ref="el" :class="['cursor', { 'cursor--lime': cursorColor === 'lime' }]">
-    <div class="cursor__dot">
+    <div class="cursor__square" />
+    <div ref="dotEl" class="cursor__dot">
       <div v-if="cursorColor === 'lime'" class="cursor__dot__lime" />
       <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
         <div v-if="cursor !== 'default'" :key="cursor" class="cursor__dot__icon">
@@ -34,6 +35,7 @@ const { x: targetX, y: targetY } = useMouse()
 const { touch } = useDevice()
 
 const el = ref<HTMLElement>()
+const dotEl = ref<HTMLElement>()
 
 let _x: number = 0
 let _y: number = 0
@@ -44,13 +46,13 @@ watch(touch, () => {
 })
 
 watch(cursor, () => {
-  if (!el.value || touch.value) return
+  if (!dotEl.value || touch.value) return
   const cursorIn = cursor.value !== 'default'
   cursorIn && (_visible = true)
-  const scale = cursorIn ? 1 : getScale()
+  const scale = cursorIn ? 1 : 0
   const duration = cursorIn ? 0.4 : 0.3
-  gsap.killTweensOf(el.value)
-  gsap.to(el.value, {
+  gsap.killTweensOf(dotEl.value)
+  gsap.to(dotEl.value, {
     scale,
     duration,
     onComplete: () => {
@@ -62,9 +64,9 @@ watch(cursor, () => {
 })
 
 onMounted(() => {
-  if (!touch.value && el.value) {
+  if (!touch.value && dotEl.value) {
     addTicker(move)
-    gsap.set(el.value, { scale: getScale() })
+    gsap.set(dotEl.value, { scale: 0 })
   }
 })
 
@@ -107,16 +109,25 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .cursor {
   pointer-events: none;
-  transform: scale(0);
   will-change: transform;
 
   &--lime {
+    .cursor__square {
+      background-color: var(--lime);
+    }
     .cursor__dot__icon svg {
       path,
       rect {
         fill: var(--black) !important;
       }
     }
+  }
+
+  &__square {
+    @include absolute-center;
+    width: toScale(1.2rem);
+    height: toScale(1.2rem);
+    background-color: var(--black);
   }
 
   &__dot {

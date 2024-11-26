@@ -16,20 +16,12 @@
           @leave="transitionShuffleOut">
           <p v-if="indicators" class="home__projects__index">
             <SvgSquare />
-            <transition
-              mode="out-in"
-              :css="false"
-              @before-enter="prepareFadeIn"
-              @enter="transitionShuffleIn"
-              @leave="transitionDone">
-              <span
-                :key="`${isInProject}`"
-                :class="[
-                  'home__projects__index__label',
-                  { 'home__projects__index__label--active': isInProject },
-                ]"
-                v-text="`{${startWithZero(active)}—${startWithZero(activeOf)}}`" />
-            </transition>
+            <span
+              :class="[
+                'home__projects__index__label--active',
+                // { 'home__projects__index__label--active': isInProject },
+              ]"
+              v-text="`{${startWithZero(active)}—${startWithZero(activeOf)}}`" />
           </p>
         </transition>
       </Teleport>

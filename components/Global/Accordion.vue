@@ -121,7 +121,10 @@ defineExpose({ toggle, open })
   }
 
   &__content {
-    padding-bottom: 1.6rem;
+    padding-bottom: toScale(1.6rem, 37.5rem);
+    @include from__tablet--landscape {
+      padding-bottom: toScale(1.6rem);
+    }
 
     &--animated {
       @include will-fade;

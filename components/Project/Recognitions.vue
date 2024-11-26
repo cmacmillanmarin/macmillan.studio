@@ -2,7 +2,10 @@
   <div class="project__recognitions">
     <div class="project__recognitions__content">
       <div class="project__recognitions__content__list">
-        <Separator :left="0" :start="true" />
+        <ClientOnly>
+          <Separator :left="isMobileLayout ? 8 : 3" />
+        </ClientOnly>
+
         <p v-for="recognition in data" class="project__recognitions__content__list__label">
           {{ recognition }}
         </p>
@@ -15,6 +18,8 @@
 defineProps<{
   data: Array<string>
 }>()
+
+const { isMobileLayout } = useDevice()
 </script>
 
 <style lang="scss">
@@ -32,7 +37,7 @@ defineProps<{
       position: relative;
       padding-top: 1rem;
       @include from__tablet--landscape {
-        max-width: 36rem;
+        width: calc(var(--layout-column-width) * 3 + var(--layout-gutter) * 2);
         padding-top: 1rem;
       }
       &__label {

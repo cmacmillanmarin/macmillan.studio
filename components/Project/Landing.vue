@@ -359,7 +359,7 @@ const emit = defineEmits(['update-scroll', 'next-project'])
         padding-bottom: 2rem;
 
         &__label {
-          transform: translateY(10%);
+          transform: translateY(20%);
           line-height: 1.2;
         }
       }
@@ -416,6 +416,10 @@ const emit = defineEmits(['update-scroll', 'next-project'])
       @include t-black;
       @include t-b3;
 
+      p {
+        transform: translateY(9%);
+      }
+
       &__bar {
         position: absolute;
         bottom: 0.4rem;
@@ -423,6 +427,7 @@ const emit = defineEmits(['update-scroll', 'next-project'])
         width: calc(100% - 4.8rem);
         height: 0.2rem;
         overflow: var(--overflow--hidden);
+
         &__line {
           position: absolute;
           top: 0;

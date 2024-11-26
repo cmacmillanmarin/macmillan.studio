@@ -1,6 +1,6 @@
 <template>
   <div ref="el" class="home__services" id="services-target" data-scroll-target-top>
-    <ClientOnly>
+    <!-- <ClientOnly>
       <Teleport to=".header__top">
         <transition
           mode="out-in"
@@ -15,7 +15,7 @@
           </p>
         </transition>
       </Teleport>
-    </ClientOnly>
+    </ClientOnly> -->
 
     <h2 class="home__services__title">{{ data.title }}</h2>
     <div class="home__services__hint">
