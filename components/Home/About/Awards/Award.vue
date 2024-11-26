@@ -41,11 +41,12 @@
           <p
             v-if="item.number"
             class="home__about__awards__award__content__list__item__number"
-            v-text="`{${item.number}}`" />
+            v-text="`{${startWithZero(item.number)}}`" />
           <div v-else-if="item.link" class="home__about__awards__award__content__list__item__link">
             <button
               class="home__about__awards__award__content__list__item__link__button"
               @mouseenter="shuffle"
+              @click="goToLink(item.link)"
               :data-link="i"
               tabindex="-1">
               {<SvgLinkArrow />}
@@ -63,6 +64,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAboutAwardsAward } from '~/types/wordpress/homepage'
+import { startWithZero } from '~/utils'
 import { shuffleElsIn } from '~/utils/animations'
 
 const props = defineProps<{
@@ -118,6 +120,10 @@ function shuffle(e: MouseEvent) {
     gsap.set(linkEl, { opacity: 0 })
     shuffleElsIn({ els: [linkEl] })
   }
+}
+
+function goToLink(link: string) {
+  window.open(link, '_blank')
 }
 
 onBeforeUnmount(() => {
@@ -286,6 +292,8 @@ const emit = defineEmits<{
             @include t-black;
             @include t-number;
             .svg__link-arrow {
+              width: toScale(1.4rem);
+              margin: 0 toScale(0.52rem);
               transform: translate(-0.05rem, 0.15rem);
             }
           }
