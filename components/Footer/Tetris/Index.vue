@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 import type { Tetris, Matrix, Piece, Position } from '~/types/front/tetris'
 import useScrollStore from '~/store/useScrollStore'
 import { storeToRefs } from 'pinia'

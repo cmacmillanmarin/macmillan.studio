@@ -1,4 +1,4 @@
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 
 export default function useRaf() {
   function addTicker(callback: GSAPTickerCallback): void {

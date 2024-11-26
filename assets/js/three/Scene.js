@@ -16,7 +16,7 @@ import {
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 import { round, slugify, videoLoaded } from '~/utils'
 
 import VS from './glsl/vs.glsl'

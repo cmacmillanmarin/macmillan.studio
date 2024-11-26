@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import { toPx, round } from '~/utils/index'
 import useScrollStore from '~/store/useScrollStore'

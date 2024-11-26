@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 import { shuffleElsIn, transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
 
 defineProps<{

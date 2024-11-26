@@ -1,7 +1,7 @@
 import WebFont from 'webfontloader'
 import useStore from '~/store/useStore'
 
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 import { CustomEase } from 'gsap/CustomEase'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ease } from '~/utils/animations'

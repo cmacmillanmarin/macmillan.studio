@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 
 defineProps<{
   label: string

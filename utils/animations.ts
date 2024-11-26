@@ -1,5 +1,5 @@
 import { shuffle } from '~/utils'
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 import { CustomEase } from 'gsap/CustomEase'
 
 export function ease(): string {

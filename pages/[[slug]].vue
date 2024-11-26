@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 import { type Homepage } from '~/types/wordpress/homepage'
 import { type Project, type Projects } from '~/types/wordpress/project'
 import useStore from '~/store/useStore'

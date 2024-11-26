@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { gsap } from 'gsap'
+import { gsap } from 'gsap/gsap-core'
 import { type Project } from '~/types/wordpress/project'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
