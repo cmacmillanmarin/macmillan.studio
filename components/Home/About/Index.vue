@@ -10,17 +10,16 @@
         </h3>
       </div>
       <div class="home__about__intro__content">
-        <div
-          class="home__about__intro__content__thumbnail"
-          @mouseenter="onThumbnailMouseEnter"
-          @mouseleave="onThumbnailMouseLeave">
+        <div class="home__about__intro__content__thumbnail">
           <CustomImage
             ref="thumbnailImageEl"
             :data="data.thumbnail"
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
             :lazy="true"
             data-scroll-set-position
-            @load="thumbnailImageLoaded = true" />
+            @load="thumbnailImageLoaded = true"
+            @mouseenter="onThumbnailMouseEnter"
+            @mouseleave="onThumbnailMouseLeave" />
           <p class="home__about__intro__content__thumbnail__credit">{{ data.credit }}</p>
         </div>
         <div class="home__about__intro__content__detail">
@@ -57,7 +56,10 @@
             v-html="data.collaborator.description" />
         </div>
         <div class="home__about__intro__collaborator__thumbnail">
-          <button @click="onCollaboratorImageClick" @mouseenter="onCollaboratorMouseEnter">
+          <button
+            @click="onCollaboratorImageClick"
+            @mouseenter="onCollaboratorMouseEnter"
+            @mouseleave="onCollaboratorMouseLeave">
             <SvgGatzara />
           </button>
         </div>
@@ -113,8 +115,8 @@ defineProps<{
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateSection } = store
-const { section, landingTabIndex } = storeToRefs(store)
+const { updateSection, updateCursorPosition } = store
+const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll } = scrollStore
@@ -236,6 +238,7 @@ function onThumbnailMouseEnter() {
   gsap.killTweensOf(_color)
   gsap.to(_color, {
     alpha: 0,
+    duration: 0.4,
     onUpdate: () => {
       updateTint('about-thumbnail')
     },
@@ -246,6 +249,7 @@ function onThumbnailMouseLeave() {
   gsap.killTweensOf(_color)
   gsap.to(_color, {
     alpha: 1,
+    duration: 0.4,
     onUpdate: () => {
       updateTint('about-thumbnail')
     },
@@ -255,7 +259,11 @@ function onThumbnailMouseLeave() {
 function onCollaboratorMouseEnter(e: MouseEvent) {
   const { target } = e
   const svgEl = (target as HTMLElement).querySelector('.svg__gatzara')
-  svgEl && shuffleIn({ el: svgEl as HTMLElement })
+  if (svgEl) {
+    const { bottom, left, width } = svgEl.getBoundingClientRect()
+    updateCursorPosition({ x: left + width * 0.5 - toScale(6), y: bottom + toScale(12) })
+    shuffleIn({ el: svgEl as HTMLElement })
+  }
   // collaboratorLinkEl.value?.shuffle()
   // gsap.killTweensOf(_color)
   // gsap.to(_color, {
@@ -266,14 +274,15 @@ function onCollaboratorMouseEnter(e: MouseEvent) {
   // })
 }
 
-function onCollaboratorMouseLeave() {
-  gsap.killTweensOf(_color)
-  gsap.to(_color, {
-    alpha: 1,
-    onUpdate: () => {
-      updateTint('about-collaborator-thumbnail')
-    },
-  })
+function onCollaboratorMouseLeave(e: MouseEvent) {
+  updateCursorPosition({ x: -1, y: -1 })
+  // gsap.killTweensOf(_color)
+  // gsap.to(_color, {
+  //   alpha: 1,
+  //   onUpdate: () => {
+  //     updateTint('about-collaborator-thumbnail')
+  //   },
+  // })
 }
 
 function onCollaboratorImageClick(e: MouseEvent) {

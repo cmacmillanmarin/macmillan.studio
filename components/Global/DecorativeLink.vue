@@ -17,9 +17,6 @@ import useStore from '~/store/useStore'
 import { gsap } from 'gsap/gsap-core'
 import { shuffleElsIn } from '~/utils/animations'
 
-const store = useStore()
-const { updateCursorPosition } = store
-
 defineProps<{
   label: string
   to: string
@@ -27,12 +24,17 @@ defineProps<{
   tabindex?: number
 }>()
 
+const store = useStore()
+const { updateCursorPosition } = store
+
+const { toScale } = useCss()
+
 const spanEl = ref<HTMLElement>()
 
 function onMouseEnter(e: MouseEvent) {
   if (spanEl.value) {
     const { left, top } = spanEl.value.getBoundingClientRect()
-    updateCursorPosition({ x: left, y: top })
+    updateCursorPosition({ x: left - toScale(20), y: top + toScale(8) })
     gsap.set(spanEl.value, { opacity: 0 })
     shuffleElsIn({ els: [spanEl.value] })
   }

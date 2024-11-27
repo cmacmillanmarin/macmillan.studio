@@ -44,8 +44,8 @@ function onMouseEnter() {
   const linkEl = el.value?.querySelector('.header__link__anchor')
 
   if (linkEl) {
-    const { left, width } = linkEl.getBoundingClientRect()
-    updateCursorPosition({ x: left + width * 0.5 + toScale(15), y: vh.value - toScale(21) })
+    const { left, width, top } = linkEl.getBoundingClientRect()
+    updateCursorPosition({ x: left + width * 0.5 - toScale(6), y: top + toScale(34) })
     gsap.set(linkEl, { opacity: 0 })
     shuffleElsIn({ els: [linkEl] })
   }

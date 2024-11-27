@@ -132,8 +132,9 @@ const props = defineProps<{
 }>()
 
 const store = useStore()
-const { updateCursor } = store
+const { updateCursor, updateCursorPosition } = store
 
+const { toScale } = useCss()
 const { isMobileLayout } = useDevice()
 
 const lowScoreMessages: Array<string> = [
@@ -186,13 +187,16 @@ function onInstructionsEnter(e: MouseEvent): void {
   if (isMobileLayout.value) return
   const spanEl = (e.target as HTMLElement).querySelector('span')
   if (spanEl) {
+    const { left, top } = spanEl.getBoundingClientRect()
+    updateCursorPosition({ x: left - toScale(20), y: top + toScale(8) })
     gsap.set(spanEl, { opacity: 0 })
     shuffleIn({ el: spanEl })
   }
   updateCursor('default')
 }
 
-function onInstructionsLeave(): void {
+function onInstructionsLeave(e: MouseEvent): void {
+  updateCursorPosition({ x: -1, y: -1 })
   if (isMobileLayout.value || props.instructions) return
   updateCursor('close')
 }

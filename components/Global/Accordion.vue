@@ -1,9 +1,11 @@
 <template>
-  <div :class="['accordion', { 'accordion--first': first }]">
+  <div :class="['accordion', { 'accordion--first': first }]" @mouseleave="onMouseLeave">
     <div
+      ref="buttonEl"
       :class="['accordion__title', { 'accordion__title--open': open }]"
       :aria-label="`${open ? 'Close' : 'Open'} ${title} accordion`"
       @click="toggle"
+      @mouseenter="onMouseEnter"
       tabindex="-1">
       <div class="accordion__title__content">
         <p
@@ -29,6 +31,8 @@
 </template>
 
 <script lang="ts" setup>
+import { gsap } from 'gsap/gsap-core'
+import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { startWithZero } from '~/utils'
 import { shuffleIn } from '~/utils/animations'
@@ -43,16 +47,25 @@ const props = defineProps<{
   number?: number
 }>()
 
+const store = useStore()
+const { updateCursorPosition } = store
+
 const scrollStore = useScrollStore()
 const { updateScroll } = scrollStore
 
+const { toScale } = useCss()
+
 const open = ref<boolean>(!!props.open)
 const animated = ref<boolean>(!!props.animation)
+
+const buttonEl = ref<HTMLElement>()
 
 watch(open, async () => {
   await nextTick()
   emit('toggle')
   updateScroll()
+  await nextTick()
+  updateMousePosition()
 })
 
 function toggle(e?: MouseEvent) {
@@ -60,6 +73,25 @@ function toggle(e?: MouseEvent) {
   e?.stopPropagation()
   open.value = !open.value
   animated.value = true
+}
+
+function onMouseEnter(e: MouseEvent) {
+  updateMousePosition()
+}
+
+function updateMousePosition() {
+  if (buttonEl.value) {
+    const { top, left } = buttonEl.value.getBoundingClientRect()
+    updateCursorPosition({ x: left - toScale(18), y: top + toScale(14) })
+    const svgEl = buttonEl.value.querySelector('.svg__play--small')
+    const pathEl = buttonEl.value.querySelector('path')
+    pathEl && gsap.set(pathEl, { opacity: 0 })
+    svgEl && shuffleIn({ el: svgEl as HTMLElement })
+  }
+}
+
+function onMouseLeave(e: MouseEvent) {
+  updateCursorPosition({ x: -1, y: -1 })
 }
 
 const emit = defineEmits(['toggle'])
@@ -112,6 +144,7 @@ defineExpose({ toggle, open })
       transform: rotate(90deg) translateY(24%);
       .svg__play--small {
         path {
+          will-change: opacity;
           fill: var(--black);
         }
       }

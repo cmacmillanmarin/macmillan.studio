@@ -17,10 +17,7 @@
           <p v-if="indicators" class="home__projects__index">
             <SvgSquare />
             <span
-              :class="[
-                'home__projects__index__label--active',
-                // { 'home__projects__index__label--active': isInProject },
-              ]"
+              class="home__projects__index__label--active"
               v-text="`{${startWithZero(active)}—${startWithZero(activeOf)}}`" />
           </p>
         </transition>
@@ -40,12 +37,16 @@
         </transition>
       </Teleport>
 
-      <HomeProjectsButtons
-        :indicators="indicators"
-        :projects="data.list.length"
-        :selected-projects="selectedProjectsList.length"
-        :active-list="activeList"
-        @update-list="updateActiveList" />
+      <Teleport to="#top-layer-blend">
+        <HomeProjectsButtons
+          v-if="!isInProject"
+          :indicators="indicators"
+          :projects="data.list.length"
+          :selected-projects="selectedProjectsList.length"
+          :active-list="activeList"
+          @update-list="updateActiveList"
+          @button-hover="onButtonHoverUpdate" />
+      </Teleport>
     </ClientOnly>
 
     <div class="home__projects__intersect--bg" v-intersect="{ callback: onIntersectBg }" />
@@ -65,6 +66,7 @@
           :bottom="bottom"
           :side-x="i % 2 === 0 ? -1 : 1"
           :side-y="-1"
+          :active="!onButton"
           @update-active="updateActive"
           @request-video="addVideo" />
       </div>
@@ -121,7 +123,7 @@ import {
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { FileVideo } from '~/types/wordpress'
-import type { Project, Projects } from '~/types/wordpress/project'
+import type { Projects } from '~/types/wordpress/project'
 import { toPx } from '~/utils'
 import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
 
@@ -137,7 +139,7 @@ const { updateSection, updateActiveProjectList } = store
 const { section, isInProject, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
-const { updateScroll, updateScrollFixedTargetId } = scrollStore
+const { updateScroll, updateScrollTargetId, updateScrollFixedTargetId } = scrollStore
 const { scrollUpdated, direction } = storeToRefs(scrollStore)
 
 const { vh } = useResize()
@@ -150,6 +152,7 @@ const top = ref<number>(0)
 const bottom = ref<number>(0)
 const bounding = ref<number>(0)
 const minHeight = ref<string>('auto')
+const onButton = ref<boolean>(false)
 
 const el = ref<HTMLElement>()
 const listEl = ref<HTMLElement>()
@@ -266,6 +269,7 @@ function onIntersectBg(el: HTMLElement, visible: boolean) {
 }
 
 function updateActiveList(value: 'selected' | 'all') {
+  activeList.value === value && updateScrollTargetId('projects')
   activeList.value = value
 }
 
@@ -295,6 +299,10 @@ function addVideo(params: { id: string; video?: FileVideo }) {
   !isVideoInstanced &&
     params.video &&
     instancedVideos.value.push({ id: params.id, video: params.video })
+}
+
+function onButtonHoverUpdate(state: boolean) {
+  onButton.value = state
 }
 
 onBeforeUnmount(() => {

@@ -6,6 +6,7 @@ export type Opts = {
   preventLeft?: boolean
   preventRight?: boolean
   preventClick?: boolean
+  preventMouse?: boolean
   dragOnTarget?: boolean
 }
 
@@ -77,6 +78,7 @@ export class Swiper {
   preventDown: boolean
   preventLeft: boolean
   preventRight: boolean
+  preventMouse: boolean
   preventClick: boolean
   dragOnTarget: boolean
   customCursor: boolean
@@ -133,6 +135,7 @@ export class Swiper {
     this.preventDown = !!opts.preventDown
     this.preventLeft = !!opts.preventLeft
     this.preventRight = !!opts.preventRight
+    this.preventMouse = !!opts.preventMouse
     this.preventClick = !!opts.preventClick
     this.dragOnTarget = !!opts.dragOnTarget
 
@@ -169,6 +172,7 @@ export class Swiper {
     this.preventLeft = !!opts.preventLeft
     this.preventRight = !!opts.preventRight
     this.preventClick = !!opts.preventClick
+    this.preventMouse = !!opts.preventMouse
   }
 
   destroy(): void {
@@ -241,7 +245,7 @@ export class Swiper {
   }
 
   handleTouchMove(e: Event): void {
-    if (this.preventTouch() || !this.isTouch(e)) this._prevent(e)
+    if (this.preventTouch() || this.preventMouse) this._prevent(e)
 
     const touch: Touch = this.getTouches(e)
 

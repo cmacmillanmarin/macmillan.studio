@@ -24,7 +24,7 @@
           @leave="transitionDone">
           <div
             v-if="clientNameVisible"
-            ref="clientEl"
+            ref="logoEl"
             :class="[
               'home__projects__project__client',
               `home__projects__project__client--${data.slug}`,
@@ -40,9 +40,25 @@
                 width="640"
                 height="640" />
             </div>
-            <div
-              class="home__projects__project__client__name"
-              :style="{ color: projectThumbnailCopyColor }">
+          </div>
+        </transition>
+      </Teleport>
+      <Teleport to="#top-layer-blend">
+        <transition
+          mode="out-in"
+          :css="false"
+          @before-enter="prepareClientIn"
+          @enter="transitionShuffleIn"
+          @leave="transitionDone">
+          <div
+            v-if="clientNameVisible"
+            ref="clientEl"
+            :class="[
+              'home__projects__project__client',
+              `home__projects__project__client--${data.slug}`,
+              { 'home__projects__project__client--all': inAllProjectsList },
+            ]">
+            <div class="home__projects__project__client__name">
               {{ data.client.name }}
             </div>
           </div>
@@ -61,9 +77,7 @@
               'home__projects__project__collaborator',
               { 'home__projects__project__collaborator--all': inAllProjectsList },
             ]">
-            <div
-              class="home__projects__project__collaborator__name"
-              :style="{ color: projectThumbnailCopyColor }">
+            <div class="home__projects__project__collaborator__name">
               {{ data.freelance ? 'w/ ' : 'at ' }}
               {{ data.collaborator.name }}
             </div>
@@ -103,6 +117,7 @@ const props = defineProps<{
   bottom: number
   sideX: number
   sideY: number
+  active: boolean
 }>()
 
 const { $scene }: any = useNuxtApp()
@@ -147,6 +162,7 @@ const projectVideo = computed<{ id: string; video?: FileVideo }>(() => {
 })
 
 const el = ref<HTMLElement>()
+const logoEl = ref<HTMLElement>()
 const clientEl = ref<HTMLElement>()
 const collaboratorEl = ref<HTMLElement>()
 const videoEl = ref<HTMLVideoElement>()
@@ -226,11 +242,12 @@ watch([inView, inTransition, videoEl], () => {
   }
 })
 
-watch([inProject, headerOverlay], () => {
+watch([() => props.active, inProject, headerOverlay], () => {
   const hidden = inProject.value || headerOverlay.value
+  const clickable = props.active && !hidden
   $scene.updateObject({
     id: projectId.value,
-    onClick: hidden ? null : openProject,
+    onClick: clickable ? openProject : null,
   })
   gsap.killTweensOf(opacity)
   if (hidden) {
@@ -260,6 +277,12 @@ watch(section, () => {
 watch(active, async () => {
   await nextTick()
 
+  if (logoEl.value) {
+    active.value
+      ? fadeIn({ el: logoEl.value, duration: 0.4 })
+      : fadeOut({ el: logoEl.value, duration: 0.1 })
+  }
+
   if (clientEl.value) {
     active.value
       ? fadeIn({ el: clientEl.value, duration: 0.4 })
@@ -278,6 +301,7 @@ watch(active, async () => {
 watch(inTransition, async () => {
   if (active.value) return
   await nextTick()
+  logoEl.value && fadeOut({ el: logoEl.value, duration: 0.1 })
   clientEl.value && fadeOut({ el: clientEl.value, duration: 0.1 })
   collaboratorEl.value && fadeOut({ el: collaboratorEl.value, duration: 0.1 })
 })
@@ -353,6 +377,7 @@ onMounted(async () => {
 
 function updateDom() {
   const { client, collaborator } = getClientAndCollaborator()
+  logoEl.value && gsap.set(logoEl.value, { x: client.x, y: client.y })
   clientEl.value && gsap.set(clientEl.value, { x: client.x, y: client.y })
   collaboratorEl.value && gsap.set(collaboratorEl.value, { x: collaborator.x, y: collaborator.y })
 }
@@ -363,12 +388,15 @@ function onImageLoaded() {
 }
 
 async function createPlane() {
+  const hidden = inProject.value || headerOverlay.value
+  const clickable = props.active && !hidden
   $scene.addObject({
     id: projectId.value,
     type: 'plane',
     img: customImageEl.value?.el,
     video: videoEl.value,
-    onClick: openProject,
+    onClick: clickable ? openProject : null,
+    cursor: 'plus',
     color: rbgToVec4(hexToRgb(props.data.color)),
   })
   isLoaded.value = true
@@ -532,7 +560,7 @@ function animate() {
       progress.value = getProgress()
       leaveProgress.value = getLeaveProgress()
       inView.value = getInView()
-      inView.value && $scene.updateObject({ id: projectId.value, ..._plane })
+      inView.value && $scene.updateObject({ id: projectId.value, ..._plane, forcePixelated: false })
     },
     onComplete: () => {
       inTransition.value = false
@@ -631,8 +659,7 @@ defineExpose({
     position: absolute;
     top: 50%;
     left: 50%;
-    display: flex;
-    align-items: center;
+
     column-gap: toScale(0.6rem, 37.5rem);
     opacity: 0.000001;
     will-change: opacity, transform;
@@ -660,7 +687,15 @@ defineExpose({
     }
 
     &__name {
+      color: var(--dark-grey);
       @include t-b2;
+    }
+  }
+
+  &__client__name {
+    transform: translate(toScale(3rem, 37.5rem), toScale(0.3rem, 37.5rem));
+    @include from__tablet--landscape {
+      transform: translate(toScale(3rem), toScale(0.3rem));
     }
   }
 

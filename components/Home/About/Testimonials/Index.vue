@@ -55,6 +55,8 @@
             { 'home__about__testimonials__indicator__buttons__button--active': i - 1 === active },
           ]"
           @click="updateActive(i - 1)"
+          @mouseenter="onButtonMouseEnter"
+          @mouseleave="onButtonMouseLeave"
           :tabindex="landingTabIndex">
           <SvgSquare />
         </button>
@@ -77,11 +79,13 @@ const props = defineProps<{
 }>()
 
 const store = useStore()
-const { updateCursor, updateSection } = store
+const { updateCursor, updateCursorPosition, updateSection } = store
 const { cursor, section, landingTabIndex } = storeToRefs(store)
 const scrollStore = useScrollStore()
 const { updateScroll } = scrollStore
 const { direction } = storeToRefs(scrollStore)
+
+const { toScale } = useCss()
 const { vw } = useResize()
 const { x: mouseX } = useMouse()
 const { isMobileLayout } = useDevice()
@@ -180,6 +184,16 @@ async function onClick(e: MouseEvent) {
   } else if (cursor.value === 'close') {
     expanded.value = false
   }
+}
+
+function onButtonMouseEnter(e: MouseEvent) {
+  const el = e.target as HTMLElement
+  const { top, left } = el.getBoundingClientRect()
+  updateCursorPosition({ x: left + toScale(4), y: top + toScale(4) })
+}
+
+function onButtonMouseLeave(e: MouseEvent) {
+  updateCursorPosition({ x: -1, y: -1 })
 }
 
 function updateActive(n: number) {

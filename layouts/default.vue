@@ -45,7 +45,7 @@ async function init() {
 .__layout {
   .header {
     position: absolute;
-    z-index: 9;
+    z-index: 11;
     bottom: 0;
     left: 50%;
     width: 100%;

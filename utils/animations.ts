@@ -102,6 +102,7 @@ export function shuffleIn(params: { el?: HTMLElement }) {
     const path = paths[i]
     const delay = 0.2 * i
     const duration = 0.2
+    gsap.killTweensOf(path)
     gsap.to(path, { opacity: 1, duration, delay, ease: 'power1.in' })
     gsap.to(path, {
       opacity: 0,

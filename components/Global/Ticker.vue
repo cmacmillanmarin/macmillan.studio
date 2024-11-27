@@ -56,8 +56,6 @@ let _onPan: boolean = false
 let _panDirection: number = 0
 
 const _Swiper = new Swiper({
-  preventLeft: true,
-  preventRight: true,
   dragOnTarget: !!props.dragOnTarget,
 })
 

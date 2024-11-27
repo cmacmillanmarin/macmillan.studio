@@ -9,11 +9,9 @@
       @leave="transitionShuffleOut">
       <button
         v-if="indicators"
-        :class="[
-          'home__projects__buttons__button',
-          { 'home__projects__buttons__button--active': activeList === 'selected' },
-        ]"
+        class="home__projects__buttons__button"
         @mouseenter="onButtonMouseEnter"
+        @mouseleave="onButtonMouseLeave"
         @click="updateActiveListToSelected"
         :tabindex="landingTabIndex">
         <span class="home__projects__buttons__button__label">
@@ -42,11 +40,9 @@
       @leave="transitionShuffleOut">
       <button
         v-if="indicators"
-        :class="[
-          'home__projects__buttons__button',
-          { 'home__projects__buttons__button--active': activeList === 'all' },
-        ]"
+        class="home__projects__buttons__button"
         @mouseenter="onButtonMouseEnter"
+        @mouseleave="onButtonMouseLeave"
         @click="updateActiveListToAll"
         :tabindex="landingTabIndex">
         <span class="home__projects__buttons__button__label">
@@ -74,7 +70,7 @@ import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 
-defineProps<{
+const props = defineProps<{
   activeList: 'selected' | 'all'
   indicators: boolean
   projects: number
@@ -83,6 +79,19 @@ defineProps<{
 
 const store = useStore()
 const { cursor, landingTabIndex } = storeToRefs(store)
+const { updateCursor, updateCursorPosition } = store
+
+const { toScale } = useCss()
+
+watch(
+  () => props.indicators,
+  () => {
+    if (!props.indicators) {
+      emit('button-hover', false)
+      updateCursorPosition({ x: -1, y: -1 })
+    }
+  }
+)
 
 function updateActiveListToSelected(e: MouseEvent) {
   if (cursor.value === 'plus') return
@@ -99,16 +108,26 @@ function updateActiveListToAll(e: MouseEvent) {
 }
 
 function onButtonMouseEnter(e: MouseEvent) {
+  emit('button-hover', true)
+  updateCursor('default')
   const el = e.target as HTMLElement
   if (!el || el.classList.contains('clicked')) return
   const labelEl = el.querySelector('.home__projects__buttons__button__label__el')
+
   if (labelEl) {
+    const { left, top } = labelEl.getBoundingClientRect()
+    updateCursorPosition({ x: left - toScale(18), y: top + toScale(8) })
     gsap.set(labelEl, { opacity: 0 })
     shuffleElsIn({ els: [labelEl] })
   }
 }
 
-const emit = defineEmits(['update-list'])
+function onButtonMouseLeave(e: MouseEvent) {
+  emit('button-hover', false)
+  updateCursorPosition({ x: -1, y: -1 })
+}
+
+const emit = defineEmits(['update-list', 'button-hover'])
 </script>
 
 <style lang="scss">
@@ -138,10 +157,9 @@ const emit = defineEmits(['update-list'])
   }
 
   &__button {
-    width: max-content;
     width: 100%;
     border: none;
-    pointer-events: auto;
+
     @include will-fade;
 
     &:first-child {
@@ -162,36 +180,44 @@ const emit = defineEmits(['update-list'])
       width: toScale(40rem);
     }
 
-    &--active {
-      pointer-events: none;
-    }
-
     &__label {
+      display: block;
+      pointer-events: auto;
       position: relative;
-      @include t-black;
-      @include t-b1;
-
+      width: max-content;
+      margin: auto;
       &__el {
+        display: block;
+        width: max-content;
+        color: var(--dark-grey);
+        position: relative;
         will-change: opacity;
+        @include t-b1;
       }
 
       .svg__square {
         position: absolute;
         top: 50%;
         left: 0;
-        transform: translate(calc(-100% - toScale(0.4rem, 37.5rem)), -50%);
+        transform: translate(calc(-100% - toScale(0.6rem, 37.5rem)), -50%);
         @include will-fade;
         @include from__tablet--landscape {
           transform: translate(calc(-100% - toScale(0.6rem)), -50%);
+        }
+        rect {
+          fill: var(--dark-grey);
         }
       }
 
       &__count {
         position: absolute;
-        transform: translate(toScale(0.4rem, 37.5rem), toScale(0rem, 37.5rem));
+        top: 0;
+        right: 0;
+        transform: translate(calc(100% + toScale(0.4rem, 37.5rem)), toScale(0rem, 37.5rem));
+        color: var(--dark-grey);
         @include t-number-small;
         @include from__tablet--landscape {
-          transform: translate(toScale(0.6rem), toScale(-0.4rem));
+          transform: translate(calc(100% + toScale(0.6rem)), toScale(-0.4rem));
         }
       }
     }

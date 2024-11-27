@@ -69,6 +69,15 @@
       @mute="muteReel"
       @toggle="toggleReel"
       @update="updateReel" />
+    <HomeHeroPlayer
+      v-if="isInReel"
+      :blend="true"
+      :ready="reelReady"
+      :progress="reelProgress"
+      @close="closeReel"
+      @mute="muteReel"
+      @toggle="toggleReel"
+      @update="updateReel" />
 
     <div class="home__hero__reel-target" id="reel-target" data-scroll-target-top />
     <div class="home__hero__intersect--top" v-intersect="{ callback: onIntersectTop }" />
@@ -113,7 +122,8 @@ const firstTransition = reactive<FirstTransition>({ state: false, step: 1, progr
 const hideComponents = computed<boolean>(
   () =>
     (scrollProgress.value < 1 && videoInProject.value) ||
-    ((firstTransition.step === 1 || firstTransition.progress < 0.5) && firstTransition.state)
+    ((firstTransition.step === 1 || firstTransition.progress < 0.5) && firstTransition.state) ||
+    isInReel.value
 )
 const reelVideoActive = computed(
   () =>
@@ -194,6 +204,11 @@ const position = computed<{ x: number; y: number }>(() => {
   }
 })
 
+watch(hideComponents, async () => {
+  await nextTick()
+  updateScroll()
+})
+
 watch(isInProjectEntered, () => {
   if (isInProjectEntered.value) videoInProject.value = true
   else videoInProject.value = !!route.params.slug
@@ -255,14 +270,18 @@ watch(current, () => {
     })
   }
 
-  gsap.set('.home__hero__content__video', { y: videoY })
-  gsap.set('.svg__macmillan, .svg__studio', { scale })
-  gsap.set('.home__hero__content__hint', {
-    opacity: isMobileLayout.value ? 1 : opacity,
-    y: isMobileLayout.value ? contentY : hintY,
-  })
-  gsap.set('.home__hero__content__studio__content', { y: contentY })
-  gsap.set('.home__hero__content__macmillan', { y: isMobileLayout.value ? contentY : titleY })
+  videoEl.value && gsap.set(videoEl.value, { y: videoY })
+  const svgs = document.querySelectorAll('.svg__macmillan, .svg__studio')
+  svgs.length && gsap.set(svgs, { scale })
+  hintEl.value &&
+    gsap.set(hintEl.value, {
+      opacity: isMobileLayout.value ? 1 : opacity,
+      y: isMobileLayout.value ? contentY : hintY,
+    })
+  const studioContent = document.querySelector('.home__hero__content__studio__content')
+  const contentMacMillan = document.querySelector('.home__hero__content__macmillan')
+  studioContent && gsap.set(studioContent, { y: contentY })
+  contentMacMillan && gsap.set(contentMacMillan, { y: isMobileLayout.value ? contentY : titleY })
 })
 
 watch([firstTransition, position, videoPlaying, videoInProject], () => {
@@ -338,7 +357,13 @@ function goToReel() {
   reelButtonVisible.value = false
   updateInReel(true)
   disableScroll(true)
-  $scene.updateObject({ id: 'reel', onClick: null, noPixel: true, cursor: null })
+  $scene.updateObject({
+    id: 'reel',
+    onClick: null,
+    noPixel: true,
+    cursor: null,
+    forcePixelated: false,
+  })
   if (route.hash === '#reel') updateScrollTargetId('reel')
   else router.push('/#reel')
   if (videoEl.value) {

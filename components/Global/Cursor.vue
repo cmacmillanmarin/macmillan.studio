@@ -24,9 +24,9 @@
 import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
-import { fadeIn, transitionShuffleIn, transitionDone } from '~/utils/animations'
+import { fadeIn, fadeOut, transitionShuffleIn, transitionDone } from '~/utils/animations'
 
-const { cursor, cursorColor, cursorPosition } = storeToRefs(useStore())
+const { cursor, cursorColor, cursorPosition, headerLogo, isInReel } = storeToRefs(useStore())
 
 const { addTicker, killTicker } = useRaf()
 
@@ -51,8 +51,15 @@ watch(touch, () => {
   touch.value ? killTicker(move) : addTicker(move)
 })
 
+watch(headerLogo, () => {
+  if (headerLogo.value) {
+    _entered = false
+    squareEl.value && fadeOut({ el: squareEl.value })
+  }
+})
+
 watch([mouseX, mouseY], () => {
-  if (_inFixedPosition) return
+  if (_inFixedPosition || headerLogo.value) return
   if (!_entered) {
     _entered = true
     _x = mouseX.value
@@ -66,17 +73,22 @@ watch([mouseX, mouseY], () => {
 watch(cursorPosition, () => {
   _inFixedPosition = cursorPosition.value.x !== -1 && cursorPosition.value.y !== -1
   if (_inFixedPosition) {
-    targetX.value = cursorPosition.value.x - toScale(15)
-    targetY.value = cursorPosition.value.y + toScale(15)
+    targetX.value = cursorPosition.value.x + toScale(6)
+    targetY.value = cursorPosition.value.y + toScale(6)
   }
 })
 
-watch(cursor, () => {
-  if (!dotEl.value || touch.value || _inFixedPosition) return
+watch([cursor, isInReel], () => {
+  if (!dotEl.value || touch.value) return
   const cursorIn = cursor.value !== 'default'
   cursorIn && (_visible = true)
   const scale = cursorIn ? 1 : 0
   const duration = cursorIn ? 0.4 : 0.3
+  if (isInReel.value) {
+    scale === 0 ? fadeOut({ el: squareEl.value }) : fadeIn({ el: squareEl.value })
+  } else {
+    fadeIn({ el: squareEl.value })
+  }
   gsap.killTweensOf(dotEl.value)
   gsap.to(dotEl.value, {
     scale,

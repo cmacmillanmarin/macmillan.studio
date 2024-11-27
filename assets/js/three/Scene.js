@@ -297,6 +297,7 @@ class Controller {
           object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0
           object.mesh.material.uniforms.uTextureFade.value = 0
           object.mesh.material.uniforms.uTextureLoaded.value = 0
+          object.mesh.material.uniforms.uBlackAndWhite.value = object.blackAndWhite ? 1 : 0
 
           object.firstFrame = true
           object.wasPixelated = false
@@ -387,7 +388,8 @@ class Controller {
 
         if (object.onIntersect) object.onIntersect(hovered)
 
-        const hovered = this.intersects.includes(object.mesh) && !this.touch
+        const hovered =
+          this.intersects.includes(object.mesh) && (!this.touch || object.blackAndWhite)
         const clickable = hovered && object.onClick
         const pixelated = (clickable && !object.noPixel) || object.forcePixelated
         const wasPixelated = uniforms.uPixel.value === 1
@@ -408,18 +410,17 @@ class Controller {
         }
 
         if (!clickable && object.wasClickable) {
-          gsap.killTweensOf(uniforms.uZoom)
-          gsap.to(uniforms.uZoom, {
-            value: object.zoom,
-            duration: 0.4,
-            onStart: () => {
-              object.inZoomTransition = true
-            },
-            onComplete: () => {
-              object.inZoomTransition = false
-            },
-          })
-
+          // gsap.killTweensOf(uniforms.uZoom)
+          // gsap.to(uniforms.uZoom, {
+          //   value: object.zoom,
+          //   duration: 0.4,
+          //   onStart: () => {
+          //     object.inZoomTransition = true
+          //   },
+          //   onComplete: () => {
+          //     object.inZoomTransition = false
+          //   },
+          // })
           if (this.intersects.length === 0) {
             this.updateCursor('default')
             this.main.classList.remove('__main--pointer')
@@ -429,19 +430,19 @@ class Controller {
             }
           }
         } else if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
-          if (clickable && !object.wasClickable) {
-            gsap.to(uniforms.uZoom, {
-              value: object.zoom,
-              // value: object.img ? object.zoom + 0.2 : object.zoom,
-              duration: 1,
-              onStart: () => {
-                object.inZoomTransition = true
-              },
-              onComplete: () => {
-                object.inZoomTransition = false
-              },
-            })
-          }
+          // if (clickable && !object.wasClickable) {
+          //   gsap.to(uniforms.uZoom, {
+          //     value: object.zoom,
+          //     // value: object.img ? object.zoom + 0.2 : object.zoom,
+          //     duration: 1,
+          //     onStart: () => {
+          //       object.inZoomTransition = true
+          //     },
+          //     onComplete: () => {
+          //       object.inZoomTransition = false
+          //     },
+          //   })
+          // }
           this.main.classList.add('__main--pointer')
           this.updateCursor(object.cursor)
           if (this.logo) {

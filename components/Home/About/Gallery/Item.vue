@@ -35,6 +35,7 @@
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
+import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAboutGalleryItem } from '~/types/wordpress/homepage'
 import { shuffleElsIn, fadeOut } from '~/utils/animations'
@@ -48,7 +49,9 @@ const props = defineProps<{
 }>()
 
 const { $scene }: any = useNuxtApp()
+// const { updateCursorPosition } = useStore()
 const { scrollUpdated } = storeToRefs(useScrollStore())
+// const { current, scrollUpdated } = storeToRefs(useScrollStore())
 const { toScale, getColumnWidth } = useCss()
 const { isMobileLayout } = useDevice()
 
@@ -67,6 +70,10 @@ const customImageEl = ref<InstanceType<typeof CustomImage>>()
 
 const el = ref<HTMLElement>()
 const creditsEl = ref<HTMLElement>()
+
+// watch(current, () => {
+//   updateCursorPosition({ x: -1, y: -1 })
+// })
 
 watch(scrollUpdated, () => {
   width.value = getWidth()
@@ -118,11 +125,14 @@ function onImageLoaded() {
 
 function onMouseEnter() {
   if (!creditsEl.value) return
+  // const { left, top } = creditsEl.value.getBoundingClientRect()
+  // updateCursorPosition({ x: left - toScale(20), y: top + toScale(17) })
   shuffleElsIn({ els: [creditsEl.value] })
 }
 
 function onMouseLeave() {
   if (!creditsEl.value) return
+  // updateCursorPosition({ x: -1, y: -1 })
   fadeOut({ el: creditsEl.value })
 }
 

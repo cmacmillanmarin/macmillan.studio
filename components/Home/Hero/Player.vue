@@ -1,13 +1,13 @@
 <template>
   <ClientOnly>
-    <Teleport to="#top-layer">
+    <Teleport :to="blend ? '#top-layer-blend' : '#top-layer'">
       <div
         ref="el"
-        class="home__hero__player"
+        :class="['home__hero__player', { 'home__hero__player--blend': blend }]"
         v-transition:in="{ callback: shuffleIn }"
         @click="onClick">
         <div
-          v-if="!isMobileLayout"
+          v-if="!isMobileLayout && !blend"
           ref="closeEl"
           class="home__hero__player__close"
           @mouseenter="onButtonMouseEnter"
@@ -16,7 +16,7 @@
             <SvgClose />
           </button>
         </div>
-        <div v-else ref="toggleEl" class="home__hero__player__toggle">
+        <div v-else-if="!blend" ref="toggleEl" class="home__hero__player__toggle">
           <button @click="onToggleButtonClick">
             <transition
               mode="out-in"
@@ -32,6 +32,7 @@
         </div>
 
         <div
+          v-if="blend"
           ref="timelineEl"
           class="home__hero__player__timeline"
           @click="onTimelineClick"
@@ -45,6 +46,7 @@
         </div>
 
         <div
+          v-if="!blend"
           ref="muteEl"
           class="home__hero__player__mute"
           @mouseenter="onButtonMouseEnter"
@@ -68,6 +70,7 @@ import { fadeIn, shuffleIn, fadeOut } from '~/utils/animations'
 const props = defineProps<{
   ready: boolean
   progress: number
+  blend?: boolean
 }>()
 
 const store = useStore()
@@ -206,6 +209,10 @@ const emit = defineEmits(['close', 'pause', 'toggle', 'mute', 'update'])
   @include will-fade;
   @include absolute-center;
 
+  &--blend {
+    pointer-events: none;
+  }
+
   &__close,
   &__mute,
   &__toggle {
@@ -291,6 +298,7 @@ const emit = defineEmits(['close', 'pause', 'toggle', 'mute', 'update'])
   }
 
   &__timeline {
+    pointer-events: auto;
     width: calc(100% - var(--layout-margin) * 2);
     height: toScale(6rem, 37.5rem);
     overflow: var(--overflow--hidden);

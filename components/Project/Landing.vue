@@ -41,7 +41,8 @@
           target="_blank"
           rel="noopener noreferral"
           class="project__landing__info__link__label"
-          @mouseenter="onLaunchProjectMouseEnter">
+          @mouseenter="onLaunchProjectMouseEnter"
+          @mouseleave="onLaunchProjectMouseLeave">
           <span>Launch Project</span>
           <SvgLinkArrow />
         </a>
@@ -124,7 +125,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { type Project } from '~/types/wordpress/project'
 import { fadeIn, shuffleIn } from '~/utils/animations'
-import { slugify } from '~/utils'
+import { slugify, toPercentage } from '~/utils'
 
 const props = defineProps<{
   data: Project
@@ -135,9 +136,10 @@ const props = defineProps<{
 }>()
 
 const store = useStore()
-const { updateCursor } = store
+const { updateCursor, updateCursorPosition } = store
 const { gridType } = storeToRefs(store)
 
+const { toScale } = useCss()
 const { isMobileLayout } = useDevice()
 
 const stackEl = ref<HTMLElement>()
@@ -185,6 +187,14 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
   const label = (e.target as HTMLElement)?.querySelector('span')
   label && gsap.set(label, { opacity: 0 })
   shuffleIn({ el: e.target as HTMLElement })
+  if (label) {
+    const { left, top } = label.getBoundingClientRect()
+    updateCursorPosition({ x: left - toScale(18), y: top + toScale(4) })
+  }
+}
+
+function onLaunchProjectMouseLeave(e: MouseEvent) {
+  updateCursorPosition({ x: -1, y: -1 })
 }
 
 function onTitleClick() {

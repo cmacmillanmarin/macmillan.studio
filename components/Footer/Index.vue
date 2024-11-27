@@ -71,7 +71,8 @@
           <li class="footer__nav__credits__link">
             <button
               class="footer__nav__credits__link__btn--tetris"
-              @mouseenter="shuffle"
+              @mouseenter="onTetrisMouseEnter"
+              @mouseleave="onTetrisMouseLeave"
               @click="playTetris"
               :tabindex="landingTabIndex">
               <span>Play Tetris</span>
@@ -91,7 +92,6 @@
           <li class="footer__nav__credits__link">
             <button
               class="footer__nav__credits__link__btn--tetris"
-              @mouseenter="shuffle"
               @click="playTetris"
               :tabindex="landingTabIndex">
               <span>Play Tetris</span>
@@ -156,13 +156,15 @@ import Tetris from '~/components/Footer/Tetris/Index.vue'
 import type { Piece } from '~/types/front/tetris'
 
 const store = useStore()
-const { updateSection, updateCursor, updateCursorColor, updateInTetris } = store
+const { updateSection, updateCursor, updateCursorPosition, updateCursorColor, updateInTetris } =
+  store
 const { cursor, section, gridType, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { disableScroll } = scrollStore
 const { direction } = storeToRefs(scrollStore)
 
+const { toScale } = useCss()
 const { isMobileLayout } = useDevice()
 
 const rrss = ref([
@@ -209,6 +211,7 @@ const over = computed<boolean>(() => tetrisEl.value?.over || false)
 watch([tetris, over], () => {
   updateInTetris(tetris.value)
   disableScroll(tetris.value)
+  updateCursorPosition({ x: -1, y: -1 })
   if (tetris.value) {
     updateCursor(over.value ? 'play' : 'close')
   } else {
@@ -239,14 +242,20 @@ function onCloseInstructions() {
   tetrisInstructions.value = false
 }
 
-function shuffle(e: MouseEvent) {
+function onTetrisMouseEnter(e: MouseEvent) {
   const { target } = e
   const span = target instanceof HTMLElement ? target.querySelector('span') : null
   const shuffleEl = (span ? span : target) as HTMLElement
   if (shuffleEl) {
+    const { top, left } = shuffleEl.getBoundingClientRect()
+    updateCursorPosition({ x: left - toScale(20), y: top + toScale(5) })
     gsap.set(shuffleEl, { opacity: 0 })
     shuffleElsIn({ els: [shuffleEl] })
   }
+}
+
+function onTetrisMouseLeave(e: MouseEvent) {
+  updateCursorPosition({ x: -1, y: -1 })
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
