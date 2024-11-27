@@ -7,23 +7,28 @@
     <div class="home__hero__content">
       <ClientOnly>
         <GridRuleOfThirds v-if="gridType === 'rule-of-thirds'" />
-        <div class="home__hero__content__macmillan">
-          <SvgMacMillan v-if="!hideComponents && !isMobileLayout" />
-          <Ticker v-if="!hideComponents && isMobileLayout">
+        <div v-if="isMobileLayout && !hideComponents" class="home__hero__content__macmillan">
+          <Ticker>
             <div v-for="i in 2" :key="i"><SvgMacMillan /></div>
           </Ticker>
         </div>
 
-        <Teleport to="#top-layer">
-          <div
-            v-if="!hideComponents"
-            data-scroll
-            data-scroll-continuous
-            class="home__hero__content__studio">
-            <div class="home__hero__content__studio__content">
-              <SvgStudio />
+        <Teleport to="#top-layer-blend">
+          <template v-if="!hideComponents">
+            <div
+              v-if="!isMobileLayout"
+              class="home__hero__content__macmillan home__hero__content__macmillan--blend">
+              <SvgMacMillan data-scroll data-scroll-continuous />
             </div>
-          </div>
+            <div data-scroll data-scroll-continuous class="home__hero__content__studio">
+              <div class="home__hero__content__studio__content">
+                <SvgStudio :blend="true" />
+              </div>
+            </div>
+          </template>
+        </Teleport>
+
+        <Teleport to="#top-layer">
           <button
             v-show="isMobileLayout"
             ref="reelButtonEl"
@@ -128,9 +133,9 @@ const reelProgress = ref<number>(0)
 const reelButtonVisible = ref<boolean>(false)
 const reelReady = ref<boolean>(false)
 
-const verticalGap = computed<number>(() => lvw.value * 0.082)
+const verticalGap = computed<number>(() => lvw.value * 0.0825)
 const verticalGapPx = computed<string>(() =>
-  toPx(isMobileLayout.value ? toScale(71 + 8 + 16) : lvw.value * 0.082 * 1.5)
+  toPx(isMobileLayout.value ? toScale(71 + 8 + 16) : verticalGap.value * 1.5)
 )
 const titleMargin = computed<number>(() => verticalGap.value * 0.5)
 const titleMarginPx = computed<string>(() => toPx(titleMargin.value))
@@ -223,14 +228,15 @@ watch(current, () => {
   const initScale = 1
   const finalScale = isMobileLayout.value ? 1 : 0.885
   const incrementScale = initScale - finalScale
-  const scaleProgress = Math.min(1, current.value / scrollThreshold.value)
+  const logoScroll = current.value * 0.75
+  const scaleProgress = Math.min(1, logoScroll / scrollThreshold.value)
   const scale = initScale - incrementScale * scaleProgress
 
   videoInView.value = current.value < componentHeight.value
   reelButtonVisible.value =
     isMobileLayout.value && current.value > vh.value * 0.66 && !isInReel.value
 
-  const scroll = Math.min(0, scrollThreshold.value - current.value) * 0.5
+  const scroll = Math.min(0, scrollThreshold.value - logoScroll) * 0.5
 
   const opacity = Math.max(0, 1 - (1 * current.value) / (vh.value * 0.15))
 
@@ -545,16 +551,24 @@ onUnmounted(() => {
       padding-top: var(--layout-margin);
       will-change: transform;
 
-      @include from__tablet--landscape {
+      &--blend {
+        position: absolute;
+        --col: 33.3333%;
         width: calc(var(--col) * 2);
         margin-left: var(--col);
         padding-right: var(--layout-margin);
         margin-bottom: v-bind(titleMarginPx);
         padding-top: 0;
       }
+
       .ticker {
         > div {
           padding-right: toScale(3.2rem, 37.5rem);
+        }
+        svg {
+          path {
+            fill: var(--black);
+          }
         }
       }
 
@@ -569,6 +583,9 @@ onUnmounted(() => {
         }
         @include from__tablet--landscape {
           width: 100%;
+        }
+        path {
+          fill: var(--light-grey);
         }
       }
     }
@@ -597,6 +614,9 @@ onUnmounted(() => {
         transform-origin: top left;
         @include from__tablet--landscape {
           width: 127.9%;
+        }
+        path {
+          fill: var(--light-grey);
         }
       }
     }

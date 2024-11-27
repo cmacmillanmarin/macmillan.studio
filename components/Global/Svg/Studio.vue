@@ -27,9 +27,8 @@ import { shuffleIn } from '~/utils/animations'
 .svg__studio {
   fill: none;
   &__path {
-    @include will-fade;
-
     fill: black;
+    @include will-fade;
   }
 }
 </style>

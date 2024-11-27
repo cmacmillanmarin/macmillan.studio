@@ -44,15 +44,15 @@ onMounted(() => {
     size: { x: vw.value, y: vh.value },
     updateCursor,
   })
-  $scene.addObject({
-    id: 'noise',
-    type: 'plane',
-    fixed: { from: 0, to: bounding.value },
-    size: { x: vw.value, y: vh.value, z: 1 },
-    position: { x: 0, y: 0, z: 300 },
-    fade: true,
-    order: 50,
-  })
+  // $scene.addObject({
+  //   id: 'noise',
+  //   type: 'plane',
+  //   fixed: { from: 0, to: bounding.value },
+  //   size: { x: vw.value, y: vh.value, z: 1 },
+  //   position: { x: 0, y: 0, z: 300 },
+  //   fade: true,
+  //   order: 50,
+  // })
   $scene.updateMobileLayout(isMobileLayout.value)
 })
 

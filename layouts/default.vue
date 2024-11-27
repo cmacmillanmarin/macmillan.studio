@@ -2,13 +2,12 @@
   <div ref="el" class="__layout">
     <Header />
     <slot />
-
     <Three />
 
     <ClientOnly>
       <Cursor v-if="!touch" />
-
       <div class="__layout__top-layer" id="top-layer" />
+      <div class="__layout__top-layer--blend" id="top-layer-blend" />
     </ClientOnly>
   </div>
 </template>
@@ -53,20 +52,25 @@ async function init() {
     transform: translateX(-50%);
   }
   .three {
-    @include absolute-fill();
     z-index: 7;
+    @include absolute-fill();
   }
   .cursor {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 9;
+    z-index: 11;
   }
   &__top-layer {
-    @include absolute-fill();
     z-index: 8;
     pointer-events: none;
     overflow: var(--overflow--hidden);
+    @include absolute-fill();
+    &--blend {
+      @extend .__layout__top-layer;
+      mix-blend-mode: difference;
+      z-index: 10;
+    }
   }
 }
 </style>
