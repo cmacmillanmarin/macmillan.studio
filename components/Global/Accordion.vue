@@ -77,12 +77,16 @@ defineExpose({ toggle, open })
   }
 
   &__title {
-    height: 4rem;
+    height: toScale(4rem, 37.5rem);
     border: none;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    @include from__tablet--landscape {
+      height: toScale(4rem);
+    }
 
     &__content {
       display: flex;

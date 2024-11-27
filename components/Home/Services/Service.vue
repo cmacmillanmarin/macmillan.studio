@@ -161,13 +161,13 @@ const emit = defineEmits<{
 
     &__title {
       @include t-b1;
-      @include gap(2, 'left', 'desktop');
-      @include columns(4, 'desktop');
+      @include gap(2, 'left', 'tablet--landscape');
+      @include columns(4, 'tablet--landscape');
     }
 
     &__description {
       @include t-b1;
-      @include columns(6, 'desktop');
+      @include columns(6, 'tablet--landscape');
 
       p {
         margin-bottom: toScale(0.8rem);

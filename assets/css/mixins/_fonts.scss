@@ -20,7 +20,7 @@
   font-style: normal;
 
   font-weight: 400;
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-weight: 700;
   }
 }
@@ -31,7 +31,7 @@
 
   @include t-h;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(16rem);
     line-height: toScale(13rem);
   }
@@ -43,7 +43,7 @@
 
   @include t-h;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(12.2rem);
     line-height: toScale(9.2rem);
   }
@@ -56,7 +56,7 @@
 
   @include t-h;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(5.2rem);
     line-height: toScale(5.6rem);
     letter-spacing: toScale(-0.07rem);
@@ -70,7 +70,7 @@
 
   @include t-h;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(4.6rem);
     line-height: toScale(4rem);
     letter-spacing: 0;
@@ -91,7 +91,7 @@
 
   @include t-b;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(2.2rem);
     line-height: toScale(2.8rem);
   }
@@ -103,7 +103,7 @@
 
   @include t-b;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(1.6rem);
     line-height: toScale(2rem);
   }
@@ -115,7 +115,7 @@
 
   @include t-b--bold;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(1.4rem);
     line-height: toScale(2rem);
   }
@@ -127,7 +127,7 @@
 
   @include t-b--bold;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(1.2rem);
     line-height: toScale(1.4rem);
   }
@@ -141,7 +141,7 @@
 
   @include t-b;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(2.2rem);
     line-height: toScale(2.2rem);
   }
@@ -153,7 +153,7 @@
 
   @include t-b--bold;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(1.4rem);
     line-height: toScale(2rem);
   }
@@ -165,7 +165,7 @@
 
   @include t-b;
 
-  @include from__desktop {
+  @include from__tablet--landscape {
     font-size: toScale(1.9rem);
   }
 }

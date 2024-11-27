@@ -237,8 +237,8 @@ const emit = defineEmits<{
       @include from__tablet--landscape {
         font-family: inherit;
 
-        @include gap(2, 'left', 'desktop');
-        @include columns(4, 'desktop');
+        @include gap(2, 'left', 'tablet--landscape');
+        @include columns(4, 'tablet--landscape');
         @include t-b1;
       }
     }
@@ -246,7 +246,7 @@ const emit = defineEmits<{
     &__list {
       @include columns(8, 'mobile');
       @include from__tablet--landscape {
-        @include columns(6, 'desktop');
+        @include columns(6, 'tablet--landscape');
       }
 
       &__item {

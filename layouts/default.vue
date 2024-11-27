@@ -6,7 +6,7 @@
     <Three />
 
     <ClientOnly>
-      <Cursor />
+      <Cursor v-if="!touch" />
 
       <div class="__layout__top-layer" id="top-layer" />
     </ClientOnly>
@@ -22,6 +22,8 @@ const { updateLoading } = store
 const { isPreloaded, isInProject } = storeToRefs(store)
 
 const scroll = useScroll()
+
+const { touch } = useDevice()
 
 const el = ref<HTMLElement>()
 

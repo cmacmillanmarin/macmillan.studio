@@ -191,6 +191,7 @@ class Controller {
     object.multiplyColor = object.multiplyColor || null
     object.color = object.color || null
     object.noPixel = !!object.noPixel
+    object.blackAndWhite = !!object.blackAndWhite
     this.objects.push(object)
   }
 
@@ -216,6 +217,7 @@ class Controller {
     multiplyColor,
     color,
     noPixel,
+    blackAndWhite,
     forcePixelated,
     onClick,
     onIntersect,
@@ -240,6 +242,7 @@ class Controller {
       object.color = color || object.color
       object.cursor = cursor || object.cursor
       object.noPixel = noPixel !== undefined ? noPixel : object.noPixel
+      object.blackAndWhite = blackAndWhite !== undefined ? blackAndWhite : object.blackAndWhite
       object.forcePixelated = forcePixelated !== undefined ? forcePixelated : object.forcePixelated
       object.onIntersect = onIntersect !== undefined ? onIntersect : object.onIntersect
     }
@@ -296,6 +299,10 @@ class Controller {
           object.mesh.material.uniforms.uTextureLoaded.value = 0
 
           object.firstFrame = true
+          object.wasPixelated = false
+          object.wasHovered = false
+          object.wasClickable = false
+          object.previousCursor = object.cursor
           object.videoAssigned = object.imgAssigned = false
 
           if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
@@ -386,6 +393,14 @@ class Controller {
         const wasPixelated = uniforms.uPixel.value === 1
         const wasntPixelated = uniforms.uPixel.value === 0
         const pixelatedTransition = (pixelated && wasntPixelated) || (!pixelated && wasPixelated)
+
+        if (hovered !== object.wasHovered && object.blackAndWhite) {
+          gsap.killTweensOf(uniforms.uBlackAndWhite)
+          gsap.to(uniforms.uBlackAndWhite, {
+            value: hovered ? 0 : 1,
+            duration: 0.4,
+          })
+        }
 
         if (pixelatedTransition || pixelated !== object.wasPixelated) {
           gsap.killTweensOf(uniforms.uPixel)
@@ -609,6 +624,7 @@ class Controller {
             uFade: { type: 'f', value: 0.0 },
             uZoom: { type: 'f', value: 1.0 },
             uPixel: { type: 'f', value: 0.0 },
+            uBlackAndWhite: { type: 'f', value: 0.0 },
             uParallax: { type: 'v2', value: new Vector2(0, 0) },
             uOpacity: { type: 'f', value: 1.0 },
             uBorderRadius: { type: 'f', value: 16.0 },

@@ -107,8 +107,8 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       @include from__tablet--landscape {
         padding-top: toScale(2rem);
         padding-bottom: toScale(2rem);
-        @include columns(10, 'desktop');
-        @include gap(2, 'left', 'desktop');
+        @include columns(10, 'tablet--landscape');
+        @include gap(2, 'left', 'tablet--landscape');
       }
 
       &__indent {

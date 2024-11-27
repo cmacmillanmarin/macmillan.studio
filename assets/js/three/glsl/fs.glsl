@@ -22,6 +22,8 @@ uniform vec4 uMultiplyColor;
 uniform vec4 uColor;
 uniform float uZoom;
 uniform float uDevicePixelRatio;
+uniform float uBlackAndWhite;
+
 
 float hash(uint n) {
     n = (n << 13U) ^ n;
@@ -85,13 +87,15 @@ void main() {
   vec4 coveredTexture = texture2D(uTextureVideo, uv);
   if (uTextureType == 1) {
     coveredTexture = vec4(1.0, 0.0, 0.0, 1.0);
-    coveredTexture = texture2D(uTextureImage, uv) * uMultiplyColor;
+    coveredTexture = texture2D(uTextureImage, uv);
   }
-  vec4 pixelatedTexture = texture2D(uTextureVideo, pixel) * uMultiplyColor;
+  vec4 pixelatedTexture = texture2D(uTextureVideo, pixel);
   if (uTextureType == 1) {
-    pixelatedTexture = texture2D(uTextureImage, pixel) * uMultiplyColor;
+    pixelatedTexture = texture2D(uTextureImage, pixel);
   }
   vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, uPixel);
+  vec4 blackAndWhiteTexture = vec4(vec3(0.2126 * mixedTexture.x + 0.7152 * mixedTexture.y + 0.0722 * mixedTexture.z), 1.0);
+  vec4 finalTexture = mix(mixedTexture, blackAndWhiteTexture, uBlackAndWhite) * uMultiplyColor;
 
   if (uNoise == 1) {
     uvec2 psI = uvec2(uPlaneSize.xy);
@@ -102,8 +106,8 @@ void main() {
   } else if (uTextureLoaded == 0) {
     gl_FragColor = vec4(uColor.xyz, uFade * uOpacity);
   } else if (uTextureFade != 1.0) {
-    gl_FragColor = vec4(mix(uColor.xyz, mixedTexture.xyz, uTextureFade), uFade * uOpacity);
+    gl_FragColor = vec4(mix(uColor.xyz, finalTexture.xyz, uTextureFade), uFade * uOpacity);
   } else {
-    gl_FragColor = vec4(mixedTexture.xyz, uFade * uOpacity);
+    gl_FragColor = vec4(finalTexture.xyz, uFade * uOpacity);
   }
 }

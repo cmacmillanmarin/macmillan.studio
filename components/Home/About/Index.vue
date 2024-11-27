@@ -56,7 +56,12 @@
             class="home__about__intro__collaborator__content__label"
             v-html="data.collaborator.description" />
         </div>
-        <div
+        <div class="home__about__intro__collaborator__thumbnail">
+          <button @click="onCollaboratorImageClick" @mouseenter="onCollaboratorMouseEnter">
+            <SvgGatzara />
+          </button>
+        </div>
+        <!-- <div
           class="home__about__intro__collaborator__thumbnail"
           @mouseenter="onCollaboratorMouseEnter"
           @mouseleave="onCollaboratorMouseLeave">
@@ -75,7 +80,7 @@
             to="https://xaviercusso.com"
             :label="data.collaborator.credit"
             :tabindex="landingTabIndex" />
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -168,23 +173,25 @@ onMounted(() => {
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
     img: thumbnailImageEl.value?.el,
+    blackAndWhite: true,
     color: rbgToVec4(hexToRgb('#000000')),
     multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
   })
-  $scene.addObject({
-    id: 'about-collaborator-thumbnail',
-    type: 'plane',
-    position: { x: 0, y: 0 },
-    size: { x: 0, y: 0, z: 1 },
-    img: collaboratorImageEl.value?.el,
-    color: rbgToVec4(hexToRgb('#000000')),
-    multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
-  })
+  // $scene.addObject({
+  //   id: 'about-collaborator-thumbnail',
+  //   type: 'plane',
+  //   position: { x: 0, y: 0 },
+  //   size: { x: 0, y: 0, z: 1 },
+  //   img: collaboratorImageEl.value?.el,
+  //   color: rbgToVec4(hexToRgb('#000000')),
+  //   multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
+  // })
   updateImagePositions()
 })
 
 function updateImagePositions() {
-  if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
+  if (!thumbnailImageEl.value) return
+  // if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
   const thumbnailImageBounding = getBounding(thumbnailImageEl.value.el)
   const thumbnailImageWidth = thumbnailImageEl.value.el.clientWidth
   const thumbnailImageHeight = thumbnailImageEl.value.el.clientHeight
@@ -194,15 +201,15 @@ function updateImagePositions() {
     size: { x: thumbnailImageWidth, y: thumbnailImageHeight, z: 1 },
     border: toScale(isMobileLayout.value ? 8 : 16),
   })
-  const collaboratorImageBounding = getBounding(collaboratorImageEl.value.el)
-  const collaboratorImageWidth = collaboratorImageEl.value.el.clientWidth
-  const collaboratorImageHeight = collaboratorImageEl.value.el.clientHeight
-  $scene.updateObject({
-    id: 'about-collaborator-thumbnail',
-    position: { x: collaboratorImageBounding.left, y: collaboratorImageBounding.top },
-    size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
-    border: toScale(isMobileLayout.value ? 8 : 16),
-  })
+  // const collaboratorImageBounding = getBounding(collaboratorImageEl.value.el)
+  // const collaboratorImageWidth = collaboratorImageEl.value.el.clientWidth
+  // const collaboratorImageHeight = collaboratorImageEl.value.el.clientHeight
+  // $scene.updateObject({
+  //   id: 'about-collaborator-thumbnail',
+  //   position: { x: collaboratorImageBounding.left, y: collaboratorImageBounding.top },
+  //   size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
+  //   border: toScale(isMobileLayout.value ? 8 : 16),
+  // })
 }
 
 async function onReadMore() {
@@ -213,7 +220,7 @@ async function onReadMore() {
 
 function onImagesFadeUpdate() {
   $scene.updateObject({ id: 'about-thumbnail', opacity: imagesFade.value })
-  $scene.updateObject({ id: 'about-collaborator-thumbnail', opacity: imagesFade.value })
+  // $scene.updateObject({ id: 'about-collaborator-thumbnail', opacity: imagesFade.value })
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -245,15 +252,18 @@ function onThumbnailMouseLeave() {
   })
 }
 
-function onCollaboratorMouseEnter() {
-  collaboratorLinkEl.value?.shuffle()
-  gsap.killTweensOf(_color)
-  gsap.to(_color, {
-    alpha: 0,
-    onUpdate: () => {
-      updateTint('about-collaborator-thumbnail')
-    },
-  })
+function onCollaboratorMouseEnter(e: MouseEvent) {
+  const { target } = e
+  const svgEl = (target as HTMLElement).querySelector('.svg__gatzara')
+  svgEl && shuffleIn({ el: svgEl as HTMLElement })
+  // collaboratorLinkEl.value?.shuffle()
+  // gsap.killTweensOf(_color)
+  // gsap.to(_color, {
+  //   alpha: 0,
+  //   onUpdate: () => {
+  //     updateTint('about-collaborator-thumbnail')
+  //   },
+  // })
 }
 
 function onCollaboratorMouseLeave() {
@@ -286,7 +296,7 @@ function updateTint(id: string) {
 
 onBeforeUnmount(() => {
   $scene.removeObject('about-thumbnail')
-  $scene.removeObject('about-collaborator-thumbnail')
+  // $scene.removeObject('about-collaborator-thumbnail')
 })
 </script>
 
@@ -317,8 +327,8 @@ onBeforeUnmount(() => {
 
         @include from__tablet--landscape {
           padding-bottom: toScale(8rem);
-          @include columns(10, 'desktop');
-          @include gap(2, 'left', 'desktop');
+          @include columns(10, 'tablet--landscape');
+          @include gap(2, 'left', 'tablet--landscape');
         }
 
         &__indent {
@@ -338,8 +348,8 @@ onBeforeUnmount(() => {
         @include columns(3, 'mobile');
 
         @include from__tablet--landscape {
-          @include columns(2, 'desktop');
-          @include gap(2, 'left', 'desktop');
+          @include columns(2, 'tablet--landscape');
+          @include gap(2, 'left', 'tablet--landscape');
         }
 
         .custom-image {
@@ -365,8 +375,8 @@ onBeforeUnmount(() => {
         @include gap(1, 'left', 'mobile');
 
         @include from__tablet--landscape {
-          @include columns(6, 'desktop');
-          @include gap(2, 'left', 'desktop');
+          @include columns(6, 'tablet--landscape');
+          @include gap(2, 'left', 'tablet--landscape');
         }
 
         &__text {
@@ -436,8 +446,8 @@ onBeforeUnmount(() => {
         @include columns(4, 'mobile');
 
         @include from__tablet--landscape {
-          @include gap(4, 'left', 'desktop');
-          @include columns(2, 'desktop');
+          @include gap(4, 'left', 'tablet--landscape');
+          @include columns(2, 'tablet--landscape');
         }
 
         &__label {
@@ -449,8 +459,8 @@ onBeforeUnmount(() => {
       &__content {
         @include columns(4, 'mobile');
         @include from__tablet--landscape {
-          @include columns(3, 'desktop');
-          @include gap(1, 'right', 'desktop');
+          @include columns(3, 'tablet--landscape');
+          @include gap(1, 'right', 'tablet--landscape');
         }
 
         &__label {
@@ -460,7 +470,7 @@ onBeforeUnmount(() => {
       }
 
       &__thumbnail {
-        cursor: pointer;
+        position: relative;
         margin-top: toScale(3.2rem);
         margin-left: calc(toColumns(4) + var(--layout-gutter));
         @include columns(4, 'mobile');
@@ -468,7 +478,21 @@ onBeforeUnmount(() => {
         @include from__tablet--landscape {
           margin-top: 0;
           margin-left: 0;
-          @include columns(2, 'desktop');
+          @include columns(2, 'tablet--landscape');
+        }
+
+        button {
+          padding: 0;
+          border: none;
+          margin-top: toScale(3.2rem, 37.5rem);
+          @include from__tablet--landscape {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-90deg);
+            transform-origin: center;
+            margin-top: 0;
+          }
         }
 
         .custom-image {

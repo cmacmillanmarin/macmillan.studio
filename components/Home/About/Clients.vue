@@ -110,8 +110,8 @@ function enterMobileLogos(params: { el: HTMLElement }) {
     @include columns(8, 'mobile');
 
     @include from__tablet--landscape {
-      @include columns(6, 'desktop');
-      @include gap(6, 'left', 'desktop');
+      @include columns(6, 'tablet--landscape');
+      @include gap(6, 'left', 'tablet--landscape');
     }
 
     &__title {
@@ -133,7 +133,7 @@ function enterMobileLogos(params: { el: HTMLElement }) {
 
     @include from__tablet--landscape {
       margin-bottom: 0;
-      @include columns(4, 'desktop');
+      @include columns(4, 'tablet--landscape');
     }
 
     &__title {
@@ -185,7 +185,7 @@ function enterMobileLogos(params: { el: HTMLElement }) {
     aspect-ratio: 1 / 3;
     display: flex;
     flex-wrap: wrap;
-    @include columns(2, 'desktop');
+    @include columns(2, 'tablet--landscape');
 
     &__transition-in {
       position: absolute;

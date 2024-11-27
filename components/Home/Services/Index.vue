@@ -126,8 +126,8 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       padding-top: toScale(2rem);
       padding-bottom: toScale(2rem);
       @include t-h2;
-      @include columns(10, 'desktop');
-      @include gap(2, 'left', 'desktop');
+      @include columns(10, 'tablet--landscape');
+      @include gap(2, 'left', 'tablet--landscape');
 
       &__indent {
         width: calc(toColumns(2) + var(--layout-gutter));
@@ -148,7 +148,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   }
 
   &__mobile-list {
-    padding: 3.2rem var(--layout-margin) 0;
+    padding: toScale(3.2rem, 37.5rem) var(--layout-margin) 0;
     .accordion__title__content__number {
       font-family: 'HelveticaNowDisplayBold' !important;
     }

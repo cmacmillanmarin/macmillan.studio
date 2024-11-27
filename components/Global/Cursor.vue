@@ -57,7 +57,6 @@ watch([mouseX, mouseY], () => {
     _entered = true
     _x = mouseX.value
     _y = mouseY.value
-    console.log(squareEl.value)
     squareEl.value && fadeIn({ el: squareEl.value })
   }
   targetX.value = mouseX.value
