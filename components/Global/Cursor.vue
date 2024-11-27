@@ -1,6 +1,5 @@
 <template>
   <div ref="el" :class="['cursor', { 'cursor--lime': cursorColor === 'lime' }]">
-    <div class="cursor__square" />
     <div ref="dotEl" class="cursor__dot">
       <div v-if="cursorColor === 'lime'" class="cursor__dot__lime" />
       <transition mode="out-in" :css="false" @enter="transitionShuffleIn" @leave="transitionDone">
@@ -17,6 +16,7 @@
         </div>
       </transition>
     </div>
+    <div ref="squareEl" class="cursor__square" />
   </div>
 </template>
 
@@ -24,7 +24,7 @@
 import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
-import { transitionShuffleIn, transitionDone } from '~/utils/animations'
+import { fadeIn, transitionShuffleIn, transitionDone } from '~/utils/animations'
 
 const { cursor, cursorColor, cursorPosition } = storeToRefs(useStore())
 
@@ -36,12 +36,15 @@ const { touch } = useDevice()
 
 const el = ref<HTMLElement>()
 const dotEl = ref<HTMLElement>()
+const squareEl = ref<HTMLElement>()
+
 const targetX = ref<number>(0)
 const targetY = ref<number>(0)
 
 let _x: number = 0
 let _y: number = 0
 let _visible: boolean = false
+let _entered: boolean = false
 let _inFixedPosition: boolean = false
 
 watch(touch, () => {
@@ -50,6 +53,13 @@ watch(touch, () => {
 
 watch([mouseX, mouseY], () => {
   if (_inFixedPosition) return
+  if (!_entered) {
+    _entered = true
+    _x = mouseX.value
+    _y = mouseY.value
+    console.log(squareEl.value)
+    squareEl.value && fadeIn({ el: squareEl.value })
+  }
   targetX.value = mouseX.value
   targetY.value = mouseY.value
 })
@@ -116,20 +126,22 @@ onBeforeUnmount(() => {
   }
 
   &__square {
-    @include absolute-center;
     width: toScale(1.2rem);
     height: toScale(1.2rem);
     background-color: var(--black);
+    z-index: 1;
+    @include will-fade;
+    @include absolute-center;
   }
 
   &__dot {
-    @include absolute-center;
     width: toScale(8rem);
     height: toScale(8rem);
     background-color: var(--black);
     border-radius: 50%;
-
     will-change: transform;
+    z-index: 2;
+    @include absolute-center;
 
     &__lime {
       width: calc(100% - 0.4rem);
