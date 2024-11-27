@@ -26,27 +26,44 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { transitionShuffleIn, transitionDone } from '~/utils/animations'
 
-const { cursor, cursorColor } = storeToRefs(useStore())
+const { cursor, cursorColor, cursorPosition } = storeToRefs(useStore())
 
 const { addTicker, killTicker } = useRaf()
 
 const { toScale } = useCss()
-const { x: targetX, y: targetY } = useMouse()
+const { x: mouseX, y: mouseY } = useMouse()
 const { touch } = useDevice()
 
 const el = ref<HTMLElement>()
 const dotEl = ref<HTMLElement>()
+const targetX = ref<number>(0)
+const targetY = ref<number>(0)
 
 let _x: number = 0
 let _y: number = 0
 let _visible: boolean = false
+let _inFixedPosition: boolean = false
 
 watch(touch, () => {
   touch.value ? killTicker(move) : addTicker(move)
 })
 
+watch([mouseX, mouseY], () => {
+  if (_inFixedPosition) return
+  targetX.value = mouseX.value
+  targetY.value = mouseY.value
+})
+
+watch(cursorPosition, () => {
+  _inFixedPosition = cursorPosition.value.x !== -1 && cursorPosition.value.y !== -1
+  if (_inFixedPosition) {
+    targetX.value = cursorPosition.value.x - toScale(15)
+    targetY.value = cursorPosition.value.y + toScale(15)
+  }
+})
+
 watch(cursor, () => {
-  if (!dotEl.value || touch.value) return
+  if (!dotEl.value || touch.value || _inFixedPosition) return
   const cursorIn = cursor.value !== 'default'
   cursorIn && (_visible = true)
   const scale = cursorIn ? 1 : 0
@@ -74,31 +91,6 @@ function move() {
   _x += (targetX.value - _x) * 0.2
   _y += (targetY.value - _y) * 0.2
   el.value && gsap.set(el.value, { x: _x, y: _y })
-}
-
-function getScale(): number {
-  const size = toScale(80)
-  const targetSize = toScale(12)
-  return targetSize / size
-}
-
-function limeEnter(el: Element, done: Function) {
-  gsap.to(el, {
-    duration: 0.05,
-    onComplete: () => {
-      done()
-    },
-  })
-}
-
-function limeLeave(el: Element, done: Function) {
-  gsap.to(el, {
-    delay: 0.35,
-    duration: 0.05,
-    onComplete: () => {
-      done()
-    },
-  })
 }
 
 onBeforeUnmount(() => {

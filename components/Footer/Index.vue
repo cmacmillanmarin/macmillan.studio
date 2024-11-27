@@ -105,14 +105,15 @@
     <transition mode="out-in" :css="false" @leave="transitionShuffleOut">
       <div v-if="!tetris" class="footer__location" v-transition:in="{ callback: fadeIn }">
         <div class="footer__location__coordinates">
-          <a
+          <!-- <a
             href="https://maps.app.goo.gl/osjpdZpbnTjgLg7h7"
             target="__blank"
             rel="noopener"
             @mouseenter="shuffle"
             :tabindex="landingTabIndex">
             Cádiz—36.5282º N, 6.18892º W
-          </a>
+          </a> -->
+          <p>Cádiz—36.5282º N, 6.18892º W</p>
         </div>
         <div class="footer__location__year">
           <p>©2023</p>

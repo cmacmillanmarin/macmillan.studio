@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { State, GridType, Section, Cursor, NextProjectTicker } from '~/types/front/store'
 
 let _to: any
+let _toCursor: any
 
 export default defineStore('use-store', {
   state: (): State => ({
@@ -13,6 +14,7 @@ export default defineStore('use-store', {
     sectionThrottle: false,
     cursor: 'default',
     cursorColor: 'black',
+    cursorPosition: { x: -1, y: -1 },
     activeProjectList: 'selected',
     header: false,
     headerLogo: false,
@@ -101,6 +103,14 @@ export default defineStore('use-store', {
     },
     updateCursorColor(state: 'lime' | 'black') {
       this.cursorColor = state
+    },
+    updateCursorPosition(state: { x: number; y: number }) {
+      _toCursor && clearTimeout(_toCursor)
+      if (state.x === -1) {
+        _toCursor = setTimeout(() => {
+          this.cursorPosition = state
+        }, 100)
+      } else this.cursorPosition = state
     },
     updateInReel(state: boolean) {
       this.inReel = state

@@ -4,7 +4,8 @@
     :to="to"
     :type="type"
     :content="true"
-    @mouseenter="shuffle"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
     :tabindex="tabindex">
     <span ref="spanEl">{{ label }}</span>
     <SvgLinkArrow />
@@ -12,7 +13,12 @@
 </template>
 
 <script lang="ts" setup>
+import useStore from '~/store/useStore'
 import { gsap } from 'gsap/gsap-core'
+import { shuffleElsIn } from '~/utils/animations'
+
+const store = useStore()
+const { updateCursorPosition } = store
 
 defineProps<{
   label: string
@@ -23,11 +29,17 @@ defineProps<{
 
 const spanEl = ref<HTMLElement>()
 
-function shuffle(e: MouseEvent) {
+function onMouseEnter(e: MouseEvent) {
   if (spanEl.value) {
+    const { left, top } = spanEl.value.getBoundingClientRect()
+    updateCursorPosition({ x: left, y: top })
     gsap.set(spanEl.value, { opacity: 0 })
     shuffleElsIn({ els: [spanEl.value] })
   }
+}
+
+function onMouseLeave(e: MouseEvent) {
+  updateCursorPosition({ x: -1, y: -1 })
 }
 
 defineExpose({

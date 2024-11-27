@@ -25,7 +25,8 @@
           <p v-if="!item.link" class="home__about__awards__award__content__list__item__label">
             {{ item.label }}
           </p>
-          <a
+          <DecorativeLink v-else type="external" :to="item.link" :label="item.label" />
+          <!-- <a
             v-else
             :class="[
               'home__about__awards__award__content__list__item__label',
@@ -37,12 +38,12 @@
             @mouseenter="shuffle"
             :tabindex="landingTabIndex">
             {{ item.label }}
-          </a>
+          </a> -->
           <p
             v-if="item.number"
             class="home__about__awards__award__content__list__item__number"
             v-text="`{${startWithZero(item.number)}}`" />
-          <div v-else-if="item.link" class="home__about__awards__award__content__list__item__link">
+          <!-- <div v-else-if="item.link" class="home__about__awards__award__content__list__item__link">
             <button
               class="home__about__awards__award__content__list__item__link__button"
               @mouseenter="shuffle"
@@ -51,7 +52,7 @@
               tabindex="-1">
               {<SvgLinkArrow />}
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -265,10 +266,16 @@ const emit = defineEmits<{
           }
         }
 
-        &__label {
+        &__label,
+        .decorative-link {
           will-change: opacity;
           @include t-black;
           @include t-b1;
+          .svg__link-arrow {
+            path {
+              fill: var(--black);
+            }
+          }
         }
 
         &__number,

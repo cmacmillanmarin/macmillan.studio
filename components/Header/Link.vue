@@ -6,6 +6,7 @@
       :to="to"
       :label="label"
       @mouseenter="!touch ? onMouseEnter() : () => {}"
+      @mouseleave="!touch ? onMouseLeave() : () => {}"
       data-tab-fixed
       :tabindex="tabindex" />
     <transition
@@ -20,6 +21,7 @@
 
 <script lang="ts" setup>
 import { gsap } from 'gsap/gsap-core'
+import useStore from '~/store/useStore'
 import { shuffleElsIn, transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
 
 defineProps<{
@@ -29,16 +31,28 @@ defineProps<{
   tabindex?: number
 }>()
 
+const store = useStore()
+const { updateCursorPosition } = store
+
+const { toScale } = useCss()
+const { vh } = useResize()
 const { touch } = useDevice()
 
 const el = ref<HTMLElement>()
 
 function onMouseEnter() {
   const linkEl = el.value?.querySelector('.header__link__anchor')
+
   if (linkEl) {
+    const { left, width } = linkEl.getBoundingClientRect()
+    updateCursorPosition({ x: left + width * 0.5 + toScale(15), y: vh.value - toScale(21) })
     gsap.set(linkEl, { opacity: 0 })
     shuffleElsIn({ els: [linkEl] })
   }
+}
+
+function onMouseLeave() {
+  updateCursorPosition({ x: -1, y: -1 })
 }
 </script>
 
