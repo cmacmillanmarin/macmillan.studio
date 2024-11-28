@@ -146,6 +146,7 @@ const infoVisible = computed<boolean>(
   () =>
     !inTransition.value &&
     !inProject.value &&
+    !isInProjectEntered.value &&
     ((inAllProjectsList.value && section.value === 'projects') ||
       (!inAllProjectsList.value && active.value))
 )

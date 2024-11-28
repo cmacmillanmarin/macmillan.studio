@@ -594,6 +594,12 @@ onUnmounted(() => {
         padding-right: var(--layout-margin);
         margin-bottom: v-bind(titleMarginPx);
         padding-top: 0;
+        @include from__desktop--x-large {
+          width: calc(var(--layout-max-width) * 0.666666);
+          margin-left: calc(
+            (100vw - var(--layout-max-width)) * 0.5 + var(--layout-max-width) * 0.333333
+          );
+        }
       }
 
       .ticker {

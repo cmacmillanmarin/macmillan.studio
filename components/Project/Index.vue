@@ -363,6 +363,9 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
       left: var(--layout-margin);
       z-index: 9;
       mix-blend-mode: difference;
+      @include from__desktop--x-large {
+        padding-left: calc((100vw - var(--layout-max-width)) * 0.5);
+      }
     }
 
     > div {

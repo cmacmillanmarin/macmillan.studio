@@ -6,10 +6,14 @@
 
     <div v-show="!isMobileLayout" class="header__hint">
       <button
+        ref="scrollDownButtonEl"
         @click="scrollDown"
+        @mouseenter="onScrollDownMouseEnter"
+        @mouseleave="onScrollDownMouseLeave"
         data-tab-fixed
         :tabindex="landingTabIndex"
-        aria-label="Scroll down">
+        aria-label="Scroll down"
+        class="header__hint__button">
         <SvgPixelArrow />
       </button>
       <p class="header__hint__label">Independent Tech Lead—Developer</p>
@@ -139,6 +143,7 @@ const links = computed<HeaderLinks>(() => {
 
 const el = ref<HTMLElement>()
 const logoMobileEl = ref<HTMLElement>()
+const scrollDownButtonEl = ref<HTMLElement>()
 const entered = ref<boolean>(false)
 const logoVisible = ref<boolean>(false)
 const linksVisible = ref<boolean>(false)
@@ -157,6 +162,7 @@ watch(logoVisible, () => {
 })
 
 watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], async () => {
+  current.value === 0 && onScrollDownMouseEnter()
   mobileButton.value = isMobileLayout.value && (current.value > vh.value * 0.5 || isInProject.value)
   isMobileLayout.value && (await nextTick())
   logoVisible.value = !isInProject.value && !isInReel.value && !headerOverlay.value
@@ -216,7 +222,7 @@ function enterLinks() {
   gsap.set(el.value, { pointerEvents: 'auto' })
   const links =
     el.value.querySelectorAll('.header__bottom, .header__link__anchor, .header__nav--scroll') || []
-  const hints = el.value.querySelectorAll('.header__hint') || []
+  const hints = el.value.querySelectorAll('.header__hint__label, .header__hint__button') || []
   shuffleElsIn({ els: hints, fast: true })
   shuffleElsIn({ els: links, fast: true })
 }
@@ -226,7 +232,7 @@ function leaveLinks() {
   gsap.set(el.value, { pointerEvents: 'none' })
   const links =
     el.value.querySelectorAll('.header__bottom, .header__link__anchor, .header__nav--scroll') || []
-  const hints = el.value.querySelectorAll('.header__hint') || []
+  const hints = el.value.querySelectorAll('.header__hint__label, .header__hint__button') || []
   shuffleElsOut({ els: hints, fast: true })
   shuffleElsOut({ els: links, fast: true })
 }
@@ -265,6 +271,17 @@ function onMouseEnter() {
 
 function onMouseLeave() {
   updateHeaderLogo(false)
+  updateCursor('default')
+}
+
+function onScrollDownMouseEnter(e?: MouseEvent) {
+  if (!scrollDownButtonEl.value) return
+  !!e && updateCursor('none')
+  gsap.set(scrollDownButtonEl.value, { opacity: 0 })
+  shuffleIn({ el: scrollDownButtonEl.value })
+}
+
+function onScrollDownMouseLeave() {
   updateCursor('default')
 }
 
@@ -311,23 +328,26 @@ function scrollDown() {
   &__hint {
     display: flex;
     align-items: center;
-    column-gap: 0.8rem;
+    // column-gap: 0.8rem;
+    transform: translate(toScale(-0.4rem), toScale(0.2rem));
     padding-left: var(--layout-margin);
-
-    @include will-fade;
 
     p {
       @include t-b1;
     }
 
-    button {
+    &__button {
       display: block;
-      padding: 0;
+      padding: toScale(0.8rem);
       border: none;
       width: max-content;
+      @include will-fade;
       .svg__pixel-arrow {
         width: toScale(2.4rem);
       }
+    }
+    &__label {
+      @include will-fade;
     }
   }
 
