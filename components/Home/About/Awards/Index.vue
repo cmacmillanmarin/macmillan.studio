@@ -171,7 +171,10 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
     .home__about__awards__award {
       position: sticky;
-      top: calc(var(--layout-margin) * 2);
+      top: calc(7.2rem - toScale(3.2rem, 37.5rem));
+      @include from__tablet--landscape {
+        top: calc(7.2rem - toScale(4rem));
+      }
     }
   }
 

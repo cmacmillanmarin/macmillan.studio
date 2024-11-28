@@ -123,11 +123,17 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     @include grid;
 
     &__label {
-      padding-top: toScale(2rem);
-      padding-bottom: toScale(2rem);
+      padding-top: toScale(0.4rem, 37.5rem);
+      padding-bottom: toScale(0.4rem, 37.5rem);
+
       @include t-h2;
       @include columns(10, 'tablet--landscape');
       @include gap(2, 'left', 'tablet--landscape');
+
+      @include from__tablet--landscape {
+        padding-top: toScale(2rem);
+        padding-bottom: toScale(2rem);
+      }
 
       &__indent {
         width: calc(toColumns(2) + var(--layout-gutter));
@@ -143,7 +149,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     position: relative;
     .home__services__service {
       position: sticky;
-      top: calc(var(--layout-margin) * 2);
+      top: calc(7.2rem - toScale(4rem));
     }
   }
 
