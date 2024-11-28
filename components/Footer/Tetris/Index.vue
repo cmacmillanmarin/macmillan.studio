@@ -214,14 +214,14 @@ function drawBoard() {
 }
 
 function drawLogo(position: Position) {
-  const gap = 0.6
+  const gap = 0
   const color = 66
   tetris.ctx?.drawImage(
     tint(logo, color, color, color),
     (position.x + gap * 0.5) * dpr.value,
     (position.y + gap * 0.5) * dpr.value,
-    (tetris.size.piece - gap) * dpr.value,
-    (tetris.size.piece - gap) * dpr.value
+    (tetris.size.piece - gap + 1) * dpr.value,
+    (tetris.size.piece - gap + 1) * dpr.value
   )
 }
 
