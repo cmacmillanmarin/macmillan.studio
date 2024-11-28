@@ -13,7 +13,9 @@
           <SvgTick v-else-if="cursor === 'copied'" />
           <SvgClose v-else-if="cursor === 'close'" />
           <SvgLoading v-else-if="cursor === 'loading'" />
-          <SvgDrag v-else-if="cursor === 'drag'" />
+          <SvgDrag
+            v-else-if="cursor === 'drag' || cursor === 'drag-vertical'"
+            :vertical="cursor.includes('vertical')" />
         </div>
       </transition>
     </div>

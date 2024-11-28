@@ -1,7 +1,7 @@
 <template>
   <div ref="el" :class="['project', { 'project--entered': !transition }]" @click="onClick">
     <ClientOnly>
-      <Teleport to="#top-layer">
+      <Teleport to=".__layout">
         <transition @leave="transitionFadeOut">
           <PixelTransition v-if="transition" :color="data.color" @done="enter" />
         </transition>

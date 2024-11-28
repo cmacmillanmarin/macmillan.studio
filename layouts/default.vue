@@ -45,31 +45,34 @@ async function init() {
 .__layout {
   .header {
     position: absolute;
-    z-index: 11;
+    z-index: 10;
     bottom: 0;
     left: 50%;
     width: 100%;
     transform: translateX(-50%);
   }
+
   .three {
-    z-index: 7;
+    z-index: 6;
     @include absolute-fill();
   }
+
   .cursor {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 11;
   }
+
   &__top-layer {
-    z-index: 8;
+    z-index: 7;
     pointer-events: none;
     overflow: var(--overflow--hidden);
     @include absolute-fill();
     &--blend {
       @extend .__layout__top-layer;
       mix-blend-mode: difference;
-      z-index: 10;
+      z-index: 8;
     }
   }
 }

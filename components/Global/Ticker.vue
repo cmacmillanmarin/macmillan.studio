@@ -95,12 +95,12 @@ function onPanMove(params: PanParams) {
     _target = _current
   }
   _onPan = true
-  _target = _panInit - xDiff * inertia
+  _target = _panInit - xDiff * (0.25 + inertia)
   _panDirection = xDir
 }
 
 function onPanEnd() {
-  _panSpeed = Math.abs(_target - _current) * 0.12
+  // _panSpeed = Math.abs(_target - _current) * 0.12
   _onPan = false
 }
 

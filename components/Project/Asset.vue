@@ -96,6 +96,15 @@ onMounted(() => {
     }
   }
 
+  &--layout-scroll {
+    justify-content: center;
+
+    @include from__tablet--landscape {
+      overflow: var(--overflow-hidden);
+      padding-top: toScale(13rem);
+    }
+  }
+
   &--gap-s {
     padding-bottom: 4rem;
     @include from__tablet--landscape {

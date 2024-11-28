@@ -24,6 +24,7 @@ export type Cursor =
   | 'close'
   | 'loading'
   | 'drag'
+  | 'drag-vertical'
 
 export interface NextProjectTickerItem {
   init: number

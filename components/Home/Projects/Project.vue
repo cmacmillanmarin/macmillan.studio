@@ -43,7 +43,7 @@
           </div>
         </transition>
       </Teleport>
-      <Teleport to="#top-layer-blend">
+      <Teleport to="#top-layer">
         <transition
           mode="out-in"
           :css="false"
@@ -58,7 +58,9 @@
               `home__projects__project__client--${data.slug}`,
               { 'home__projects__project__client--all': inAllProjectsList },
             ]">
-            <div class="home__projects__project__client__name">
+            <div
+              class="home__projects__project__client__name"
+              :style="{ color: projectThumbnailCopyColor }">
               {{ data.client.name }}
             </div>
           </div>
@@ -77,7 +79,9 @@
               'home__projects__project__collaborator',
               { 'home__projects__project__collaborator--all': inAllProjectsList },
             ]">
-            <div class="home__projects__project__collaborator__name">
+            <div
+              class="home__projects__project__collaborator__name"
+              :style="{ color: projectThumbnailCopyColor }">
               {{ data.freelance ? 'w/ ' : 'at ' }}
               {{ data.collaborator.name }}
             </div>

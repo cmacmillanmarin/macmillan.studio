@@ -48,6 +48,7 @@ const imgSrcset = computed<string>(() => {
   for (const { src, width } of Object.values(data.sizes)) {
     srcset += `${src} ${width}w,`
   }
+  srcset += `${data.src} ${data.width}w`
   return srcset.slice(0, -1)
 })
 

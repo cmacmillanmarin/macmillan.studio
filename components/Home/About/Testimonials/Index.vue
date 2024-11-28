@@ -138,7 +138,8 @@ watch(mouseX, () => {
     section.value === 'about-testimonials' &&
     cursor.value !== 'default' &&
     cursor.value !== 'plus' &&
-    cursor.value !== 'close'
+    cursor.value !== 'close' &&
+    cursor.value !== 'drag'
   ) {
     updateCarouselCursor()
   }
