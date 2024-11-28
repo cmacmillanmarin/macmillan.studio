@@ -1,21 +1,32 @@
 <template>
-  <SvgProjectWallpapersGoogle
-    v-if="!isMobileLayout"
-    v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
-  <Ticker
-    v-else
-    ref="tickerEl"
-    :drag-on-target="true"
-    :ignore-update-scroll="true"
-    :ticker="!next ? inProjectNextProjectTicker : undefined"
-    class="svg__project__wallpapers__ticker"
-    @update="emit('update-scroll')">
-    <div v-for="i in 2" :key="i">
+  <div :class="['svg__project__wallpapers', { 'svg__project__wallpapers--animation': animation }]">
+    <template v-if="isMobileLayout">
+      <Ticker
+        ref="tickerEl"
+        :drag-on-target="true"
+        :ignore-update-scroll="true"
+        :ticker="!next ? inProjectNextProjectTicker : undefined"
+        class="svg__project__wallpapers__ticker"
+        @update="emit('update-scroll')">
+        <div v-for="i in 2" :key="i">
+          <SvgProjectWallpapersGoogle
+            v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+        </div>
+      </Ticker>
+      <SvgProjectWallpapersPixels
+        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+    </template>
+    <template v-else>
       <SvgProjectWallpapersGoogle
         v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
-    </div>
-  </Ticker>
-  <SvgProjectWallpapersPixels v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+      <div class="svg__project__wallpapers__flex">
+        <SvgProjectWallpapersPixels
+          v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+        <SvgProjectWallpapersPixels
+          v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+      </div>
+    </template>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -27,6 +38,7 @@ import { storeToRefs } from 'pinia'
 const props = defineProps<{
   next: boolean
   animation: boolean
+  color?: string
 }>()
 
 const store = useStore()
@@ -36,6 +48,8 @@ const { inProjectNextProjectTicker } = storeToRefs(store)
 const { isMobileLayout } = useDevice()
 
 const tickerEl = ref<typeof Ticker>()
+
+const fill = computed(() => props.color || 'var(--black)')
 
 onBeforeUnmount(() => {
   if (props.next && tickerEl.value) {
@@ -48,16 +62,34 @@ const emit = defineEmits(['update-scroll'])
 </script>
 
 <style lang="scss">
-.svg__project__wallpapers__ticker {
-  margin-bottom: var(--layout-gutter);
-  > div {
-    padding-right: toScale(3.2rem, 37.5rem);
+.svg__project__wallpapers {
+  &--animation {
+    svg {
+      > path,
+      > g {
+        @include will-fade;
+      }
+    }
   }
-}
-.svg__project__wallpapers__pixels {
-  margin: 0 auto;
-  @include from__tablet--landscape {
-    margin: 0;
+  &__ticker {
+    margin-bottom: var(--layout-gutter);
+    > div {
+      padding-right: toScale(3.2rem, 37.5rem);
+    }
+  }
+  &__flex {
+    display: flex;
+    column-gap: toScale(3.2rem);
+    margin-top: toScale(1.2rem);
+  }
+  &__pixels {
+    margin: 0 auto;
+    @include from__tablet--landscape {
+      margin: 0;
+    }
+  }
+  svg path {
+    fill: v-bind(fill);
   }
 }
 </style>

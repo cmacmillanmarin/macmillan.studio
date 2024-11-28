@@ -20,7 +20,7 @@
             @update-scroll="emit('update-scroll')" />
         </button>
         <SvgProject
-          v-else
+          v-else-if="isMobileLayout"
           :project="data.slug"
           :animation="animation"
           :next="false"
@@ -221,12 +221,6 @@ const emit = defineEmits(['update-scroll', 'next-project'])
   }
 
   &--next {
-    // .project__landing__title {
-    //   padding-top: toScale(4rem, 37.5rem);
-    //   @include from__tablet--landscape {
-    //     padding-top: 0;
-    //   }
-    // }
     .project__landing__info__stack {
       padding-bottom: toScale(10rem, 37.5rem);
       @include from__tablet--landscape {
@@ -236,14 +230,6 @@ const emit = defineEmits(['update-scroll', 'next-project'])
   }
 
   &--animation {
-    .project__landing__title {
-      svg {
-        > path,
-        > g {
-          @include will-fade;
-        }
-      }
-    }
     .project__landing__info {
       .project__landing__info__stack,
       .project__landing__info__content,
@@ -253,16 +239,6 @@ const emit = defineEmits(['update-scroll', 'next-project'])
       }
     }
   }
-
-  // &--nike-trail-challenge {
-  //   .project__landing__title {
-  //     svg {
-  //       &:nth-child(1) {
-  //         margin-bottom: 1.2rem;
-  //       }
-  //     }
-  //   }
-  // }
 
   &__title {
     text-align: center;
@@ -288,15 +264,6 @@ const emit = defineEmits(['update-scroll', 'next-project'])
       display: block;
       padding: 0;
       border: none;
-    }
-
-    svg {
-      @include from__tablet--landscape {
-        margin-bottom: 1.2rem;
-      }
-      &:last-child {
-        margin-bottom: 0;
-      }
     }
   }
 

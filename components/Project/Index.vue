@@ -10,6 +10,16 @@
     </ClientOnly>
 
     <div ref="contentEl" class="project__content">
+      <ClientOnly>
+        <figure v-if="!isMobileLayout" class="project__content__title">
+          <SvgProject
+            :project="data.slug"
+            :animation="svgAnimation"
+            :color="data.color"
+            :next="false"
+            @update-scroll="updateScroll" />
+        </figure>
+      </ClientOnly>
       <ProjectLanding
         :data="data"
         :ready="ready"
@@ -311,7 +321,6 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
 <style lang="scss">
 .project {
   @include will-fade;
-  background-color: v-bind(backgroundColor);
 
   &--entered {
     cursor: pointer;
@@ -336,6 +345,7 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
   }
 
   &__content {
+    background-color: v-bind(backgroundColor);
     will-change: transform;
 
     @include from__tablet--landscape {
@@ -345,6 +355,14 @@ const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
 
     .project__landing {
       z-index: 2;
+    }
+
+    &__title {
+      position: absolute;
+      bottom: var(--layout-margin);
+      left: var(--layout-margin);
+      z-index: 9;
+      mix-blend-mode: difference;
     }
 
     > div {
