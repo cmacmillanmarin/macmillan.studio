@@ -1,6 +1,10 @@
 <template>
   <div ref="el" class="home__about__gallery">
-    <Ticker ref="tickerEl" :planes-id="planeIds">
+    <Ticker
+      ref="tickerEl"
+      :planes-id="planeIds"
+      @mouseenter="onMouseEnter"
+      @mouseleave="onMouseLeave">
       <HomeAboutGalleryItem
         v-for="(item, i) in items"
         :pos="i + 1"
@@ -25,6 +29,7 @@ const props = defineProps<{
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
+const { updateCursor } = store
 const { section } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
@@ -53,6 +58,14 @@ function onItemsFadeUpdate() {
       opacity: itemsFade.value,
     })
   })
+}
+
+function onMouseEnter() {
+  updateCursor('drag')
+}
+
+function onMouseLeave() {
+  updateCursor('default')
 }
 
 function update() {

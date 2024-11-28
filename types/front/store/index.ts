@@ -12,6 +12,7 @@ export type Section =
   | 'contact'
 
 export type Cursor =
+  | 'none'
   | 'default'
   | 'play'
   | 'pause'
@@ -22,6 +23,7 @@ export type Cursor =
   | 'copied'
   | 'close'
   | 'loading'
+  | 'drag'
 
 export interface NextProjectTickerItem {
   init: number

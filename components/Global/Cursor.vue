@@ -13,6 +13,7 @@
           <SvgTick v-else-if="cursor === 'copied'" />
           <SvgClose v-else-if="cursor === 'close'" />
           <SvgLoading v-else-if="cursor === 'loading'" />
+          <SvgDrag v-else-if="cursor === 'drag'" />
         </div>
       </transition>
     </div>
@@ -26,40 +27,29 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { fadeIn, fadeOut, transitionShuffleIn, transitionDone } from '~/utils/animations'
 
-const { cursor, cursorColor, cursorPosition, headerLogo, isInReel } = storeToRefs(useStore())
+const { cursor, cursorColor, cursorPosition } = storeToRefs(useStore())
 
 const { addTicker, killTicker } = useRaf()
 
 const { toScale } = useCss()
 const { x: mouseX, y: mouseY } = useMouse()
-const { touch } = useDevice()
 
 const el = ref<HTMLElement>()
 const dotEl = ref<HTMLElement>()
 const squareEl = ref<HTMLElement>()
+
+const down = ref<boolean>(false)
 
 const targetX = ref<number>(0)
 const targetY = ref<number>(0)
 
 let _x: number = 0
 let _y: number = 0
-let _visible: boolean = false
 let _entered: boolean = false
 let _inFixedPosition: boolean = false
 
-watch(touch, () => {
-  touch.value ? killTicker(move) : addTicker(move)
-})
-
-watch(headerLogo, () => {
-  if (headerLogo.value) {
-    _entered = false
-    squareEl.value && fadeOut({ el: squareEl.value })
-  }
-})
-
 watch([mouseX, mouseY], () => {
-  if (_inFixedPosition || headerLogo.value) return
+  if (_inFixedPosition || cursor.value === 'none') return
   if (!_entered) {
     _entered = true
     _x = mouseX.value
@@ -75,47 +65,53 @@ watch(cursorPosition, () => {
   if (_inFixedPosition) {
     targetX.value = cursorPosition.value.x + toScale(6)
     targetY.value = cursorPosition.value.y + toScale(6)
+  } else {
+    targetX.value = mouseX.value
+    targetY.value = mouseY.value
   }
 })
 
-watch([cursor, isInReel], () => {
-  if (!dotEl.value || touch.value) return
-  const cursorIn = cursor.value !== 'default'
-  cursorIn && (_visible = true)
-  const scale = cursorIn ? 1 : 0
-  const duration = cursorIn ? 0.4 : 0.3
-  if (isInReel.value) {
-    scale === 0 ? fadeOut({ el: squareEl.value }) : fadeIn({ el: squareEl.value })
-  } else {
-    fadeIn({ el: squareEl.value })
+watch([cursor, down], () => {
+  if (!dotEl.value || !squareEl.value) return
+  if (cursor.value === 'none') {
+    _entered = false
+    fadeOut({ el: squareEl.value })
   }
+  const visible = cursor.value !== 'default' && cursor.value !== 'none'
+  const scale = visible ? (down.value ? 0.8 : 1) : 0
+  const duration = visible ? 0.4 : 0.3
   gsap.killTweensOf(dotEl.value)
-  gsap.to(dotEl.value, {
-    scale,
-    duration,
-    onComplete: () => {
-      if (!cursorIn) {
-        _visible = false
-      }
-    },
-  })
+  gsap.to(dotEl.value, { scale, duration })
 })
 
 onMounted(() => {
-  if (!touch.value && dotEl.value) {
+  if (dotEl.value) {
     addTicker(move)
     gsap.set(dotEl.value, { scale: 0 })
+    window.addEventListener('mouseup', onMouseUp)
+    window.addEventListener('mousedown', onMouseDown)
   }
 })
 
+function onMouseUp() {
+  down.value = false
+}
+
+function onMouseDown() {
+  down.value = true
+}
+
 function move() {
-  _x += (targetX.value - _x) * 0.2
-  _y += (targetY.value - _y) * 0.2
+  const s = _inFixedPosition ? 0.125 : 0.2
+  _x += (targetX.value - _x) * s
+  _y += (targetY.value - _y) * s
   el.value && gsap.set(el.value, { x: _x, y: _y })
 }
 
 onBeforeUnmount(() => {
   killTicker(move)
+  window.removeEventListener('mouseup', onMouseUp)
+  window.removeEventListener('mousedown', onMouseDown)
 })
 </script>
 

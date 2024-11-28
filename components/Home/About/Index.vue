@@ -115,7 +115,7 @@ defineProps<{
 const { $scene }: any = useNuxtApp()
 
 const store = useStore()
-const { updateSection, updateCursorPosition } = store
+const { updateSection, updateCursor, updateCursorPosition } = store
 const { section } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
@@ -235,6 +235,7 @@ function onTestimonialsUpdateExpanded() {
 }
 
 function onThumbnailMouseEnter() {
+  updateCursor('none')
   gsap.killTweensOf(_color)
   gsap.to(_color, {
     alpha: 0,
@@ -246,6 +247,7 @@ function onThumbnailMouseEnter() {
 }
 
 function onThumbnailMouseLeave() {
+  updateCursor('default')
   gsap.killTweensOf(_color)
   gsap.to(_color, {
     alpha: 1,

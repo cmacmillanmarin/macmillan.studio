@@ -36,8 +36,9 @@
           ref="timelineEl"
           class="home__hero__player__timeline"
           @click="onTimelineClick"
-          @mouseenter="onButtonMouseEnter"
-          @mouseleave="onButtonMouseLeave">
+          @mouseenter="onTimelineMouseEnter"
+          @mousemove="onTimelineMouseMove"
+          @mouseleave="onTimelineMouseLeave">
           <div class="home__hero__player__timeline__progress">
             <div ref="barEl" class="home__hero__player__timeline__progress__bar">
               <SvgSquare />
@@ -74,12 +75,13 @@ const props = defineProps<{
 }>()
 
 const store = useStore()
-const { updateCursor } = store
+const { updateCursor, updateCursorPosition } = store
 const { cursor, headerMobileButtonClicked } = storeToRefs(store)
 
 const { x, y } = useMouse()
 const { addTicker, killTicker } = useRaf()
 const { isMobileLayout } = useDevice()
+const { toScale } = useCss()
 
 const progress = ref<number>(0)
 const visible = ref<boolean>(true)
@@ -148,21 +150,42 @@ function updateProgress() {
 }
 
 function onTimelineClick(e: MouseEvent) {
-  e.preventDefault()
-  e.stopPropagation()
-  const target = e.target as HTMLElement
-  const { left, width } = target.getBoundingClientRect()
-  const current = (e.clientX - left) / width
-  progress.value = current
-  emit('update', current)
+  if (props.ready) {
+    e.preventDefault()
+    e.stopPropagation()
+    const target = e.target as HTMLElement
+    const { left, width } = target.getBoundingClientRect()
+    const current = (e.clientX - left) / width
+    progress.value = current
+    emit('update', current)
+  }
 }
 
 function onElementFocus() {
   visible.value = true
 }
 
+function onTimelineMouseEnter(e: MouseEvent) {
+  if (props.ready) {
+    updateCursor('default')
+    onTimelineMouseMove(e)
+  }
+}
+
+function onTimelineMouseMove(e: MouseEvent) {
+  if (timelineEl.value && props.ready) {
+    const { top } = timelineEl.value.getBoundingClientRect()
+    updateCursorPosition({ x: e.clientX - toScale(12), y: top + toScale(16) })
+  }
+}
+
+function onTimelineMouseLeave() {
+  updateCursorPosition({ x: -1, y: -1 })
+  updateCursor(!props.ready ? 'loading' : playing.value ? 'pause' : 'play')
+}
+
 function onButtonMouseEnter() {
-  updateCursor('default')
+  updateCursor('none')
 }
 
 function onButtonMouseLeave() {

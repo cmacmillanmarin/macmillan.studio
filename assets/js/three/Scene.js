@@ -188,6 +188,7 @@ class Controller {
     object.order = object.order || 0
     object.cursor = object.cursor || 'plus'
     object.opacity = object.opacity !== undefined ? object.opacity : 1
+    object.textureFade = object.textureFade !== undefined ? object.textureFade : null
     object.multiplyColor = object.multiplyColor || null
     object.color = object.color || null
     object.noPixel = !!object.noPixel
@@ -216,6 +217,7 @@ class Controller {
     order,
     multiplyColor,
     color,
+    textureFade,
     noPixel,
     blackAndWhite,
     forcePixelated,
@@ -240,6 +242,7 @@ class Controller {
       object.onClick = onClick !== undefined ? onClick : object.onClick
       object.multiplyColor = multiplyColor || object.multiplyColor
       object.color = color || object.color
+      object.textureFade = textureFade !== undefined ? textureFade : object.textureFade
       object.cursor = cursor || object.cursor
       object.noPixel = noPixel !== undefined ? noPixel : object.noPixel
       object.blackAndWhite = blackAndWhite !== undefined ? blackAndWhite : object.blackAndWhite
@@ -372,6 +375,7 @@ class Controller {
         uniforms.uColor.value = object.color || this.colors.lightGrey
         uniforms.uMultiplyColor.value = object.multiplyColor || this.colors.white
         uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
+
         uniforms.uBorderRadius.value = object.border
         uniforms.uTime.value += 0.05
         const xPixelRatio = object.size.x / round(object.size.x / this.toScale(18))
@@ -385,7 +389,7 @@ class Controller {
         uniforms.uTextureVideo.value.needsUpdate =
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
         uniforms.uDevicePixelRatio.value = this.getDevicePixelRatio()
-
+        if (object.textureFade) uniforms.uTextureFade.value = object.textureFade
         if (object.onIntersect) object.onIntersect(hovered)
 
         const hovered =

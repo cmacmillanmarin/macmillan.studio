@@ -260,11 +260,12 @@ function mobileButtonLeave(el: Element, done: () => void) {
 
 function onMouseEnter() {
   updateHeaderLogo(true)
-  updateCursor('default')
+  updateCursor('none')
 }
 
 function onMouseLeave() {
   updateHeaderLogo(false)
+  updateCursor('default')
 }
 
 function onMobileButtonClick() {

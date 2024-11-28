@@ -139,6 +139,7 @@ const videoPlaying = ref<boolean>(false)
 const videoInView = ref<boolean>(false)
 const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
+const reelFade = ref<number>(1)
 const reelProgress = ref<number>(0)
 const reelButtonVisible = ref<boolean>(false)
 const reelReady = ref<boolean>(false)
@@ -346,7 +347,7 @@ onMounted(() => {
     id: 'reel',
     type: 'plane',
     video: videoEl.value,
-    color: rbgToVec4(hexToRgb('#818388')),
+    color: rbgToVec4(hexToRgb('#000000')),
     cursor: 'play',
   })
 })
@@ -364,6 +365,9 @@ function goToReel() {
     cursor: null,
     forcePixelated: false,
   })
+  gsap.killTweensOf(reelFade)
+  gsap.to(reelFade, { value: 0, onUpdate: updateReelOpacity })
+
   if (route.hash === '#reel') updateScrollTargetId('reel')
   else router.push('/#reel')
   if (videoEl.value) {
@@ -377,8 +381,14 @@ function goToReel() {
 }
 
 function onReelReady() {
+  gsap.killTweensOf(reelFade)
+  gsap.to(reelFade, { value: 1, onUpdate: updateReelOpacity })
   reelReady.value = true
   videoEl.value?.removeEventListener('canplaythrough', onReelReady)
+}
+
+function updateReelOpacity() {
+  $scene.updateObject({ id: 'reel', textureFade: reelFade.value })
 }
 
 function updateReel(progress: number) {
