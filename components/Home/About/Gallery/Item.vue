@@ -35,7 +35,7 @@
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
-import useStore from '~/store/useStore'
+// import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import type { HomepageAboutGalleryItem } from '~/types/wordpress/homepage'
 import { shuffleElsIn, fadeOut } from '~/utils/animations'
@@ -168,7 +168,8 @@ onBeforeUnmount(() => {
   &__credits {
     display: none;
     width: toColumns(v-bind(columns));
-    padding: 1.2rem;
+    padding: toScale(1.2rem);
+    user-select: none;
     pointer-events: none;
     @include will-fade;
     @include t-b3;
