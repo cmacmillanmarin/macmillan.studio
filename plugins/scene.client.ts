@@ -1,5 +1,6 @@
 import useStore from '~/store/useStore'
 import Scene from '~/assets/js/three/Scene'
+import Noise from '~/assets/js/three/Noise'
 
 export default defineNuxtPlugin(nuxtApp => {
   const store = useStore()
@@ -8,5 +9,7 @@ export default defineNuxtPlugin(nuxtApp => {
   scene.onPreloaded = () => {
     store.updatePreloadedTextures(true)
   }
+  const noise = new Noise()
   nuxtApp.provide('scene', scene)
+  nuxtApp.provide('noise', noise)
 })

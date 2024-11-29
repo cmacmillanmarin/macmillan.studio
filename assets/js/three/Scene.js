@@ -80,7 +80,7 @@ class Controller {
     this.needsUpdate = false
 
     this.geometries = {
-      plane: new PlaneGeometry(1, 1, 32, 32),
+      plane: new PlaneGeometry(1, 1),
     }
 
     this.colors = {
@@ -301,6 +301,7 @@ class Controller {
           object.mesh.material.uniforms.uTextureFade.value = 0
           object.mesh.material.uniforms.uTextureLoaded.value = 0
           object.mesh.material.uniforms.uBlackAndWhite.value = object.blackAndWhite ? 1 : 0
+          object.mesh.material.uniforms.uDevicePixelRatio.value = this.getDevicePixelRatio()
 
           object.firstFrame = true
           object.wasPixelated = false
@@ -388,7 +389,7 @@ class Controller {
         uniforms.uPlaneSize.value.y = object.size.y
         uniforms.uTextureVideo.value.needsUpdate =
           object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
-        uniforms.uDevicePixelRatio.value = this.getDevicePixelRatio()
+
         if (object.textureFade) uniforms.uTextureFade.value = object.textureFade
         if (object.onIntersect) object.onIntersect(hovered)
 

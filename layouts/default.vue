@@ -2,10 +2,11 @@
   <div ref="el" class="__layout">
     <Header />
     <slot />
-    <Three />
 
     <ClientOnly>
       <Cursor v-if="!touch" />
+      <Three />
+      <Noise />
       <div class="__layout__top-layer" id="top-layer" />
       <div class="__layout__top-layer--blend" id="top-layer-blend" />
     </ClientOnly>
@@ -54,6 +55,11 @@ async function init() {
 
   .three {
     z-index: 6;
+    @include absolute-fill();
+  }
+
+  .noise {
+    z-index: 12;
     @include absolute-fill();
   }
 

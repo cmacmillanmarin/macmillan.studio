@@ -113,7 +113,7 @@ const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
 const { current, direction } = storeToRefs(scrollStore)
 
-const { isMobileLayout } = useDevice()
+const { isMobileLayout, isTabletPortrait } = useDevice()
 const { layoutMargin, toScale } = useCss()
 const { lvw, vw, vh } = useResize()
 
@@ -164,7 +164,9 @@ const size = computed<{ x: number; y: number; z: number }>(() => {
   const finalWidth = vw.value
   const incrementWidth = finalWidth - initWidth
 
-  const initHeight = isMobileLayout.value
+  const initHeight = isTabletPortrait.value
+    ? vh.value - toScale(340)
+    : isMobileLayout.value
     ? vh.value - toScale(244) - toScale(208)
     : vh.value * 0.666666 - verticalGap.value
   const finalHeight = vh.value
@@ -195,7 +197,11 @@ const position = computed<{ x: number; y: number }>(() => {
     incrementGap * (scrollProgress.value - 1) +
     layoutMargin.value * scrollProgress.value
 
-  const initY = isMobileLayout.value ? toScale(244) : verticalGap.value
+  const initY = isTabletPortrait.value
+    ? toScale(186)
+    : isMobileLayout.value
+    ? toScale(244)
+    : verticalGap.value
   const finalY = 0
   const incrementY = finalY - initY
 
@@ -443,14 +449,20 @@ function updateFirstTransitionSteps() {
   const initHeight = isMobileLayout.value
     ? (initWidth * vh.value) / vw.value
     : vh.value * initWidthRatio
-  const finalHeight = isMobileLayout.value
+  const finalHeight = isTabletPortrait.value
+    ? vh.value - toScale(340)
+    : isMobileLayout.value
     ? vh.value - toScale(244) - toScale(208)
     : vh.value * 0.666666 - verticalGap.value
 
   const layoutGap = Math.min(0, lvw.value - vw.value) * -0.5
 
   const finalX = vw.value - layoutMargin.value - finalWidth - layoutGap
-  const finalY = isMobileLayout.value ? toScale(244) : verticalGap.value
+  const finalY = isTabletPortrait.value
+    ? toScale(186)
+    : isMobileLayout.value
+    ? toScale(244)
+    : verticalGap.value
 
   firstTransition.steps = [
     {
@@ -605,6 +617,9 @@ onUnmounted(() => {
       .ticker {
         > div {
           padding-right: toScale(3.2rem, 37.5rem);
+          @include from__tablet {
+            padding-right: toScale(4rem);
+          }
         }
         svg {
           path {
@@ -621,6 +636,9 @@ onUnmounted(() => {
         transform-origin: top right;
         &:nth-child(2) {
           margin: 0 var(--layout-margin);
+        }
+        @include from__tablet {
+          width: 100vw;
         }
         @include from__tablet--landscape {
           width: 100%;
@@ -639,11 +657,19 @@ onUnmounted(() => {
       padding-top: v-bind(verticalGapPx);
       margin-left: var(--layout-margin);
 
+      @include from__tablet {
+        width: 65vw;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: calc(toScale(21rem) + var(--layout-margin));
+      }
+
       @include from__tablet--landscape {
         width: calc(min(100vw, var(--layout-max-width)) * 0.333333);
         padding-top: v-bind(verticalGapPx);
         padding-left: var(--layout-margin);
         margin-left: 0;
+        margin-right: 0;
       }
 
       @include from__desktop--x-large {
@@ -670,6 +696,10 @@ onUnmounted(() => {
       padding: 0 var(--layout-gutter);
       text-align: center;
       @include will-fade;
+
+      @include from__tablet {
+        top: toScale(50rem);
+      }
 
       @include from__tablet--landscape {
         display: flex;

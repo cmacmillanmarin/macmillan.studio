@@ -147,11 +147,12 @@ export default function useScroll() {
   }
 
   function onScroll(data: Data) {
-    const { $scene }: any = useNuxtApp()
+    const { $scene, $noise }: any = useNuxtApp()
     if ($scene?.ready) {
       $scene.updateY(data.current)
       $scene.render()
     }
+    $noise?.ready && $noise.render()
     for (const callback of renderCallbacks.value) callback()
     updateSectionThrottle(data.speed > 1000)
     updateScrollData(data)
