@@ -186,6 +186,7 @@ const emit = defineEmits(['update-list', 'button-hover'])
       position: relative;
       width: max-content;
       margin: auto;
+
       &__el {
         display: block;
         width: max-content;
@@ -215,7 +216,7 @@ const emit = defineEmits(['update-list', 'button-hover'])
         right: 0;
         transform: translate(calc(100% + toScale(0.4rem, 37.5rem)), toScale(0rem, 37.5rem));
         color: var(--dark-grey);
-        @include t-number-small;
+        @include t-b3;
         @include from__tablet--landscape {
           transform: translate(calc(100% + toScale(0.6rem)), toScale(-0.4rem));
         }

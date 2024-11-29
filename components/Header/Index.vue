@@ -162,7 +162,7 @@ watch(logoVisible, () => {
 })
 
 watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], async () => {
-  current.value === 0 && onScrollDownMouseEnter()
+  current.value === 0 && !isInProject.value && onScrollDownMouseEnter()
   mobileButton.value = isMobileLayout.value && (current.value > vh.value * 0.5 || isInProject.value)
   isMobileLayout.value && (await nextTick())
   logoVisible.value = !isInProject.value && !isInReel.value && !headerOverlay.value
