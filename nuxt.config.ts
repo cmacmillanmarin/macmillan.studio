@@ -16,12 +16,12 @@ const IS_OFFLINE: boolean = OFFLINE == '1'
 const IS_PRODUCTION: boolean = PRODUCTION == '1'
 const DEPLOY_DATE: string = Date.now().toString()
 
-// const robotsRules: Array<any> = [
-//   { UserAgent: '*' },
-//   { Disallow: '/' },
-//   { BlankLine: true },
-//   { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
-// ]
+const robotsRules: Array<any> = [
+  { UserAgent: '*' },
+  { Disallow: '/' },
+  { BlankLine: true },
+  { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
+]
 
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
@@ -43,8 +43,6 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: 'en',
       },
-      meta: [{ name: 'theme-color', content: '#FFF' }],
-      link: [{ rel: 'icon', type: 'image/x-icon', href: '/assets/img/favicon.ico' }],
     },
   },
 
@@ -60,9 +58,9 @@ export default defineNuxtConfig({
 
   modules: ['@pinia/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap'],
 
-  // robots: {
-  //   rules: robotsRules,
-  // },
+  robots: {
+    rules: robotsRules,
+  },
 
   sitemap: {
     defaults: {

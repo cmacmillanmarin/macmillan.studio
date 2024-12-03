@@ -106,8 +106,15 @@ const { $scene }: any = useNuxtApp()
 
 const store = useStore()
 const { updateHeader, updateLoading, updateSection, updateInReel } = store
-const { section, gridType, headerLogo, isInReel, isInProjectEntered, landingTabIndex } =
-  storeToRefs(store)
+const {
+  isPreloaded,
+  section,
+  gridType,
+  headerLogo,
+  isInReel,
+  isInProjectEntered,
+  landingTabIndex,
+} = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
@@ -137,6 +144,7 @@ const videoEl = ref<HTMLVideoElement>()
 const reelButtonEl = ref<HTMLElement>()
 const videoPlaying = ref<boolean>(false)
 const videoInView = ref<boolean>(false)
+const videoCanPlay = ref<boolean>(false)
 const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
 const reelFade = ref<number>(1)
@@ -209,6 +217,12 @@ const position = computed<{ x: number; y: number }>(() => {
     x: x,
     y: initY + incrementY * scrollProgress.value,
   }
+})
+
+const isReady = computed<boolean>(() => isPreloaded.value && videoCanPlay.value)
+
+watch(isReady, ready => {
+  ready && animate()
 })
 
 watch(hideComponents, async () => {
@@ -382,7 +396,7 @@ function goToReel() {
     videoEl.value.muted = false
     videoEl.value.loop = false
     videoEl.value.play()
-    videoEl.value.addEventListener('canplaythrough', onReelReady)
+    videoEl.value.addEventListener('canplay', onReelReady)
   }
 }
 
@@ -390,7 +404,7 @@ function onReelReady() {
   gsap.killTweensOf(reelFade)
   gsap.to(reelFade, { value: 1, onUpdate: updateReelOpacity })
   reelReady.value = true
-  videoEl.value?.removeEventListener('canplaythrough', onReelReady)
+  videoEl.value?.removeEventListener('canplay', onReelReady)
 }
 
 function updateReelOpacity() {
@@ -432,6 +446,34 @@ function closeReel() {
 function toggleReel() {
   if (videoEl.value) {
     videoEl.value.paused ? videoEl.value.play() : videoEl.value.pause()
+  }
+}
+
+function animate() {
+  if (firstTransition.state) {
+    updateLoading(false)
+    const duration = 0.8
+    for (let i = 1; i < firstTransition.steps.length; i++) {
+      const delay = duration * (i - 1)
+      gsap.set(firstTransition, { progress: 0, delay })
+      gsap.to(firstTransition, {
+        progress: 1,
+        duration,
+        delay,
+        onStart: () => {
+          firstTransition.step = i
+        },
+        onUpdate: () => {
+          i === firstTransition.steps.length - 1 &&
+            firstTransition.progress > 0.2 &&
+            !heroAnimation.value &&
+            onLastAnimationStepDone()
+        },
+        onComplete: () => {
+          i === firstTransition.steps.length - 1 && onFirstAnimationDone()
+        },
+      })
+    }
   }
 }
 
@@ -490,31 +532,7 @@ function updateFirstTransitionSteps() {
 }
 
 function onVideoReady() {
-  if (firstTransition.state) {
-    updateLoading(false)
-    const duration = 0.8
-    for (let i = 1; i < firstTransition.steps.length; i++) {
-      const delay = duration * (i - 1)
-      gsap.set(firstTransition, { progress: 0, delay })
-      gsap.to(firstTransition, {
-        progress: 1,
-        duration,
-        delay,
-        onStart: () => {
-          firstTransition.step = i
-        },
-        onUpdate: () => {
-          i === firstTransition.steps.length - 1 &&
-            firstTransition.progress > 0.2 &&
-            !heroAnimation.value &&
-            onLastAnimationStepDone()
-        },
-        onComplete: () => {
-          i === firstTransition.steps.length - 1 && onFirstAnimationDone()
-        },
-      })
-    }
-  }
+  videoCanPlay.value = true
 }
 
 function onVideoPlaying() {

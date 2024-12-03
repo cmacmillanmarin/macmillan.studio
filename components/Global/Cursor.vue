@@ -29,7 +29,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { fadeIn, fadeOut, transitionShuffleIn, transitionDone } from '~/utils/animations'
 
-const { cursor, cursorColor, cursorPosition } = storeToRefs(useStore())
+const { isPreloaded, cursor, cursorColor, cursorPosition } = storeToRefs(useStore())
 
 const { addTicker, killTicker } = useRaf()
 
@@ -51,7 +51,7 @@ let _entered: boolean = false
 let _inFixedPosition: boolean = false
 
 watch([mouseX, mouseY], () => {
-  if (_inFixedPosition || cursor.value === 'none') return
+  if (_inFixedPosition || cursor.value === 'none' || !isPreloaded.value) return
   if (!_entered) {
     _entered = true
     _x = mouseX.value

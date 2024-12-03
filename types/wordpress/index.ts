@@ -464,6 +464,12 @@ export function getPostNamesFrom(source?: Array<{ post_name: string }>): string 
   return ''
 }
 
+export interface WP_Head {
+  title: string
+  description: string
+  og_image: WP_Image
+  tw_image: WP_Image
+}
 export interface Head {
   title: string
   description: string
@@ -471,11 +477,11 @@ export interface Head {
   tw_image: string
 }
 
-export function parseHead(data?: Head): Head {
+export function parseHead(data?: WP_Head): Head {
   return {
     title: data?.title || '',
     description: data?.description || '',
-    og_image: data?.og_image || '',
-    tw_image: data?.tw_image || '',
+    og_image: data?.og_image.url || '',
+    tw_image: data?.tw_image.url || '',
   }
 }
