@@ -389,7 +389,7 @@ function updateDom() {
 
 function onImageLoaded() {
   $scene.updateObject({ id: projectId.value, img: customImageEl.value?.el })
-  customImageEl.value?.el && $scene.preload(customImageEl.value.el)
+  // customImageEl.value?.el && $scene.preload(customImageEl.value.el)
 }
 
 async function createPlane() {

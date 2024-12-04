@@ -2,7 +2,6 @@ precision highp float;
 
 varying vec2 vUv;
 
-uniform int uNoise;
 uniform int uFrame;
 uniform float uTime;
 uniform float uFade;
@@ -23,13 +22,6 @@ uniform vec4 uColor;
 uniform float uZoom;
 uniform float uDevicePixelRatio;
 uniform float uBlackAndWhite;
-
-
-float hash(uint n) {
-    n = (n << 13U) ^ n;
-    n = n * (n * n * 15731U + 789221U) + 1376312589U;
-    return float(n & uint(0x7fffffffU)) / float(0x7fffffff);
-}
 
 float roundedBoxSDF(vec2 p, vec2 b, float r) {
   vec2 q = abs(p) - b + vec2(r);
@@ -97,13 +89,7 @@ void main() {
   vec4 blackAndWhiteTexture = vec4(vec3(0.2126 * mixedTexture.x + 0.7152 * mixedTexture.y + 0.0722 * mixedTexture.z), 1.0);
   vec4 finalTexture = mix(mixedTexture, blackAndWhiteTexture, uBlackAndWhite) * uMultiplyColor;
 
-  if (uNoise == 1) {
-    uvec2 psI = uvec2(uPlaneSize.xy);
-    uvec2 uvI = uvec2(uv.xy * uPlaneSize.x * uPlaneSize.y * uDevicePixelRatio);
-    uint frameI = uint(uFrame);
-    float random = hash(uvI.x + psI.x * uvI.y + (psI.x * psI.y) * frameI);
-    gl_FragColor = vec4(vec3(0.0), random * 0.2 * uOpacity * uFade);
-  } else if (uTextureLoaded == 0) {
+  if (uTextureLoaded == 0) {
     gl_FragColor = vec4(uColor.xyz, uFade * uOpacity);
   } else if (uTextureFade != 1.0) {
     gl_FragColor = vec4(mix(uColor.xyz, finalTexture.xyz, uTextureFade), uFade * uOpacity);

@@ -77,10 +77,9 @@ export interface Object {
   inZoomTransition?: boolean
 }
 
-export interface LoadedTexture {
+export interface PlaneTexture {
   id: string
-  ready: boolean
-  txt: Texture
+  txt?: Texture
 }
 
 export interface InViewParams {

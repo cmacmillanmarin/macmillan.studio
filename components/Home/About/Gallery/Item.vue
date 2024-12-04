@@ -119,7 +119,7 @@ function onVideoLoaded() {
 }
 
 function onImageLoaded() {
-  customImageEl.value?.el && $scene.preload(customImageEl.value.el)
+  // customImageEl.value?.el && $scene.preload(customImageEl.value.el)
 }
 
 function onMouseEnter() {

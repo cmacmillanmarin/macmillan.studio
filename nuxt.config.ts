@@ -26,6 +26,7 @@ const robotsRules: Array<any> = [
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   ssr: true,
+
   runtimeConfig: {
     VITE_CJS_IGNORE_WARNING,
     public: {
@@ -38,6 +39,7 @@ export default defineNuxtConfig({
       BE_API_URL: `${BE_PROTOCOL}${BE_BASE_URL}${BE_BASE_API_URL}`,
     },
   },
+
   app: {
     head: {
       htmlAttrs: {

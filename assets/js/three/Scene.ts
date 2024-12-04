@@ -14,6 +14,7 @@ import {
   WebGLRenderer,
   DirectionalLight,
   Object3D,
+  Texture,
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
@@ -21,16 +22,15 @@ import { gsap } from 'gsap/gsap-core'
 import { round, slugify, videoLoaded } from '~/utils'
 
 import VS from '~/assets/js/three/glsl/vs.glsl'
-import FS from '~/assets/js/three/glsl/vs.glsl'
-import type { Cursor } from '~/types/front/store'
+import FS from '~/assets/js/three/glsl/fs.glsl'
 import type {
   CreateParams,
   Fixed,
   InViewParams,
-  LoadedTexture,
   Object,
   ObjectParam,
   Plane,
+  PlaneTexture,
 } from '~/types/front/three'
 
 export default class {
@@ -91,15 +91,17 @@ export default class {
 
   raycaster: Raycaster = new Raycaster()
 
-  loader: TextureLoader = new TextureLoader()
-  loaderRequests: number = 0
-  loadedTextures: Array<LoadedTexture> = []
-  loadedTexturesCount: number = 0
-  onPreloaded: Function = () => {}
+  textures: Array<PlaneTexture> = []
+  texturesLoader: TextureLoader = new TextureLoader()
+  texturesLoaderRequests: number = 0
+  texturesLoaderRequestsThreshold: number = 2
+  texturesLoaderRequestQueue: Array<HTMLImageElement> = []
 
-  updateCursor: Function = (value: Cursor) => {}
+  onPreloaded: Function = () => {}
+  updateCursor: Function = () => {}
 
   _onClick: (this: Window, ev: MouseEvent) => any = () => {}
+  _onTextureLoaded: (data: Texture) => void = () => {}
   _onMouseMovement: (this: Window, ev: MouseEvent) => any = () => {}
   _onTouchStart: (this: Window, ev: TouchEvent) => any = () => {}
   _onTouchEnd: (this: Window, ev: TouchEvent) => any = () => {}
@@ -164,25 +166,47 @@ export default class {
       console.warn('No image to preload')
       return
     }
+    console.log('preload', img)
+    this.createTexture(img)
+  }
+
+  createTexture(img: HTMLImageElement): PlaneTexture {
+    const id = this.getTextureId(img)
+    const texture: PlaneTexture = { id }
+    this.textures.push(texture)
+    this.loadTexture(img)
+    return texture
+  }
+
+  loadTexture(img: HTMLImageElement) {
     const src = img.src || img.currentSrc
-    const id = slugify(src)
-    const exists = this.loadedTextures.find(t => t.id === id)
-    if (!exists && this.loaderRequests < 2) {
-      this.loaderRequests++
-      this.loadedTextures.push({
-        id,
-        ready: false,
-        txt: this.loader.load(img.src || img.currentSrc, async texture => {
-          await this.renderer?.initTexture(texture)
-          this.loaderRequests--
-          const loadedTexture = this.loadedTextures.find(t => t.id === id)
-          if (loadedTexture) {
-            loadedTexture.ready = true
-            this.loadedTexturesCount++
-          }
-        }),
-      })
+    if (this.texturesLoaderRequests <= this.texturesLoaderRequestsThreshold) {
+      this.texturesLoaderRequests++
+      this.texturesLoader.load(src, this._onTextureLoaded)
+    } else {
+      this.texturesLoaderRequestQueue.push(img)
     }
+  }
+
+  async onTextureLoaded(txt: Texture) {
+    await this.renderer?.initTexture(txt)
+    const texture = this.getTexture(txt.image)
+    texture.txt = txt
+    this.texturesLoaderRequests--
+    const queueTexture = this.texturesLoaderRequestQueue.pop()
+    queueTexture && this.loadTexture(queueTexture)
+  }
+
+  getTextureId(img: HTMLImageElement): string {
+    const src = img.src || img.currentSrc
+    return slugify(src)
+  }
+
+  getTexture(img: HTMLImageElement): PlaneTexture {
+    const id = this.getTextureId(img)
+    const existingTexture = this.textures.find(t => t.id === id)
+    if (existingTexture) return existingTexture
+    return this.createTexture(img)
   }
 
   addObject(param: ObjectParam) {
@@ -285,76 +309,23 @@ export default class {
 
     for (const object of this.objects) {
       object.inView = this.inView(object)
-      let texture: LoadedTexture | undefined
 
       if (object.inView) {
         if (!object.mesh) {
-          const availablePlane = this.getAvailablePlane(object.id)
-          if (!availablePlane) {
+          const plane = this.getAvailablePlane(object.id)
+          if (!plane) {
             console.warn(`No available planes for ${object.id}`)
             continue
           }
-
-          object.mesh = availablePlane.mesh
-          object.meshId = availablePlane.id
-          object.mesh.material.uniforms.uTextureFade.value = 0
-          object.mesh.material.uniforms.uTextureLoaded.value = 0
-          object.mesh.material.uniforms.uBlackAndWhite.value = object.blackAndWhite ? 1 : 0
-          object.mesh.material.uniforms.uDevicePixelRatio.value = this.getDevicePixelRatio()
-
-          object.firstFrame = true
-          object.wasPixelated = false
-          object.wasHovered = false
-          object.wasClickable = false
-          object.previousCursor = object.cursor
-          object.videoAssigned = object.imgAssigned = false
-
-          if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
-          else object.mesh.material.uniforms.uFade.value = 1
-        }
-
-        if (object.video && !object.videoAssigned) {
-          object.videoAssigned = true
-          object.mesh.material.uniforms.uTextureType.value = 0
-          object.mesh.material.uniforms.uTextureVideo.value.image = object.video
-          object.mesh.material.uniforms.uTextureSize.value.x = object.size.x
-          object.mesh.material.uniforms.uTextureSize.value.y =
-            (object.size.x * object.video.height) / object.video.width
-          object.mesh.material.uniforms.uTextureLoaded.value =
-            videoLoaded(object.video) && object.firstFrame ? 1 : 0
-        } else if (object.img && !object.imgAssigned) {
-          object.imgAssigned = true
-          object.mesh.material.uniforms.uTextureType.value = 1
-          object.mesh.material.uniforms.uTextureSize.value.x = object.img.width
-          object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
-          if (this.imageLoaded(object.img) && object.firstFrame) {
-            object.mesh.material.uniforms.uTextureLoaded.value = 1
-            texture = this.loadedTextures.find(t => t.id === slugify(object.img?.currentSrc || ''))
-            if (texture) object.mesh.material.uniforms.uTextureImage.value = texture.txt
-          }
-        }
-
-        const { uniforms } = object.mesh.material as ShaderMaterial
-
-        let isLoaded = 0
-        if (uniforms.uTextureLoaded.value === 1) isLoaded = 1
-        else if (object.video) isLoaded = videoLoaded(object.video) ? 1 : 0
-        else if (object.img) {
-          isLoaded = this.imageLoaded(object.img)
-          if (isLoaded) {
-            texture = this.loadedTextures.find(t => t.id === slugify(object.img?.currentSrc || ''))
-            if (texture) uniforms.uTextureImage.value = texture.txt
-          } else this.preload(object.img)
-        }
-
-        if (isLoaded && uniforms.uTextureFade.value === 0) {
-          const fade = isLoaded !== uniforms.uTextureLoaded.value
-          uniforms.uTextureLoaded.value = 1
-          gsap.killTweensOf(uniforms.uTextureFade)
-          gsap[fade ? 'to' : 'set'](uniforms.uTextureFade, { value: 1 })
+          this.assignPlaneToObject({ plane, object })
         }
 
         this.needsUpdate = true
+
+        object.img && this.processImage(object)
+        object.video && this.processVideo(object)
+
+        const { uniforms } = object.mesh.material
 
         const position: { x: number; y: number } = this.fromDomToCanvas({
           x: object.position.x,
@@ -389,7 +360,6 @@ export default class {
 
         if (object.video) {
           const { readyState, HAVE_CURRENT_DATA } = object.video
-          uniforms.uTextureVideo.value.needsUpdate = readyState >= HAVE_CURRENT_DATA
         }
 
         if (object.textureFade) uniforms.uTextureFade.value = object.textureFade
@@ -473,6 +443,76 @@ export default class {
         this.releasePlane(object.meshId)
         object.mesh = null
       }
+    }
+  }
+
+  assignPlaneToObject(params: { plane: Plane; object: Object }) {
+    const { plane, object } = params
+
+    object.mesh = plane.mesh
+    object.meshId = plane.id
+
+    object.firstFrame = true
+    object.wasHovered = false
+    object.wasPixelated = false
+    object.wasClickable = false
+    object.previousCursor = object.cursor
+    object.videoAssigned = object.imgAssigned = false
+
+    const { uniforms } = object.mesh.material
+
+    uniforms.uTextureFade.value = 0
+    uniforms.uTextureLoaded.value = 0
+    uniforms.uBlackAndWhite.value = object.blackAndWhite ? 1 : 0
+    uniforms.uDevicePixelRatio.value = this.getDevicePixelRatio()
+
+    if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
+    else object.mesh.material.uniforms.uFade.value = 1
+  }
+
+  processImage(object: Object) {
+    const { img } = object
+    if (!img) return
+
+    const texture = this.getTexture(img)
+
+    if (texture.txt && !object.imgAssigned) {
+      object.imgAssigned = true
+      const { uniforms } = object.mesh.material
+
+      uniforms.uTextureType.value = 1
+      uniforms.uTextureSize.value.x = img.width
+      uniforms.uTextureSize.value.y = img.height
+      uniforms.uTextureLoaded.value = 1
+      object.mesh.material.uniforms.uTextureImage.value = texture.txt
+
+      const fade = !object.firstFrame
+      gsap.killTweensOf(uniforms.uTextureFade)
+      gsap[fade ? 'to' : 'set'](uniforms.uTextureFade, { value: 1 })
+    }
+  }
+
+  processVideo(object: Object) {
+    const { video } = object
+    if (!video) return
+
+    const { uniforms } = object.mesh.material
+    const { width, height, readyState, HAVE_CURRENT_DATA } = video
+
+    uniforms.uTextureLoaded.value = this.videoLoaded(video)
+    uniforms.uTextureVideo.value.needsUpdate = readyState >= HAVE_CURRENT_DATA
+
+    if (uniforms.uTextureLoaded.value === 1 && !object.videoAssigned) {
+      object.videoAssigned = true
+
+      uniforms.uTextureType.value = 0
+      uniforms.uTextureVideo.value.image = video
+      uniforms.uTextureSize.value.x = object.size.x
+      uniforms.uTextureSize.value.y = (object.size.x * height) / width
+
+      const fade = !object.firstFrame
+      gsap.killTweensOf(uniforms.uTextureFade)
+      gsap[fade ? 'to' : 'set'](uniforms.uTextureFade, { value: 1 })
     }
   }
 
@@ -750,11 +790,13 @@ export default class {
   }
 
   imageLoaded(img: HTMLImageElement): number {
-    const { currentSrc } = img
-    const id = slugify(currentSrc)
-    const texture = this.loadedTextures.find(t => t.id === id)
-    if (texture?.ready) return 1
+    const texture = this.getTexture(img)
+    if (texture.txt) return 1
     return 0
+  }
+
+  videoLoaded(video: HTMLVideoElement): number {
+    return videoLoaded(video) ? 1 : 0
   }
 
   onClick(e: MouseEvent) {
@@ -808,6 +850,7 @@ export default class {
 
   bind() {
     this._onClick = this.onClick.bind(this)
+    this._onTextureLoaded = this.onTextureLoaded.bind(this)
     this._onMouseMovement = this.onMouseMovement.bind(this)
     this._onTouchStart = this.onTouchStart.bind(this)
     this._onTouchEnd = this.onTouchEnd.bind(this)

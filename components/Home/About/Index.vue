@@ -141,14 +141,14 @@ let _color = { vec4: rbgToVec4(hexToRgb('bdff00')), alpha: 1 }
 
 watch(thumbnailImageLoaded, () => {
   if (thumbnailImageEl.value && thumbnailImageLoaded.value) {
-    $scene.preload(thumbnailImageEl.value.el)
+    // $scene.preload(thumbnailImageEl.value.el)
     updateImagePositions()
   }
 })
 
 watch(collaboratorImageLoaded, () => {
   if (collaboratorImageEl.value && collaboratorImageLoaded.value) {
-    $scene.preload(collaboratorImageEl.value.el)
+    // $scene.preload(collaboratorImageEl.value.el)
     updateImagePositions()
   }
 })
