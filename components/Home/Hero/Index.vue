@@ -313,7 +313,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
   let _opacity = 1
   let _fixed = { from: 0, to: vh.value * scrollGap.value }
   let _parallax = { x: 0, y: 0 }
-  let _forcePixelated =
+  let _forcePixel =
     current.value >= vh.value * scrollGap.value && isMobileLayout.value && !isInReel.value
 
   if (firstTransition.state) {
@@ -323,7 +323,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
     if (from && to) {
       const progress = firstTransition.progress
       if (progress === 0) return
-      _forcePixelated = !!from.forcePixelated
+      _forcePixel = !!from.forcePixel
       _size = {
         x: from.size.x + (to.size.x - from.size.x) * progress,
         y: from.size.y + (to.size.y - from.size.y) * progress,
@@ -350,7 +350,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
     zoom: _zoom,
     opacity: _opacity,
     parallax: _parallax,
-    forcePixelated: _forcePixelated,
+    forcePixel: _forcePixel,
   })
 })
 
@@ -365,7 +365,6 @@ onMounted(() => {
   videoInView.value = current.value < componentHeight.value && section.value === 'hero'
   $scene.addObject({
     id: 'reel',
-    type: 'plane',
     video: videoEl.value,
     color: rbgToVec4(hexToRgb('#000000')),
     cursor: 'play',
@@ -383,7 +382,7 @@ function goToReel() {
     onClick: null,
     noPixel: true,
     cursor: null,
-    forcePixelated: false,
+    forcePixel: false,
   })
   gsap.killTweensOf(reelFade)
   gsap.to(reelFade, { value: 0, onUpdate: updateReelOpacity })
@@ -512,21 +511,21 @@ function updateFirstTransitionSteps() {
       size: { x: initWidth, y: initHeight, z: 1 },
       border: toScale(isMobileLayout.value ? 8 : 16),
       zoom: isMobileLayout.value ? 1 : 2,
-      forcePixelated: isMobileLayout.value,
+      forcePixel: isMobileLayout.value,
     },
     {
       position: { x: halfWidth - initWidth * 0.5, y: halfHeight - initHeight * 0.5 },
       size: { x: initWidth, y: initHeight, z: 1 },
       border: toScale(isMobileLayout.value ? 8 : 16),
       zoom: isMobileLayout.value ? 1 : 2,
-      forcePixelated: false,
+      forcePixel: false,
     },
     {
       position: { x: finalX, y: finalY },
       size: { x: finalWidth, y: finalHeight, z: 1 },
       border: 0,
       zoom: 1,
-      forcePixelated: false,
+      forcePixel: false,
     },
   ]
 }

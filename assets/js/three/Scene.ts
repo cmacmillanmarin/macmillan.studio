@@ -13,96 +13,104 @@ import {
   PerspectiveCamera,
   WebGLRenderer,
   DirectionalLight,
+  Object3D,
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 import { gsap } from 'gsap/gsap-core'
 import { round, slugify, videoLoaded } from '~/utils'
 
-import VS from './glsl/vs.glsl'
-import FS from './glsl/fs.glsl'
+import VS from '~/assets/js/three/glsl/vs.glsl'
+import FS from '~/assets/js/three/glsl/vs.glsl'
+import type { Cursor } from '~/types/front/store'
+import type {
+  CreateParams,
+  Fixed,
+  InViewParams,
+  LoadedTexture,
+  Object,
+  ObjectParam,
+  Plane,
+} from '~/types/front/three'
 
-class Controller {
+export default class {
+  debug: boolean = false
+
+  ready: boolean = false
+  active: boolean = false
+
+  main: HTMLElement | null = null
+  canvas: HTMLCanvasElement | null = null
+
+  y: number = 0
+  z: number = 1000
+  scene: Scene | null = null
+  camera: PerspectiveCamera | null = null
+  renderer: WebGLRenderer | null = null
+
+  logo: Object3D | null = null
+  logoScene: Scene | null = null
+  logoCamera: PerspectiveCamera | null = null
+  logoLight: DirectionalLight | null = null
+  logoSize: number = 160
+  logoScale: number = 1
+  logoTargetScale: number = 1
+  logoAnimation: { value: number } = { value: 0 }
+  logoMargin: number = 0
+
+  colors: { [key: string]: Vector4 } = {
+    white: new Vector4(1.0, 1.0, 1.0, 1.0),
+    lime: new Vector4(197.0 / 255.0, 255.0 / 255.0, 32.0 / 255.0, 1.0),
+    lightGrey: new Vector4(211.0 / 255.0, 214.0 / 255.0, 218.0 / 255.0, 1.0),
+    darkGrey: new Vector4(129.0 / 255.0, 131.0 / 255.0, 136.0 / 255.0, 1.0),
+  }
+
+  maxPlanes: number = 10
+  batch: Array<Plane> = []
+
+  objects: Array<Object> = []
+  intersects: Array<Object3D> = []
+
+  frame: number = 0
+  rendering: boolean = false
+  needsUpdate: boolean = false
+
+  touch: boolean = false
+  touchStartX: number = 0
+  touchStartY: number = 0
+  touchTime: number = 0
+
+  isMobileLayout: boolean = false
+
+  bounding: DOMRect | null = null
+  scrollBounding: number = 0
+  maxPixelRatio: number = 2
+
+  size: Vector2 = new Vector2()
+  mouse: Vector2 = new Vector2(-1000, -1000)
+
+  raycaster: Raycaster = new Raycaster()
+
+  loader: TextureLoader = new TextureLoader()
+  loaderRequests: number = 0
+  loadedTextures: Array<LoadedTexture> = []
+  loadedTexturesCount: number = 0
+  onPreloaded: Function = () => {}
+
+  updateCursor: Function = (value: Cursor) => {}
+
+  _onClick: (this: Window, ev: MouseEvent) => any = () => {}
+  _onMouseMovement: (this: Window, ev: MouseEvent) => any = () => {}
+  _onTouchStart: (this: Window, ev: TouchEvent) => any = () => {}
+  _onTouchEnd: (this: Window, ev: TouchEvent) => any = () => {}
+
   constructor() {
-    this.debug = false
-
-    this.ready = false
-    this.active = false
-    this.canvas = null
-    this.scene = null
-    this.camera = null
-    this.renderer = null
-    this.main = null
-    this.frame = 0
-    this.isMobileLayout = false
-
-    this.logo = null
-    this.logoScene = null
-    this.logoCamera = null
-    this.logoLight = null
-    this.logoSize = 160
-    this.logoScale = 1
-    this.logoAnimation = {
-      value: 0,
-    }
-    this.logoMargin =
-      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
-      10
-
-    this.touch = !!window.getComputedStyle(document.body, ':after').getPropertyValue('--touch')
-    this.touchStartX = 0
-    this.touchStartY = 0
-    this.touchTime = 0
-
-    this.bounding = 0
-    this.scrollBounding = 0
-
-    this._onClick = null
-    this._onMouseMovement = null
-
-    this.z = 1000
-
-    this.size = new Vector2()
-    this.mouse = new Vector2(-1000, -1000)
-    this.raycaster = new Raycaster()
-    this.loader = new TextureLoader()
-    this.loadedTextures = []
-    this.loadedTexturesCount = 0
-    this.onPreloaded = () => {
-      console.log('Textures preloaded!')
-    }
-    this.updateCursor = value => {
-      console.log(`Update cursor to ${value}`)
-    }
-
-    this.maxPixelRatio = 2
-    this.rendering = false
-    this.needsUpdate = false
-
-    this.geometries = {
-      plane: new PlaneGeometry(1, 1),
-    }
-
-    this.colors = {
-      white: new Vector4(1.0, 1.0, 1.0, 1.0),
-      lime: new Vector4(197.0 / 255.0, 255.0 / 255.0, 32.0 / 255.0, 1.0),
-      lightGrey: new Vector4(211.0 / 255.0, 214.0 / 255.0, 218.0 / 255.0, 1.0),
-      darkGrey: new Vector4(129.0 / 255.0, 131.0 / 255.0, 136.0 / 255.0, 1.0),
-    }
-
-    this.maxPlanes = 10
-    this.batch = []
-    this.loaderRequests = 0
-
-    this.objects = []
-
-    this.intersects = []
-
     this.bind()
   }
 
-  async create({ el, size, onPreloaded, updateCursor }) {
+  async create(params: CreateParams) {
     this.log(`create()`)
+    const { el, size, updateCursor, onPreloaded } = params
 
     this.main = document.querySelector('main')
 
@@ -122,7 +130,6 @@ class Controller {
       alpha: true,
       antialias: false,
       premultipliedAlpha: false,
-      sortObjects: true,
     })
     this.renderer.setClearColor(0x000000, 0)
     this.renderer.autoClear = false
@@ -146,117 +153,108 @@ class Controller {
       this.logoLight = new DirectionalLight(0xffffff, 0)
       this.logoLight.position.set(1, 1, 1)
 
-      this.logoScene.add(this.logoLight)
-      this.logoScene.add(this.logo)
+      this.logoScene?.add(this.logoLight)
+      this.logoScene?.add(this.logo)
       this.onPreloaded()
     })
   }
 
-  preload(img) {
+  preload(img?: HTMLImageElement) {
+    if (!img) {
+      console.warn('No image to preload')
+      return
+    }
     const src = img.src || img.currentSrc
     const id = slugify(src)
     const exists = this.loadedTextures.find(t => t.id === id)
-    if (img && !exists && this.loaderRequests < 2) {
+    if (!exists && this.loaderRequests < 2) {
       this.loaderRequests++
       this.loadedTextures.push({
         id,
         ready: false,
         txt: this.loader.load(img.src || img.currentSrc, async texture => {
-          await this.renderer.initTexture(texture)
+          await this.renderer?.initTexture(texture)
           this.loaderRequests--
           const loadedTexture = this.loadedTextures.find(t => t.id === id)
-          loadedTexture.ready = true
-          this.loadedTexturesCount++
-          // if (this.loadedTexturesCount === this.loadedTextures.length) this.onPreloaded()
+          if (loadedTexture) {
+            loadedTexture.ready = true
+            this.loadedTexturesCount++
+          }
         }),
       })
     }
   }
 
-  addObject(object) {
+  addObject(param: ObjectParam) {
     this.log('addObject()')
 
-    object.onClick = object.onClick || null
-    object.onIntersect = object.onIntersect || null
-    object.border = object.border || 0
-    object.fade = object.fade || false
-    object.position = object.position || { x: 0, y: 0 }
-    object.parallax = object.parallax || { x: 0, y: 0 }
-    object.size = object.size || { x: 0, y: 0, z: 1 }
-    object.rotate = object.rotate || { x: 0, y: 0, z: 0 }
-    object.zoom = object.zoom || 1
-    object.order = object.order || 0
-    object.cursor = object.cursor || 'plus'
-    object.opacity = object.opacity !== undefined ? object.opacity : 1
-    object.textureFade = object.textureFade !== undefined ? object.textureFade : null
-    object.multiplyColor = object.multiplyColor || null
-    object.color = object.color || null
-    object.noPixel = !!object.noPixel
-    object.blackAndWhite = !!object.blackAndWhite
-    this.objects.push(object)
+    this.objects.push({
+      ...param,
+      border: param.border || 0,
+      fade: !!param.fade,
+      fixed: param.fixed || { from: 0, to: 0 },
+      position: param.position || new Vector2(),
+      parallax: param.parallax || new Vector2(),
+      size: param.size || new Vector3(),
+      rotate: param.rotate || new Vector3(),
+      zoom: param.zoom || 1,
+      order: param.order || 0,
+      cursor: param.cursor || 'default',
+      opacity: param.opacity !== undefined ? param.opacity : 1,
+      textureFade: param.textureFade !== undefined ? param.textureFade : null,
+      multiplyColor: param.multiplyColor || null,
+      color: param.color || null,
+      noPixel: !!param.noPixel,
+      forcePixel: !!param.forcePixel,
+      blackAndWhite: !!param.blackAndWhite,
+      img: param.img || null,
+      video: param.video || null,
+      onClick: param.onClick || null,
+      onIntersect: param.onIntersect || null,
+      inView: false,
+    })
   }
 
-  getObject(id) {
+  getObject(id: string): Object | undefined {
     return this.objects.find(obj => obj.id === id)
   }
 
-  updateObject({
-    id,
-    fixed,
-    position,
-    parallax,
-    opacity,
-    rotate,
-    zoom,
-    size,
-    cursor,
-    fade,
-    img,
-    video,
-    border,
-    order,
-    multiplyColor,
-    color,
-    textureFade,
-    noPixel,
-    blackAndWhite,
-    forcePixelated,
-    onClick,
-    onIntersect,
-  }) {
-    this.log(`updateObject() ${id}`)
-    const object = this.getObject(id)
+  updateObject(param: ObjectParam) {
+    this.log(`updateObject() ${param.id}`)
+    const object = this.getObject(param.id)
     if (object) {
-      object.zoom = zoom !== undefined ? zoom : object.zoom
-      object.border = border !== undefined ? border : object.border
-      object.position = position || object.position
-      object.parallax = parallax || object.parallax
-      object.rotate = rotate || object.rotate
-      object.img = img || object.img
-      object.video = video || object.video
-      object.size = size || object.size
-      object.fade = fade !== undefined ? fade : object.fade
-      object.fixed = fixed || object.fixed
-      object.order = order !== undefined ? order : object.order
-      object.opacity = opacity !== undefined ? opacity : object.opacity
-      object.onClick = onClick !== undefined ? onClick : object.onClick
-      object.multiplyColor = multiplyColor || object.multiplyColor
-      object.color = color || object.color
-      object.textureFade = textureFade !== undefined ? textureFade : object.textureFade
-      object.cursor = cursor || object.cursor
-      object.noPixel = noPixel !== undefined ? noPixel : object.noPixel
-      object.blackAndWhite = blackAndWhite !== undefined ? blackAndWhite : object.blackAndWhite
-      object.forcePixelated = forcePixelated !== undefined ? forcePixelated : object.forcePixelated
-      object.onIntersect = onIntersect !== undefined ? onIntersect : object.onIntersect
+      object.zoom = param.zoom !== undefined ? param.zoom : object.zoom
+      object.border = param.border !== undefined ? param.border : object.border
+      object.position = param.position || object.position
+      object.parallax = param.parallax || object.parallax
+      object.rotate = param.rotate || object.rotate
+      object.img = param.img || object.img
+      object.video = param.video || object.video
+      object.size = param.size || object.size
+      object.fade = param.fade !== undefined ? param.fade : object.fade
+      object.fixed = param.fixed || object.fixed
+      object.order = param.order !== undefined ? param.order : object.order
+      object.opacity = param.opacity !== undefined ? param.opacity : object.opacity
+      object.onClick = param.onClick !== undefined ? param.onClick : object.onClick
+      object.multiplyColor = param.multiplyColor || object.multiplyColor
+      object.color = param.color || object.color
+      object.textureFade = param.textureFade !== undefined ? param.textureFade : object.textureFade
+      object.cursor = param.cursor || object.cursor
+      object.noPixel = param.noPixel !== undefined ? param.noPixel : object.noPixel
+      object.blackAndWhite =
+        param.blackAndWhite !== undefined ? param.blackAndWhite : object.blackAndWhite
+      object.forcePixel = param.forcePixel !== undefined ? param.forcePixel : object.forcePixel
+      object.onIntersect = param.onIntersect !== undefined ? param.onIntersect : object.onIntersect
     }
   }
 
-  removeObject({ id }) {
+  removeObject(params: { id: string }) {
     if (!this.objects) return
+    const { id } = params
     const index = this.objects.findIndex(object => object.id === id)
     const object = this.objects[index]
     if (!object) return
-    if (object.mesh) {
+    if (object.mesh && object.mesh.material.uniforms) {
       gsap.killTweensOf(object.mesh.material.uniforms.uFade)
       gsap.to(object.mesh.material.uniforms.uFade, {
         value: 0.0,
@@ -265,7 +263,7 @@ class Controller {
         onComplete: () => {
           const index = this.objects.findIndex(object => object.id === id)
           const object = this.objects[index]
-          this.releasePlane(object.meshId)
+          object.meshId && this.releasePlane(object.meshId)
           this.objects.splice(index, 1)
         },
       })
@@ -274,10 +272,12 @@ class Controller {
     }
   }
 
-  updateY(y) {
+  updateY(y: number) {
     this.y = y
-    this.camera.position.y = this.y * -1
-    this.raycaster.setFromCamera(this.mouse, this.camera)
+    if (this.camera) {
+      this.camera.position.y = this.y * -1
+      this.raycaster.setFromCamera(this.mouse, this.camera)
+    }
   }
 
   updateObjects() {
@@ -285,7 +285,7 @@ class Controller {
 
     for (const object of this.objects) {
       object.inView = this.inView(object)
-      let texture = null
+      let texture: LoadedTexture | undefined
 
       if (object.inView) {
         if (!object.mesh) {
@@ -297,7 +297,6 @@ class Controller {
 
           object.mesh = availablePlane.mesh
           object.meshId = availablePlane.id
-          object.mesh.material.uniforms.uNoise.value = object.id === 'noise' ? 1 : 0
           object.mesh.material.uniforms.uTextureFade.value = 0
           object.mesh.material.uniforms.uTextureLoaded.value = 0
           object.mesh.material.uniforms.uBlackAndWhite.value = object.blackAndWhite ? 1 : 0
@@ -330,21 +329,21 @@ class Controller {
           object.mesh.material.uniforms.uTextureSize.value.y = object.img.height
           if (this.imageLoaded(object.img) && object.firstFrame) {
             object.mesh.material.uniforms.uTextureLoaded.value = 1
-            texture = this.loadedTextures.find(t => t.id === slugify(object.img.currentSrc))
-            object.mesh.material.uniforms.uTextureImage.value = texture.txt
+            texture = this.loadedTextures.find(t => t.id === slugify(object.img?.currentSrc || ''))
+            if (texture) object.mesh.material.uniforms.uTextureImage.value = texture.txt
           }
         }
 
-        const { uniforms } = object.mesh.material
+        const { uniforms } = object.mesh.material as ShaderMaterial
 
         let isLoaded = 0
-        if (uniforms.uTextureLoaded.value === 1 || object.id === 'noise') isLoaded = 1
+        if (uniforms.uTextureLoaded.value === 1) isLoaded = 1
         else if (object.video) isLoaded = videoLoaded(object.video) ? 1 : 0
         else if (object.img) {
           isLoaded = this.imageLoaded(object.img)
           if (isLoaded) {
-            texture = this.loadedTextures.find(t => t.id === slugify(object.img.currentSrc))
-            uniforms.uTextureImage.value = texture.txt
+            texture = this.loadedTextures.find(t => t.id === slugify(object.img?.currentSrc || ''))
+            if (texture) uniforms.uTextureImage.value = texture.txt
           } else this.preload(object.img)
         }
 
@@ -357,14 +356,14 @@ class Controller {
 
         this.needsUpdate = true
 
-        const position = this.fromDomToCanvas({
+        const position: { x: number; y: number } = this.fromDomToCanvas({
           x: object.position.x,
           y: object.position.y + this.getFixedY(object.fixed),
         })
         object.mesh.renderOrder = object.order
         object.mesh.position.x = position.x + object.size.x * 0.5
         object.mesh.position.y = position.y - object.size.y * 0.5
-        object.mesh.position.z = object.position.z || 0
+        object.mesh.position.z = 0
         object.mesh.rotation.x = object.rotate.x
         object.mesh.rotation.y = object.rotate.y
         object.mesh.rotation.z = object.rotate.z
@@ -387,19 +386,23 @@ class Controller {
         uniforms.uParallax.value.y = object.parallax.y
         uniforms.uPlaneSize.value.x = object.size.x
         uniforms.uPlaneSize.value.y = object.size.y
-        uniforms.uTextureVideo.value.needsUpdate =
-          object.video?.readyState >= object.video?.HAVE_CURRENT_DATA
+
+        if (object.video) {
+          const { readyState, HAVE_CURRENT_DATA } = object.video
+          uniforms.uTextureVideo.value.needsUpdate = readyState >= HAVE_CURRENT_DATA
+        }
 
         if (object.textureFade) uniforms.uTextureFade.value = object.textureFade
-        if (object.onIntersect) object.onIntersect(hovered)
 
         const hovered =
           this.intersects.includes(object.mesh) && (!this.touch || object.blackAndWhite)
-        const clickable = hovered && object.onClick
-        const pixelated = (clickable && !object.noPixel) || object.forcePixelated
+        const clickable = hovered && !!object.onClick
+        const pixelated = (clickable && !object.noPixel) || object.forcePixel
         const wasPixelated = uniforms.uPixel.value === 1
         const wasntPixelated = uniforms.uPixel.value === 0
         const pixelatedTransition = (pixelated && wasntPixelated) || (!pixelated && wasPixelated)
+
+        object.onIntersect && object.onIntersect(hovered)
 
         if (hovered !== object.wasHovered && object.blackAndWhite) {
           gsap.killTweensOf(uniforms.uBlackAndWhite)
@@ -428,7 +431,7 @@ class Controller {
           // })
           if (this.intersects.length === 0) {
             this.updateCursor('default')
-            this.main.classList.remove('__main--pointer')
+            this.main?.classList.remove('__main--pointer')
             if (this.logo) {
               gsap.killTweensOf(this.logo.rotation)
               gsap.to(this.logo.rotation, { y: Math.PI, onUpdate: this.updateLogoLight.bind(this) })
@@ -448,7 +451,7 @@ class Controller {
           //     },
           //   })
           // }
-          this.main.classList.add('__main--pointer')
+          this.main?.classList.add('__main--pointer')
           this.updateCursor(object.cursor)
           if (this.logo) {
             gsap.killTweensOf(this.logo.rotation)
@@ -465,15 +468,16 @@ class Controller {
         object.wasHovered = hovered
         object.wasClickable = clickable
         object.previousCursor = object.cursor
-      } else if (object.mesh && object.type === 'plane') {
-        object.mesh.material.uniforms.uFade.value = 0.0
+      } else if (object.mesh && object.meshId) {
+        ;(object.mesh.material as ShaderMaterial).uniforms.uFade.value = 0.0
         this.releasePlane(object.meshId)
         object.mesh = null
       }
     }
   }
 
-  inView({ fixed, position, size, opacity }) {
+  inView(params: InViewParams): boolean {
+    const { position, size, opacity, fixed } = params
     const y = position.y + this.getFixedY(fixed)
     const limitTop = y - this.y >= size.y * -1
     const limitRight = position.x < this.size.x
@@ -485,7 +489,7 @@ class Controller {
     )
   }
 
-  getFixedY(fixed) {
+  getFixedY(fixed: Fixed): number {
     if (fixed && this.y >= fixed.from) {
       const { from, to } = fixed
       return Math.min(this.y - from, to - from)
@@ -494,13 +498,11 @@ class Controller {
   }
 
   render() {
+    if (!this.renderer || !this.scene || !this.camera) return
     this.frame++
     this.renderer.clear()
 
-    this.intersects = this.raycaster
-      .intersectObjects(this.scene.children, false)
-      .map(i => i.object)
-      .filter(o => o.position.z === 0)
+    this.intersects = this.raycaster.intersectObjects(this.scene.children, false).map(i => i.object)
 
     this.updateObjects()
 
@@ -514,6 +516,7 @@ class Controller {
   }
 
   renderLogo() {
+    if (!this.logo || !this.logoScene || !this.logoCamera || !this.renderer) return
     let scrollTarget = this.size.y
     let scrollProgress = Math.min(1, this.y / scrollTarget)
 
@@ -579,16 +582,11 @@ class Controller {
     this.renderer.render(this.logoScene, this.logoCamera)
   }
 
-  getAvailablePlane(id) {
+  getAvailablePlane(id: string): Plane | undefined {
     if (this.batch.length === 0) {
       this.generatePlanesBatch()
     }
-    if (id === 'noise') {
-      const plane = this.batch[this.batch.length - 1]
-      plane.available = false
-      plane.mesh.visible = true
-      return plane
-    }
+
     for (let i = this.batch.length - 1; i >= 0; i--) {
       const plane = this.batch[i]
       if (plane.available) {
@@ -602,49 +600,51 @@ class Controller {
     this.log('Error! NO PLANES AVAILABLE')
   }
 
-  releasePlane(id) {
-    this.log(`Plane ${id} released`)
+  releasePlane(id: number) {
     const plane = this.batch.find(p => p.id === id)
-    plane.mesh.scale.x = 0
-    plane.mesh.scale.y = 0
-    plane.available = true
-    plane.mesh.visible = false
-    plane.video = null
-    plane.img = null
+    if (plane) {
+      this.log(`Plane ${id} released`)
+      plane.mesh.scale.x = 0
+      plane.mesh.scale.y = 0
+      plane.available = true
+      plane.mesh.visible = false
+      plane.video = null
+      plane.img = null
+    }
   }
 
   generatePlanesBatch() {
     const video = document.createElement('video')
-
+    const plane = new PlaneGeometry(1, 1)
     for (let id = 0; id < this.maxPlanes; id++) {
-      const available = true
+      const available: boolean = true
       const mesh = new Mesh(
-        this.geometries.plane,
+        plane,
         new ShaderMaterial({
           vertexShader: VS,
           fragmentShader: FS,
           uniforms: {
-            uNoise: { type: 'i', value: 0 },
-            uFrame: { type: 'i', value: 0 },
-            uTime: { type: 'f', value: 0.0 },
-            uFade: { type: 'f', value: 0.0 },
-            uZoom: { type: 'f', value: 1.0 },
-            uPixel: { type: 'f', value: 0.0 },
-            uBlackAndWhite: { type: 'f', value: 0.0 },
-            uParallax: { type: 'v2', value: new Vector2(0, 0) },
-            uOpacity: { type: 'f', value: 1.0 },
-            uBorderRadius: { type: 'f', value: 16.0 },
-            uPixelSize: { type: 'v2', value: new Vector2(1, 1) },
-            uTextureType: { type: 'i', value: 0 }, // 0 Video, 1 Image
-            uTextureFade: { type: 'f', value: 0.0 },
-            uTextureLoaded: { type: 'i', value: 0 },
-            uTextureImage: { type: 't', value: null },
-            uTextureVideo: { type: 't', value: new VideoTexture(video) },
-            uTextureSize: { type: 'v2', value: new Vector2(1, 1) },
-            uPlaneSize: { type: 'v2', value: new Vector2(1, 1) },
-            uDevicePixelRatio: { type: 'f', value: 1.0 },
-            uColor: { type: 'v4', value: this.colors.lightGrey },
-            uMultiplyColor: { type: 'v4', value: this.colors.lime },
+            uNoise: { value: 0 },
+            uFrame: { value: 0 },
+            uTime: { value: 0.0 },
+            uFade: { value: 0.0 },
+            uZoom: { value: 1.0 },
+            uPixel: { value: 0.0 },
+            uBlackAndWhite: { value: 0.0 },
+            uParallax: { value: new Vector2(0, 0) },
+            uOpacity: { value: 1.0 },
+            uBorderRadius: { value: 16.0 },
+            uPixelSize: { value: new Vector2(1, 1) },
+            uTextureType: { value: 0 }, // 0 Video, 1 Image
+            uTextureFade: { value: 0.0 },
+            uTextureLoaded: { value: 0 },
+            uTextureImage: { value: null },
+            uTextureVideo: { value: new VideoTexture(video) },
+            uTextureSize: { value: new Vector2(1, 1) },
+            uPlaneSize: { value: new Vector2(1, 1) },
+            uDevicePixelRatio: { value: 1.0 },
+            uColor: { value: this.colors.lightGrey },
+            uMultiplyColor: { value: this.colors.lime },
           },
           wireframe: false,
           transparent: true,
@@ -653,13 +653,18 @@ class Controller {
         })
       )
       mesh.visible = false
-      this.scene.add(mesh)
-      this.batch.push({ id, available, mesh })
+      this.scene?.add(mesh)
+      this.batch.push({ id, available, mesh, img: null, video: null })
     }
   }
 
-  updateSize({ size }) {
-    this.size = size
+  updateSize(params: { size?: { x: number; y: number } }) {
+    const { size } = params
+    if (!size || !this.camera || !this.logoCamera || !this.renderer) return
+
+    this.size.x = size.x
+    this.size.y = size.y
+
     this.camera.aspect = size.x / size.y
     this.camera.fov = 2 * Math.atan((size.y * 0.5) / this.z) * (180 / Math.PI)
     this.camera.updateProjectionMatrix()
@@ -683,28 +688,24 @@ class Controller {
     this.log(`updateSize() w: ${size.x}, h: ${size.y}`)
   }
 
-  getDevicePixelRatio() {
+  getDevicePixelRatio(): number {
     return Math.min(window.devicePixelRatio, this.maxPixelRatio)
   }
 
-  fromDomToCanvas({ x, y }) {
-    const _x = x - this.size.x * 0.5
-    const _y = -y + this.size.y * 0.5
-    return { x: _x, y: _y }
+  fromDomToCanvas(params: { x: number; y: number }): { x: number; y: number } {
+    return {
+      x: params.x - this.size.x * 0.5,
+      y: -params.y + this.size.y * 0.5,
+    }
   }
 
-  toScale(n) {
-    const mvw = Math.min(this.size.x, 1920) // Check layout max width
-    return (n * mvw) / 1440
-  }
-
-  planeIn(prop) {
+  planeIn(prop: { value: number }) {
     gsap.killTweensOf(prop)
     const duration = 1.2
     gsap.fromTo(prop, { value: 0 }, { value: 1, duration, delay: 0.1 })
   }
 
-  updateLogoState(value) {
+  updateLogoState(value: boolean) {
     if (this.logo) {
       gsap.killTweensOf(this.logo.rotation)
       gsap.killTweensOf(this.logoAnimation)
@@ -725,30 +726,30 @@ class Controller {
     }
   }
 
-  updateMobileLayout(value) {
+  updateMobileLayout(value: boolean) {
     this.isMobileLayout = value
     this.logoSize = value ? 96 : 160
     this.logoTargetScale = value ? 0.416666 : 0.25
   }
 
   updateLogoLight() {
-    if (!this.logo) return
+    if (!this.logo || !this.logoLight) return
     const maxIntensity = 0.25
     const rotation = this.logo.rotation.y % Math.PI
     const distanceToMiddlePoint = Math.abs(rotation - Math.PI * 0.5) / (Math.PI * 0.5)
     this.logoLight.intensity = maxIntensity - distanceToMiddlePoint * maxIntensity
   }
 
-  updateScrollBounding(value) {
+  updateScrollBounding(value: number) {
     this.scrollBounding = value
   }
 
-  toScale(n) {
-    const mvw = Math.min(this.size.x, 1800)
+  toScale(n: number): number {
+    const mvw = Math.min(this.size.x, 1800) // Check layout max width
     return (n * mvw) / (this.isMobileLayout ? 375 : 1440)
   }
 
-  imageLoaded(img) {
+  imageLoaded(img: HTMLImageElement): number {
     const { currentSrc } = img
     const id = slugify(currentSrc)
     const texture = this.loadedTextures.find(t => t.id === id)
@@ -756,7 +757,7 @@ class Controller {
     return 0
   }
 
-  onClick(e) {
+  onClick(e: MouseEvent) {
     for (const mesh of this.intersects) {
       const object = this.objects.find(obj => obj.mesh === mesh)
       if (object && object.onClick) {
@@ -766,48 +767,46 @@ class Controller {
     }
   }
 
-  onMouseMovement(e) {
+  onMouseMovement(e: MouseEvent) {
     if (!this.bounding || this.touch) return
-    this.updateRaycaster(e)
+    this.updateRaycaster({ x: e.clientX, y: e.clientY })
   }
 
-  updateRaycaster(e) {
-    this.mouse.x =
-      ((e.clientX - this.bounding.left) / (this.bounding.right - this.bounding.left)) * 2 - 1
-    this.mouse.y =
-      -((e.clientY - this.bounding.top) / (this.bounding.bottom - this.bounding.top)) * 2 + 1
+  updateRaycaster(params: { x: number; y: number }) {
+    if (!this.camera || !this.bounding) return
+    const { x, y } = params
+    this.mouse.x = ((x - this.bounding.left) / (this.bounding.right - this.bounding.left)) * 2 - 1
+    this.mouse.y = -((y - this.bounding.top) / (this.bounding.bottom - this.bounding.top)) * 2 + 1
 
     this.raycaster.setFromCamera(this.mouse, this.camera)
   }
 
-  onTouchStart(e) {
+  onTouchStart(e: TouchEvent) {
     const { clientX, clientY } = this.getTouch(e)
     this.touchStartX = clientX
     this.touchStartY = clientY
     this.touchTime = Date.now()
   }
 
-  onTouchEnd(e) {
+  onTouchEnd(e: TouchEvent) {
     const { clientX, clientY } = this.getTouch(e)
     const touchDifferenceX = Math.abs(clientX - this.touchStartX)
     const touchDifferenceY = Math.abs(clientY - this.touchStartY)
     const touchTime = Date.now() - this.touchTime
-    if (touchDifferenceX < 10 && touchDifferenceY < 10 && touchTime < 200) {
-      this.updateRaycaster({ clientX, clientY })
+    if (this.scene && touchDifferenceX < 10 && touchDifferenceY < 10 && touchTime < 200) {
+      this.updateRaycaster({ x: clientX, y: clientY })
       this.intersects = this.raycaster
         .intersectObjects(this.scene.children, false)
         .map(i => i.object)
-        .filter(o => o.position.z === 0)
     }
   }
 
-  getTouch(e) {
-    const touch = e.changedTouches || e.touches || (e.originalEvent && e.originalEvent.touches)
-    return touch && touch.length ? touch[0] : e
+  getTouch(e: TouchEvent): Touch {
+    const touch = e.changedTouches || e.touches
+    return touch && touch.length ? touch[0] : (e as unknown as Touch)
   }
 
   bind() {
-    this._render = this.render.bind(this)
     this._onClick = this.onClick.bind(this)
     this._onMouseMovement = this.onMouseMovement.bind(this)
     this._onTouchStart = this.onTouchStart.bind(this)
@@ -828,7 +827,7 @@ class Controller {
     window.removeEventListener('touchend', this._onTouchEnd)
   }
 
-  log(msg) {
+  log(msg: string) {
     if (!this.debug) return
     console.log(`Scene ~ ${msg}`)
   }
@@ -837,7 +836,7 @@ class Controller {
     this.log('destroy()')
 
     this.ready = false
-    this.canvas.remove()
+    this.canvas?.remove()
     this.canvas = null
     this.scene = null
     this.camera = null
@@ -848,12 +847,9 @@ class Controller {
     this.renderer = null
     this.objects = []
     for (const i in this.batch) {
-      this.batch[i] = null
       delete this.batch[i]
     }
 
     this.removeListeners()
   }
 }
-
-export default Controller

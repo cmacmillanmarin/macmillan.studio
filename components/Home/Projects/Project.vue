@@ -397,7 +397,6 @@ async function createPlane() {
   const clickable = props.active && !hidden
   $scene.addObject({
     id: projectId.value,
-    type: 'plane',
     img: customImageEl.value?.el,
     video: videoEl.value,
     onClick: clickable ? openProject : null,
@@ -465,7 +464,7 @@ function getInAllProjectsListPlane(): Plane {
     border: toScale(borderRadius.value),
     order: props.of - props.i,
     zoom: 1,
-    forcePixelated: false,
+    forcePixel: false,
   }
 }
 
@@ -491,7 +490,7 @@ function getInSelectedProjectsListPlane(): Plane {
     order: props.of - props.i,
     border: toScale(borderRadius.value) * (progress.value + leaveProgress.value),
     zoom: 1.4 - 0.4 * progress.value,
-    forcePixelated: isMobileLayout.value && leaveProgress.value !== 0,
+    forcePixel: isMobileLayout.value && leaveProgress.value !== 0,
   }
 }
 
@@ -565,7 +564,7 @@ function animate() {
       progress.value = getProgress()
       leaveProgress.value = getLeaveProgress()
       inView.value = getInView()
-      inView.value && $scene.updateObject({ id: projectId.value, ..._plane, forcePixelated: false })
+      inView.value && $scene.updateObject({ id: projectId.value, ..._plane, forcePixel: false })
     },
     onComplete: () => {
       inTransition.value = false

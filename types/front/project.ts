@@ -6,7 +6,7 @@ export interface Plane {
   border: number
   zoom: number
   order: number
-  forcePixelated?: boolean
+  forcePixel?: boolean
 }
 
 export interface ClientAndCollaborator {

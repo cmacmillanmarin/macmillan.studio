@@ -171,7 +171,6 @@ watch(section, () => {
 onMounted(() => {
   $scene.addObject({
     id: 'about-thumbnail',
-    type: 'plane',
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
     img: thumbnailImageEl.value?.el,

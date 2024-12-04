@@ -88,7 +88,6 @@ watch(scrollUpdated, () => {
 onMounted(() => {
   $scene.addObject({
     id: `${props.planesId}-${props.pos}`,
-    type: 'plane',
     img: customImageEl.value?.el,
     video: videoEl.value,
     position: { x: 0, y: 0 },
