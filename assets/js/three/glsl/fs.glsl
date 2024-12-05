@@ -12,7 +12,6 @@ uniform vec2 uPixelSize;
 uniform vec2 uPlaneSize;  
 uniform int uTextureType;
 uniform vec2 uTextureSize;
-uniform int uTextureLoaded;
 uniform float uTextureFade;  
 uniform sampler2D uTextureImage;
 uniform sampler2D uTextureVideo;
@@ -89,9 +88,7 @@ void main() {
   vec4 blackAndWhiteTexture = vec4(vec3(0.2126 * mixedTexture.x + 0.7152 * mixedTexture.y + 0.0722 * mixedTexture.z), 1.0);
   vec4 finalTexture = mix(mixedTexture, blackAndWhiteTexture, uBlackAndWhite) * uMultiplyColor;
 
-  if (uTextureLoaded == 0) {
-    gl_FragColor = vec4(uColor.xyz, uFade * uOpacity);
-  } else if (uTextureFade != 1.0) {
+  if (uTextureFade != 1.0) {
     gl_FragColor = vec4(mix(uColor.xyz, finalTexture.xyz, uTextureFade), uFade * uOpacity);
   } else {
     gl_FragColor = vec4(finalTexture.xyz, uFade * uOpacity);

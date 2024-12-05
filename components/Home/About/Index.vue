@@ -141,6 +141,10 @@ let _color = { vec4: rbgToVec4(hexToRgb('bdff00')), alpha: 1 }
 
 watch(thumbnailImageLoaded, () => {
   if (thumbnailImageEl.value && thumbnailImageLoaded.value) {
+    $scene.updateObject({
+      id: 'about-thumbnail',
+      img: thumbnailImageEl.value.el,
+    })
     // $scene.preload(thumbnailImageEl.value.el)
     updateImagePositions()
   }
@@ -162,7 +166,7 @@ watch(section, () => {
   if (section.value === 'about') {
     fadeIn({ el: introEl.value, delay: 0.2 })
     gsap.to(imagesFade, { value: 1, duration: 1, delay: 0.2, onUpdate: onImagesFadeUpdate })
-  } else {
+  } else if (imagesFade.value === 1) {
     fadeOut({ el: introEl.value })
     gsap.to(imagesFade, { value: 0, duration: 0.6, onUpdate: onImagesFadeUpdate })
   }
@@ -173,8 +177,8 @@ onMounted(() => {
     id: 'about-thumbnail',
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
-    img: thumbnailImageEl.value?.el,
     blackAndWhite: true,
+    opacity: 0,
     color: rbgToVec4(hexToRgb('#000000')),
     multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
   })

@@ -179,21 +179,28 @@ export default class {
   }
 
   loadTexture(img: HTMLImageElement) {
-    const src = img.src || img.currentSrc
     if (this.texturesLoaderRequests <= this.texturesLoaderRequestsThreshold) {
       this.texturesLoaderRequests++
-      this.texturesLoader.load(src, this._onTextureLoaded)
+      this.initTexture(img, this._onTextureLoaded)
     } else {
       this.texturesLoaderRequestQueue.push(img)
     }
   }
 
-  async onTextureLoaded(txt: Texture) {
+  async initTexture(img: HTMLElement, cb: Function) {
+    const txt = new Texture(img)
     await this.renderer?.initTexture(txt)
+    txt.needsUpdate = true
+    cb(txt)
+  }
+
+  async onTextureLoaded(txt: Texture) {
+    console.log('texture loaded', txt.image.currentSrc)
     const texture = this.getTexture(txt.image)
     texture.txt = txt
     this.texturesLoaderRequests--
     const queueTexture = this.texturesLoaderRequestQueue.pop()
+    queueTexture && console.log(`load texture from queue ${queueTexture.currentSrc}`)
     queueTexture && this.loadTexture(queueTexture)
   }
 
@@ -244,7 +251,7 @@ export default class {
   }
 
   updateObject(param: ObjectParam) {
-    this.log(`updateObject() ${param.id}`)
+    this.log(`updateObject() ${param.img}`)
     const object = this.getObject(param.id)
     if (object) {
       object.zoom = param.zoom !== undefined ? param.zoom : object.zoom
@@ -317,6 +324,12 @@ export default class {
             console.warn(`No available planes for ${object.id}`)
             continue
           }
+          object.firstFrame = true
+          object.wasHovered = false
+          object.wasPixelated = false
+          object.wasClickable = false
+          object.previousCursor = object.cursor
+          object.videoAssigned = object.imgAssigned = false
           this.assignPlaneToObject({ plane, object })
         }
 
@@ -325,124 +338,126 @@ export default class {
         object.img && this.processImage(object)
         object.video && this.processVideo(object)
 
-        const { uniforms } = object.mesh.material
-
-        const position: { x: number; y: number } = this.fromDomToCanvas({
+        const fixed = this.getFixedY(object.fixed)
+        const { x, y } = this.fromDomToCanvas({
           x: object.position.x,
-          y: object.position.y + this.getFixedY(object.fixed),
+          y: object.position.y + fixed,
         })
-        object.mesh.renderOrder = object.order
-        object.mesh.position.x = position.x + object.size.x * 0.5
-        object.mesh.position.y = position.y - object.size.y * 0.5
-        object.mesh.position.z = 0
-        object.mesh.rotation.x = object.rotate.x
-        object.mesh.rotation.y = object.rotate.y
-        object.mesh.rotation.z = object.rotate.z
-        object.mesh.scale.x = object.size.x
-        object.mesh.scale.y = object.size.y
-        object.mesh.scale.z = object.size.z
+        const { mesh } = object
+        mesh.renderOrder = object.order
+        mesh.position.x = x + object.size.x * 0.5
+        mesh.position.y = y - object.size.y * 0.5
+        mesh.position.z = 0
+        mesh.rotation.x = object.rotate.x
+        mesh.rotation.y = object.rotate.y
+        mesh.rotation.z = object.rotate.z
+        mesh.scale.x = object.size.x
+        mesh.scale.y = object.size.y
+        mesh.scale.z = object.size.z
 
+        const { uniforms } = mesh.material
+
+        uniforms.uTime.value += 0.05
         uniforms.uFrame.value = this.frame
+        uniforms.uPlaneSize.value.x = object.size.x
+        uniforms.uPlaneSize.value.y = object.size.y
+        uniforms.uBorderRadius.value = object.border
+        uniforms.uParallax.value.x = object.parallax.x
+        uniforms.uParallax.value.y = object.parallax.y
         uniforms.uColor.value = object.color || this.colors.lightGrey
         uniforms.uMultiplyColor.value = object.multiplyColor || this.colors.white
         uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
-
-        uniforms.uBorderRadius.value = object.border
-        uniforms.uTime.value += 0.05
+        if (object.textureFade) uniforms.uTextureFade.value = object.textureFade
         const xPixelRatio = object.size.x / round(object.size.x / this.toScale(18))
         const yPixelRatio = object.size.y / round(object.size.y / this.toScale(18))
         uniforms.uPixelSize.value.x = object.size.x / xPixelRatio
         uniforms.uPixelSize.value.y = object.size.y / yPixelRatio
-        uniforms.uParallax.value.x = object.parallax.x
-        uniforms.uParallax.value.y = object.parallax.y
-        uniforms.uPlaneSize.value.x = object.size.x
-        uniforms.uPlaneSize.value.y = object.size.y
 
-        if (object.video) {
-          const { readyState, HAVE_CURRENT_DATA } = object.video
-        }
+        const { onClick, blackAndWhite, forcePixel, noPixel, cursor } = object
+        const hovered = this.intersects.includes(mesh) && (!this.touch || blackAndWhite)
+        const clickable = hovered && !!onClick
+        const pixelated = (clickable && !noPixel) || forcePixel
 
-        if (object.textureFade) uniforms.uTextureFade.value = object.textureFade
+        this.manageEvents({ object, hovered, clickable, pixelated })
 
-        const hovered =
-          this.intersects.includes(object.mesh) && (!this.touch || object.blackAndWhite)
-        const clickable = hovered && !!object.onClick
-        const pixelated = (clickable && !object.noPixel) || object.forcePixel
-        const wasPixelated = uniforms.uPixel.value === 1
-        const wasntPixelated = uniforms.uPixel.value === 0
-        const pixelatedTransition = (pixelated && wasntPixelated) || (!pixelated && wasPixelated)
-
-        object.onIntersect && object.onIntersect(hovered)
-
-        if (hovered !== object.wasHovered && object.blackAndWhite) {
-          gsap.killTweensOf(uniforms.uBlackAndWhite)
-          gsap.to(uniforms.uBlackAndWhite, {
-            value: hovered ? 0 : 1,
-            duration: 0.4,
-          })
-        }
-
-        if (pixelatedTransition || pixelated !== object.wasPixelated) {
-          gsap.killTweensOf(uniforms.uPixel)
-          gsap.to(uniforms.uPixel, { value: pixelated ? 1 : 0, duration: 0.4 })
-        }
-
-        if (!clickable && object.wasClickable) {
-          // gsap.killTweensOf(uniforms.uZoom)
-          // gsap.to(uniforms.uZoom, {
-          //   value: object.zoom,
-          //   duration: 0.4,
-          //   onStart: () => {
-          //     object.inZoomTransition = true
-          //   },
-          //   onComplete: () => {
-          //     object.inZoomTransition = false
-          //   },
-          // })
-          if (this.intersects.length === 0) {
-            this.updateCursor('default')
-            this.main?.classList.remove('__main--pointer')
-            if (this.logo) {
-              gsap.killTweensOf(this.logo.rotation)
-              gsap.to(this.logo.rotation, { y: Math.PI, onUpdate: this.updateLogoLight.bind(this) })
-            }
-          }
-        } else if (clickable && (!object.wasClickable || object.cursor !== object.previousCursor)) {
-          // if (clickable && !object.wasClickable) {
-          //   gsap.to(uniforms.uZoom, {
-          //     value: object.zoom,
-          //     // value: object.img ? object.zoom + 0.2 : object.zoom,
-          //     duration: 1,
-          //     onStart: () => {
-          //       object.inZoomTransition = true
-          //     },
-          //     onComplete: () => {
-          //       object.inZoomTransition = false
-          //     },
-          //   })
-          // }
-          this.main?.classList.add('__main--pointer')
-          this.updateCursor(object.cursor)
-          if (this.logo) {
-            gsap.killTweensOf(this.logo.rotation)
-            gsap.to(this.logo.rotation, {
-              y: Math.PI * 2,
-              onUpdate: this.updateLogoLight.bind(this),
-            })
-          }
-        } else if (!clickable && !object.inZoomTransition) {
-          uniforms.uZoom.value = object.zoom
-        }
-        object.firstFrame = false
         object.wasPixelated = pixelated
         object.wasHovered = hovered
         object.wasClickable = clickable
-        object.previousCursor = object.cursor
+        object.previousCursor = cursor
+        object.firstFrame = false
       } else if (object.mesh && object.meshId) {
-        ;(object.mesh.material as ShaderMaterial).uniforms.uFade.value = 0.0
         this.releasePlane(object.meshId)
+        object.mesh.material.uniforms.uFade.value = 0
         object.mesh = null
       }
+    }
+  }
+
+  manageEvents(params: {
+    object: Object
+    hovered: boolean
+    clickable: boolean
+    pixelated: boolean
+  }) {
+    const { object, hovered, clickable, pixelated } = params
+    const { mesh, onIntersect, blackAndWhite, cursor, previousCursor } = object
+    const { uniforms } = mesh.material
+
+    const wasPixelated = uniforms.uPixel.value === 1
+    const wasntPixelated = uniforms.uPixel.value === 0
+    const pixelatedTransition = (pixelated && wasntPixelated) || (!pixelated && wasPixelated)
+
+    const cursorChanged = cursor !== previousCursor
+
+    onIntersect && onIntersect(hovered)
+
+    if (blackAndWhite && hovered !== object.wasHovered) {
+      gsap.killTweensOf(uniforms.uBlackAndWhite)
+      gsap.to(uniforms.uBlackAndWhite, { value: hovered ? 0 : 1, duration: 0.4 })
+    }
+
+    if (pixelatedTransition || pixelated !== object.wasPixelated) {
+      gsap.killTweensOf(uniforms.uPixel)
+      gsap.to(uniforms.uPixel, { value: pixelated ? 1 : 0, duration: 0.4 })
+    }
+
+    if (!clickable && object.wasClickable) {
+      // this.zoomTexture({ object, value: 1 })
+      if (this.intersects.length === 0) {
+        this.updateCursor('default')
+        this.main?.classList.remove('__main--pointer')
+        this.rotateLogo(Math.PI)
+      }
+    } else if (clickable && (!object.wasClickable || cursorChanged)) {
+      // clickable && !clickable && this.zoomTexture({ object, value: 1.2 })
+      this.updateCursor(cursor)
+      this.main?.classList.add('__main--pointer')
+      this.rotateLogo(Math.PI * 2)
+    } else if (!clickable && !object.inZoomTransition) {
+      uniforms.uZoom.value = object.zoom
+    }
+  }
+
+  zoomTexture(params: { object: Object; value: number }) {
+    const { object, value } = params
+    const { uniforms } = object.mesh.material
+    gsap.killTweensOf(uniforms.uZoom)
+    gsap.to(uniforms.uZoom, {
+      value,
+      duration: 0.4,
+      onStart: () => {
+        object.inZoomTransition = true
+      },
+      onComplete: () => {
+        object.inZoomTransition = false
+      },
+    })
+  }
+
+  rotateLogo(y: number) {
+    if (this.logo) {
+      gsap.killTweensOf(this.logo.rotation)
+      gsap.to(this.logo.rotation, { y, onUpdate: this.updateLogoLight.bind(this) })
     }
   }
 
@@ -452,22 +467,14 @@ export default class {
     object.mesh = plane.mesh
     object.meshId = plane.id
 
-    object.firstFrame = true
-    object.wasHovered = false
-    object.wasPixelated = false
-    object.wasClickable = false
-    object.previousCursor = object.cursor
-    object.videoAssigned = object.imgAssigned = false
-
     const { uniforms } = object.mesh.material
 
     uniforms.uTextureFade.value = 0
-    uniforms.uTextureLoaded.value = 0
     uniforms.uBlackAndWhite.value = object.blackAndWhite ? 1 : 0
     uniforms.uDevicePixelRatio.value = this.getDevicePixelRatio()
 
-    if (object.fade) this.planeIn(object.mesh.material.uniforms.uFade)
-    else object.mesh.material.uniforms.uFade.value = 1
+    gsap.killTweensOf(uniforms.uFade)
+    gsap[object.fade ? 'to' : 'set'](uniforms.uFade, { value: 1 })
   }
 
   processImage(object: Object) {
@@ -475,16 +482,18 @@ export default class {
     if (!img) return
 
     const texture = this.getTexture(img)
+    const textureLoaded = !!texture.txt
 
-    if (texture.txt && !object.imgAssigned) {
+    if (textureLoaded && !object.imgAssigned) {
       object.imgAssigned = true
-      const { uniforms } = object.mesh.material
 
+      const { uniforms } = object.mesh.material
       uniforms.uTextureType.value = 1
-      uniforms.uTextureSize.value.x = img.width
-      uniforms.uTextureSize.value.y = img.height
-      uniforms.uTextureLoaded.value = 1
-      object.mesh.material.uniforms.uTextureImage.value = texture.txt
+      uniforms.uTextureImage.value = texture.txt
+      uniforms.uTextureImage.needsUpdate = true
+      uniforms.uTextureSize.value.x = object.size.x
+      uniforms.uTextureSize.value.y = object.size.x * (img.height / img.width)
+      console.log(img.width, img.height)
 
       const fade = !object.firstFrame
       gsap.killTweensOf(uniforms.uTextureFade)
@@ -499,10 +508,11 @@ export default class {
     const { uniforms } = object.mesh.material
     const { width, height, readyState, HAVE_CURRENT_DATA } = video
 
-    uniforms.uTextureLoaded.value = this.videoLoaded(video)
-    uniforms.uTextureVideo.value.needsUpdate = readyState >= HAVE_CURRENT_DATA
+    const loaded = videoLoaded(video)
 
-    if (uniforms.uTextureLoaded.value === 1 && !object.videoAssigned) {
+    uniforms.uTextureVideo.value.needsUpdate = readyState >= HAVE_CURRENT_DATA && loaded
+
+    if (loaded && !object.videoAssigned) {
       object.videoAssigned = true
 
       uniforms.uTextureType.value = 0
@@ -539,7 +549,9 @@ export default class {
 
   render() {
     if (!this.renderer || !this.scene || !this.camera) return
+
     this.frame++
+
     this.renderer.clear()
 
     this.intersects = this.raycaster.intersectObjects(this.scene.children, false).map(i => i.object)
@@ -677,7 +689,6 @@ export default class {
             uPixelSize: { value: new Vector2(1, 1) },
             uTextureType: { value: 0 }, // 0 Video, 1 Image
             uTextureFade: { value: 0.0 },
-            uTextureLoaded: { value: 0 },
             uTextureImage: { value: null },
             uTextureVideo: { value: new VideoTexture(video) },
             uTextureSize: { value: new Vector2(1, 1) },
@@ -793,10 +804,6 @@ export default class {
     const texture = this.getTexture(img)
     if (texture.txt) return 1
     return 0
-  }
-
-  videoLoaded(video: HTMLVideoElement): number {
-    return videoLoaded(video) ? 1 : 0
   }
 
   onClick(e: MouseEvent) {

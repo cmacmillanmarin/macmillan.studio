@@ -132,25 +132,24 @@ function move() {
       const position = lastItem.value.reset - item.reset
       item.init = edge - position
     }
-    // if not in view
-    if (x < item.width * -1 || x > _containerWidth) {
-      x = _containerWidth
+    const inView = x >= item.width * -1 && x <= _containerWidth
+    if (!inView) {
+      x = _direction === -1 ? _containerWidth : item.width * -1
     }
-    x = round(x, 2)
-    if (props.planesId) {
-      const { $scene }: any = useNuxtApp()
-      const index = items.value.indexOf(item)
-      // const totalDistance = _containerWidth + item.width
-      // const current = x + item.width
-      // const progress = current / totalDistance
-      // const distanceToCenter = distanceToMidpoint(progress)
-      $scene.updateObject({
-        id: `${props.planesId}-${index + 1}`,
-        position: { x: x, y: y.value },
-        zoom: 1,
-      })
+    if (inView || x !== item.x) {
+      x = round(x, 2)
+      if (props.planesId) {
+        const { $scene }: any = useNuxtApp()
+        const index = items.value.indexOf(item)
+        const id = `${props.planesId}-${index + 1}`
+        // const totalDistance = _containerWidth + item.width
+        // const current = x + item.width
+        // const progress = current / totalDistance
+        // const distanceToCenter = distanceToMidpoint(progress)
+        $scene.updateObject({ id, position: { x: x, y: y.value }, zoom: 1 })
+      }
+      gsap.set(item.el, { x })
     }
-    gsap.set(item.el, { x })
     item.x = x
   }
 }

@@ -49,7 +49,7 @@ const imgSrcset = computed<string>(() => {
     srcset += `${src} ${width}w,`
   }
   srcset += `${data.src} ${data.width}w`
-  return srcset.slice(0, -1)
+  return srcset
 })
 
 watch([isLoaded, inView], () => {

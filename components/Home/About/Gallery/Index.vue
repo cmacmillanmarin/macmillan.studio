@@ -44,7 +44,7 @@ watch(section, () => {
     fadeIn({ el: el.value, delay: 0.2 })
     gsap.killTweensOf(itemsFade)
     gsap.to(itemsFade, { value: 1, duration: 1, delay: 0.2, onUpdate: onItemsFadeUpdate })
-  } else {
+  } else if (itemsFade.value === 1) {
     fadeOut({ el: el.value })
     gsap.killTweensOf(itemsFade)
     gsap.to(itemsFade, { value: 0, duration: 0.6, onUpdate: onItemsFadeUpdate })

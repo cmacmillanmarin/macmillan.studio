@@ -71,6 +71,8 @@ const customImageEl = ref<InstanceType<typeof CustomImage>>()
 const el = ref<HTMLElement>()
 const creditsEl = ref<HTMLElement>()
 
+const id: string = `${props.planesId}-${props.pos}`
+
 // watch(current, () => {
 //   updateCursorPosition({ x: -1, y: -1 })
 // })
@@ -79,7 +81,7 @@ watch(scrollUpdated, () => {
   width.value = getWidth()
   height.value = getHeight()
   $scene.updateObject({
-    id: `${props.planesId}-${props.pos}`,
+    id,
     size: { x: width.value, y: height.value, z: 1 },
     border: toScale(isMobileLayout.value ? 8 : 16),
   })
@@ -87,9 +89,7 @@ watch(scrollUpdated, () => {
 
 onMounted(() => {
   $scene.addObject({
-    id: `${props.planesId}-${props.pos}`,
-    img: customImageEl.value?.el,
-    video: videoEl.value,
+    id,
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
     opacity: 0,
@@ -112,13 +112,11 @@ function getHeight() {
 }
 
 function onVideoLoaded() {
-  $scene.updateObject({
-    id: `${props.planesId}-${props.pos}`,
-    video: videoEl.value,
-  })
+  $scene.updateObject({ id, video: videoEl.value })
 }
 
 function onImageLoaded() {
+  $scene.updateObject({ id, img: customImageEl.value?.el })
   // customImageEl.value?.el && $scene.preload(customImageEl.value.el)
 }
 

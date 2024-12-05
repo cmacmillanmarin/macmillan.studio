@@ -272,7 +272,7 @@ watch(section, () => {
       gsap.killTweensOf(opacity)
       gsap.to(opacity, { value: 0, duration: 0.6, onUpdate: onOpacityUpdate })
     }
-  } else {
+  } else if (opacity.value !== 1) {
     opacity.value = 1
     $scene.updateObject({ id: projectId.value, opacity: 1 })
   }
@@ -397,7 +397,6 @@ async function createPlane() {
   const clickable = props.active && !hidden
   $scene.addObject({
     id: projectId.value,
-    img: customImageEl.value?.el,
     video: videoEl.value,
     onClick: clickable ? openProject : null,
     cursor: 'plus',
