@@ -731,6 +731,7 @@ onUnmounted(() => {
       p {
         color: var(--black);
         height: max-content;
+        font-family: 'HelveticaNowDisplayBold' !important;
         @include t-b1;
       }
     }

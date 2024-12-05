@@ -3,6 +3,7 @@
     ref="el"
     :class="[
       'home__projects__project',
+      `home__projects__project--${props.data.slug}`,
       { 'home__projects__project--all': inAllProjectsList },
       { 'home__projects__project--all-and-selected': inAllProjectsList && data.selected },
     ]"
@@ -11,6 +12,9 @@
       v-if="data.thumbnail.image && imageReady"
       ref="customImageEl"
       :data="data.thumbnail.image"
+      :lazy="!inAllProjectsList"
+      :virtual="true"
+      :size="{ d: columns / 12, t: columns / 8, m: columns / 8 }"
       class="home__projects__project__img"
       @load="onImageLoaded" />
 
@@ -178,6 +182,7 @@ const isLoaded = ref<boolean>(false)
 const inTransition = ref<boolean>(false)
 const inTransitionReady = ref<boolean>(true)
 const imageReady = ref<boolean>(true)
+const imageLoaded = ref<boolean>(false)
 const opacity = ref<number>(1)
 const progress = ref<number>(0)
 const leaveProgress = ref<number>(0)
@@ -197,10 +202,14 @@ const inActiveSection = computed<boolean>(
 
 const borderRadius = computed<number>(() => (isMobileLayout.value ? 8 : 16))
 
-const size = computed<{ x: number; y: number }>(() => {
+const columns = computed<number>(() => {
   let columns = isMobileLayout.value ? 5 : 3
   if (inAllProjectsList.value && props.data.selected) columns = isMobileLayout.value ? 6 : 3.5
-  const width = getColumnWidth(columns)
+  return columns
+})
+
+const size = computed<{ x: number; y: number }>(() => {
+  const width = getColumnWidth(columns.value)
   return { x: width, y: (width * 7) / 5 }
 })
 
@@ -387,9 +396,9 @@ function updateDom() {
   collaboratorEl.value && gsap.set(collaboratorEl.value, { x: collaborator.x, y: collaborator.y })
 }
 
-function onImageLoaded() {
-  $scene.updateObject({ id: projectId.value, img: customImageEl.value?.el })
-  // customImageEl.value?.el && $scene.preload(customImageEl.value.el)
+function onImageLoaded(img: HTMLImageElement) {
+  imageLoaded.value = true
+  $scene.updateObject({ id: projectId.value, img })
 }
 
 async function createPlane() {
@@ -398,6 +407,7 @@ async function createPlane() {
   $scene.addObject({
     id: projectId.value,
     video: videoEl.value,
+    img: imageLoaded.value ? customImageEl.value?.el : null,
     onClick: clickable ? openProject : null,
     cursor: 'plus',
     color: rbgToVec4(hexToRgb(props.data.color)),
@@ -568,9 +578,14 @@ function animate() {
     onComplete: () => {
       inTransition.value = false
       setTransitionReady()
-      disableScroll(false)
+      animationDone()
     },
   })
+}
+
+async function animationDone() {
+  await sleep(200)
+  disableScroll(false)
 }
 
 async function setTransitionReady() {

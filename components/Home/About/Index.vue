@@ -16,8 +16,9 @@
             :data="data.thumbnail"
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
             :lazy="true"
+            :virtual="true"
             data-scroll-set-position
-            @load="thumbnailImageLoaded = true"
+            @load="onThumbnailLoaded"
             @mouseenter="onThumbnailMouseEnter"
             @mouseleave="onThumbnailMouseLeave" />
           <p class="home__about__intro__content__thumbnail__credit">{{ data.credit }}</p>
@@ -63,26 +64,6 @@
             <SvgGatzara />
           </button>
         </div>
-        <!-- <div
-          class="home__about__intro__collaborator__thumbnail"
-          @mouseenter="onCollaboratorMouseEnter"
-          @mouseleave="onCollaboratorMouseLeave">
-          <CustomImage
-            ref="collaboratorImageEl"
-            :data="data.collaborator.thumbnail"
-            :size="{ d: 0.2, t: 0.4, m: 0.5 }"
-            data-scroll-set-position
-            :lazy="true"
-            @load="collaboratorImageLoaded = true"
-            @click="onCollaboratorImageClick" />
-          <DecorativeLink
-            ref="collaboratorLinkEl"
-            class="home__about__intro__collaborator__thumbnail__credit"
-            type="external"
-            to="https://xaviercusso.com"
-            :label="data.collaborator.credit"
-            :tabindex="landingTabIndex" />
-        </div> -->
       </div>
     </div>
 
@@ -106,7 +87,6 @@ import type { HomepageAbout } from '~/types/wordpress/homepage'
 import CustomImage from '~/components/Global/CustomImage.vue'
 import HomeAboutGallery from '~/components/Home/About/Gallery/Index.vue'
 import { hexToRgb, rbgToVec4 } from '~/utils'
-import DecorativeLink from '~/components/Global/DecorativeLink.vue'
 
 defineProps<{
   data: HomepageAbout
@@ -128,34 +108,12 @@ const { getBounding } = useVirtualScrollAndThreeTools()
 const { isMobileLayout } = useDevice()
 
 const introEl = ref<HTMLElement>()
-const thumbnailImageLoaded = ref<boolean>(false)
 const thumbnailImageEl = ref<typeof CustomImage>()
-const collaboratorImageLoaded = ref<boolean>(false)
-const collaboratorImageEl = ref<typeof CustomImage>()
-const collaboratorLinkEl = ref<typeof DecorativeLink>()
 const galleryEl = ref<typeof HomeAboutGallery>()
 
 const imagesFade = ref<number>(0)
 const allContentVisible = ref<boolean>(false)
 let _color = { vec4: rbgToVec4(hexToRgb('bdff00')), alpha: 1 }
-
-watch(thumbnailImageLoaded, () => {
-  if (thumbnailImageEl.value && thumbnailImageLoaded.value) {
-    $scene.updateObject({
-      id: 'about-thumbnail',
-      img: thumbnailImageEl.value.el,
-    })
-    // $scene.preload(thumbnailImageEl.value.el)
-    updateImagePositions()
-  }
-})
-
-watch(collaboratorImageLoaded, () => {
-  if (collaboratorImageEl.value && collaboratorImageLoaded.value) {
-    // $scene.preload(collaboratorImageEl.value.el)
-    updateImagePositions()
-  }
-})
 
 watch(scrollUpdated, () => {
   updateImagePositions()
@@ -182,21 +140,11 @@ onMounted(() => {
     color: rbgToVec4(hexToRgb('#000000')),
     multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
   })
-  // $scene.addObject({
-  //   id: 'about-collaborator-thumbnail',
-  //   type: 'plane',
-  //   position: { x: 0, y: 0 },
-  //   size: { x: 0, y: 0, z: 1 },
-  //   img: collaboratorImageEl.value?.el,
-  //   color: rbgToVec4(hexToRgb('#000000')),
-  //   multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
-  // })
   updateImagePositions()
 })
 
 function updateImagePositions() {
   if (!thumbnailImageEl.value) return
-  // if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
   const thumbnailImageBounding = getBounding(thumbnailImageEl.value.el)
   const thumbnailImageWidth = thumbnailImageEl.value.el.clientWidth
   const thumbnailImageHeight = thumbnailImageEl.value.el.clientHeight
@@ -206,15 +154,6 @@ function updateImagePositions() {
     size: { x: thumbnailImageWidth, y: thumbnailImageHeight, z: 1 },
     border: toScale(isMobileLayout.value ? 8 : 16),
   })
-  // const collaboratorImageBounding = getBounding(collaboratorImageEl.value.el)
-  // const collaboratorImageWidth = collaboratorImageEl.value.el.clientWidth
-  // const collaboratorImageHeight = collaboratorImageEl.value.el.clientHeight
-  // $scene.updateObject({
-  //   id: 'about-collaborator-thumbnail',
-  //   position: { x: collaboratorImageBounding.left, y: collaboratorImageBounding.top },
-  //   size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
-  //   border: toScale(isMobileLayout.value ? 8 : 16),
-  // })
 }
 
 async function onReadMore() {
@@ -225,7 +164,6 @@ async function onReadMore() {
 
 function onImagesFadeUpdate() {
   $scene.updateObject({ id: 'about-thumbnail', opacity: imagesFade.value })
-  // $scene.updateObject({ id: 'about-collaborator-thumbnail', opacity: imagesFade.value })
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -235,6 +173,11 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
 function onTestimonialsUpdateExpanded() {
   galleryEl.value?.update()
+}
+
+function onThumbnailLoaded(img: HTMLImageElement) {
+  $scene.updateObject({ id: 'about-thumbnail', img })
+  updateImagePositions()
 }
 
 function onThumbnailMouseEnter() {
@@ -269,25 +212,10 @@ function onCollaboratorMouseEnter(e: MouseEvent) {
     updateCursorPosition({ x: left + width * 0.5 - toScale(6), y: bottom + toScale(12) })
     shuffleIn({ el: svgEl as HTMLElement })
   }
-  // collaboratorLinkEl.value?.shuffle()
-  // gsap.killTweensOf(_color)
-  // gsap.to(_color, {
-  //   alpha: 0,
-  //   onUpdate: () => {
-  //     updateTint('about-collaborator-thumbnail')
-  //   },
-  // })
 }
 
 function onCollaboratorMouseLeave(e: MouseEvent) {
   updateCursorPosition({ x: -1, y: -1 })
-  // gsap.killTweensOf(_color)
-  // gsap.to(_color, {
-  //   alpha: 1,
-  //   onUpdate: () => {
-  //     updateTint('about-collaborator-thumbnail')
-  //   },
-  // })
 }
 
 function onCollaboratorImageClick(e: MouseEvent) {
@@ -310,7 +238,6 @@ function updateTint(id: string) {
 
 onBeforeUnmount(() => {
   $scene.removeObject('about-thumbnail')
-  // $scene.removeObject('about-collaborator-thumbnail')
 })
 </script>
 

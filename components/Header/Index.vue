@@ -334,6 +334,7 @@ function scrollDown() {
 
     p {
       @include t-b1;
+      font-family: 'HelveticaNowDisplayBold';
     }
 
     &__button {

@@ -24,7 +24,7 @@
             @leave="transitionShuffleOut">
             <SvgSquare v-if="activeList === 'selected'" />
           </transition>
-          <span class="home__projects__buttons__button__label__el">Selected projects</span>
+          <span class="home__projects__buttons__button__label__el">Selected Projects</span>
           <span
             class="home__projects__buttons__button__label__count"
             v-html="`{${startWithZero(selectedProjects)}}`" />
@@ -55,7 +55,7 @@
             @leave="transitionShuffleOut">
             <SvgSquare v-if="activeList === 'all'" />
           </transition>
-          <span class="home__projects__buttons__button__label__el">All projects</span>
+          <span class="home__projects__buttons__button__label__el">All Projects</span>
           <span
             class="home__projects__buttons__button__label__count"
             v-html="`{${startWithZero(projects)}}`" />
@@ -193,6 +193,7 @@ const emit = defineEmits(['update-list', 'button-hover'])
         color: var(--dark-grey);
         position: relative;
         will-change: opacity;
+        font-family: 'HelveticaNowDisplayBold' !important;
         @include t-b1;
       }
 

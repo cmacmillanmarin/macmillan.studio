@@ -67,6 +67,7 @@ export interface Object {
   meshId?: number
 
   inView: boolean
+  wasInView?: boolean
   firstFrame?: boolean
   wasPixelated?: boolean
   wasHovered?: boolean

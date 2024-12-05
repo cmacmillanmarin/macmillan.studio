@@ -66,7 +66,6 @@ function onMouseLeave() {
     font-family: 'HelveticaNowDisplayBold' !important;
     @include t-b1;
     @include from__tablet--landscape {
-      font-family: 'HelveticaNowDisplayMedium' !important;
       @include t-b1;
     }
   }

@@ -9,6 +9,7 @@
         v-if="data.type === 'img' && !!data.image"
         :data="data.image"
         :lazy="true"
+        :virtual="true"
         :size="{ d: data.columns / 12, t: data.columns / 8, m: data.columns / 8 }"
         @load="onImageLoaded" />
       <video
@@ -115,8 +116,8 @@ function onVideoLoaded() {
   $scene.updateObject({ id, video: videoEl.value })
 }
 
-function onImageLoaded() {
-  $scene.updateObject({ id, img: customImageEl.value?.el })
+function onImageLoaded(img: HTMLImageElement) {
+  $scene.updateObject({ id, img })
   // customImageEl.value?.el && $scene.preload(customImageEl.value.el)
 }
 

@@ -23,20 +23,6 @@
         </transition>
       </Teleport>
 
-      <Teleport to=".header__bottom">
-        <transition
-          mode="out-in"
-          :css="false"
-          :appear="true"
-          @before-enter="prepareFadeIn"
-          @enter="transitionShuffleIn"
-          @leave="transitionShuffleOut">
-          <p v-if="indicators" class="home__projects__date">
-            <span v-text="`{${year}—2013}`" />
-          </p>
-        </transition>
-      </Teleport>
-
       <Teleport to="#top-layer-blend">
         <HomeProjectsButtons
           v-if="!isInProject"

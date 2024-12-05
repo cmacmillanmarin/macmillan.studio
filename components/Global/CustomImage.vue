@@ -1,6 +1,7 @@
 <template>
   <img
     ref="el"
+    v-if="!virtual"
     :src="thumbnail ? data.src : undefined"
     :srcset="thumbnail ? undefined : imgSrcset"
     :sizes="thumbnail ? undefined : imgSizes"
@@ -12,6 +13,15 @@
     crossorigin="anonymous"
     :class="['custom-image', { 'custom-image--cover': cover }, { 'will-fade': fade }]"
     @load="onload"
+    v-intersect="{ callback: intersect }" />
+  <div
+    v-else
+    ref="el"
+    class="custom-image"
+    data-custom-image-virtual
+    :aria-label="data.alt"
+    :data-width="data.width"
+    :data-height="data.height"
     v-intersect="{ callback: intersect }" />
 </template>
 
@@ -27,12 +37,14 @@ const props = defineProps<{
   fade?: boolean
   cover?: boolean
   thumbnail?: boolean
+  virtual?: boolean
 }>()
 
 const el = ref<HTMLImageElement>()
 const inView = ref<boolean>(false)
 const isLoaded = ref<boolean>(false)
 const isVisible = ref<boolean>(false)
+const isVirtual = ref<boolean>(!!props.virtual)
 
 const size = ref<ImageDimensions>(props.size || { d: 1, t: 1, m: 1 })
 const imgSizes = computed<string>(
@@ -54,6 +66,12 @@ const imgSrcset = computed<string>(() => {
 
 watch([isLoaded, inView], () => {
   props.fade && isLoaded.value && inView.value && !isVisible.value && enter()
+  isVirtual.value && inView.value && !isLoaded.value && createVirtualImage()
+})
+
+onMounted(() => {
+  el.value?.complete && el.value?.naturalHeight !== 0 && onload()
+  isVirtual.value && !isLoaded.value && !props.lazy && createVirtualImage()
 })
 
 function intersect(el: HTMLElement, visible: boolean): void {
@@ -62,7 +80,7 @@ function intersect(el: HTMLElement, visible: boolean): void {
 
 function onload(): void {
   isLoaded.value = true
-  emit('load')
+  emit('load', el.value)
 }
 
 function enter(): void {
@@ -70,9 +88,18 @@ function enter(): void {
   isVisible.value = true
 }
 
-onMounted(() => {
-  el.value?.complete && el.value?.naturalHeight !== 0 && onload()
-})
+// needed while threejs does not support images from DOM with CSS: mrdoob/three.js#23164
+
+function createVirtualImage() {
+  const image = new Image()
+  image.crossOrigin = 'annonymus'
+  image.srcset = imgSrcset.value
+  image.sizes = imgSizes.value
+  image.onload = () => {
+    isLoaded.value = true
+    emit('load', image)
+  }
+}
 
 defineExpose({
   el,
@@ -84,6 +111,7 @@ const emit = defineEmits(['load'])
 <style lang="scss">
 .custom-image {
   border-radius: var(--border-radius--m);
+
   &--cover {
     height: 100%;
     object-fit: cover;

@@ -133,6 +133,7 @@ export default class {
       antialias: false,
       premultipliedAlpha: false,
     })
+    this.renderer.sortObjects = true
     this.renderer.setClearColor(0x000000, 0)
     this.renderer.autoClear = false
 
@@ -166,7 +167,6 @@ export default class {
       console.warn('No image to preload')
       return
     }
-    console.log('preload', img)
     this.createTexture(img)
   }
 
@@ -187,7 +187,7 @@ export default class {
     }
   }
 
-  async initTexture(img: HTMLElement, cb: Function) {
+  async initTexture(img: HTMLImageElement, cb: Function) {
     const txt = new Texture(img)
     await this.renderer?.initTexture(txt)
     txt.needsUpdate = true
@@ -195,12 +195,10 @@ export default class {
   }
 
   async onTextureLoaded(txt: Texture) {
-    console.log('texture loaded', txt.image.currentSrc)
     const texture = this.getTexture(txt.image)
     texture.txt = txt
     this.texturesLoaderRequests--
     const queueTexture = this.texturesLoaderRequestQueue.pop()
-    queueTexture && console.log(`load texture from queue ${queueTexture.currentSrc}`)
     queueTexture && this.loadTexture(queueTexture)
   }
 
@@ -317,7 +315,7 @@ export default class {
     for (const object of this.objects) {
       object.inView = this.inView(object)
 
-      if (object.inView) {
+      if (object.inView || object.wasInView) {
         if (!object.mesh) {
           const plane = this.getAvailablePlane(object.id)
           if (!plane) {
@@ -390,6 +388,8 @@ export default class {
         object.mesh.material.uniforms.uFade.value = 0
         object.mesh = null
       }
+
+      object.wasInView = object.inView
     }
   }
 
@@ -478,13 +478,13 @@ export default class {
   }
 
   processImage(object: Object) {
-    const { img } = object
-    if (!img) return
+    const { img, imgAssigned } = object
+    if (!img || imgAssigned) return
 
     const texture = this.getTexture(img)
     const textureLoaded = !!texture.txt
 
-    if (textureLoaded && !object.imgAssigned) {
+    if (textureLoaded) {
       object.imgAssigned = true
 
       const { uniforms } = object.mesh.material
@@ -493,7 +493,6 @@ export default class {
       uniforms.uTextureImage.needsUpdate = true
       uniforms.uTextureSize.value.x = object.size.x
       uniforms.uTextureSize.value.y = object.size.x * (img.height / img.width)
-      console.log(img.width, img.height)
 
       const fade = !object.firstFrame
       gsap.killTweensOf(uniforms.uTextureFade)
