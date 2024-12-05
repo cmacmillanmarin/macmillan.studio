@@ -85,6 +85,10 @@
   font-family: 'HelveticaNowDisplayBold';
 }
 
+@mixin t-b--xbold {
+  font-family: 'HelveticaNowDisplayXBold';
+}
+
 @mixin t-b1 {
   font-size: toScaleUp(1.5rem);
   line-height: toScaleUp(1.8rem);
@@ -114,6 +118,18 @@
   line-height: toScaleUp(1.7rem);
 
   @include t-b--bold;
+
+  @include from__tablet--landscape {
+    font-size: toScale(1.4rem);
+    line-height: toScale(2rem);
+  }
+}
+
+@mixin t-b3--number {
+  font-size: toScaleUp(1.4rem);
+  line-height: toScaleUp(1.7rem);
+
+  @include t-b--xbold;
 
   @include from__tablet--landscape {
     font-size: toScale(1.4rem);

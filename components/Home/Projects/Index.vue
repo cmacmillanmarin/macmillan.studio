@@ -377,7 +377,7 @@ const emit = defineEmits(['update-list', 'update-active', 'update-temporary-proj
     &__label {
       &--active {
         transform: translateY(5%);
-        @include t-b3;
+        @include t-b3--number;
       }
     }
     .svg__square {

@@ -1,8 +1,7 @@
 @import './reset';
 @import './variables';
 
-@include import-font('HelveticaNowTextBold');
-@include import-font('HelveticaNowTextMedium');
+@include import-font('HelveticaNowDisplayXBold');
 @include import-font('HelveticaNowDisplayBold');
 @include import-font('HelveticaNowDisplayMedium');
 @include import-font('NeuePixelRegular');

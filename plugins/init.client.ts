@@ -23,7 +23,11 @@ export default defineNuxtPlugin(async () => {
 
   WebFont.load({
     custom: {
-      families: ['HelveticaNowDisplayBold', 'HelveticaNowDisplayMedium'],
+      families: [
+        'HelveticaNowDisplayXBold',
+        'HelveticaNowDisplayBold',
+        'HelveticaNowDisplayMedium',
+      ],
     },
     active: (): void => {
       store.updatePreloadedFonts(true)

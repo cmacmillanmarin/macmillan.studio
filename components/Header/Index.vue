@@ -345,6 +345,7 @@ function scrollDown() {
       @include will-fade;
       .svg__pixel-arrow {
         width: toScale(2.4rem);
+        transform: translateY(toScale(0.05rem));
       }
     }
     &__label {

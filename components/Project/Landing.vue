@@ -336,6 +336,7 @@ const emit = defineEmits(['update-scroll', 'next-project'])
         padding-bottom: 2rem;
 
         &__label {
+          padding-top: 0.2rem;
           transform: translateY(20%);
           line-height: 1.2;
         }
