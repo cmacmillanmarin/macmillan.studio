@@ -187,8 +187,11 @@ export default class {
     }
   }
 
-  async initTexture(img: HTMLElement, cb: Function) {
-    const txt = new Texture(img)
+  async initTexture(img: HTMLImageElement, cb: Function) {
+    const image = new Image()
+    image.crossOrigin = 'anonymous'
+    image.src = img.currentSrc
+    const txt = new Texture(image)
     await this.renderer?.initTexture(txt)
     txt.needsUpdate = true
     cb(txt)
