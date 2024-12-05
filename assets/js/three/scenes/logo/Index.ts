@@ -300,7 +300,7 @@ export default class {
     }
   }
 
-  updateY(y: number) {
+  updateCamera(y: number) {
     this.y = y
     if (this.camera) {
       this.camera.position.y = this.y * -1

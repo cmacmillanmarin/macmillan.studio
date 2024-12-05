@@ -7,33 +7,38 @@ import {
   PerspectiveCamera,
   WebGLRenderer,
 } from 'three'
+import type { CreateParams } from '~/types/front/three'
+import VS from '~/assets/js/three/scenes/noise/glsl/vs.glsl'
+import FS from '~/assets/js/three/scenes/noise/glsl/fs.glsl'
 
-import VS from './glsl/noise/vs.glsl'
-import FS from './glsl/noise/fs.glsl'
+export default class Noise {
+  debug: boolean = false
 
-class Noise {
+  ready: boolean = false
+
+  canvas: HTMLCanvasElement | null = null
+
+  z: number = 1000
+  scene: Scene | null = null
+  camera: PerspectiveCamera | null = null
+  renderer: WebGLRenderer | null = null
+
+  noise: any | null = null
+
+  size: Vector2 = new Vector2()
+
+  isMobileLayout: boolean = false
+  maxPixelRatio: number = 2
+
+  rendering: boolean = false
+
   constructor() {
-    this.debug = false
-
-    this.ready = false
-    this.canvas = null
-    this.scene = null
-    this.camera = null
-    this.renderer = null
-    this.noise = null
-
-    this.z = 1000
-
-    this.size = new Vector2()
-
-    this.maxPixelRatio = 2
-    this.rendering = false
-
     this.bind()
   }
 
-  async create({ el, size }) {
+  async create(params: CreateParams) {
     this.log(`create()`)
+    const { el, size } = params
 
     this.canvas = el
 
@@ -56,6 +61,7 @@ class Noise {
   }
 
   render() {
+    if (!this.noise || !this.scene || !this.renderer || !this.camera) return
     this.noise.material.uniforms.uFrame.value++
     this.noise.material.uniforms.uTime.value += 0.05
 
@@ -69,21 +75,25 @@ class Noise {
         vertexShader: VS,
         fragmentShader: FS,
         uniforms: {
-          uTime: { type: 'f', value: 0.0 },
-          uFrame: { type: 'i', value: 0 },
-          uOpacity: { type: 'f', value: 0.0 },
-          uPlaneSize: { type: 'v2', value: new Vector2(1, 1) },
-          uDevicePixelRatio: { type: 'f', value: 1.0 },
+          uTime: { value: 0.0 },
+          uFrame: { value: 0 },
+          uOpacity: { value: 0.0 },
+          uPlaneSize: { value: new Vector2(1, 1) },
+          uDevicePixelRatio: { value: 1.0 },
         },
         wireframe: false,
         transparent: true,
       })
     )
-    this.scene.add(this.noise)
+    this.scene?.add(this.noise)
   }
 
-  updateSize({ size }) {
-    this.size = size
+  updateSize(params: { size: { x: number; y: number } }) {
+    const { size } = params
+    if (!size || !this.camera || !this.noise || !this.renderer) return
+    this.size.x = size.x
+    this.size.y = size.y
+
     this.camera.aspect = size.x / size.y
     this.camera.fov = 2 * Math.atan((size.y * 0.5) / this.z) * (180 / Math.PI)
     this.camera.updateProjectionMatrix()
@@ -105,26 +115,27 @@ class Noise {
     return Math.min(window.devicePixelRatio, this.maxPixelRatio)
   }
 
-  fromDomToCanvas({ x, y }) {
-    const _x = x - this.size.x * 0.5
-    const _y = -y + this.size.y * 0.5
-    return { x: _x, y: _y }
+  fromDomToCanvas(params: { x: number; y: number }): { x: number; y: number } {
+    return {
+      x: params.x - this.size.x * 0.5,
+      y: -params.y + this.size.y * 0.5,
+    }
   }
 
-  updateOpacity(opacity) {
-    this.noise.material.uniforms.uOpacity.value = opacity
+  updateOpacity(opacity: number) {
+    if (this.noise) this.noise.material.uniforms.uOpacity.value = opacity
   }
 
-  toScale(n) {
+  toScale(n: number): number {
     const mvw = Math.min(this.size.x, 1800)
     return (n * mvw) / (this.isMobileLayout ? 375 : 1440)
   }
 
-  bind() {
-    this._render = this.render.bind(this)
-  }
+  updateCamera(y: number) {}
 
-  log(msg) {
+  bind() {}
+
+  log(msg: string) {
     if (!this.debug) return
     console.log(`Scene ~ ${msg}`)
   }
@@ -133,7 +144,7 @@ class Noise {
     this.log('destroy()')
 
     this.ready = false
-    this.canvas.remove()
+    this.canvas?.remove()
     this.canvas = null
     this.scene = null
     this.camera = null
@@ -141,5 +152,3 @@ class Noise {
     this.noise = null
   }
 }
-
-export default Noise

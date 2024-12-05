@@ -21,8 +21,6 @@ body {
   }
   &::after {
     display: none;
-  }
-  &::after {
     content: 'mobile';
     @include from__tablet {
       content: 'tablet';

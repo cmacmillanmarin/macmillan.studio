@@ -1,6 +1,6 @@
 import useStore from '~/store/useStore'
 import Scene from '~/assets/js/three/Scene'
-import Noise from '~/assets/js/three/Noise'
+import Noise from '~/assets/js/three/scenes/noise/Index'
 
 export default defineNuxtPlugin(nuxtApp => {
   const store = useStore()

@@ -1,5 +1,5 @@
 import { Mesh } from 'three'
-import type { Texture, Vector2, Vector3, Vector4 } from 'three'
+import type { Texture, Vector2, Vector3, Vector4, WebGLRenderer } from 'three'
 import type { Cursor } from '~/types/front/store'
 
 export interface CreateParams {
@@ -7,6 +7,7 @@ export interface CreateParams {
   size: Vector2
   updateCursor?: Function
   onPreloaded?: Function
+  renderer?: WebGLRenderer | null
 }
 
 export interface ObjectParam {
