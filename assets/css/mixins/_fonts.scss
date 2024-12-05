@@ -101,6 +101,18 @@
   }
 }
 
+@mixin t-b1--bold {
+  font-size: toScaleUp(1.5rem);
+  line-height: toScaleUp(1.8rem);
+
+  @include t-b--bold;
+
+  @include from__tablet--landscape {
+    font-size: toScale(2.2rem);
+    line-height: toScale(2.8rem);
+  }
+}
+
 @mixin t-b2 {
   font-size: toScaleUp(1.4rem);
   line-height: toScaleUp(1.8rem);

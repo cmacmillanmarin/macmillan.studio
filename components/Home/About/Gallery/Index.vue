@@ -26,7 +26,7 @@ const props = defineProps<{
   data: HomepageAboutGallery
 }>()
 
-const { $scene }: any = useNuxtApp()
+const { $three }: any = useNuxtApp()
 
 const store = useStore()
 const { updateCursor } = store
@@ -53,7 +53,7 @@ watch(section, () => {
 
 function onItemsFadeUpdate() {
   items.value.forEach((item, i) => {
-    $scene.updateObject({
+    $three.planes.updateObject({
       id: `${planeIds.value}-${i + 1}`,
       opacity: itemsFade.value,
     })

@@ -107,7 +107,7 @@ import {
 import { type HeaderLinks } from '~/types/front'
 import { toPx, toPercentage } from '~/utils'
 
-const { $scene }: any = useNuxtApp()
+const { $three }: any = useNuxtApp()
 
 const store = useStore()
 const { updateHeader, updateHeaderLogo, updateCursor, headerButtonClicked, updateHeaderOverlay } =
@@ -158,7 +158,7 @@ watch(linksVisible, () => {
 })
 
 watch(logoVisible, () => {
-  $scene.updateLogoState(logoVisible.value)
+  $three.planes.updateLogoState(logoVisible.value)
 })
 
 watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], async () => {
@@ -333,8 +333,7 @@ function scrollDown() {
     padding-left: var(--layout-margin);
 
     p {
-      @include t-b1;
-      font-family: 'HelveticaNowDisplayBold';
+      @include t-b1--bold;
     }
 
     &__button {

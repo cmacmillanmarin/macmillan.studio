@@ -102,7 +102,7 @@ defineProps<{
 const route = useRoute()
 const router = useRouter()
 
-const { $scene }: any = useNuxtApp()
+const { $three }: any = useNuxtApp()
 
 const store = useStore()
 const { updateHeader, updateLoading, updateSection, updateInReel } = store
@@ -236,7 +236,7 @@ watch(isInProjectEntered, () => {
 })
 
 watch([headerLogo, videoInProject, isMobileLayout], () => {
-  $scene.updateObject({
+  $three.planes.updateObject({
     id: 'reel',
     onClick: videoInProject.value || headerLogo.value || isMobileLayout.value ? null : goToReel,
   })
@@ -341,7 +341,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
     }
   } else if (videoInProject.value) _opacity = 0
 
-  $scene.updateObject({
+  $three.planes.updateObject({
     id: 'reel',
     fixed: _fixed,
     size: _size,
@@ -363,7 +363,7 @@ onMounted(() => {
   videoEl.value?.addEventListener('canplaythrough', onVideoReady)
   !videoInProject.value && videoEl.value?.load()
   videoInView.value = current.value < componentHeight.value && section.value === 'hero'
-  $scene.addObject({
+  $three.planes.addObject({
     id: 'reel',
     video: videoEl.value,
     color: rbgToVec4(hexToRgb('#000000')),
@@ -377,7 +377,7 @@ function goToReel() {
   reelButtonVisible.value = false
   updateInReel(true)
   disableScroll(true)
-  $scene.updateObject({
+  $three.planes.updateObject({
     id: 'reel',
     onClick: null,
     noPixel: true,
@@ -407,7 +407,7 @@ function onReelReady() {
 }
 
 function updateReelOpacity() {
-  $scene.updateObject({ id: 'reel', textureFade: reelFade.value })
+  $three.planes.updateObject({ id: 'reel', textureFade: reelFade.value })
 }
 
 function updateReel(progress: number) {
@@ -427,7 +427,7 @@ function closeReel() {
   updateInReel(false)
   disableScroll(false)
   updateScrollTargetId('projects')
-  $scene.updateObject({
+  $three.planes.updateObject({
     id: 'reel',
     onClick: isMobileLayout.value ? null : goToReel,
     noPixel: false,
@@ -551,7 +551,7 @@ async function onFirstAnimationDone() {
   await nextTick()
   updateScroll()
   disableScroll(false)
-  $scene.updateObject({ id: 'reel', onClick: isMobileLayout.value ? null : goToReel })
+  $three.planes.updateObject({ id: 'reel', onClick: isMobileLayout.value ? null : goToReel })
 }
 
 function onPlay() {
@@ -574,8 +574,8 @@ onUnmounted(() => {
   videoEl.value?.removeEventListener('play', onPlay)
   videoEl.value?.removeEventListener('pause', onPause)
   videoEl.value?.removeEventListener('canplaythrough', onVideoReady)
-  $scene.removeObject('reel')
-  $scene.destroy()
+  $three.planes.removeObject('reel')
+  $three.planes.destroy()
 })
 </script>
 

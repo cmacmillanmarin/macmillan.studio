@@ -49,7 +49,7 @@ const props = defineProps<{
   planesId: string
 }>()
 
-const { $scene }: any = useNuxtApp()
+const { $three }: any = useNuxtApp()
 // const { updateCursorPosition } = useStore()
 const { scrollUpdated } = storeToRefs(useScrollStore())
 // const { current, scrollUpdated } = storeToRefs(useScrollStore())
@@ -81,7 +81,7 @@ const id: string = `${props.planesId}-${props.pos}`
 watch(scrollUpdated, () => {
   width.value = getWidth()
   height.value = getHeight()
-  $scene.updateObject({
+  $three.planes.updateObject({
     id,
     size: { x: width.value, y: height.value, z: 1 },
     border: toScale(isMobileLayout.value ? 8 : 16),
@@ -89,7 +89,7 @@ watch(scrollUpdated, () => {
 })
 
 onMounted(() => {
-  $scene.addObject({
+  $three.planes.addObject({
     id,
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
@@ -113,12 +113,12 @@ function getHeight() {
 }
 
 function onVideoLoaded() {
-  $scene.updateObject({ id, video: videoEl.value })
+  $three.planes.updateObject({ id, video: videoEl.value })
 }
 
 function onImageLoaded(img: HTMLImageElement) {
-  $scene.updateObject({ id, img })
-  // customImageEl.value?.el && $scene.preload(customImageEl.value.el)
+  $three.planes.updateObject({ id, img })
+  // customImageEl.value?.el && $three.planes.preload(customImageEl.value.el)
 }
 
 function onMouseEnter() {
@@ -135,7 +135,7 @@ function onMouseLeave() {
 }
 
 onBeforeUnmount(() => {
-  $scene.removeObject(`${props.planesId}-${props.pos}`)
+  $three.planes.removeObject(`${props.planesId}-${props.pos}`)
 })
 </script>
 

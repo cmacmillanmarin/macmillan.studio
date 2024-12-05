@@ -139,14 +139,14 @@ function move() {
     if (inView || x !== item.x) {
       x = round(x, 2)
       if (props.planesId) {
-        const { $scene }: any = useNuxtApp()
+        const { $three }: any = useNuxtApp()
         const index = items.value.indexOf(item)
         const id = `${props.planesId}-${index + 1}`
         // const totalDistance = _containerWidth + item.width
         // const current = x + item.width
         // const progress = current / totalDistance
         // const distanceToCenter = distanceToMidpoint(progress)
-        $scene.updateObject({ id, position: { x: x, y: y.value }, zoom: 1 })
+        $three.planes.updateObject({ id, position: { x: x, y: y.value }, zoom: 1 })
       }
       gsap.set(item.el, { x })
     }

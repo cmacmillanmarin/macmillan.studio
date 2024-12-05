@@ -18,6 +18,7 @@ import {
 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type {
+  ConstructorParams,
   CreateParams,
   Fixed,
   InViewParams,
@@ -105,17 +106,23 @@ export default class {
   _onTouchStart: (this: Window, ev: TouchEvent) => any = () => {}
   _onTouchEnd: (this: Window, ev: TouchEvent) => any = () => {}
 
-  constructor() {
+  constructor(params: ConstructorParams) {
+    const { updateCursor, onPreloaded } = params
+
+    this.onPreloaded = onPreloaded || this.onPreloaded
+    this.updateCursor = updateCursor || this.updateCursor
+
     this.bind()
   }
 
   async create(params: CreateParams) {
     this.log(`create()`)
-    const { el, size, updateCursor, onPreloaded } = params
+    const { canvas, renderer, size } = params
+
+    this.canvas = canvas
+    this.renderer = renderer
 
     this.main = document.querySelector('main')
-
-    this.canvas = el
 
     this.scene = new Scene()
     this.logoScene = new Scene()
@@ -125,19 +132,6 @@ export default class {
 
     this.logoCamera = new PerspectiveCamera(75, size.x / size.y, 100, 1250)
     this.logoCamera.position.z = this.z
-
-    this.renderer = new WebGLRenderer({
-      canvas: this.canvas,
-      alpha: true,
-      antialias: false,
-      premultipliedAlpha: false,
-    })
-    this.renderer.sortObjects = true
-    this.renderer.setClearColor(0x000000, 0)
-    this.renderer.autoClear = false
-
-    this.onPreloaded = onPreloaded || this.onPreloaded
-    this.updateCursor = updateCursor || this.updateCursor
 
     this.updateSize({ size })
     this.addListeners()
@@ -559,6 +553,7 @@ export default class {
     if (this.needsUpdate) {
       this.log('render()')
       this.renderer.setViewport(0, 0, this.size.x, this.size.y)
+      this.renderer.domElement = this.canvas as HTMLCanvasElement
       this.renderer.render(this.scene, this.camera)
     }
 

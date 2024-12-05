@@ -92,7 +92,7 @@ defineProps<{
   data: HomepageAbout
 }>()
 
-const { $scene }: any = useNuxtApp()
+const { $three }: any = useNuxtApp()
 
 const store = useStore()
 const { updateSection, updateCursor, updateCursorPosition } = store
@@ -131,7 +131,7 @@ watch(section, () => {
 })
 
 onMounted(() => {
-  $scene.addObject({
+  $three.planes.addObject({
     id: 'about-thumbnail',
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
@@ -148,7 +148,7 @@ function updateImagePositions() {
   const thumbnailImageBounding = getBounding(thumbnailImageEl.value.el)
   const thumbnailImageWidth = thumbnailImageEl.value.el.clientWidth
   const thumbnailImageHeight = thumbnailImageEl.value.el.clientHeight
-  $scene.updateObject({
+  $three.planes.updateObject({
     id: 'about-thumbnail',
     position: { x: thumbnailImageBounding.left, y: thumbnailImageBounding.top },
     size: { x: thumbnailImageWidth, y: thumbnailImageHeight, z: 1 },
@@ -163,7 +163,7 @@ async function onReadMore() {
 }
 
 function onImagesFadeUpdate() {
-  $scene.updateObject({ id: 'about-thumbnail', opacity: imagesFade.value })
+  $three.planes.updateObject({ id: 'about-thumbnail', opacity: imagesFade.value })
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -176,7 +176,7 @@ function onTestimonialsUpdateExpanded() {
 }
 
 function onThumbnailLoaded(img: HTMLImageElement) {
-  $scene.updateObject({ id: 'about-thumbnail', img })
+  $three.planes.updateObject({ id: 'about-thumbnail', img })
   updateImagePositions()
 }
 
@@ -225,7 +225,7 @@ function onCollaboratorImageClick(e: MouseEvent) {
 }
 
 function updateTint(id: string) {
-  $scene.updateObject({
+  $three.planes.updateObject({
     id,
     multiplyColor: [
       _color.vec4[0] + (1 - _color.vec4[0]) * (1 - _color.alpha),
@@ -237,7 +237,7 @@ function updateTint(id: string) {
 }
 
 onBeforeUnmount(() => {
-  $scene.removeObject('about-thumbnail')
+  $three.planes.removeObject('about-thumbnail')
 })
 </script>
 

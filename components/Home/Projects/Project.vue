@@ -128,7 +128,7 @@ const props = defineProps<{
   active: boolean
 }>()
 
-const { $scene }: any = useNuxtApp()
+const { $three }: any = useNuxtApp()
 
 const route = useRoute()
 const router = useRouter()
@@ -259,7 +259,7 @@ watch([inView, inTransition, videoEl], () => {
 watch([() => props.active, inProject, headerOverlay], () => {
   const hidden = inProject.value || headerOverlay.value
   const clickable = props.active && !hidden
-  $scene.updateObject({
+  $three.planes.updateObject({
     id: projectId.value,
     onClick: clickable ? openProject : null,
   })
@@ -283,7 +283,7 @@ watch(section, () => {
     }
   } else if (opacity.value !== 1) {
     opacity.value = 1
-    $scene.updateObject({ id: projectId.value, opacity: 1 })
+    $three.planes.updateObject({ id: projectId.value, opacity: 1 })
   }
   inView.value = getInView()
 })
@@ -328,7 +328,7 @@ watch([inTransitionReady, active], async () => {
     const video = document.getElementById(projectVideo.value.id) as HTMLVideoElement | undefined
     if (video) {
       videoEl.value = video
-      $scene.updateObject({ id: projectId.value, video: videoEl.value })
+      $three.planes.updateObject({ id: projectId.value, video: videoEl.value })
     }
   }
   if (!imageReady.value) imageReady.value = inTransitionReady.value && active.value
@@ -354,7 +354,7 @@ watch(
       ? getInAllProjectsListPlane()
       : getInSelectedProjectsListPlane()
 
-    $scene.updateObject({ id: projectId.value, ..._plane })
+    $three.planes.updateObject({ id: projectId.value, ..._plane })
   }
 )
 
@@ -398,13 +398,13 @@ function updateDom() {
 
 function onImageLoaded(img: HTMLImageElement) {
   imageLoaded.value = true
-  $scene.updateObject({ id: projectId.value, img })
+  $three.planes.updateObject({ id: projectId.value, img })
 }
 
 async function createPlane() {
   const hidden = inProject.value || headerOverlay.value
   const clickable = props.active && !hidden
-  $scene.addObject({
+  $three.planes.addObject({
     id: projectId.value,
     video: videoEl.value,
     img: imageLoaded.value ? customImageEl.value?.el : null,
@@ -548,7 +548,7 @@ function getActiveInAllProjectsList() {
 }
 
 function onOpacityUpdate() {
-  $scene.updateObject({ id: projectId.value, opacity: opacity.value })
+  $three.planes.updateObject({ id: projectId.value, opacity: opacity.value })
 }
 
 function transition() {
@@ -573,7 +573,8 @@ function animate() {
       progress.value = getProgress()
       leaveProgress.value = getLeaveProgress()
       inView.value = getInView()
-      inView.value && $scene.updateObject({ id: projectId.value, ..._plane, forcePixel: false })
+      inView.value &&
+        $three.planes.updateObject({ id: projectId.value, ..._plane, forcePixel: false })
     },
     onComplete: () => {
       inTransition.value = false
@@ -611,7 +612,7 @@ onBeforeUnmount(() => {
     })
   }
   removeRenderCallback(updateDom)
-  $scene.removeObject({ id: projectId.value })
+  $three.planes.removeObject({ id: projectId.value })
 })
 
 const emit = defineEmits<{

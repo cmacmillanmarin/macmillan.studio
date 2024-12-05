@@ -44,7 +44,7 @@ export interface NextProjectTicker {
 
 export interface State {
   preloadedFonts: boolean
-  preloadedTextures: boolean
+  preloadedThree: boolean
   loading: boolean
   grid: GridType
   section: Section

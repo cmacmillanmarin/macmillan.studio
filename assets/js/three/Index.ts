@@ -1,7 +1,8 @@
 import { Vector2, WebGLRenderer } from 'three'
-import Planes from '~/assets/js/three/scenes/planes/Index'
+
 import Noise from '~/assets/js/three/scenes/noise/Index'
-import type { CreateParams } from '~/types/front/three'
+import Planes from '~/assets/js/three/scenes/planes/Index'
+import type { ConstructorParams, CreateParams } from '~/types/front/three'
 
 type ThreeScene = Planes | Noise
 
@@ -10,36 +11,55 @@ export default class Three {
   ready: boolean = false
   disabled: boolean = false
 
+  canvas: HTMLCanvasElement | null = null
   renderer?: WebGLRenderer | null
 
-  planes: Planes = new Planes()
-  noise: Noise = new Noise()
+  planes?: Planes
+  noise?: Noise
 
   scenes: Array<ThreeScene> = []
 
-  constructor() {
+  onPreloaded?: Function = () => {}
+  updateCursor?: Function = () => {}
+
+  constructor(params: ConstructorParams) {
     this.bind()
 
-    this.scenes.push(this.planes, this.noise)
+    this.planes = new Planes(params)
+    this.noise = new Noise()
+
+    this.scenes.push(this.planes)
+    this.scenes.push(this.noise)
   }
 
   async create(params: CreateParams) {
     this.log(`create()`)
-    const canvas: HTMLElement | null = document.querySelector('.three')
-    if (canvas) {
-      const alpha: boolean = true
-      const antialias: boolean = false
-      const premultipliedAlpha: boolean = true
-      const stencil: boolean = true
-      this.renderer = new WebGLRenderer({ canvas, antialias, premultipliedAlpha, alpha, stencil })
-      this.renderer.autoClear = false
+    const parent: HTMLElement = document.querySelector('.__layout') || document.body
+    this.canvas = document.createElement('canvas')
+    this.canvas.classList.add('three')
+    parent.appendChild(this.canvas)
 
-      this.scenes.forEach((s: ThreeScene) => s.create({ ...params, renderer: this.renderer }))
+    this.renderer = new WebGLRenderer({
+      canvas: this.canvas,
+      antialias: false,
+      premultipliedAlpha: true,
+      alpha: true,
+      stencil: true,
+    })
+    this.renderer.setClearColor(0x000000, 0)
+    this.renderer.sortObjects = true
+    this.renderer.autoClear = false
 
-      this.ready = true
-    } else {
-      console.warn('Three ~ Canvas not found!')
-    }
+    this.scenes.forEach((s: ThreeScene) =>
+      s.create({
+        ...params,
+        parent,
+        canvas: this.canvas as HTMLCanvasElement,
+        renderer: this.renderer as WebGLRenderer,
+      })
+    )
+
+    this.ready = true
   }
 
   updateCamera(position: number) {
@@ -62,6 +82,10 @@ export default class Three {
   getDevicePixelRatio() {
     const maxPixelRatio = 2
     return Math.min(window.devicePixelRatio, maxPixelRatio)
+  }
+
+  updateMobileLayout(value: boolean) {
+    this.scenes.forEach((s: ThreeScene) => s.updateMobileLayout(value))
   }
 
   bind() {

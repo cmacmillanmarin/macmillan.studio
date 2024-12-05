@@ -38,22 +38,18 @@ export default class Noise {
 
   async create(params: CreateParams) {
     this.log(`create()`)
-    const { el, size } = params
+    const { renderer, parent, size } = params
 
-    this.canvas = el
+    this.canvas = document.createElement('canvas')
+    this.canvas.classList.add('three--noise')
+    parent.appendChild(this.canvas)
+
+    this.renderer = renderer
 
     this.scene = new Scene()
 
     this.camera = new PerspectiveCamera(75, size.x / size.y, 100, 1250)
     this.camera.position.z = this.z
-
-    this.renderer = new WebGLRenderer({
-      canvas: this.canvas,
-      alpha: true,
-      antialias: false,
-      premultipliedAlpha: false,
-    })
-    this.renderer.setClearColor(0x000000, 0)
 
     this.createNoise()
     this.updateSize({ size })
@@ -65,6 +61,8 @@ export default class Noise {
     this.noise.material.uniforms.uFrame.value++
     this.noise.material.uniforms.uTime.value += 0.05
 
+    this.renderer.setViewport(0, 0, this.size.x, this.size.y)
+    this.renderer.domElement = this.canvas as HTMLCanvasElement
     this.renderer.render(this.scene, this.camera)
   }
 
@@ -124,6 +122,10 @@ export default class Noise {
 
   updateOpacity(opacity: number) {
     if (this.noise) this.noise.material.uniforms.uOpacity.value = opacity
+  }
+
+  updateMobileLayout(value: boolean) {
+    this.isMobileLayout = value
   }
 
   toScale(n: number): number {

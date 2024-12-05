@@ -111,11 +111,11 @@ export default class {
 
   async create(params: CreateParams) {
     this.log(`create()`)
-    const { el, size, updateCursor, onPreloaded } = params
+    const { canvas, size } = params
 
     this.main = document.querySelector('main')
 
-    this.canvas = el
+    this.canvas = canvas
 
     this.scene = new Scene()
     this.logoScene = new Scene()
@@ -135,9 +135,6 @@ export default class {
     this.renderer.sortObjects = true
     this.renderer.setClearColor(0x000000, 0)
     this.renderer.autoClear = false
-
-    this.onPreloaded = onPreloaded || this.onPreloaded
-    this.updateCursor = updateCursor || this.updateCursor
 
     this.updateSize({ size })
     this.addListeners()

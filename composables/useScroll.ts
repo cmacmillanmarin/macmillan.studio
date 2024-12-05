@@ -5,6 +5,8 @@ import type { Data } from '~/types/front/store/scroll'
 import { targetify } from '~/utils'
 
 export default function useScroll() {
+  const { $three }: any = useNuxtApp()
+
   const route = useRoute()
   const routeHash = computed<string>(() => route.hash?.substring(1) || '')
 
@@ -112,8 +114,7 @@ export default function useScroll() {
   })
 
   watch(bounding, () => {
-    const { $scene }: any = useNuxtApp()
-    $scene?.ready && $scene.updateScrollBounding(bounding.value)
+    $three.planes.ready && $three.planes.updateScrollBounding(bounding.value)
   })
 
   watch(touch, () => {
@@ -147,12 +148,10 @@ export default function useScroll() {
   }
 
   function onScroll(data: Data) {
-    const { $scene, $noise }: any = useNuxtApp()
-    if ($scene?.ready) {
-      $scene.updateY(data.current)
-      $scene.render()
+    if ($three.ready) {
+      $three.updateCamera(data.current)
+      $three.render()
     }
-    $noise?.ready && $noise.render()
     for (const callback of renderCallbacks.value) callback()
     updateSectionThrottle(data.speed > 1000)
     updateScrollData(data)

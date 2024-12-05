@@ -7,7 +7,7 @@ let _toCursor: any
 export default defineStore('use-store', {
   state: (): State => ({
     preloadedFonts: false,
-    preloadedTextures: false,
+    preloadedThree: false,
     loading: true,
     grid: 'none',
     section: 'hero',
@@ -36,7 +36,7 @@ export default defineStore('use-store', {
   }),
   getters: {
     isPreloaded(): boolean {
-      return this.preloadedFonts && this.preloadedTextures
+      return this.preloadedFonts && this.preloadedThree
     },
     isLoading(): boolean {
       return this.loading
@@ -61,8 +61,8 @@ export default defineStore('use-store', {
     updatePreloadedFonts(value: boolean) {
       this.preloadedFonts = value
     },
-    updatePreloadedTextures(value: boolean) {
-      this.preloadedTextures = value
+    updatePreloadedThree(value: boolean) {
+      this.preloadedThree = value
     },
     updateLoading(value: boolean) {
       this.loading = value

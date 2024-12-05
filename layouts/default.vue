@@ -6,7 +6,6 @@
     <ClientOnly>
       <Cursor v-if="!touch" />
       <Three />
-      <Noise />
       <div class="__layout__top-layer" id="top-layer" />
       <div class="__layout__top-layer--blend" id="top-layer-blend" />
     </ClientOnly>
@@ -55,12 +54,16 @@ async function init() {
 
   .three {
     z-index: 6;
-    @include absolute-fill();
-  }
-
-  .noise {
-    z-index: 12;
-    @include absolute-fill();
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    &--noise {
+      @extend .three;
+      z-index: 12;
+    }
   }
 
   .cursor {
