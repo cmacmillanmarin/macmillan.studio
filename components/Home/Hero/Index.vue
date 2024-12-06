@@ -118,7 +118,7 @@ const {
 
 const scrollStore = useScrollStore()
 const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
-const { current, direction } = storeToRefs(scrollStore)
+const { current, direction, bounding } = storeToRefs(scrollStore)
 
 const { isMobileLayout, isTabletPortrait } = useDevice()
 const { layoutMargin, toScale } = useCss()
@@ -260,7 +260,7 @@ watch([section, videoInView, videoInProject], () => {
   // updateScroll()
 })
 
-watch(current, () => {
+watch([current, section], () => {
   const initScale = 1
   const finalScale = isMobileLayout.value ? 1 : 0.885
   const incrementScale = initScale - finalScale
@@ -268,7 +268,7 @@ watch(current, () => {
   const scaleProgress = Math.min(1, logoScroll / scrollThreshold.value)
   const scale = initScale - incrementScale * scaleProgress
 
-  videoInView.value = current.value < componentHeight.value
+  videoInView.value = true
   reelButtonVisible.value =
     isMobileLayout.value && current.value > vh.value * 0.66 && !isInReel.value
 
@@ -303,6 +303,18 @@ watch(current, () => {
   const contentMacMillan = document.querySelector('.home__hero__content__macmillan')
   studioContent && gsap.set(studioContent, { y: contentY })
   contentMacMillan && gsap.set(contentMacMillan, { y: isMobileLayout.value ? contentY : titleY })
+
+  $three.planes.updateObject({
+    id: 'reel--small',
+    position: {
+      x: vw.value - toScale(164) - layoutMargin.value,
+      y: vh.value - toScale(82) - layoutMargin.value,
+    },
+    fixed: { from: 0, to: bounding.value },
+    size: { x: toScale(164), y: toScale(82), z: 1 },
+    border: toScale(8),
+    opacity: section.value !== 'hero' && section.value !== 'projects-bg' ? 1 : 0,
+  })
 })
 
 watch([firstTransition, position, videoPlaying, videoInProject], () => {
@@ -368,6 +380,12 @@ onMounted(() => {
     video: videoEl.value,
     color: rbgToVec4(hexToRgb('#000000')),
     cursor: 'play',
+  })
+  $three.planes.addObject({
+    id: 'reel--small',
+    video: videoEl.value,
+    color: rbgToVec4(hexToRgb('#000000')),
+    onClick: goToReel,
   })
 })
 
@@ -590,17 +608,6 @@ onUnmounted(() => {
 
   &__title {
     @include t-seo;
-  }
-
-  &__reel {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: var(--vh);
-    z-index: 2;
-    background-color: black;
-    opacity: 1;
   }
 
   &__content {

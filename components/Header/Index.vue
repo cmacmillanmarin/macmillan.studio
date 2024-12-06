@@ -285,7 +285,9 @@ function onScrollDownMouseLeave() {
   updateCursor('default')
 }
 
-function onMobileButtonClick() {
+function onMobileButtonClick(e: MouseEvent | TouchEvent) {
+  e.preventDefault()
+  e.stopPropagation()
   if (!isInProject.value && !isInReel.value) toggleMobileOverlay()
   else headerButtonClicked()
 }

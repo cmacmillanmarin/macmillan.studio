@@ -89,7 +89,6 @@ export default class {
 
   updateCamera(y: number) {
     this.y = y
-    if (this.camera) this.camera.position.y = this.y * -1
   }
 
   rotate(y: number) {
@@ -186,21 +185,17 @@ export default class {
     this.log(`updateSize() w: ${size.x}, h: ${size.y}`)
   }
 
-  fromDomToCanvas(params: { x: number; y: number }): { x: number; y: number } {
-    return {
-      x: params.x - this.size.x * 0.5,
-      y: -params.y + this.size.y * 0.5,
-    }
-  }
-
   updateState(value: boolean) {
     if (this.logo) {
       gsap.killTweensOf(this.logo.rotation)
       gsap.killTweensOf(this.animation)
       gsap.to(this.animation, { value: value ? 1 : 0 })
       gsap.to(this.logo.rotation, {
-        y: value ? Math.PI : 0,
+        y: value ? Math.PI * 2 : 0,
         onUpdate: this.updateLight.bind(this),
+        onComplete: () => {
+          if (this.logo) this.logo.rotation.y = Math.PI
+        },
       })
     }
   }
