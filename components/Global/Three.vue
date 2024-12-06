@@ -1,3 +1,5 @@
+<template></template>
+
 <script lang="ts" setup>
 import { gsap } from 'gsap/gsap-core'
 const { $three }: any = useNuxtApp()

@@ -12,11 +12,9 @@ import {
   Scene,
   PerspectiveCamera,
   WebGLRenderer,
-  DirectionalLight,
   Object3D,
   Texture,
 } from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type {
   ConstructorParams,
   CreateParams,
@@ -30,8 +28,8 @@ import type {
 import { gsap } from 'gsap/gsap-core'
 import { round, slugify, videoLoaded } from '~/utils'
 
-import VS from '~/assets/js/three/glsl/vs.glsl'
-import FS from '~/assets/js/three/glsl/fs.glsl'
+import VS from '~/assets/js/three/scenes/planes/glsl/vs.glsl'
+import FS from '~/assets/js/three/scenes/planes/glsl/fs.glsl'
 
 export default class {
   debug: boolean = false
@@ -47,16 +45,6 @@ export default class {
   scene: Scene | null = null
   camera: PerspectiveCamera | null = null
   renderer: WebGLRenderer | null = null
-
-  logo: Object3D | null = null
-  logoScene: Scene | null = null
-  logoCamera: PerspectiveCamera | null = null
-  logoLight: DirectionalLight | null = null
-  logoSize: number = 160
-  logoScale: number = 1
-  logoTargetScale: number = 1
-  logoAnimation: { value: number } = { value: 0 }
-  logoMargin: number = 0
 
   colors: { [key: string]: Vector4 } = {
     white: new Vector4(1.0, 1.0, 1.0, 1.0),
@@ -97,7 +85,7 @@ export default class {
   texturesLoaderRequestsThreshold: number = 2
   texturesLoaderRequestQueue: Array<HTMLImageElement> = []
 
-  onPreloaded: Function = () => {}
+  rotateLogo: Function = () => {}
   updateCursor: Function = () => {}
 
   _onClick: (this: Window, ev: MouseEvent) => any = () => {}
@@ -107,9 +95,9 @@ export default class {
   _onTouchEnd: (this: Window, ev: TouchEvent) => any = () => {}
 
   constructor(params: ConstructorParams) {
-    const { updateCursor, onPreloaded } = params
+    const { updateCursor, rotateLogo } = params
 
-    this.onPreloaded = onPreloaded || this.onPreloaded
+    this.rotateLogo = rotateLogo || this.rotateLogo
     this.updateCursor = updateCursor || this.updateCursor
 
     this.bind()
@@ -125,34 +113,14 @@ export default class {
     this.main = document.querySelector('main')
 
     this.scene = new Scene()
-    this.logoScene = new Scene()
 
     this.camera = new PerspectiveCamera(75, size.x / size.y, 100, 1250)
     this.camera.position.z = this.z
-
-    this.logoCamera = new PerspectiveCamera(75, size.x / size.y, 100, 1250)
-    this.logoCamera.position.z = this.z
 
     this.updateSize({ size })
     this.addListeners()
     this.generatePlanesBatch()
     this.ready = true
-
-    const loader = new GLTFLoader()
-    loader.load('./assets/gltf/logo.gltf', async gltf => {
-      this.logo = gltf.scene.children[0].children[0].children[0]
-      this.logo.scale.set(1, 1, 1)
-      this.logo.rotation.set(0, 0, 0)
-      this.logo.position.set(0, 0, 0)
-      this.updateLogoScale()
-
-      this.logoLight = new DirectionalLight(0xffffff, 0)
-      this.logoLight.position.set(1, 1, 1)
-
-      this.logoScene?.add(this.logoLight)
-      this.logoScene?.add(this.logo)
-      this.onPreloaded()
-    })
   }
 
   preload(img?: HTMLImageElement) {
@@ -447,13 +415,6 @@ export default class {
     })
   }
 
-  rotateLogo(y: number) {
-    if (this.logo) {
-      gsap.killTweensOf(this.logo.rotation)
-      gsap.to(this.logo.rotation, { y, onUpdate: this.updateLogoLight.bind(this) })
-    }
-  }
-
   assignPlaneToObject(params: { plane: Plane; object: Object }) {
     const { plane, object } = params
 
@@ -553,78 +514,8 @@ export default class {
     if (this.needsUpdate) {
       this.log('render()')
       this.renderer.setViewport(0, 0, this.size.x, this.size.y)
-      this.renderer.domElement = this.canvas as HTMLCanvasElement
       this.renderer.render(this.scene, this.camera)
     }
-
-    this.logo && this.renderLogo()
-  }
-
-  renderLogo() {
-    if (!this.logo || !this.logoScene || !this.logoCamera || !this.renderer) return
-    let scrollTarget = this.size.y
-    let scrollProgress = Math.min(1, this.y / scrollTarget)
-
-    let scrollLeaveInit = this.scrollBounding - this.size.y
-    let scrollLeaveEnd = !this.isMobileLayout
-      ? this.scrollBounding - this.logoMargin * 2 - 160
-      : this.scrollBounding - 16 - 56
-    let scrollLeaveProgress = Math.max(
-      0,
-      Math.min(1, (this.y - scrollLeaveInit) / (scrollLeaveEnd - scrollLeaveInit))
-    )
-    let scrollLeaveGap = Math.max(0, this.y - scrollLeaveEnd)
-
-    let scrollDistance = 0
-    let scrollGap = 0
-    let logoCurrentScale = 1 - (1 - this.logoTargetScale) * scrollProgress
-    let logoGap = 0
-    let screenGap = 0
-    let xOffset = 0
-    let yOffset = 0
-
-    if (!this.isMobileLayout) {
-      logoCurrentScale += (1 - this.logoTargetScale) * scrollLeaveProgress
-      if (scrollLeaveProgress === 0) {
-        scrollDistance = this.size.y - this.logoSize * this.logoTargetScale - this.logoMargin * 2
-      } else {
-        scrollDistance = this.size.y - this.logoSize * logoCurrentScale - this.logoMargin * 2
-      }
-
-      scrollGap = scrollDistance * scrollProgress - 8 + 4 * scrollProgress - 4 * scrollLeaveProgress
-      logoGap = this.logoSize * logoCurrentScale * 0.5 + this.logoMargin
-      screenGap = Math.max(0, this.size.x - 1800) * 0.5
-      xOffset = -logoGap - screenGap
-      yOffset = logoGap + scrollGap + scrollLeaveGap
-    } else {
-      const mobileHeaderTop = this.toScale(67) + this.logoSize * 0.5 + this.toScale(20)
-      const mobileInitY = mobileHeaderTop
-      const scrollDistanceX =
-        this.size.x * 0.5 - this.logoSize * this.logoTargetScale * 0.5 - this.logoMargin
-      const scrollGapX = scrollDistanceX * scrollProgress
-      scrollDistance =
-        this.size.y - mobileInitY - this.logoSize * this.logoTargetScale * 0.5 - this.logoMargin
-      scrollGap = scrollDistance * scrollProgress
-
-      const leaveGap = this.y > scrollLeaveEnd ? this.y - scrollLeaveEnd : 0
-
-      xOffset = this.size.x * -0.5 + scrollGapX
-      yOffset = mobileInitY + scrollGap + leaveGap
-    }
-
-    this.logo.scale.set(
-      this.logoScale * logoCurrentScale * this.logoAnimation.value,
-      this.logoScale * logoCurrentScale * this.logoAnimation.value,
-      this.logoScale * logoCurrentScale * this.logoAnimation.value * 0.5
-    )
-
-    this.renderer.setViewport(
-      this.size.x * 0.5 + xOffset,
-      this.size.y * -0.5 + yOffset,
-      this.size.x,
-      this.size.y
-    )
-    this.renderer.render(this.logoScene, this.logoCamera)
   }
 
   getAvailablePlane(id: string): Plane | undefined {
@@ -704,7 +595,7 @@ export default class {
 
   updateSize(params: { size?: { x: number; y: number } }) {
     const { size } = params
-    if (!size || !this.camera || !this.logoCamera || !this.renderer) return
+    if (!size || !this.camera || !this.renderer) return
 
     this.size.x = size.x
     this.size.y = size.y
@@ -713,19 +604,7 @@ export default class {
     this.camera.fov = 2 * Math.atan((size.y * 0.5) / this.z) * (180 / Math.PI)
     this.camera.updateProjectionMatrix()
 
-    this.logoCamera.aspect = size.x / size.y
-    this.logoCamera.fov = 2 * Math.atan((size.y * 0.5) / this.z) * (180 / Math.PI)
-    this.logoCamera.updateProjectionMatrix()
-    this.logoMargin =
-      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--layout-margin')) *
-      10
-
     this.touch = !!window.getComputedStyle(document.body, ':after').getPropertyValue('--touch')
-
-    this.updateLogoScale()
-
-    this.renderer.setSize(size.x, size.y)
-    this.renderer.setPixelRatio(this.getDevicePixelRatio())
 
     this.bounding = this.renderer.domElement.getBoundingClientRect()
 
@@ -749,39 +628,8 @@ export default class {
     gsap.fromTo(prop, { value: 0 }, { value: 1, duration, delay: 0.1 })
   }
 
-  updateLogoState(value: boolean) {
-    if (this.logo) {
-      gsap.killTweensOf(this.logo.rotation)
-      gsap.killTweensOf(this.logoAnimation)
-      gsap.to(this.logoAnimation, { value: value ? 1 : 0 })
-      gsap.to(this.logo.rotation, {
-        y: value ? Math.PI : 0,
-        onUpdate: this.updateLogoLight.bind(this),
-      })
-    }
-  }
-
-  updateLogoScale() {
-    if (this.logo) {
-      this.logo.scale.set(1, 1, 1)
-      const box = new Box3().setFromObject(this.logo)
-      const size = box.getSize(new Vector3())
-      this.logoScale = this.logoSize / size.x
-    }
-  }
-
   updateMobileLayout(value: boolean) {
     this.isMobileLayout = value
-    this.logoSize = value ? 96 : 160
-    this.logoTargetScale = value ? 0.416666 : 0.25
-  }
-
-  updateLogoLight() {
-    if (!this.logo || !this.logoLight) return
-    const maxIntensity = 0.25
-    const rotation = this.logo.rotation.y % Math.PI
-    const distanceToMiddlePoint = Math.abs(rotation - Math.PI * 0.5) / (Math.PI * 0.5)
-    this.logoLight.intensity = maxIntensity - distanceToMiddlePoint * maxIntensity
   }
 
   updateScrollBounding(value: number) {
@@ -883,10 +731,6 @@ export default class {
     this.canvas = null
     this.scene = null
     this.camera = null
-    this.logo = null
-    this.logoScene = null
-    this.logoCamera = null
-    this.logoLight = null
     this.renderer = null
     this.objects = []
     for (const i in this.batch) {

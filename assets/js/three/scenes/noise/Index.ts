@@ -38,13 +38,18 @@ export default class Noise {
 
   async create(params: CreateParams) {
     this.log(`create()`)
-    const { renderer, parent, size } = params
+    const { parent, size } = params
 
     this.canvas = document.createElement('canvas')
     this.canvas.classList.add('three--noise')
     parent.appendChild(this.canvas)
 
-    this.renderer = renderer
+    this.renderer = new WebGLRenderer({
+      canvas: this.canvas,
+      antialias: false,
+      alpha: true,
+    })
+    this.renderer.setClearColor(0x000000, 0)
 
     this.scene = new Scene()
 
@@ -61,8 +66,6 @@ export default class Noise {
     this.noise.material.uniforms.uFrame.value++
     this.noise.material.uniforms.uTime.value += 0.05
 
-    this.renderer.setViewport(0, 0, this.size.x, this.size.y)
-    this.renderer.domElement = this.canvas as HTMLCanvasElement
     this.renderer.render(this.scene, this.camera)
   }
 

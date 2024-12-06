@@ -158,7 +158,7 @@ watch(linksVisible, () => {
 })
 
 watch(logoVisible, () => {
-  $three.planes.updateLogoState(logoVisible.value)
+  $three.logo.updateState(logoVisible.value)
 })
 
 watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], async () => {

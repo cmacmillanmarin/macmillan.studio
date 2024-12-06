@@ -3,6 +3,7 @@ import type { Texture, Vector2, Vector3, Vector4, WebGLRenderer } from 'three'
 import type { Cursor } from '~/types/front/store'
 
 export interface ConstructorParams {
+  rotateLogo?: Function
   updateCursor?: Function
   onPreloaded?: Function
 }

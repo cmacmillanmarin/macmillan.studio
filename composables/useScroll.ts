@@ -114,7 +114,7 @@ export default function useScroll() {
   })
 
   watch(bounding, () => {
-    $three.planes.ready && $three.planes.updateScrollBounding(bounding.value)
+    $three.ready && $three.updateScrollBounding(bounding.value)
   })
 
   watch(touch, () => {
