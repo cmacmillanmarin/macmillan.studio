@@ -93,7 +93,6 @@ export default class {
   }
 
   rotate(y: number) {
-    console.log(y, this.logo)
     if (this.logo) {
       gsap.killTweensOf(this.logo.rotation)
       gsap.to(this.logo.rotation, { y, onUpdate: this.updateLight.bind(this) })

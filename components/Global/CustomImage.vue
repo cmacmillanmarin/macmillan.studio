@@ -22,6 +22,7 @@
     :aria-label="data.alt"
     :data-width="data.width"
     :data-height="data.height"
+    :style="{ aspectRatio: data.width / data.height }"
     v-intersect="{ callback: intersect }" />
 </template>
 

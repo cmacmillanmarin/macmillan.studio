@@ -1,7 +1,7 @@
 <template>
-  <svg :class="['svg__drag', { 'svg__drag--vertical': vertical }]" viewBox="0 0 24 40">
+  <svg :class="['svg__drag', { 'svg__drag--vertical': vertical }]" viewBox="0 0 80 80">
     <path
-      d="M0 8h8V3.5e-7L3.5e-7 0 0 8ZM0 40h8v-8H3.5e-7L0 40ZM8 32h8v-8H8v8ZM8 16h8V8H8v8ZM16 24h8v-8h-8v8Z" />
+      d="M54 36h8v8h-8zM46 44h8v8h-8zM46 28h8v8h-8zM26 36h-8v8h8zM34 44h-8v8h8zM34 28h-8v8h8z" />
   </svg>
 </template>
 
@@ -15,13 +15,13 @@ defineProps<{
 .svg__drag {
   display: block;
   fill: none;
-  width: toScale(2.4rem);
-  height: toScale(4rem);
+  width: toScale(8rem);
+  height: toScale(8rem);
   &--vertical {
     transform: rotate(90deg);
   }
   path {
-    fill: red;
+    fill: var(--lime);
   }
 }
 </style>

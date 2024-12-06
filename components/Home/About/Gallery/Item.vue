@@ -106,8 +106,8 @@ function getHeight() {
   let ar = 1
   if (props.data.type === 'img') {
     ar = props.data.image.height / props.data.image.width
-  } else if (props.data.video) {
-    ar = props.data.video.height / props.data.video.width
+  } else if (videoEl.value) {
+    ar = videoEl.value.clientHeight / videoEl.value.clientWidth
   }
   return width.value * ar
 }

@@ -459,7 +459,7 @@ export default class {
     if (!video) return
 
     const { uniforms } = object.mesh.material
-    const { width, height, readyState, HAVE_CURRENT_DATA } = video
+    const { clientWidth, clientHeight, width, height, readyState, HAVE_CURRENT_DATA } = video
 
     const loaded = videoLoaded(video)
 
@@ -468,10 +468,13 @@ export default class {
     if (loaded && !object.videoAssigned) {
       object.videoAssigned = true
 
+      const videoWidth = clientWidth || width
+      const videoHeight = clientHeight || height
+
       uniforms.uTextureType.value = 0
       uniforms.uTextureVideo.value.image = video
       uniforms.uTextureSize.value.x = object.size.x
-      uniforms.uTextureSize.value.y = (object.size.x * height) / width
+      uniforms.uTextureSize.value.y = (object.size.x * videoHeight) / videoWidth
 
       const fade = !object.firstFrame
       gsap.killTweensOf(uniforms.uTextureFade)
