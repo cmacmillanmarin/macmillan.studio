@@ -93,7 +93,7 @@ import useScrollStore from '~/store/useScrollStore'
 import { toPx, round } from '~/utils'
 import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
-import { shuffleIn, shuffleElsOut } from '~/utils/animations'
+import { shuffleIn, shuffleInParam, shuffleElsOut } from '~/utils/animations'
 
 defineProps<{
   data: HomepageHero
@@ -148,6 +148,7 @@ const videoCanPlay = ref<boolean>(false)
 const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
 const reelFade = ref<number>(1)
+const reelSmallOpacity = ref<number>(0)
 const reelProgress = ref<number>(0)
 const reelButtonVisible = ref<boolean>(false)
 const reelReady = ref<boolean>(false)
@@ -313,8 +314,22 @@ watch([current, section], () => {
     fixed: { from: 0, to: bounding.value },
     size: { x: toScale(164), y: toScale(82), z: 1 },
     border: toScale(8),
-    opacity: section.value !== 'hero' && section.value !== 'projects-bg' ? 1 : 0,
+    order: 99,
   })
+  const visible = section.value !== 'hero' && section.value !== 'projects-bg'
+  if (visible) {
+    reelSmallOpacity.value === 0 &&
+      shuffleInParam({
+        param: reelSmallOpacity,
+        onUpdate: () => {
+          $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
+        },
+      })
+  } else {
+    gsap.killTweensOf(reelSmallOpacity)
+    reelSmallOpacity.value = 0
+    $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
+  }
 })
 
 watch([firstTransition, position, videoPlaying, videoInProject], () => {

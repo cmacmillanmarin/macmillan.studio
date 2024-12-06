@@ -91,6 +91,24 @@ export function transitionShuffleOut(el: Element, done: Function) {
   shuffleElsOut({ els: [el], done })
 }
 
+export function shuffleInParam(params: {
+  param: { value: number }
+  onUpdate: (...args: any[]) => void
+}) {
+  const { param, onUpdate } = params
+  const duration = 0.2
+  gsap.killTweensOf(param)
+  gsap.to(param, { value: 1, duration, onUpdate, ease: 'power1.in' })
+  gsap.to(param, {
+    value: 0,
+    duration: duration * 0.5,
+    delay: duration,
+    onUpdate,
+    ease: 'power1.out',
+  })
+  gsap.to(param, { value: 1, duration, delay: duration * 1.5, onUpdate, ease: 'power1.in' })
+}
+
 export function shuffleIn(params: { el?: HTMLElement }) {
   const { el } = params
   if (!el) return
