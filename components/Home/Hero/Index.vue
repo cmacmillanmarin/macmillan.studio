@@ -38,6 +38,21 @@
             :tabindex="landingTabIndex">
             <SvgPlay />
           </button>
+          <transition
+            :css="false"
+            mode="out-in"
+            @enter="enterSmallReelButton"
+            @leave="transitionFadeOut">
+            <button
+              v-if="reelSmallVisible && !reelSmallHovered"
+              ref="smallReelButtonEl"
+              class="home__hero__content__small-reel-button"
+              @click="goToReel"
+              aria-label="Play reel"
+              :tabindex="landingTabIndex">
+              <SvgPixelArrow />
+            </button>
+          </transition>
         </Teleport>
       </ClientOnly>
 
@@ -69,6 +84,7 @@
       @mute="muteReel"
       @toggle="toggleReel"
       @update="updateReel" />
+
     <HomeHeroPlayer
       v-if="isInReel"
       :blend="true"
@@ -93,7 +109,7 @@ import useScrollStore from '~/store/useScrollStore'
 import { toPx, round } from '~/utils'
 import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
-import { shuffleIn, shuffleInParam, shuffleElsOut } from '~/utils/animations'
+import { shuffleIn, shuffleInParam, shuffleElsOut, transitionFadeOut } from '~/utils/animations'
 
 defineProps<{
   data: HomepageHero
@@ -112,6 +128,7 @@ const {
   gridType,
   headerLogo,
   isInReel,
+  isInProject,
   isInProjectEntered,
   landingTabIndex,
 } = storeToRefs(store)
@@ -149,6 +166,9 @@ const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
 const reelFade = ref<number>(1)
 const reelSmallOpacity = ref<number>(0)
+const reelSmallHovered = ref<boolean>(false)
+const reelSmallScale = ref<number>(1)
+const reelSmallVisible = ref<boolean>(false)
 const reelProgress = ref<number>(0)
 const reelButtonVisible = ref<boolean>(false)
 const reelReady = ref<boolean>(false)
@@ -251,6 +271,60 @@ watch(reelButtonVisible, () => {
     : shuffleElsOut({ els: [reelButtonEl.value] })
 })
 
+watch(reelSmallHovered, () => {
+  gsap.killTweensOf(reelSmallScale)
+  gsap.to(reelSmallScale, {
+    value: reelSmallHovered.value ? 1.25 : 1,
+  })
+})
+
+watch(reelSmallVisible, () => {
+  if (reelSmallVisible.value) {
+    shuffleInParam({
+      param: reelSmallOpacity,
+      onUpdate: () => {
+        $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
+      },
+    })
+  } else {
+    gsap.killTweensOf(reelSmallOpacity)
+    gsap.to(reelSmallOpacity, {
+      value: 0,
+      duration: 0.5,
+      onUpdate: () => {
+        $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
+      },
+    })
+  }
+})
+
+watch([current, direction, section, isInProject, reelSmallScale], () => {
+  reelSmallVisible.value =
+    !isMobileLayout.value &&
+    !isInProject.value &&
+    section.value !== 'hero' &&
+    section.value !== 'projects-bg' &&
+    section.value !== 'reel' &&
+    current.value < bounding.value - vh.value
+
+  const x: number = toScale(164 * reelSmallScale.value)
+  const y: number = toScale(82 * reelSmallScale.value)
+
+  const offset = Math.max(0, current.value - (bounding.value - vh.value))
+  $three.planes.updateObject({
+    id: 'reel--small',
+    cursor: 'play',
+    position: {
+      x: vw.value - x - layoutMargin.value,
+      y: vh.value - y - layoutMargin.value - offset,
+    },
+    fixed: { from: 0, to: bounding.value },
+    size: { x, y, z: 1 },
+    border: toScale(8),
+    order: 99,
+  })
+})
+
 watch([section, videoInView, videoInProject], () => {
   const play = videoInView.value && !videoInProject.value
   if (!play) {
@@ -261,7 +335,7 @@ watch([section, videoInView, videoInProject], () => {
   // updateScroll()
 })
 
-watch([current, section], () => {
+watch(current, () => {
   const initScale = 1
   const finalScale = isMobileLayout.value ? 1 : 0.885
   const incrementScale = initScale - finalScale
@@ -304,32 +378,6 @@ watch([current, section], () => {
   const contentMacMillan = document.querySelector('.home__hero__content__macmillan')
   studioContent && gsap.set(studioContent, { y: contentY })
   contentMacMillan && gsap.set(contentMacMillan, { y: isMobileLayout.value ? contentY : titleY })
-
-  $three.planes.updateObject({
-    id: 'reel--small',
-    position: {
-      x: vw.value - toScale(164) - layoutMargin.value,
-      y: vh.value - toScale(82) - layoutMargin.value,
-    },
-    fixed: { from: 0, to: bounding.value },
-    size: { x: toScale(164), y: toScale(82), z: 1 },
-    border: toScale(8),
-    order: 99,
-  })
-  const visible = section.value !== 'hero' && section.value !== 'projects-bg'
-  if (visible) {
-    reelSmallOpacity.value === 0 &&
-      shuffleInParam({
-        param: reelSmallOpacity,
-        onUpdate: () => {
-          $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
-        },
-      })
-  } else {
-    gsap.killTweensOf(reelSmallOpacity)
-    reelSmallOpacity.value = 0
-    $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
-  }
 })
 
 watch([firstTransition, position, videoPlaying, videoInProject], () => {
@@ -401,6 +449,8 @@ onMounted(() => {
     video: videoEl.value,
     color: rbgToVec4(hexToRgb('#000000')),
     onClick: goToReel,
+    onIntersect: onSmallReelHovered,
+    opacity: 0,
   })
 })
 
@@ -587,6 +637,14 @@ async function onFirstAnimationDone() {
   $three.planes.updateObject({ id: 'reel', onClick: isMobileLayout.value ? null : goToReel })
 }
 
+function enterSmallReelButton(el: Element, done: Function) {
+  fadeIn({ el, delay: 0.4, done })
+}
+
+function onSmallReelHovered(value: boolean) {
+  reelSmallHovered.value = value
+}
+
 function onPlay() {
   videoPlaying.value = true
 }
@@ -755,6 +813,33 @@ onUnmounted(() => {
         height: max-content;
         font-family: 'HelveticaNowDisplayBold' !important;
         @include t-b1;
+      }
+    }
+
+    &__small-reel-button {
+      position: absolute;
+      right: calc(var(--layout-margin) * 1.5);
+      bottom: calc(var(--layout-margin) * 1.5);
+      width: toScale(2.8rem);
+      height: toScale(2.8rem);
+      border: 0;
+      padding: 0;
+      background-color: black;
+      border: none;
+      border-radius: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      opacity: 0.000001;
+      will-change: opacity, transform;
+
+      .svg__pixel-arrow {
+        width: toScale(1.2rem);
+        transform: rotate(-90deg) translate(0, 15%);
+        path {
+          fill: var(--lime);
+        }
       }
     }
 

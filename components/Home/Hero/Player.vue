@@ -303,9 +303,7 @@ const emit = defineEmits(['close', 'pause', 'toggle', 'mute', 'update'])
     top: var(--layout-margin);
     left: var(--layout-margin);
     @include from__tablet--landscape {
-      top: auto;
-      bottom: var(--layout-margin);
-      padding-top: toScale(3rem);
+      padding-bottom: toScale(3rem);
       padding-right: toScale(3rem);
     }
 
