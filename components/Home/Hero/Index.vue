@@ -134,7 +134,7 @@ const {
 } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
-const { updateScroll, disableScroll, updateScrollTargetId } = scrollStore
+const { updateScroll, disableScroll, updateScrollFixedTarget, updateScrollTargetId } = scrollStore
 const { current, direction, bounding } = storeToRefs(scrollStore)
 
 const { isMobileLayout, isTabletPortrait } = useDevice()
@@ -168,6 +168,7 @@ const reelFade = ref<number>(1)
 const reelSmallOpacity = ref<number>(0)
 const reelSmallHovered = ref<boolean>(false)
 const reelSmallScale = ref<number>(1)
+const reelSmallTransition = ref<number>(0)
 const reelSmallVisible = ref<boolean>(false)
 const reelProgress = ref<number>(0)
 const reelButtonVisible = ref<boolean>(false)
@@ -275,6 +276,7 @@ watch(reelSmallHovered, () => {
   gsap.killTweensOf(reelSmallScale)
   gsap.to(reelSmallScale, {
     value: reelSmallHovered.value ? 1.25 : 1,
+    duration: reelSmallHovered.value ? 0.4 : 0.6,
   })
 })
 
@@ -294,36 +296,49 @@ watch(reelSmallVisible, () => {
       onUpdate: () => {
         $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
       },
+      onComplete: () => {
+        reelSmallScale.value = 1
+        reelSmallTransition.value = 0
+      },
     })
   }
 })
 
-watch([current, direction, section, isInProject, reelSmallScale], () => {
-  reelSmallVisible.value =
-    !isMobileLayout.value &&
-    !isInProject.value &&
-    section.value !== 'hero' &&
-    section.value !== 'projects-bg' &&
-    section.value !== 'reel' &&
-    current.value < bounding.value - vh.value
+watch(
+  [current, direction, section, isInProject, isInReel, reelSmallScale, reelSmallTransition],
+  () => {
+    reelSmallVisible.value =
+      !isMobileLayout.value &&
+      !isInProject.value &&
+      !isInReel.value &&
+      section.value !== 'hero' &&
+      section.value !== 'projects-bg' &&
+      section.value !== 'reel' &&
+      current.value < bounding.value - vh.value
 
-  const x: number = toScale(164 * reelSmallScale.value)
-  const y: number = toScale(82 * reelSmallScale.value)
+    let offsetX: number = 0
+    let offsetY: number = 0
+    let tX: number = 1 - reelSmallTransition.value
+    if (reelSmallTransition.value > 0) {
+      offsetX = (vw.value - toScale(164 * reelSmallScale.value)) * reelSmallTransition.value
+      offsetY = (vh.value - toScale(82 * reelSmallScale.value)) * reelSmallTransition.value
+    }
 
-  const offset = Math.max(0, current.value - (bounding.value - vh.value))
-  $three.planes.updateObject({
-    id: 'reel--small',
-    cursor: 'play',
-    position: {
-      x: vw.value - x - layoutMargin.value,
-      y: vh.value - y - layoutMargin.value - offset,
-    },
-    fixed: { from: 0, to: bounding.value },
-    size: { x, y, z: 1 },
-    border: toScale(8),
-    order: 99,
-  })
-})
+    const x: number = toScale(164 * reelSmallScale.value) + offsetX
+    const y: number = toScale(82 * reelSmallScale.value) + offsetY
+
+    $three.planes.updateObject({
+      id: 'reel--small',
+      position: {
+        x: vw.value - x - layoutMargin.value * tX,
+        y: vh.value - y - layoutMargin.value * tX,
+      },
+      fixed: { from: 0, to: bounding.value - vh.value },
+      size: { x, y, z: 1 },
+      border: toScale(8 * tX),
+    })
+  }
+)
 
 watch([section, videoInView, videoInProject], () => {
   const play = videoInView.value && !videoInProject.value
@@ -447,10 +462,12 @@ onMounted(() => {
   $three.planes.addObject({
     id: 'reel--small',
     video: videoEl.value,
+    cursor: 'play',
     color: rbgToVec4(hexToRgb('#000000')),
-    onClick: goToReel,
+    onClick: goToReelFromThumbnail,
     onIntersect: onSmallReelHovered,
     opacity: 0,
+    order: 99,
   })
 })
 
@@ -480,6 +497,18 @@ function goToReel() {
     videoEl.value.play()
     videoEl.value.addEventListener('canplay', onReelReady)
   }
+}
+
+function goToReelFromThumbnail() {
+  disableScroll(true)
+  gsap.killTweensOf(reelSmallTransition)
+  gsap.to(reelSmallTransition, {
+    value: 1,
+    onComplete: () => {
+      updateScrollFixedTarget(vh.value)
+      goToReel()
+    },
+  })
 }
 
 function onReelReady() {
