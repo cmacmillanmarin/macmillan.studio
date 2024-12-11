@@ -265,11 +265,13 @@ function mobileButtonLeave(el: Element, done: () => void) {
 }
 
 function onMouseEnter() {
+  $three.logo.rotate(Math.PI * 2)
   updateHeaderLogo(true)
   updateCursor('none')
 }
 
 function onMouseLeave() {
+  $three.logo.rotate(Math.PI)
   updateHeaderLogo(false)
   updateCursor('default')
 }
