@@ -58,6 +58,7 @@ export interface State {
   cursorColor: 'lime' | 'black'
   cursorPosition: { x: number; y: number }
   inReel: boolean
+  inReelHovered: boolean
   inProject: boolean
   inProjectEntered: boolean
   inProjectScroll: boolean

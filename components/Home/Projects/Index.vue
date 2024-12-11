@@ -100,12 +100,7 @@
 import { gsap } from 'gsap/gsap-core'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import {
-  transitionShuffleIn,
-  transitionShuffleOut,
-  prepareFadeIn,
-  transitionDone,
-} from '~/utils/animations'
+import { transitionShuffleIn, transitionShuffleOut, prepareFadeIn } from '~/utils/animations'
 import { type HomepageProjects } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 import type { FileVideo } from '~/types/wordpress'
@@ -122,7 +117,7 @@ const firstRouteIsProject = ref<boolean>(!!route.params.slug)
 
 const store = useStore()
 const { updateSection, updateActiveProjectList } = store
-const { section, isInProject, landingTabIndex } = storeToRefs(store)
+const { section, isInReel, isInProject, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollTargetId, updateScrollFixedTargetId } = scrollStore
@@ -146,7 +141,8 @@ const listContainerEl = ref<HTMLElement>()
 const projectEls = ref<Array<typeof HomeProjectsProject>>([])
 
 const indicators = computed<boolean>(
-  () => section.value === 'projects' && !(isInProject.value && isMobileLayout.value)
+  () =>
+    section.value === 'projects' && !(isInProject.value && isMobileLayout.value) && !isInReel.value
 )
 
 const year = ref<string>(new Date().getFullYear().toString())

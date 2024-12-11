@@ -6,33 +6,40 @@
         :class="['home__hero__player', { 'home__hero__player--blend': blend }]"
         v-transition:in="{ callback: shuffleIn }"
         @click="onClick">
-        <div
-          v-if="!isMobileLayout && !blend"
-          ref="closeEl"
-          class="home__hero__player__close"
-          @mouseenter="onButtonMouseEnter"
-          @mouseleave="onButtonMouseLeave">
-          <button @click="onCloseButtonClick">
-            <SvgClose />
-          </button>
-        </div>
-        <div v-else-if="!blend" ref="toggleEl" class="home__hero__player__toggle">
-          <button @click="onToggleButtonClick">
-            <transition
-              mode="out-in"
-              :css="false"
-              :appear="true"
-              @leave="transitionDone"
-              @enter="transitionShuffleIn">
-              <SvgLoading v-if="!ready" />
-              <SvgPause v-else-if="playing" />
-              <SvgPlay v-else />
-            </transition>
-          </button>
-        </div>
+        <transition
+          mode="out-in"
+          :css="false"
+          :appear="true"
+          @leave="transitionDone"
+          @enter="transitionShuffleIn">
+          <div
+            v-if="!isMobileLayout && !blend && ready"
+            ref="closeEl"
+            class="home__hero__player__close"
+            @mouseenter="onButtonMouseEnter"
+            @mouseleave="onButtonMouseLeave">
+            <button @click="onCloseButtonClick">
+              <SvgClose />
+            </button>
+          </div>
+          <div v-else-if="!blend && ready" ref="toggleEl" class="home__hero__player__toggle">
+            <button @click="onToggleButtonClick">
+              <transition
+                mode="out-in"
+                :css="false"
+                :appear="true"
+                @leave="transitionDone"
+                @enter="transitionShuffleIn">
+                <SvgLoading v-if="!ready" />
+                <SvgPause v-else-if="playing" />
+                <SvgPlay v-else />
+              </transition>
+            </button>
+          </div>
+        </transition>
 
         <div
-          v-if="blend"
+          v-if="blend && ready"
           ref="timelineEl"
           class="home__hero__player__timeline"
           @click="onTimelineClick"
@@ -46,16 +53,23 @@
           </div>
         </div>
 
-        <div
-          v-if="!blend"
-          ref="muteEl"
-          class="home__hero__player__mute"
-          @mouseenter="onButtonMouseEnter"
-          @mouseleave="onButtonMouseLeave">
-          <button @click="onMuteButtonClick">
-            <SvgMute :state="muted || !playing || !ready" />
-          </button>
-        </div>
+        <transition
+          mode="out-in"
+          :css="false"
+          :appear="true"
+          @leave="transitionDone"
+          @enter="transitionShuffleIn">
+          <div
+            v-if="!blend && ready"
+            ref="muteEl"
+            class="home__hero__player__mute"
+            @mouseenter="onButtonMouseEnter"
+            @mouseleave="onButtonMouseLeave">
+            <button @click="onMuteButtonClick">
+              <SvgMute :state="muted || !playing || !ready" />
+            </button>
+          </div>
+        </transition>
       </div>
     </Teleport>
   </ClientOnly>
@@ -145,6 +159,7 @@ function onClick(e: MouseEvent) {
 }
 
 function updateProgress() {
+  if (!props.ready) return
   progress.value += (props.progress - progress.value) * 0.025
   barEl.value && gsap.set(barEl.value, { x: toPercentage(-100 + 100 * progress.value) })
 }
@@ -240,7 +255,7 @@ const emit = defineEmits(['close', 'pause', 'toggle', 'mute', 'update'])
   &__mute,
   &__toggle {
     position: absolute;
-    will-change: opacity;
+    @include will-fade;
 
     button {
       position: relative;

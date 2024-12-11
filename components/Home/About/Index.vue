@@ -96,7 +96,7 @@ const { $three }: any = useNuxtApp()
 
 const store = useStore()
 const { updateSection, updateCursor, updateCursorPosition } = store
-const { section } = storeToRefs(store)
+const { section, inReelHovered } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll } = scrollStore
@@ -205,6 +205,7 @@ function onThumbnailMouseLeave() {
 }
 
 function onCollaboratorMouseEnter(e: MouseEvent) {
+  if (inReelHovered.value) return
   const { target } = e
   const svgEl = (target as HTMLElement).querySelector('.svg__gatzara')
   if (svgEl) {
@@ -219,6 +220,7 @@ function onCollaboratorMouseLeave(e: MouseEvent) {
 }
 
 function onCollaboratorImageClick(e: MouseEvent) {
+  if (inReelHovered.value) return
   e?.preventDefault()
   e?.stopPropagation()
   window.open('https://xaviercusso.com', '_blank')

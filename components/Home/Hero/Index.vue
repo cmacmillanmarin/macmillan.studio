@@ -109,7 +109,7 @@ import useScrollStore from '~/store/useScrollStore'
 import { toPx, round } from '~/utils'
 import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
-import { shuffleIn, shuffleInParam, shuffleElsOut, transitionFadeOut } from '~/utils/animations'
+import { shuffleIn, shuffleElsOut, transitionFadeOut } from '~/utils/animations'
 
 defineProps<{
   data: HomepageHero
@@ -121,7 +121,14 @@ const router = useRouter()
 const { $three }: any = useNuxtApp()
 
 const store = useStore()
-const { updateHeader, updateLoading, updateSection, updateInReel } = store
+const {
+  updateHeader,
+  updateLoading,
+  updateSectionThrottle,
+  updateSection,
+  updateInReel,
+  updateInReelHovered,
+} = store
 const {
   isPreloaded,
   section,
@@ -273,6 +280,7 @@ watch(reelButtonVisible, () => {
 })
 
 watch(reelSmallHovered, () => {
+  updateInReelHovered(reelSmallHovered.value)
   gsap.killTweensOf(reelSmallScale)
   gsap.to(reelSmallScale, {
     value: reelSmallHovered.value ? 1.25 : 1,
@@ -281,40 +289,43 @@ watch(reelSmallHovered, () => {
 })
 
 watch(reelSmallVisible, () => {
-  if (reelSmallVisible.value) {
-    shuffleInParam({
-      param: reelSmallOpacity,
-      onUpdate: () => {
-        $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
-      },
-    })
-  } else {
-    gsap.killTweensOf(reelSmallOpacity)
-    gsap.to(reelSmallOpacity, {
-      value: 0,
-      duration: 0.5,
-      onUpdate: () => {
-        $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
-      },
-      onComplete: () => {
+  gsap.killTweensOf(reelSmallOpacity)
+  gsap.to(reelSmallOpacity, {
+    value: reelSmallVisible.value ? 1 : 0,
+    delay: reelSmallVisible.value ? 0.2 : 0,
+    duration: reelSmallVisible.value ? 0.8 : 0.5,
+    onUpdate: () => {
+      $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
+    },
+    onComplete: () => {
+      if (!reelSmallVisible.value) {
         reelSmallScale.value = 1
         reelSmallTransition.value = 0
-      },
-    })
-  }
+      }
+    },
+  })
 })
 
 watch(
-  [current, direction, section, isInProject, isInReel, reelSmallScale, reelSmallTransition],
+  [
+    current,
+    direction,
+    section,
+    isInProject,
+    reelReady,
+    reelFade,
+    reelSmallScale,
+    reelSmallTransition,
+  ],
   () => {
     reelSmallVisible.value =
-      !isMobileLayout.value &&
-      !isInProject.value &&
-      !isInReel.value &&
-      section.value !== 'hero' &&
-      section.value !== 'projects-bg' &&
-      section.value !== 'reel' &&
-      current.value < bounding.value - vh.value
+      (!isMobileLayout.value &&
+        !isInProject.value &&
+        section.value !== 'hero' &&
+        section.value !== 'projects-bg' &&
+        section.value !== 'reel' &&
+        current.value < bounding.value - vh.value) ||
+      (reelSmallTransition.value === 1 && reelFade.value !== 1)
 
     let offsetX: number = 0
     let offsetY: number = 0
@@ -501,17 +512,26 @@ function goToReel() {
 
 function goToReelFromThumbnail() {
   disableScroll(true)
+  updateInReel(true)
+  $three.planes.updateObject({ id: 'reel--small', onIntersect: null, onClick: null, noPixel: true })
   gsap.killTweensOf(reelSmallTransition)
   gsap.to(reelSmallTransition, {
     value: 1,
     onComplete: () => {
-      updateScrollFixedTarget(vh.value)
-      goToReel()
+      onReelTransitionDone()
     },
   })
 }
 
+async function onReelTransitionDone() {
+  updateSectionThrottle(true)
+  await nextTick()
+  updateScrollFixedTarget(vh.value)
+  goToReel()
+}
+
 function onReelReady() {
+  updateSectionThrottle(false)
   gsap.killTweensOf(reelFade)
   gsap.to(reelFade, { value: 1, onUpdate: updateReelOpacity })
   reelReady.value = true
@@ -536,6 +556,8 @@ function muteReel() {
 }
 
 function closeReel() {
+  reelSmallTransition.value = 0
+  reelReady.value = false
   updateInReel(false)
   disableScroll(false)
   updateScrollTargetId('projects')
@@ -544,6 +566,12 @@ function closeReel() {
     onClick: isMobileLayout.value ? null : goToReel,
     noPixel: false,
     cursor: 'play',
+  })
+  $three.planes.updateObject({
+    id: 'reel--small',
+    onIntersect: onSmallReelHovered,
+    onClick: goToReelFromThumbnail,
+    noPixel: false,
   })
   if (videoEl.value) {
     videoEl.value.src = '/assets/video/reel--short.webm'
@@ -791,7 +819,7 @@ onUnmounted(() => {
       }
 
       @include from__tablet--landscape {
-        width: calc(min(100vw, var(--layout-max-width)) * 0.333333);
+        width: calc(min(100vw, var(--layout-max-width)) * 0.333);
         padding-top: v-bind(verticalGapPx);
         padding-left: var(--layout-margin);
         margin-left: 0;

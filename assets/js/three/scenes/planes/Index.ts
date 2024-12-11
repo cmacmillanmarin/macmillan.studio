@@ -180,6 +180,7 @@ export default class {
 
     this.objects.push({
       ...param,
+      meshId: -1,
       border: param.border || 0,
       fade: !!param.fade,
       fixed: param.fixed || { from: 0, to: 0 },
@@ -253,7 +254,7 @@ export default class {
         onComplete: () => {
           const index = this.objects.findIndex(object => object.id === id)
           const object = this.objects[index]
-          object.meshId && this.releasePlane(object.meshId)
+          this.releasePlane(object.meshId)
           this.objects.splice(index, 1)
         },
       })
@@ -344,7 +345,7 @@ export default class {
         object.wasClickable = clickable
         object.previousCursor = cursor
         object.firstFrame = false
-      } else if (object.mesh && object.meshId) {
+      } else if (object.mesh) {
         this.releasePlane(object.meshId)
         object.mesh.material.uniforms.uFade.value = 0
         object.mesh = null
@@ -417,6 +418,8 @@ export default class {
 
   assignPlaneToObject(params: { plane: Plane; object: Object }) {
     const { plane, object } = params
+
+    plane.object = object.id
 
     object.mesh = plane.mesh
     object.meshId = plane.id
@@ -542,11 +545,12 @@ export default class {
   releasePlane(id: number) {
     const plane = this.batch.find(p => p.id === id)
     if (plane) {
-      this.log(`Plane ${id} released`)
+      this.log(`Plane ${plane.object} released`)
       plane.mesh.scale.x = 0
       plane.mesh.scale.y = 0
-      plane.available = true
       plane.mesh.visible = false
+      plane.available = true
+      plane.object = ''
       plane.video = null
       plane.img = null
     }
@@ -556,6 +560,7 @@ export default class {
     const video = document.createElement('video')
     const plane = new PlaneGeometry(1, 1)
     for (let id = 0; id < this.maxPlanes; id++) {
+      const object: string = ''
       const available: boolean = true
       const mesh = new Mesh(
         plane,
@@ -592,7 +597,7 @@ export default class {
       )
       mesh.visible = false
       this.scene?.add(mesh)
-      this.batch.push({ id, available, mesh, img: null, video: null })
+      this.batch.push({ id, object, available, mesh, img: null, video: null })
     }
   }
 

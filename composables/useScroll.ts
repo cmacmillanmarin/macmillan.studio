@@ -16,6 +16,7 @@ export default function useScroll() {
   const { create: createScrollLock, destroy: destroyScrollLock } = useScrollLock()
 
   const store = useStore()
+  const { sectionThrottle } = storeToRefs(store)
   const { updateSectionThrottle } = store
 
   const scrollStore = useScrollStore()
@@ -153,7 +154,7 @@ export default function useScroll() {
       $three.render()
     }
     for (const callback of renderCallbacks.value) callback()
-    updateSectionThrottle(data.speed > 1000)
+    updateSectionThrottle(data.speed > 1000 || sectionThrottle.value)
     updateScrollData(data)
   }
 

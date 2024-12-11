@@ -53,8 +53,6 @@
 <script lang="ts" setup>
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { startWithZero } from '~/utils'
-import { transitionShuffleIn, transitionShuffleOut } from '~/utils/animations'
 import type { HomepageServices } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 
@@ -64,7 +62,7 @@ defineProps<{
 
 const store = useStore()
 const { updateSection } = store
-const { section } = storeToRefs(store)
+const { section, isInReel } = storeToRefs(store)
 const { direction } = storeToRefs(useScrollStore())
 
 const { isMobileLayout } = useDevice()
@@ -74,6 +72,10 @@ const activeService = ref<number>(0)
 const isActive = computed(() => section.value === 'services')
 
 const el = ref<HTMLElement>()
+
+watch(isInReel, () => {
+  activeService.value = 0
+})
 
 watch(isActive, () => {
   isActive.value ? fadeIn({ el: el.value, delay: 0.2 }) : fadeOut({ el: el.value })

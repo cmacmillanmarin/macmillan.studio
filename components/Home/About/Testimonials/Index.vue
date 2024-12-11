@@ -80,7 +80,7 @@ const props = defineProps<{
 
 const store = useStore()
 const { updateCursor, updateCursorPosition, updateSection } = store
-const { cursor, section, landingTabIndex } = storeToRefs(store)
+const { cursor, section, inReelHovered, landingTabIndex } = storeToRefs(store)
 const scrollStore = useScrollStore()
 const { updateScroll } = scrollStore
 const { direction } = storeToRefs(scrollStore)
@@ -97,6 +97,7 @@ const x = ref<number>(0)
 const active = ref<number>(0)
 const activeEntered = ref<number>(0)
 const expanded = ref<boolean>(false)
+const cursorInTestimonials = ref<boolean>(false)
 
 let _Swiper = new Swiper({ preventLeft: true, preventRight: true, dragOnTarget: true })
 
@@ -124,7 +125,7 @@ watch(section, (to, from) => {
   section.value === 'about-testimonials'
     ? fadeIn({ el: el.value, delay: 0.2 })
     : fadeOut({ el: el.value })
-  if (from === 'about-testimonials') updateCursor('default')
+  if (from === 'about-testimonials' && !inReelHovered.value) updateCursor('default')
 })
 
 watch(expanded, () => {
@@ -133,13 +134,18 @@ watch(expanded, () => {
   updateScroll()
 })
 
+watch(inReelHovered, () => {
+  !inReelHovered.value && cursorInTestimonials.value && updateCarouselCursor()
+})
+
 watch(mouseX, () => {
   if (
     section.value === 'about-testimonials' &&
-    cursor.value !== 'default' &&
+    cursorInTestimonials.value &&
     cursor.value !== 'plus' &&
     cursor.value !== 'close' &&
-    cursor.value !== 'drag'
+    cursor.value !== 'drag' &&
+    cursor.value !== 'play'
   ) {
     updateCarouselCursor()
   }
@@ -173,7 +179,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 }
 
 function onMouseEnter() {
-  cursor.value === 'default' && updateCarouselCursor()
+  cursorInTestimonials.value = true
 }
 
 async function onClick(e: MouseEvent) {
@@ -188,12 +194,14 @@ async function onClick(e: MouseEvent) {
 }
 
 function onButtonMouseEnter(e: MouseEvent) {
+  if (inReelHovered.value) return
   const el = e.target as HTMLElement
   const { top, left } = el.getBoundingClientRect()
   updateCursorPosition({ x: left + toScale(4), y: top + toScale(4) })
 }
 
 function onButtonMouseLeave(e: MouseEvent) {
+  if (inReelHovered.value) return
   updateCursorPosition({ x: -1, y: -1 })
 }
 
@@ -202,19 +210,19 @@ function updateActive(n: number) {
 }
 
 function onMouseLeave() {
-  !isMobileLayout.value && updateCursor('default')
+  cursorInTestimonials.value = false
+  !inReelHovered.value && updateCursor('default')
 }
 
 function onTestimonialMouseEnter() {
-  !isMobileLayout.value && updateCursor(expanded.value ? 'close' : 'plus')
+  !inReelHovered.value && updateCursor(expanded.value ? 'close' : 'plus')
 }
 
 function onTestimonialMouseLeave() {
-  updateCarouselCursor()
+  !inReelHovered.value && updateCarouselCursor()
 }
 
 function updateCarouselCursor() {
-  if (isMobileLayout.value) return
   if (active.value === 0) updateCursor('arrow-right')
   else if (active.value === props.data.length - 1) updateCursor('arrow-left')
   else mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')

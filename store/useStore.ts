@@ -21,6 +21,7 @@ export default defineStore('use-store', {
     headerOverlay: false,
     headerMobileButtonClicked: false,
     inReel: false,
+    inReelHovered: false,
     inProject: false,
     inProjectEntered: false,
     inProjectScroll: true,
@@ -114,6 +115,9 @@ export default defineStore('use-store', {
     },
     updateInReel(state: boolean) {
       this.inReel = state
+    },
+    updateInReelHovered(state: boolean) {
+      this.inReelHovered = state
     },
     updateInProject(state: boolean) {
       this.inProject = state

@@ -30,12 +30,13 @@ const { $three }: any = useNuxtApp()
 
 const store = useStore()
 const { updateCursor } = store
-const { section } = storeToRefs(store)
+const { section, inReelHovered } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
 const items = ref<HomepageAboutGallery>([...props.data])
 const itemsFade = ref<number>(0)
 const planeIds = ref<string>(`gallery-image-${Date.now()}`)
+const mouseInGallery = ref<boolean>(false)
 
 const tickerEl = ref<typeof Ticker>()
 
@@ -51,6 +52,10 @@ watch(section, () => {
   }
 })
 
+watch(inReelHovered, () => {
+  !inReelHovered.value && updateCursor(mouseInGallery.value ? 'drag' : 'default')
+})
+
 function onItemsFadeUpdate() {
   items.value.forEach((item, i) => {
     $three.planes.updateObject({
@@ -61,10 +66,14 @@ function onItemsFadeUpdate() {
 }
 
 function onMouseEnter() {
+  mouseInGallery.value = true
+  if (inReelHovered.value) return
   updateCursor('drag')
 }
 
 function onMouseLeave() {
+  mouseInGallery.value = false
+  if (inReelHovered.value) return
   updateCursor('default')
 }
 

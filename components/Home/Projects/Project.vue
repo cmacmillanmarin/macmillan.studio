@@ -25,7 +25,7 @@
           :css="false"
           @before-enter="prepareClientIn"
           @enter="transitionShuffleIn"
-          @leave="transitionDone">
+          @leave="isInReel ? transitionFadeOut : transitionDone">
           <div
             v-if="clientNameVisible"
             ref="logoEl"
@@ -53,7 +53,7 @@
           :css="false"
           @before-enter="prepareClientIn"
           @enter="transitionShuffleIn"
-          @leave="transitionDone">
+          @leave="isInReel ? transitionFadeOut : transitionDone">
           <div
             v-if="clientNameVisible"
             ref="clientEl"
@@ -74,7 +74,7 @@
           :css="false"
           @before-enter="prepareCollaboratorIn"
           @enter="transitionShuffleIn"
-          @leave="transitionDone">
+          @leave="isInReel ? transitionFadeOut : transitionDone">
           <div
             v-if="collaboratorNameVisible"
             ref="collaboratorEl"
@@ -110,7 +110,13 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
 import { slugify, hexToRgb, rbgToVec4, sleep } from '~/utils'
-import { fadeIn, fadeOut } from '~/utils/animations'
+import {
+  fadeIn,
+  fadeOut,
+  transitionFadeOut,
+  transitionShuffleIn,
+  transitionDone,
+} from '~/utils/animations'
 import type { Plane, ClientAndCollaborator } from '~/types/front/project'
 import type { FileVideo } from '~/types/wordpress'
 import type { Project } from '~/types/wordpress/project'
@@ -134,7 +140,7 @@ const route = useRoute()
 const router = useRouter()
 
 const store = useStore()
-const { headerOverlay, section, isInProjectEntered, landingTabIndex } = storeToRefs(store)
+const { headerOverlay, section, isInReel, isInProjectEntered, landingTabIndex } = storeToRefs(store)
 const scrollStore = useScrollStore()
 const { disableScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { current } = storeToRefs(scrollStore)
@@ -150,6 +156,7 @@ const infoVisible = computed<boolean>(
   () =>
     !inTransition.value &&
     !inProject.value &&
+    !isInReel.value &&
     !isInProjectEntered.value &&
     ((inAllProjectsList.value && section.value === 'projects') ||
       (!inAllProjectsList.value && active.value))
@@ -256,8 +263,8 @@ watch([inView, inTransition, videoEl], () => {
   }
 })
 
-watch([() => props.active, inProject, headerOverlay], () => {
-  const hidden = inProject.value || headerOverlay.value
+watch([() => props.active, inProject, isInReel, headerOverlay], () => {
+  const hidden = inProject.value || headerOverlay.value || isInReel.value
   const clickable = props.active && !hidden
   $three.planes.updateObject({
     id: projectId.value,
@@ -265,14 +272,19 @@ watch([() => props.active, inProject, headerOverlay], () => {
   })
   gsap.killTweensOf(opacity)
   if (hidden) {
-    opacity.value = 0
-    onOpacityUpdate()
+    if (isInReel.value) {
+      gsap.to(opacity, { value: 0, onUpdate: onOpacityUpdate })
+    } else {
+      opacity.value = 0
+      onOpacityUpdate()
+    }
   } else {
     gsap.to(opacity, { value: 1, onUpdate: onOpacityUpdate })
   }
 })
 
 watch(section, () => {
+  if (isInReel.value) return
   if (inAllProjectsList.value) {
     if (inActiveSection.value && opacity.value === 0) {
       gsap.killTweensOf(opacity)

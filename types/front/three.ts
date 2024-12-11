@@ -70,7 +70,7 @@ export interface Object {
   onIntersect: Function | null
 
   mesh?: any
-  meshId?: number
+  meshId: number
 
   inView: boolean
   wasInView?: boolean
@@ -98,6 +98,7 @@ export interface InViewParams {
 
 export interface Plane {
   id: number
+  object: string
   available: boolean
   mesh: any
   img: HTMLElement | null

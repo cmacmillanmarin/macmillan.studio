@@ -12,10 +12,6 @@
       v-if="i === of"
       class="home__services__service__observer--in"
       v-intersect="{ callback: onIntersectIn }" />
-    <!-- <div
-      v-if="i === of"
-      class="home__services__service__observer--out"
-      v-intersect="{ callback: onIntersectOut }" /> -->
     <div class="home__services__service__content">
       <div class="home__services__service__content__title">
         <h3 class="home__services__service__content__title__label">
