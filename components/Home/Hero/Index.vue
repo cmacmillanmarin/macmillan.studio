@@ -121,14 +121,7 @@ const router = useRouter()
 const { $three }: any = useNuxtApp()
 
 const store = useStore()
-const {
-  updateHeader,
-  updateLoading,
-  updateSectionThrottle,
-  updateSection,
-  updateInReel,
-  updateInReelHovered,
-} = store
+const { updateHeader, updateLoading, updateSection, updateInReel, updateInReelHovered } = store
 const {
   isPreloaded,
   section,
@@ -524,14 +517,12 @@ function goToReelFromThumbnail() {
 }
 
 async function onReelTransitionDone() {
-  updateSectionThrottle(true)
   await nextTick()
   updateScrollFixedTarget(vh.value)
   goToReel()
 }
 
 function onReelReady() {
-  updateSectionThrottle(false)
   gsap.killTweensOf(reelFade)
   gsap.to(reelFade, { value: 1, onUpdate: updateReelOpacity })
   reelReady.value = true

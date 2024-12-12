@@ -154,7 +154,7 @@ export default function useScroll() {
       $three.render()
     }
     for (const callback of renderCallbacks.value) callback()
-    updateSectionThrottle(data.speed > 1000 || sectionThrottle.value)
+    updateSectionThrottle(data.speed > 1000)
     updateScrollData(data)
   }
 

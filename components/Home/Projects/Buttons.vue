@@ -1,5 +1,5 @@
 <template>
-  <div class="home__projects__buttons" data-scroll-sticky>
+  <div ref="el" class="home__projects__buttons">
     <transition
       mode="out-in"
       :css="false"
@@ -83,6 +83,8 @@ const { updateCursor, updateCursorPosition } = store
 
 const { toScale } = useCss()
 
+const el = ref<HTMLElement>()
+
 watch(
   () => props.indicators,
   () => {
@@ -128,6 +130,10 @@ function onButtonMouseLeave(e: MouseEvent) {
 }
 
 const emit = defineEmits(['update-list', 'button-hover'])
+
+defineExpose({
+  el,
+})
 </script>
 
 <style lang="scss">
@@ -159,6 +165,7 @@ const emit = defineEmits(['update-list', 'button-hover'])
   &__button {
     width: 100%;
     border: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
     @include will-fade;
 

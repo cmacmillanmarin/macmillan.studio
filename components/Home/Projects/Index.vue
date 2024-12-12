@@ -14,7 +14,7 @@
           @before-enter="prepareFadeIn"
           @enter="transitionShuffleIn"
           @leave="transitionShuffleOut">
-          <p v-if="indicators" class="home__projects__index">
+          <p v-if="indicators" ref="indexEl" class="home__projects__index">
             <SvgSquare />
             <span
               class="home__projects__index__label--active"
@@ -26,6 +26,7 @@
       <Teleport to="#top-layer-blend">
         <HomeProjectsButtons
           v-if="!isInProject"
+          ref="buttonsEl"
           :indicators="indicators"
           :projects="data.list.length"
           :selected-projects="selectedProjectsList.length"
@@ -107,6 +108,7 @@ import type { FileVideo } from '~/types/wordpress'
 import type { Projects } from '~/types/wordpress/project'
 import { toPx } from '~/utils'
 import HomeProjectsProject from '~/components/Home/Projects/Project.vue'
+import HomeProjectsButtons from '~/components/Home/Projects/Buttons.vue'
 
 const props = defineProps<{
   data: HomepageProjects
@@ -121,7 +123,7 @@ const { section, isInReel, isInProject, landingTabIndex } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
 const { updateScroll, updateScrollTargetId, updateScrollFixedTargetId } = scrollStore
-const { scrollUpdated, direction } = storeToRefs(scrollStore)
+const { current, scrollUpdated, direction } = storeToRefs(scrollStore)
 
 const { vh } = useResize()
 const { isMobileLayout } = useDevice()
@@ -139,13 +141,13 @@ const el = ref<HTMLElement>()
 const listEl = ref<HTMLElement>()
 const listContainerEl = ref<HTMLElement>()
 const projectEls = ref<Array<typeof HomeProjectsProject>>([])
+const buttonsEl = ref<typeof HomeProjectsButtons>()
+const indexEl = ref<HTMLElement>()
 
 const indicators = computed<boolean>(
   () =>
     section.value === 'projects' && !(isInProject.value && isMobileLayout.value) && !isInReel.value
 )
-
-const year = ref<string>(new Date().getFullYear().toString())
 
 let _to: any
 const selectedProjectsList = ref<Projects>(props.data.list.filter(project => project.selected))
@@ -166,32 +168,12 @@ watch(
       if (!inActiveList) active.value = 1
       activeOf.value = activeListProjects.value.length
     }
+    indexEl.value && !isMobileLayout.value && gsap.set(indexEl.value, { y: 0 })
   }
 )
 
 watch(temporaryProjectList, () => {
   emit('update-temporary-project-list', temporaryProjectList.value)
-})
-
-watchEffect(() => {
-  if (route.params.slug) {
-    const inActiveList = !!activeListProjects.value.find(p => p.slug === route.params.slug)
-    if (!inActiveList && firstRouteIsProject.value && !temporaryProjectList.value.length) {
-      temporaryProjectList.value = props.data.list
-    }
-    const list = temporaryProjectList.value.length
-      ? temporaryProjectList.value
-      : inActiveList
-      ? activeListProjects.value
-      : props.data.list
-
-    const index = list.findIndex(p => p.slug === route.params.slug)
-    active.value = index + 1
-    activeOf.value = list.length
-  } else {
-    firstRouteIsProject.value = false
-    temporaryProjectList.value = []
-  }
 })
 
 watch(indicators, () => {
@@ -226,6 +208,39 @@ watch(activeListProjects, async () => {
   await nextTick()
   for (const project of projectEls.value) {
     project.transition()
+  }
+})
+
+watchEffect(() => {
+  if (route.params.slug) {
+    const inActiveList = !!activeListProjects.value.find(p => p.slug === route.params.slug)
+    if (!inActiveList && firstRouteIsProject.value && !temporaryProjectList.value.length) {
+      temporaryProjectList.value = props.data.list
+    }
+    const list = temporaryProjectList.value.length
+      ? temporaryProjectList.value
+      : inActiveList
+      ? activeListProjects.value
+      : props.data.list
+
+    const index = list.findIndex(p => p.slug === route.params.slug)
+    active.value = index + 1
+    activeOf.value = list.length
+  } else {
+    firstRouteIsProject.value = false
+    temporaryProjectList.value = []
+  }
+})
+
+watch(current, () => {
+  if (el.value && buttonsEl.value?.el) {
+    const height: number = bounding.value > 0 ? bounding.value : el.value.offsetHeight - vh.value
+    const projectScroll: number = current.value - vh.value * 2
+    const offsetTop: number = Math.max(0, vh.value * 2 - current.value)
+    const offsetBottom: number = Math.min(0, height - projectScroll)
+    const y: number = offsetTop + offsetBottom
+    gsap.set(buttonsEl.value.el, { y })
+    indexEl.value && gsap.set(indexEl.value, { y })
   }
 })
 
