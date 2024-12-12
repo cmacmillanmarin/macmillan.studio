@@ -216,7 +216,7 @@ function onButtonMouseLeave() {
 }
 
 async function delayedShuffleIn(el: Element, done: Function) {
-  await sleep(isMobileLayout.value ? 400 : 0)
+  await sleep(500)
   el && shuffleIn({ el: el as HTMLElement, done })
 }
 
