@@ -13,7 +13,7 @@
           @leave="transitionDone"
           @enter="transitionShuffleIn">
           <div
-            v-if="!isMobileLayout && !blend && ready"
+            v-if="!isMobileLayout && !blend && inReel"
             ref="closeEl"
             class="home__hero__player__close"
             @mouseenter="onButtonMouseEnter"
@@ -22,7 +22,10 @@
               <SvgClose />
             </button>
           </div>
-          <div v-else-if="!blend && ready" ref="toggleEl" class="home__hero__player__toggle">
+          <div
+            v-else-if="!blend && ready && inReel"
+            ref="toggleEl"
+            class="home__hero__player__toggle">
             <button @click="onToggleButtonClick">
               <transition
                 mode="out-in"
@@ -39,7 +42,7 @@
         </transition>
 
         <div
-          v-if="blend && ready"
+          v-if="blend && ready && inReel"
           ref="timelineEl"
           class="home__hero__player__timeline"
           @click="onTimelineClick"
@@ -60,7 +63,7 @@
           @leave="transitionDone"
           @enter="transitionShuffleIn">
           <div
-            v-if="!blend && ready"
+            v-if="!blend && ready && inReel"
             ref="muteEl"
             class="home__hero__player__mute"
             @mouseenter="onButtonMouseEnter"
@@ -79,6 +82,7 @@
 import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
+import useScrollStore from '~/store/useScrollStore'
 import { toPercentage } from '~/utils'
 import { fadeIn, shuffleIn, fadeOut } from '~/utils/animations'
 
@@ -91,9 +95,12 @@ const props = defineProps<{
 const store = useStore()
 const { updateCursor, updateCursorPosition } = store
 const { cursor, headerMobileButtonClicked } = storeToRefs(store)
+const scrollStore = useScrollStore()
+const { current } = storeToRefs(scrollStore)
 
 const { x, y } = useMouse()
 const { addTicker, killTicker } = useRaf()
+const { vh } = useResize()
 const { isMobileLayout } = useDevice()
 const { toScale } = useCss()
 
@@ -107,6 +114,8 @@ const barEl = ref<HTMLElement>()
 const muteEl = ref<HTMLElement>()
 const closeEl = ref<HTMLElement>()
 const timelineEl = ref<HTMLElement>()
+
+const inReel = computed<boolean>(() => current.value === vh.value)
 
 let _to: any
 

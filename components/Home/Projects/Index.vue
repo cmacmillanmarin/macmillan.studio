@@ -384,15 +384,23 @@ const emit = defineEmits(['update-list', 'update-active', 'update-temporary-proj
   &__index {
     position: absolute;
     width: max-content;
-    height: toScale(2.4rem);
+    height: toScale(1.2rem, 37.5rem);
+    @include from__tablet--landscape {
+      height: toScale(2.4rem);
+    }
     &__label {
       &--active {
-        transform: translateY(5%);
         @include t-b3--number;
+        @include from__tablet--landscape {
+          transform: translateY(5%);
+        }
       }
     }
     .svg__square {
-      transform: translateY(10%);
+      transform: translateY(20%);
+      @include from__tablet--landscape {
+        transform: translateY(10%);
+      }
     }
   }
 
