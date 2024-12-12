@@ -11,9 +11,9 @@
           :css="false"
           :appear="true"
           @leave="transitionDone"
-          @enter="transitionShuffleIn">
+          @enter="delayedShuffleIn">
           <div
-            v-if="!isMobileLayout && !blend"
+            v-if="!blend && !isMobileLayout"
             ref="closeEl"
             class="home__hero__player__close"
             @mouseenter="onButtonMouseEnter"
@@ -22,7 +22,7 @@
               <SvgClose />
             </button>
           </div>
-          <div v-else-if="!blend && ready" ref="toggleEl" class="home__hero__player__toggle">
+          <div v-else-if="!blend" ref="toggleEl" class="home__hero__player__toggle">
             <button @click="onToggleButtonClick">
               <transition
                 mode="out-in"
@@ -122,8 +122,9 @@ watch(headerMobileButtonClicked, () => {
 })
 
 watch(
-  [x, y],
+  [x, y, () => props.ready],
   () => {
+    if (!props.ready) return
     visible.value = true
     _to && clearTimeout(_to)
     _to = setTimeout(() => {
@@ -212,6 +213,11 @@ function onButtonMouseEnter() {
 
 function onButtonMouseLeave() {
   updateCursor(!props.ready ? 'loading' : playing.value ? 'pause' : 'play')
+}
+
+async function delayedShuffleIn(el: Element, done: Function) {
+  await sleep(isMobileLayout.value ? 400 : 0)
+  el && shuffleIn({ el: el as HTMLElement, done })
 }
 
 function onToggleButtonClick(e: MouseEvent) {

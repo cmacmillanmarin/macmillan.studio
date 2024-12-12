@@ -397,10 +397,7 @@ const emit = defineEmits(['update-list', 'update-active', 'update-temporary-proj
       }
     }
     .svg__square {
-      transform: translateY(20%);
-      @include from__tablet--landscape {
-        transform: translateY(10%);
-      }
+      transform: translateY(10%);
     }
   }
 
