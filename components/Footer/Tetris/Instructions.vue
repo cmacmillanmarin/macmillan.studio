@@ -5,7 +5,11 @@
       @mouseenter="onMouseEnter"
       @mouseleave="onMouseLeave"
       v-transition:in="{ callback: shuffleIn }">
-      <button class="footer__tetris__instructions__content__close" @click="close">
+      <button
+        class="footer__tetris__instructions__content__close"
+        @mouseenter="onCloseButtonMouseEnter"
+        @mouseleave="onCloseButtonMouseLeave"
+        @click="close">
         <SvgAspa />
       </button>
       <p class="footer__tetris__instructions__content__title">How to play</p>
@@ -83,6 +87,14 @@ function onMouseEnter() {
 
 function onMouseLeave() {
   updateCursorColor('lime')
+}
+
+function onCloseButtonMouseEnter() {
+  updateCursor('none')
+}
+
+function onCloseButtonMouseLeave() {
+  updateCursor('default')
 }
 
 onBeforeUnmount(() => {

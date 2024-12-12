@@ -44,7 +44,7 @@
             @enter="enterSmallReelButton"
             @leave="transitionFadeOut">
             <button
-              v-if="reelSmallVisible && !reelSmallHovered"
+              v-if="reelSmallVisible && !reelSmallHovered && !isInReel"
               ref="smallReelButtonEl"
               class="home__hero__content__small-reel-button"
               @click="goToReel"
@@ -106,7 +106,7 @@ import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { toPx, round } from '~/utils'
+import { toPx, round, sleep } from '~/utils'
 import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
 import { shuffleIn, shuffleElsOut, transitionFadeOut } from '~/utils/animations'
@@ -173,6 +173,7 @@ const reelSmallVisible = ref<boolean>(false)
 const reelProgress = ref<number>(0)
 const reelButtonVisible = ref<boolean>(false)
 const reelReady = ref<boolean>(false)
+const reelOpened = ref<boolean>(false)
 
 const verticalGap = computed<number>(() => lvw.value * 0.0825)
 const verticalGapPx = computed<string>(() =>
@@ -247,6 +248,25 @@ watch(isReady, ready => {
   ready && animate()
 })
 
+watch([current, isInReel], () => {
+  reelOpened.value = current.value === vh.value && isInReel.value
+})
+
+watch(reelOpened, () => {
+  gsap.killTweensOf(reelFade)
+  if (reelOpened.value) {
+    $three.planes.updateObject({ id: 'reel--small', opacity: 0 })
+    gsap.to(reelFade, {
+      value: 0,
+      duration: 0.5,
+      onUpdate: updateReelOpacity,
+      onComplete: changeReelSource,
+    })
+  } else {
+    gsap.to(reelFade, { value: 1, onUpdate: updateReelOpacity })
+  }
+})
+
 watch(hideComponents, async () => {
   await nextTick()
   updateScroll()
@@ -305,20 +325,19 @@ watch(
     direction,
     section,
     isInProject,
+    isInReel,
     reelReady,
     reelFade,
     reelSmallScale,
     reelSmallTransition,
+    isMobileLayout,
   ],
   () => {
     reelSmallVisible.value =
-      (!isMobileLayout.value &&
-        !isInProject.value &&
-        section.value !== 'hero' &&
-        section.value !== 'projects-bg' &&
-        section.value !== 'reel' &&
-        current.value < bounding.value - vh.value) ||
-      (reelSmallTransition.value === 1 && reelFade.value !== 1)
+      !isMobileLayout.value &&
+      !isInProject.value &&
+      current.value >= vh.value * 2 &&
+      current.value < bounding.value - vh.value
 
     let offsetX: number = 0
     let offsetY: number = 0
@@ -335,9 +354,9 @@ watch(
       id: 'reel--small',
       position: {
         x: vw.value - x - layoutMargin.value * tX,
-        y: vh.value - y - layoutMargin.value * tX,
+        y: vh.value * 3 - y - layoutMargin.value * tX,
       },
-      fixed: { from: 0, to: bounding.value - vh.value },
+      fixed: { from: vh.value * 2, to: bounding.value - vh.value },
       size: { x, y, z: 1 },
       border: toScale(8 * tX),
     })
@@ -488,11 +507,12 @@ function goToReel() {
     cursor: null,
     forcePixel: false,
   })
-  gsap.killTweensOf(reelFade)
-  gsap.to(reelFade, { value: 0, onUpdate: updateReelOpacity })
 
   if (route.hash === '#reel') updateScrollTargetId('reel')
   else router.push('/#reel')
+}
+
+function changeReelSource() {
   if (videoEl.value) {
     videoEl.value.src = '/assets/video/reel.mp4'
     videoEl.value.setAttribute('type', 'video/mp4')
@@ -523,8 +543,6 @@ async function onReelTransitionDone() {
 }
 
 function onReelReady() {
-  gsap.killTweensOf(reelFade)
-  gsap.to(reelFade, { value: 1, onUpdate: updateReelOpacity })
   reelReady.value = true
   videoEl.value?.removeEventListener('canplay', onReelReady)
 }
@@ -667,6 +685,10 @@ function onVideoReady() {
 
 function onVideoPlaying() {
   if (videoEl.value && isInReel.value && videoEl.value.duration) {
+    if (videoEl.value.currentTime > 0 && reelFade.value === 0) {
+      gsap.killTweensOf(reelFade)
+      gsap.to(reelFade, { value: 1, onUpdate: updateReelOpacity })
+    }
     reelProgress.value = round(videoEl.value.currentTime / videoEl.value.duration, 4)
   }
 }
@@ -685,8 +707,11 @@ async function onFirstAnimationDone() {
   $three.planes.updateObject({ id: 'reel', onClick: isMobileLayout.value ? null : goToReel })
 }
 
-function enterSmallReelButton(el: Element, done: Function) {
-  fadeIn({ el, delay: 0.4, done })
+async function enterSmallReelButton(el: Element, done: Function) {
+  // fadeIn({ el, delay: 0.4, done })
+  await sleep(400)
+  if (el && !reelSmallHovered.value && !isInReel.value) shuffleIn({ el: el as HTMLElement, done })
+  else done()
 }
 
 function onSmallReelHovered(value: boolean) {

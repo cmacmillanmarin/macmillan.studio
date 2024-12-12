@@ -327,7 +327,9 @@ export default class {
         uniforms.uColor.value = object.color || this.colors.lightGrey
         uniforms.uMultiplyColor.value = object.multiplyColor || this.colors.white
         uniforms.uOpacity.value = object.opacity !== undefined ? object.opacity : 1
-        if (object.textureFade) uniforms.uTextureFade.value = object.textureFade
+        if (object.textureFade !== null && object.textureFade !== uniforms.uTextureFade.value) {
+          uniforms.uTextureFade.value = object.textureFade
+        }
         const xPixelRatio = object.size.x / round(object.size.x / this.toScale(18))
         const yPixelRatio = object.size.y / round(object.size.y / this.toScale(18))
         uniforms.uPixelSize.value.x = object.size.x / xPixelRatio

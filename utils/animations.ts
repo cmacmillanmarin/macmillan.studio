@@ -109,7 +109,7 @@ export function shuffleInParam(params: {
   gsap.to(param, { value: 1, duration, delay: duration * 1.5, onUpdate, ease: 'power1.in' })
 }
 
-export function shuffleIn(params: { el?: HTMLElement }) {
+export function shuffleIn(params: { el?: HTMLElement; done?: Function }) {
   const { el } = params
   if (!el) return
   const paths = shuffle(
@@ -128,7 +128,15 @@ export function shuffleIn(params: { el?: HTMLElement }) {
       delay: delay + duration,
       ease: 'power1.out',
     })
-    gsap.to(path, { opacity: 1, duration, delay: delay + duration * 1.5, ease: 'power1.in' })
+    gsap.to(path, {
+      opacity: 1,
+      duration,
+      delay: delay + duration * 1.5,
+      ease: 'power1.in',
+      onComplete: () => {
+        params.done && params.done()
+      },
+    })
   }
 }
 
