@@ -61,6 +61,7 @@ let _to: any
 
 watch(isActive, () => {
   if (isActive.value) {
+    activeAward.value = 0
     fadeIn({ el: el.value, delay: 0.2 })
     _to = setTimeout(() => {
       listEl.value?.classList.add('home__about__awards__list--visible')
