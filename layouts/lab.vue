@@ -1,5 +1,5 @@
 <template>
-  <div ref="el" class="__layout">
+  <div ref="el" class="__layout __layout--lab">
     <slot />
     <ClientOnly>
       <Three :lab="true" />
@@ -40,6 +40,11 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 .__layout {
+  &--lab {
+    position: relative;
+    height: var(--vh);
+    background-color: var(--black);
+  }
   .three {
     position: absolute;
     top: 0;
