@@ -44,11 +44,13 @@ export default class {
 
   scrollBounding: number = 0
 
+  toScale: Function = () => {}
   onPreloaded: Function = () => {}
 
   constructor(params: ConstructorParams) {
-    const { onPreloaded } = params
+    const { onPreloaded, toScale } = params
 
+    this.toScale = toScale || this.toScale
     this.onPreloaded = onPreloaded || this.onPreloaded
 
     this.bind()
@@ -225,11 +227,6 @@ export default class {
     const rotation = this.logo.rotation.y % Math.PI
     const distanceToMiddlePoint = Math.abs(rotation - Math.PI * 0.5) / (Math.PI * 0.5)
     this.light.intensity = maxIntensity - distanceToMiddlePoint * maxIntensity
-  }
-
-  toScale(n: number): number {
-    const mvw = Math.min(this.size.x, 1800) // Check layout max width
-    return (n * mvw) / (this.isMobileLayout ? 375 : 1440)
   }
 
   bind() {}

@@ -7,7 +7,7 @@ import {
   PerspectiveCamera,
   WebGLRenderer,
 } from 'three'
-import type { CreateParams } from '~/types/front/three'
+import type { ConstructorParams, CreateParams } from '~/types/front/three'
 import VS from '~/assets/js/three/scenes/noise/glsl/vs.glsl'
 import FS from '~/assets/js/three/scenes/noise/glsl/fs.glsl'
 
@@ -32,7 +32,13 @@ export default class Noise {
 
   rendering: boolean = false
 
-  constructor() {
+  toScale: Function = (): number => 1
+  getDevicePixelRatio: Function = (): number => 1
+
+  constructor(params: ConstructorParams) {
+    this.toScale = params.toScale || this.toScale
+    this.getDevicePixelRatio = params.getDevicePixelRatio || this.getDevicePixelRatio
+
     this.bind()
   }
 
@@ -112,10 +118,6 @@ export default class Noise {
     this.log(`updateSize() w: ${size.x}, h: ${size.y}`)
   }
 
-  getDevicePixelRatio() {
-    return Math.min(window.devicePixelRatio, this.maxPixelRatio)
-  }
-
   fromDomToCanvas(params: { x: number; y: number }): { x: number; y: number } {
     return {
       x: params.x - this.size.x * 0.5,
@@ -129,11 +131,6 @@ export default class Noise {
 
   updateMobileLayout(value: boolean) {
     this.isMobileLayout = value
-  }
-
-  toScale(n: number): number {
-    const mvw = Math.min(this.size.x, 1800)
-    return (n * mvw) / (this.isMobileLayout ? 375 : 1440)
   }
 
   updateCamera(y: number) {}

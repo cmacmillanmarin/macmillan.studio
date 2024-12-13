@@ -87,6 +87,8 @@ export default class {
 
   rotateLogo: Function = () => {}
   updateCursor: Function = () => {}
+  toScale: Function = (): number => 1
+  getDevicePixelRatio: Function = (): number => 1
 
   _onClick: (this: Window, ev: MouseEvent) => any = () => {}
   _onTextureLoaded: (data: Texture) => void = () => {}
@@ -95,10 +97,12 @@ export default class {
   _onTouchEnd: (this: Window, ev: TouchEvent) => any = () => {}
 
   constructor(params: ConstructorParams) {
-    const { updateCursor, rotateLogo } = params
+    const { updateCursor, rotateLogo, toScale, getDevicePixelRatio } = params
 
+    this.toScale = toScale || this.toScale
     this.rotateLogo = rotateLogo || this.rotateLogo
     this.updateCursor = updateCursor || this.updateCursor
+    this.getDevicePixelRatio = getDevicePixelRatio || this.getDevicePixelRatio
 
     this.bind()
   }
@@ -621,10 +625,6 @@ export default class {
     this.log(`updateSize() w: ${size.x}, h: ${size.y}`)
   }
 
-  getDevicePixelRatio(): number {
-    return Math.min(window.devicePixelRatio, this.maxPixelRatio)
-  }
-
   fromDomToCanvas(params: { x: number; y: number }): { x: number; y: number } {
     return {
       x: params.x - this.size.x * 0.5,
@@ -644,11 +644,6 @@ export default class {
 
   updateScrollBounding(value: number) {
     this.scrollBounding = value
-  }
-
-  toScale(n: number): number {
-    const mvw = Math.min(this.size.x, 1800) // Check layout max width
-    return (n * mvw) / (this.isMobileLayout ? 375 : 1440)
   }
 
   imageLoaded(img: HTMLImageElement): number {
