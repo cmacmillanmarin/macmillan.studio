@@ -116,7 +116,6 @@ defineProps<{
 }>()
 
 const route = useRoute()
-const router = useRouter()
 
 const { $three }: any = useNuxtApp()
 
@@ -134,7 +133,13 @@ const {
 } = storeToRefs(store)
 
 const scrollStore = useScrollStore()
-const { updateScroll, disableScroll, updateScrollFixedTarget, updateScrollTargetId } = scrollStore
+const {
+  updateScroll,
+  disableScroll,
+  updateScrollTarget,
+  updateScrollFixedTarget,
+  updateScrollTargetId,
+} = scrollStore
 const { current, direction, bounding } = storeToRefs(scrollStore)
 
 const { isMobileLayout, isTabletPortrait } = useDevice()
@@ -418,7 +423,7 @@ watch(current, () => {
   contentMacMillan && gsap.set(contentMacMillan, { y: isMobileLayout.value ? contentY : titleY })
 })
 
-watch([firstTransition, position, videoPlaying, videoInProject], () => {
+watch([firstTransition, position, videoPlaying, videoInProject, isInReel], () => {
   let _size = size.value
   let _position = position.value
   let _border = 0
@@ -508,12 +513,13 @@ function goToReel() {
     forcePixel: false,
   })
 
-  if (route.hash === '#reel') updateScrollTargetId('reel')
-  else router.push('/#reel')
+  updateScrollTarget(vh.value)
 }
 
 function changeReelSource() {
   if (videoEl.value) {
+    videoEl.value.currentTime = 0
+    reelProgress.value = 0
     videoEl.value.src = '/assets/video/reel.mp4'
     videoEl.value.setAttribute('type', 'video/mp4')
     videoEl.value.muted = false

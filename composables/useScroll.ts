@@ -158,6 +158,11 @@ export default function useScroll() {
     updateScrollData(data)
   }
 
+  function destroy() {
+    nativeScroll.destroy()
+    virtualScroll.destroy()
+  }
+
   onBeforeUnmount(() => {
     nativeScroll.destroy()
     virtualScroll.destroy()
@@ -166,6 +171,7 @@ export default function useScroll() {
   return {
     init,
     reset,
+    destroy,
     forceReset,
   }
 }

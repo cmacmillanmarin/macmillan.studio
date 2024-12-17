@@ -39,6 +39,10 @@ async function init() {
   isInProject.value && updateLoading(false)
   el.value && scroll.init({ el: el.value })
 }
+
+onBeforeUnmount(() => {
+  scroll.destroy()
+})
 </script>
 
 <style lang="scss">

@@ -6,9 +6,12 @@ export interface ConstructorParams {
   rotateLogo?: Function
   updateCursor?: Function
   onPreloaded?: Function
+  toScale?: Function
+  getDevicePixelRatio?: Function
 }
 
 export interface CreateParams {
+  lab: boolean
   size: Vector2
   canvas: HTMLCanvasElement
   renderer: WebGLRenderer
