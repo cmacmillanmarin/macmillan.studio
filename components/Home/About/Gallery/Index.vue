@@ -58,7 +58,7 @@ watch(inReelHovered, () => {
 
 function onItemsFadeUpdate() {
   items.value.forEach((item, i) => {
-    $three.planes.updateObject({
+    $three.planes.update({
       id: `${planeIds.value}-${i + 1}`,
       opacity: itemsFade.value,
     })

@@ -81,7 +81,7 @@ const id: string = `${props.planesId}-${props.pos}`
 watch(scrollUpdated, () => {
   width.value = getWidth()
   height.value = getHeight()
-  $three.planes.updateObject({
+  $three.planes.update({
     id,
     size: { x: width.value, y: height.value, z: 1 },
     border: toScale(isMobileLayout.value ? 8 : 16),
@@ -89,7 +89,7 @@ watch(scrollUpdated, () => {
 })
 
 onMounted(() => {
-  $three.planes.addObject({
+  $three.planes.add({
     id,
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
@@ -113,11 +113,11 @@ function getHeight() {
 }
 
 function onVideoLoaded() {
-  $three.planes.updateObject({ id, video: videoEl.value })
+  $three.planes.update({ id, video: videoEl.value })
 }
 
 function onImageLoaded(img: HTMLImageElement) {
-  $three.planes.updateObject({ id, img })
+  $three.planes.update({ id, img })
   // customImageEl.value?.el && $three.planes.preload(customImageEl.value.el)
 }
 
@@ -135,7 +135,7 @@ function onMouseLeave() {
 }
 
 onBeforeUnmount(() => {
-  $three.planes.removeObject(`${props.planesId}-${props.pos}`)
+  $three.planes.remove(`${props.planesId}-${props.pos}`)
 })
 </script>
 

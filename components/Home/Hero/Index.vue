@@ -255,7 +255,7 @@ watch([current, isInReel], () => {
 watch(reelOpened, () => {
   gsap.killTweensOf(reelFade)
   if (reelOpened.value) {
-    $three.planes.updateObject({ id: 'reel--small', opacity: 0 })
+    $three.planes.update({ id: 'reel--small', opacity: 0 })
     gsap.to(reelFade, {
       value: 0,
       duration: 0.5,
@@ -278,7 +278,7 @@ watch(isInProjectEntered, () => {
 })
 
 watch([headerLogo, videoInProject, isMobileLayout], () => {
-  $three.planes.updateObject({
+  $three.planes.update({
     id: 'reel',
     onClick: videoInProject.value || headerLogo.value || isMobileLayout.value ? null : goToReel,
   })
@@ -308,7 +308,7 @@ watch(reelSmallVisible, () => {
     delay: reelSmallVisible.value ? 0.2 : 0,
     duration: reelSmallVisible.value ? 0.8 : 0.5,
     onUpdate: () => {
-      $three.planes.updateObject({ id: 'reel--small', opacity: reelSmallOpacity.value })
+      $three.planes.update({ id: 'reel--small', opacity: reelSmallOpacity.value })
     },
     onComplete: () => {
       if (!reelSmallVisible.value) {
@@ -350,7 +350,7 @@ watch(
     const x: number = toScale(164 * reelSmallScale.value) + offsetX
     const y: number = toScale(82 * reelSmallScale.value) + offsetY
 
-    $three.planes.updateObject({
+    $three.planes.update({
       id: 'reel--small',
       position: {
         x: vw.value - x - layoutMargin.value * tX,
@@ -454,7 +454,7 @@ watch([firstTransition, position, videoPlaying, videoInProject], () => {
     }
   } else if (videoInProject.value) _opacity = 0
 
-  $three.planes.updateObject({
+  $three.planes.update({
     id: 'reel',
     fixed: _fixed,
     size: _size,
@@ -476,13 +476,13 @@ onMounted(() => {
   videoEl.value?.addEventListener('canplaythrough', onVideoReady)
   !videoInProject.value && videoEl.value?.load()
   videoInView.value = current.value < componentHeight.value && section.value === 'hero'
-  $three.planes.addObject({
+  $three.planes.add({
     id: 'reel',
     video: videoEl.value,
     color: rbgToVec4(hexToRgb('#000000')),
     cursor: 'play',
   })
-  $three.planes.addObject({
+  $three.planes.add({
     id: 'reel--small',
     video: videoEl.value,
     cursor: 'play',
@@ -500,7 +500,7 @@ function goToReel() {
   reelButtonVisible.value = false
   updateInReel(true)
   disableScroll(true)
-  $three.planes.updateObject({
+  $three.planes.update({
     id: 'reel',
     onClick: null,
     noPixel: true,
@@ -526,7 +526,7 @@ function changeReelSource() {
 function goToReelFromThumbnail() {
   disableScroll(true)
   updateInReel(true)
-  $three.planes.updateObject({ id: 'reel--small', onIntersect: null, onClick: null, noPixel: true })
+  $three.planes.update({ id: 'reel--small', onIntersect: null, onClick: null, noPixel: true })
   gsap.killTweensOf(reelSmallTransition)
   gsap.to(reelSmallTransition, {
     value: 1,
@@ -548,7 +548,7 @@ function onReelReady() {
 }
 
 function updateReelOpacity() {
-  $three.planes.updateObject({ id: 'reel', textureFade: reelFade.value })
+  $three.planes.update({ id: 'reel', textureFade: reelFade.value })
 }
 
 function updateReel(progress: number) {
@@ -570,13 +570,13 @@ function closeReel() {
   updateInReel(false)
   disableScroll(false)
   updateScrollTargetId('projects')
-  $three.planes.updateObject({
+  $three.planes.update({
     id: 'reel',
     onClick: isMobileLayout.value ? null : goToReel,
     noPixel: false,
     cursor: 'play',
   })
-  $three.planes.updateObject({
+  $three.planes.update({
     id: 'reel--small',
     onIntersect: onSmallReelHovered,
     onClick: goToReelFromThumbnail,
@@ -704,7 +704,7 @@ async function onFirstAnimationDone() {
   await nextTick()
   updateScroll()
   disableScroll(false)
-  $three.planes.updateObject({ id: 'reel', onClick: isMobileLayout.value ? null : goToReel })
+  $three.planes.update({ id: 'reel', onClick: isMobileLayout.value ? null : goToReel })
 }
 
 async function enterSmallReelButton(el: Element, done: Function) {
@@ -738,7 +738,7 @@ onUnmounted(() => {
   videoEl.value?.removeEventListener('play', onPlay)
   videoEl.value?.removeEventListener('pause', onPause)
   videoEl.value?.removeEventListener('canplaythrough', onVideoReady)
-  $three.planes.removeObject('reel')
+  $three.planes.remove('reel')
   $three.planes.destroy()
 })
 </script>

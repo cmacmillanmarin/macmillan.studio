@@ -131,7 +131,7 @@ watch(section, () => {
 })
 
 onMounted(() => {
-  $three.planes.addObject({
+  $three.planes.add({
     id: 'about-thumbnail',
     position: { x: 0, y: 0 },
     size: { x: 0, y: 0, z: 1 },
@@ -148,7 +148,7 @@ function updateImagePositions() {
   const thumbnailImageBounding = getBounding(thumbnailImageEl.value.el)
   const thumbnailImageWidth = thumbnailImageEl.value.el.clientWidth
   const thumbnailImageHeight = thumbnailImageEl.value.el.clientHeight
-  $three.planes.updateObject({
+  $three.planes.update({
     id: 'about-thumbnail',
     position: { x: thumbnailImageBounding.left, y: thumbnailImageBounding.top },
     size: { x: thumbnailImageWidth, y: thumbnailImageHeight, z: 1 },
@@ -163,7 +163,7 @@ async function onReadMore() {
 }
 
 function onImagesFadeUpdate() {
-  $three.planes.updateObject({ id: 'about-thumbnail', opacity: imagesFade.value })
+  $three.planes.update({ id: 'about-thumbnail', opacity: imagesFade.value })
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -176,7 +176,7 @@ function onTestimonialsUpdateExpanded() {
 }
 
 function onThumbnailLoaded(img: HTMLImageElement) {
-  $three.planes.updateObject({ id: 'about-thumbnail', img })
+  $three.planes.update({ id: 'about-thumbnail', img })
   updateImagePositions()
 }
 
@@ -227,7 +227,7 @@ function onCollaboratorImageClick(e: MouseEvent) {
 }
 
 function updateTint(id: string) {
-  $three.planes.updateObject({
+  $three.planes.update({
     id,
     multiplyColor: [
       _color.vec4[0] + (1 - _color.vec4[0]) * (1 - _color.alpha),
@@ -239,7 +239,7 @@ function updateTint(id: string) {
 }
 
 onBeforeUnmount(() => {
-  $three.planes.removeObject('about-thumbnail')
+  $three.planes.remove('about-thumbnail')
 })
 </script>
 

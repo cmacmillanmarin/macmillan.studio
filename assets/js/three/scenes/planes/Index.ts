@@ -175,8 +175,8 @@ export default class {
     return this.createTexture(img)
   }
 
-  addObject(param: ObjectParam) {
-    this.log('addObject()')
+  add(param: ObjectParam) {
+    this.log('add()')
 
     this.objects.push({
       ...param,
@@ -210,8 +210,8 @@ export default class {
     return this.objects.find(obj => obj.id === id)
   }
 
-  updateObject(param: ObjectParam) {
-    this.log(`updateObject() ${param.img}`)
+  update(param: ObjectParam) {
+    this.log(`update() ${param.img}`)
     const object = this.getObject(param.id)
     if (object) {
       object.zoom = param.zoom !== undefined ? param.zoom : object.zoom
@@ -239,7 +239,7 @@ export default class {
     }
   }
 
-  removeObject(params: { id: string }) {
+  remove(params: { id: string }) {
     if (!this.objects) return
     const { id } = params
     const index = this.objects.findIndex(object => object.id === id)
@@ -271,7 +271,7 @@ export default class {
     }
   }
 
-  updateObjects() {
+  updatePlanes() {
     this.needsUpdate = false
 
     for (const object of this.objects) {
@@ -517,7 +517,7 @@ export default class {
 
     this.intersects = this.raycaster.intersectObjects(this.scene.children, false).map(i => i.object)
 
-    this.updateObjects()
+    this.updatePlanes()
 
     if (this.needsUpdate) {
       this.log('render()')

@@ -146,7 +146,7 @@ function move() {
         // const current = x + item.width
         // const progress = current / totalDistance
         // const distanceToCenter = distanceToMidpoint(progress)
-        $three.planes.updateObject({ id, position: { x: x, y: y.value }, zoom: 1 })
+        $three.planes.update({ id, position: { x: x, y: y.value }, zoom: 1 })
       }
       gsap.set(item.el, { x })
     }

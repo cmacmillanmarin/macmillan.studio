@@ -266,7 +266,7 @@ watch([inView, inTransition, videoEl], () => {
 watch([() => props.active, inProject, isInReel, headerOverlay], () => {
   const hidden = inProject.value || headerOverlay.value || isInReel.value
   const clickable = props.active && !hidden
-  $three.planes.updateObject({
+  $three.planes.update({
     id: projectId.value,
     onClick: clickable ? openProject : null,
   })
@@ -295,7 +295,7 @@ watch(section, () => {
     }
   } else if (opacity.value !== 1) {
     opacity.value = 1
-    $three.planes.updateObject({ id: projectId.value, opacity: 1 })
+    $three.planes.update({ id: projectId.value, opacity: 1 })
   }
   inView.value = getInView()
 })
@@ -340,7 +340,7 @@ watch([inTransitionReady, active], async () => {
     const video = document.getElementById(projectVideo.value.id) as HTMLVideoElement | undefined
     if (video) {
       videoEl.value = video
-      $three.planes.updateObject({ id: projectId.value, video: videoEl.value })
+      $three.planes.update({ id: projectId.value, video: videoEl.value })
     }
   }
   if (!imageReady.value) imageReady.value = inTransitionReady.value && active.value
@@ -366,7 +366,7 @@ watch(
       ? getInAllProjectsListPlane()
       : getInSelectedProjectsListPlane()
 
-    $three.planes.updateObject({ id: projectId.value, ..._plane })
+    $three.planes.update({ id: projectId.value, ..._plane })
   }
 )
 
@@ -410,13 +410,13 @@ function updateDom() {
 
 function onImageLoaded(img: HTMLImageElement) {
   imageLoaded.value = true
-  $three.planes.updateObject({ id: projectId.value, img })
+  $three.planes.update({ id: projectId.value, img })
 }
 
 async function createPlane() {
   const hidden = inProject.value || headerOverlay.value
   const clickable = props.active && !hidden
-  $three.planes.addObject({
+  $three.planes.add({
     id: projectId.value,
     video: videoEl.value,
     img: imageLoaded.value ? customImageEl.value?.el : null,
@@ -560,7 +560,7 @@ function getActiveInAllProjectsList() {
 }
 
 function onOpacityUpdate() {
-  $three.planes.updateObject({ id: projectId.value, opacity: opacity.value })
+  $three.planes.update({ id: projectId.value, opacity: opacity.value })
 }
 
 function transition() {
@@ -585,8 +585,7 @@ function animate() {
       progress.value = getProgress()
       leaveProgress.value = getLeaveProgress()
       inView.value = getInView()
-      inView.value &&
-        $three.planes.updateObject({ id: projectId.value, ..._plane, forcePixel: false })
+      inView.value && $three.planes.update({ id: projectId.value, ..._plane, forcePixel: false })
     },
     onComplete: () => {
       inTransition.value = false
@@ -624,7 +623,7 @@ onBeforeUnmount(() => {
     })
   }
   removeRenderCallback(updateDom)
-  $three.planes.removeObject({ id: projectId.value })
+  $three.planes.remove({ id: projectId.value })
 })
 
 const emit = defineEmits<{
