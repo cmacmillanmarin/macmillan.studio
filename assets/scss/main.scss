@@ -1,5 +1,6 @@
-@import './reset';
-@import './variables';
+@use 'reset';
+@use 'mixins';
+@use 'vars';
 
 @include import-font('HelveticaNowDisplayXBold');
 @include import-font('HelveticaNowDisplayBold');
@@ -8,17 +9,19 @@
 
 html {
   font-size: 10px; // 1rem = 10px
-}
 
-body {
-  background-color: var(--white);
-  overflow: hidden;
   * {
     &::-webkit-scrollbar {
       width: 0;
       height: 0;
     }
   }
+}
+
+body {
+  background-color: var(--white);
+  overflow: hidden;
+
   &::after {
     display: none;
     content: 'mobile';

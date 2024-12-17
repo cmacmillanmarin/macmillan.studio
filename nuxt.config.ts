@@ -16,12 +16,12 @@ const IS_OFFLINE: boolean = OFFLINE == '1'
 const IS_PRODUCTION: boolean = PRODUCTION == '1'
 const DEPLOY_DATE: string = Date.now().toString()
 
-const robotsRules: Array<any> = [
-  { UserAgent: '*' },
-  { Disallow: '/' },
-  { BlankLine: true },
-  { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
-]
+// const robotsRules: Array<any> = [
+//   { UserAgent: '*' },
+//   { Disallow: '/' },
+//   { BlankLine: true },
+//   { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
+// ]
 
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
@@ -60,20 +60,20 @@ export default defineNuxtConfig({
 
   modules: ['@pinia/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap'],
 
-  robots: {
-    rules: robotsRules,
-  },
+  // robots: {
+  //   rules: robotsRules,
+  // },
 
   sitemap: {
-    defaults: {
-      lastmod: new Date(),
-    },
+    // defaults: {
+    //   lastmod: new Date(),
+    // },
     // @ts-expect-error
     hostname: `${FE_PROTOCOL}${FE_BASE_URL}`,
     gzip: true,
   },
 
-  css: ['@/assets/css/main.scss'],
+  css: ['@/assets/scss/main.scss'],
 
   features: {
     inlineStyles: false,
@@ -83,13 +83,9 @@ export default defineNuxtConfig({
     plugins: [glsl()],
     css: {
       preprocessorOptions: {
+        api: 'modern',
         scss: {
-          additionalData: `
-            @import "@/assets/css/mixins/_index.scss";
-            @import "@/assets/css/mixins/_breakpoints.scss";
-            @import "@/assets/css/mixins/_grid.scss";
-            @import "@/assets/css/mixins/_fonts.scss";
-          `,
+          additionalData: '@use "@/assets/scss/_mixins.scss" as *;',
         },
       },
     },

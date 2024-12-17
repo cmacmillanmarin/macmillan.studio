@@ -102,14 +102,14 @@ function onIntersect(el: HTMLElement, visible: boolean) {
     @include grid;
 
     &__label {
-      @include columns(8, 'mobile');
+      @include columns(8);
       @include t-h2;
 
       @include from__tablet--landscape {
         padding-top: toScale(2rem);
         padding-bottom: toScale(2rem);
-        @include columns(10, 'tablet--landscape');
-        @include gap(2, 'left', 'tablet--landscape');
+        @include columns(10);
+        @include gap(2, 'left');
       }
 
       &__indent {

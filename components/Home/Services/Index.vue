@@ -129,12 +129,12 @@ function onIntersect(el: HTMLElement, visible: boolean) {
       padding-bottom: toScale(0.4rem, 37.5rem);
 
       @include t-h2;
-      @include columns(10, 'tablet--landscape');
-      @include gap(2, 'left', 'tablet--landscape');
 
       @include from__tablet--landscape {
         padding-top: toScale(2rem);
         padding-bottom: toScale(2rem);
+        @include columns(10);
+        @include gap(2, 'left');
       }
 
       &__indent {

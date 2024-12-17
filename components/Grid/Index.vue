@@ -42,7 +42,6 @@ const vertical = computed(() => Math.ceil(vh.value / 16))
       background: magenta;
       opacity: 0.2;
       @include columns('1');
-      @include columns('1', 'tablet--landscape');
     }
   }
 }

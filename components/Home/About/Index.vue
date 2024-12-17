@@ -265,13 +265,13 @@ onBeforeUnmount(() => {
 
       &__label {
         padding-bottom: toScale(3.2rem, 37.5rem);
-        @include columns(8, 'mobile');
+        @include columns(8);
         @include t-h2;
 
         @include from__tablet--landscape {
           padding-bottom: toScale(8rem);
-          @include columns(10, 'tablet--landscape');
-          @include gap(2, 'left', 'tablet--landscape');
+          @include columns(10);
+          @include gap(2, 'left');
         }
 
         &__indent {
@@ -288,11 +288,11 @@ onBeforeUnmount(() => {
       @include grid;
 
       &__thumbnail {
-        @include columns(3, 'mobile');
+        @include columns(3);
 
         @include from__tablet--landscape {
-          @include columns(2, 'tablet--landscape');
-          @include gap(2, 'left', 'tablet--landscape');
+          @include columns(2);
+          @include gap(2, 'left');
         }
 
         .custom-image {
@@ -314,12 +314,12 @@ onBeforeUnmount(() => {
       }
 
       &__detail {
-        @include columns(4, 'mobile');
-        @include gap(1, 'left', 'mobile');
+        @include columns(4);
+        @include gap(1, 'left');
 
         @include from__tablet--landscape {
-          @include columns(6, 'tablet--landscape');
-          @include gap(2, 'left', 'tablet--landscape');
+          @include columns(6);
+          @include gap(2, 'left');
         }
 
         &__text {
@@ -386,11 +386,11 @@ onBeforeUnmount(() => {
       }
 
       &__title {
-        @include columns(4, 'mobile');
+        @include columns(4);
 
         @include from__tablet--landscape {
-          @include gap(4, 'left', 'tablet--landscape');
-          @include columns(2, 'tablet--landscape');
+          @include gap(4, 'left');
+          @include columns(2);
         }
 
         &__label {
@@ -400,10 +400,10 @@ onBeforeUnmount(() => {
       }
 
       &__content {
-        @include columns(4, 'mobile');
+        @include columns(4);
         @include from__tablet--landscape {
-          @include columns(3, 'tablet--landscape');
-          @include gap(1, 'right', 'tablet--landscape');
+          @include columns(3);
+          @include gap(1, 'right');
         }
 
         &__label {
@@ -416,12 +416,12 @@ onBeforeUnmount(() => {
         position: relative;
         margin-top: toScale(3.2rem);
         margin-left: calc(toColumns(4) + var(--layout-gutter));
-        @include columns(4, 'mobile');
+        @include columns(4);
 
         @include from__tablet--landscape {
           margin-top: 0;
           margin-left: 0;
-          @include columns(2, 'tablet--landscape');
+          @include columns(2);
         }
 
         button {

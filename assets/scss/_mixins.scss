@@ -1,3 +1,95 @@
+//
+// Breakpoints
+//
+// mobile               0px >= 560px
+// tablet               561px >= 768px
+// tablet landscape     769px >= 1023px
+// desktop              1024px >= 1279px
+// desktop medium       1280px >= 1440px
+// desktop large        1441px >= 1800px
+// desktop x-large      1921px >
+
+@mixin from__tablet {
+  @media screen and (min-width: 561px) {
+    @content;
+  }
+}
+
+@mixin from__tablet--landscape {
+  @media screen and (min-width: 769px) {
+    @content;
+  }
+}
+
+@mixin from__desktop {
+  @media screen and (min-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin from__desktop--medium {
+  @media screen and (min-width: 1280px) {
+    @content;
+  }
+}
+
+@mixin from__desktop--large {
+  @media screen and (min-width: 1441px) {
+    @content;
+  }
+}
+
+@mixin from__desktop--x-large {
+  @media screen and (min-width: 1800px) {
+    @content;
+  }
+}
+
+//
+// Functions
+
+@mixin page() {
+  position: relative;
+  z-index: 1;
+
+  will-change: opacity;
+}
+
+@mixin will-fade() {
+  opacity: 0.00001;
+  will-change: opacity;
+}
+
+@mixin absolute-fill() {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+@mixin absolute-center() {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@function toScale($size, $base: 144rem) {
+  @return min(calc(100vw * $size / $base), calc(180rem * $size / $base));
+}
+
+@function toScaleUp($size, $base: 37.5rem) {
+  @return max(calc(100vw * $size / $base), $size);
+}
+
+@function toColumns($columns) {
+  @return calc(var(--layout-column-width) * #{$columns} + var(--layout-gutter) * (#{$columns} - 1));
+}
+
+//
+// Fonts
+
 @mixin import-font($fontname) {
   @font-face {
     font-family: $fontname;
@@ -201,4 +293,74 @@
 @mixin t-seo {
   position: fixed;
   top: -10000rem;
+}
+
+//
+// Grid
+
+@mixin grid($type: '') {
+  width: 100%;
+  max-width: var(--layout-max-width);
+
+  display: flex;
+  flex-wrap: wrap;
+  grid-gap: 0;
+  column-gap: var(--layout-gutter);
+
+  padding-left: var(--layout-margin);
+  padding-right: var(--layout-margin);
+  margin-left: auto;
+  margin-right: auto;
+
+  @if $type == 'centered' {
+    align-items: center;
+    justify-content: center;
+  } @else if $type == 'rule-of-thirds' {
+    column-gap: 0;
+    padding-left: 0;
+    padding-right: 0;
+
+    --col: 33.3333%;
+  } @else if $type == 'golden-ratio' {
+    --layout-margin: min(3.1%, 5.58rem);
+    --col-xs: 2.65%;
+    --col-s: 10%;
+    --col-m: 10.65%;
+    --col-l: 13.35%;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    grid-gap: 0;
+    column-gap: 0;
+
+    align-content: flex-start;
+  }
+}
+
+@mixin columns($i, $device: 'mobile') {
+  --columns: #{$i};
+  --columns-width: calc((var(--columns) / var(--layout-columns)) * 100%);
+  --columns-gap-width: calc(
+    var(--layout-gutter) * (1 - (1 / (var(--layout-columns) / var(--columns))))
+  );
+  width: calc(var(--columns-width) - var(--columns-gap-width));
+}
+
+@mixin gap($i, $side: '', $device: 'mobile') {
+  --gap: #{$i};
+  --gap-width: calc((var(--gap) / var(--layout-columns)) * 100%);
+  --gap-margin: calc(
+    var(--layout-gutter) * (var(--gap) - (1 / (var(--layout-columns) / var(--gap))))
+  );
+  --gap-value: calc(var(--gap-width) - var(--gap-margin) + var(--gap) * var(--layout-gutter));
+  @if $side == 'left' {
+    margin-left: var(--gap-value);
+  } @else if $side == 'right' {
+    margin-right: var(--gap-value);
+  } @else {
+    margin-left: var(--gap-value);
+    margin-right: var(--gap-value);
+  }
 }

@@ -156,17 +156,20 @@ const emit = defineEmits<{
     }
 
     &__title {
-      @include t-b1;
-      @include gap(2, 'left', 'tablet--landscape');
-      @include columns(4, 'tablet--landscape');
+      @include columns(4);
+      @include gap(2, 'left');
+
+      &__label {
+        @include t-b1;
+      }
     }
 
     &__description {
-      @include t-b1;
-      @include columns(6, 'tablet--landscape');
+      @include columns(6);
 
       p {
         margin-bottom: toScale(0.8rem);
+        @include t-b1;
         &:last-child {
           margin-bottom: 0;
         }

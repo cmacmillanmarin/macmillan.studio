@@ -230,23 +230,23 @@ const emit = defineEmits<{
 
     &__title {
       font-family: 'HelveticaNowDisplayBold' !important;
-      @include columns(8, 'mobile');
+      @include columns(8);
       @include t-black;
       @include t-b1;
 
       @include from__tablet--landscape {
         font-family: inherit;
 
-        @include gap(2, 'left', 'tablet--landscape');
-        @include columns(4, 'tablet--landscape');
+        @include gap(2, 'left');
+        @include columns(4);
         @include t-b1;
       }
     }
 
     &__list {
-      @include columns(8, 'mobile');
+      @include columns(8);
       @include from__tablet--landscape {
-        @include columns(6, 'tablet--landscape');
+        @include columns(6);
       }
 
       &__item {
