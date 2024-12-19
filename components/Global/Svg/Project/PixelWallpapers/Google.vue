@@ -1,5 +1,5 @@
 <template>
-  <svg class="svg__project__wallpapers__google" viewBox="0 0 744 139">
+  <svg class="svg__project__pixel-wallpapers__google" viewBox="0 0 744 139">
     <path
       d="M743.297 3.568v17.856h-74.586V58.81h67.518v17.484h-67.518v41.85h74.028V136h-93.93V3.568h94.488Z" />
     <path d="M572.765 117.304v-114h-19v114zM572.765 136.304h67.059v-19h-67.059z" />
@@ -25,7 +25,7 @@
 </template>
 
 <style lang="scss">
-.svg__project__wallpapers__google {
+.svg__project__pixel-wallpapers__google {
   display: block;
   fill: none;
   width: toScale(41rem, 37.5rem);

@@ -1,5 +1,5 @@
 <template>
-  <svg class="svg__project__wallpapers__pixels" viewBox="0 0 594 134">
+  <svg class="svg__project__pixel-wallpapers__pixels" viewBox="0 0 594 134">
     <path
       d="M505.702 0h68.596v18.842h-68.596zM505.702 55.417h68.596v18.842h-68.596zM505.702 114.158h68.596V133h-68.596zM574.298 114.158v-39.9h18.808v39.9zM486.894 55.417V17.734h18.808v37.683zM574.298 37.683V18.841h18.808v18.842zM486.894 114.158V95.316h18.808v18.842z" />
     <path
@@ -14,10 +14,10 @@
 </template>
 
 <style lang="scss">
-.svg__project__wallpapers__pixels {
+.svg__project__pixel-wallpapers__pixels {
   display: block;
   fill: none;
-  width: toScale(32.6rem, 37.5rem);
+  width: toScale(34.14rem, 37.5rem);
   height: auto;
   @include from__tablet--landscape {
     width: toScale(59.4rem);

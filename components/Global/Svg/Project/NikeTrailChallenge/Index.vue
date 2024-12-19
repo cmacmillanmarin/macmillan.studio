@@ -1,30 +1,41 @@
 <template>
-  <div :class="['svg__project__wallpapers', { 'svg__project__wallpapers--animation': animation }]">
+  <div
+    :class="[
+      'svg__project__nike-trail-challenge',
+      { 'svg__project__nike-trail-challenge--animation': animation },
+    ]">
     <template v-if="isMobileLayout">
       <Ticker
         ref="tickerEl"
         :drag-on-target="true"
         :ignore-update-scroll="true"
         :ticker="!next ? inProjectNextProjectTicker : undefined"
-        class="svg__project__wallpapers__ticker"
+        class="svg__project__nike-trail-challenge__ticker"
         @update="emit('update-scroll')">
         <div v-for="i in 2" :key="i">
-          <SvgProjectWallpapersGoogle
+          <SvgProjectNikeTrailChallengeFirstLine
             v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
         </div>
       </Ticker>
-      <SvgProjectWallpapersPixels
-        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+      <Ticker
+        ref="tickerEl"
+        :drag-on-target="true"
+        :ignore-update-scroll="true"
+        :ticker="!next ? inProjectNextProjectTicker : undefined"
+        :starting-direction="1"
+        class="svg__project__nike-trail-challenge__ticker"
+        @update="emit('update-scroll')">
+        <div v-for="i in 2" :key="i">
+          <SvgProjectNikeTrailChallengeSecondLine
+            v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+        </div>
+      </Ticker>
     </template>
     <template v-else>
-      <SvgProjectWallpapersGoogle
+      <SvgProjectNikeTrailChallengeFirstLine
         v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
-      <div class="svg__project__wallpapers__flex">
-        <SvgProjectWallpapersPixels
-          v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
-        <SvgProjectWallpapersPixels
-          v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
-      </div>
+      <SvgProjectNikeTrailChallengeSecondLine
+        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
     </template>
   </div>
 </template>
@@ -62,7 +73,7 @@ const emit = defineEmits(['update-scroll'])
 </script>
 
 <style lang="scss">
-.svg__project__wallpapers {
+.svg__project__nike-trail-challenge {
   &--animation {
     svg {
       > path,
@@ -71,23 +82,24 @@ const emit = defineEmits(['update-scroll'])
       }
     }
   }
+
   &__ticker {
     margin-bottom: var(--layout-gutter);
     > div {
       padding-right: toScale(3.2rem, 37.5rem);
     }
-  }
-  &__flex {
-    display: flex;
-    column-gap: toScale(3.2rem);
-    margin-top: toScale(1.2rem);
-  }
-  &__pixels {
-    margin: 0 auto;
-    @include from__tablet--landscape {
-      margin: 0;
+    &:last-child {
+      margin-bottom: 0;
     }
   }
+
+  &__second-line {
+    @include from__tablet--landscape {
+      margin-top: toScale(1.2rem);
+      margin-left: 24vw;
+    }
+  }
+
   svg path {
     fill: v-bind(fill);
   }

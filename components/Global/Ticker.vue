@@ -23,6 +23,7 @@ const props = defineProps<{
   dragOnTarget?: boolean
   ignoreUpdateScroll?: boolean
   ticker?: NextProjectTicker
+  startingDirection?: number
 }>()
 
 const scrollStore = useScrollStore()
@@ -46,7 +47,9 @@ const lastItem = computed<TickerItem | undefined>(() => items.value[items.value.
 
 let _current: number = props.ticker?.current || 0
 let _target: number = props.ticker?.target || 0
-let _direction: number = props.ticker?.direction || -1
+let _direction: number = props.ticker?.items.length
+  ? props.ticker.direction
+  : props.startingDirection || -1
 let _speed: number = props.ticker?.speed || 1.25
 let _panInit: number = 0
 let _panSpeed: number = 0

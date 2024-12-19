@@ -1,5 +1,6 @@
 <template>
-  <SvgProjectWallpapers
+  <Component
+    :is="type"
     :animation="animation"
     :next="next"
     :color="color"
@@ -7,12 +8,16 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
+import { hyphensToCamelcase } from '~/utils'
+
+const props = defineProps<{
   project: string
   next: boolean
   animation: boolean
   color?: string
 }>()
+
+const type = ref<string>(`SvgProject${hyphensToCamelcase(props.project)}`)
 
 const emit = defineEmits(['update-scroll'])
 </script>
