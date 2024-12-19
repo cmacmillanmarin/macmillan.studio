@@ -23,6 +23,14 @@ const DEPLOY_DATE: string = Date.now().toString()
 //   { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
 // ]
 
+const genericRouteRules = IS_DEV ? { ssr: true } : { prerender: true }
+
+const routeRules = {
+  '/': genericRouteRules,
+  '/**': genericRouteRules,
+  '/api/**': { cors: true },
+}
+
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   ssr: true,
@@ -83,8 +91,8 @@ export default defineNuxtConfig({
     plugins: [glsl()],
     css: {
       preprocessorOptions: {
-        api: 'modern',
         scss: {
+          api: 'modern',
           additionalData: '@use "@/assets/scss/_mixins.scss" as *;',
         },
       },
@@ -95,6 +103,7 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: true,
     },
+    routeRules,
   },
 
   devtools: { enabled: false },
