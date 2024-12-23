@@ -26,13 +26,6 @@ export default defineStore('use-store', {
     inProjectEntered: false,
     inProjectScroll: true,
     inProjectNextProjectInView: false,
-    inProjectNextProjectTicker: {
-      items: [],
-      current: 0,
-      target: 0,
-      speed: 1.25,
-      direction: -1,
-    },
     inTetris: false,
   }),
   getters: {
@@ -131,9 +124,9 @@ export default defineStore('use-store', {
     updateInProjectNextProjectInView(state: boolean) {
       this.inProjectNextProjectInView = state
     },
-    updateInProjectNextProjectTicker(params: NextProjectTicker) {
-      this.inProjectNextProjectTicker = params
-    },
+    // updateInProjectNextProjectTicker(params: NextProjectTicker) {
+    //   this.inProjectNextProjectTicker = params
+    // },
     updateInTetris(state: boolean) {
       this.inTetris = state
     },

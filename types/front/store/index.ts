@@ -63,6 +63,6 @@ export interface State {
   inProjectEntered: boolean
   inProjectScroll: boolean
   inProjectNextProjectInView: boolean
-  inProjectNextProjectTicker: NextProjectTicker
+  // inProjectNextProjectTicker: NextProjectTicker
   inTetris: boolean
 }

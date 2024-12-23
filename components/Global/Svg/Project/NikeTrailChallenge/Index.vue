@@ -6,10 +6,10 @@
     ]">
     <template v-if="isMobileLayout">
       <Ticker
-        ref="tickerEl"
+        ref="firstLineTickerEl"
         :drag-on-target="true"
         :ignore-update-scroll="true"
-        :ticker="!next ? inProjectNextProjectTicker : undefined"
+        :ticker="!next ? nextProjectTickerFirstLine : undefined"
         class="svg__project__nike-trail-challenge__ticker"
         @update="emit('update-scroll')">
         <div v-for="i in 2" :key="i">
@@ -18,10 +18,10 @@
         </div>
       </Ticker>
       <Ticker
-        ref="tickerEl"
+        ref="secondLineTickerEl"
         :drag-on-target="true"
         :ignore-update-scroll="true"
-        :ticker="!next ? inProjectNextProjectTicker : undefined"
+        :ticker="!next ? nextProjectTickerSecondLine : undefined"
         :starting-direction="1"
         class="svg__project__nike-trail-challenge__ticker"
         @update="emit('update-scroll')">
@@ -41,10 +41,9 @@
 </template>
 
 <script lang="ts" setup>
-import useStore from '~/store/useStore'
 import { shuffleIn } from '~/utils/animations'
 import Ticker from '~/components/Global/Ticker.vue'
-import { storeToRefs } from 'pinia'
+import { type NextProjectTicker } from '~/types/front/store'
 
 const props = defineProps<{
   next: boolean
@@ -52,20 +51,38 @@ const props = defineProps<{
   color?: string
 }>()
 
-const store = useStore()
-const { updateInProjectNextProjectTicker } = store
-const { inProjectNextProjectTicker } = storeToRefs(store)
+const id = 'project-ticker-nike-trail-callenge'
+
+const nextProjectTickerFirstLine = ref<NextProjectTicker | undefined>(
+  window.localStorage.getItem(`${id}-first-line`)
+    ? JSON.parse(window.localStorage.getItem(`${id}-first-line`) as string)
+    : undefined
+)
+const nextProjectTickerSecondLine = ref<NextProjectTicker | undefined>(
+  window.localStorage.getItem(`${id}-second-line`)
+    ? JSON.parse(window.localStorage.getItem(`${id}-second-line`) as string)
+    : undefined
+)
 
 const { isMobileLayout } = useDevice()
 
-const tickerEl = ref<typeof Ticker>()
+const firstLineTickerEl = ref<typeof Ticker>()
+const secondLineTickerEl = ref<typeof Ticker>()
 
 const fill = computed(() => props.color || 'var(--black)')
 
 onBeforeUnmount(() => {
-  if (props.next && tickerEl.value) {
-    tickerEl.value.pause()
-    updateInProjectNextProjectTicker(tickerEl.value.getNextProjectTicker())
+  if (props.next && firstLineTickerEl.value && secondLineTickerEl.value) {
+    firstLineTickerEl.value.pause()
+    secondLineTickerEl.value.pause()
+    window.localStorage.setItem(
+      `${id}-first-line`,
+      JSON.stringify(firstLineTickerEl.value.getTicker())
+    )
+    window.localStorage.setItem(
+      `${id}-second-line`,
+      JSON.stringify(secondLineTickerEl.value.getTicker())
+    )
   }
 })
 
