@@ -13,7 +13,7 @@
 import { gsap } from 'gsap/gsap-core'
 import useStore from '~/store/useStore'
 import type { Image } from '~/types/wordpress'
-import { Swiper, type Params } from '~/utils/swiper'
+import { Swiper } from '~/utils/swiper'
 
 const props = defineProps<{
   data: Image
@@ -92,7 +92,7 @@ function onLoaded() {
 function onMouseEnter() {
   if (props.layout !== 'scroll') return
   updateCursor('drag-vertical')
-  _Swiper.init({ el: el.value, cursor: true, onPanMove, onPanEnd })
+  !isMobileLayout.value && _Swiper.init({ el: el.value, cursor: true, onPanMove, onPanEnd })
 }
 
 function clamp(value: number): number {

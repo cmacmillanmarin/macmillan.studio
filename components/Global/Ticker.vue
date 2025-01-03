@@ -207,7 +207,7 @@ function pause() {
   removeRenderCallback(move)
 }
 
-function getNextProjectTicker(): NextProjectTicker {
+function getTicker(): NextProjectTicker {
   const _items: Array<NextProjectTickerItem> = []
   for (const item of items.value) {
     _items.push({
@@ -235,7 +235,7 @@ onBeforeUnmount(() => {
 defineExpose({
   update,
   pause,
-  getNextProjectTicker,
+  getTicker,
 })
 
 const emit = defineEmits(['update'])

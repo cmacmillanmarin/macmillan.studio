@@ -61,7 +61,7 @@ const fill = computed(() => props.color || 'var(--black)')
 onBeforeUnmount(() => {
   if (props.next && tickerEl.value) {
     tickerEl.value.pause()
-    window.localStorage.setItem(id, JSON.stringify(tickerEl.value.getNextProjectTicker()))
+    window.localStorage.setItem(id, JSON.stringify(tickerEl.value.getTicker()))
   }
 })
 

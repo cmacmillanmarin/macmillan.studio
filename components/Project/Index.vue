@@ -136,7 +136,6 @@ watch(nextProjectInView, () => {
 })
 
 onBeforeMount(() => {
-  console.log(props.data.title)
   updateCursor('default')
   updateSection('projects')
   updateInProjectNextProjectInView(false)
