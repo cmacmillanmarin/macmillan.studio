@@ -9,7 +9,7 @@
         ref="tickerEl"
         :drag-on-target="true"
         :ignore-update-scroll="true"
-        :ticker="!next ? inProjectNextProjectTicker : undefined"
+        :ticker="!next ? nextProjectTicker : undefined"
         class="svg__project__pixel-wallpapers__ticker"
         @update="emit('update-scroll')">
         <div v-for="i in 2" :key="i">
@@ -34,10 +34,9 @@
 </template>
 
 <script lang="ts" setup>
-import useStore from '~/store/useStore'
 import { shuffleIn } from '~/utils/animations'
 import Ticker from '~/components/Global/Ticker.vue'
-import { storeToRefs } from 'pinia'
+import { type NextProjectTicker } from '~/types/front/store'
 
 const props = defineProps<{
   next: boolean
@@ -45,9 +44,13 @@ const props = defineProps<{
   color?: string
 }>()
 
-const store = useStore()
-const { updateInProjectNextProjectTicker } = store
-const { inProjectNextProjectTicker } = storeToRefs(store)
+const id = 'project-ticker-pixel-wallpapers'
+
+const nextProjectTicker = ref<NextProjectTicker | undefined>(
+  window.localStorage.getItem(id)
+    ? JSON.parse(window.localStorage.getItem(id) as string)
+    : undefined
+)
 
 const { isMobileLayout } = useDevice()
 
@@ -58,7 +61,7 @@ const fill = computed(() => props.color || 'var(--black)')
 onBeforeUnmount(() => {
   if (props.next && tickerEl.value) {
     tickerEl.value.pause()
-    updateInProjectNextProjectTicker(tickerEl.value.getNextProjectTicker())
+    window.localStorage.setItem(id, JSON.stringify(tickerEl.value.getNextProjectTicker()))
   }
 })
 

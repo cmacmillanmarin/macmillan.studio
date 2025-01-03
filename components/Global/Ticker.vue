@@ -30,7 +30,6 @@ const scrollStore = useScrollStore()
 const { updateScroll, addRenderCallback, removeRenderCallback } = scrollStore
 const { scrollUpdated } = storeToRefs(scrollStore)
 
-const { isMobileLayout } = useDevice()
 const { onResize } = useResize()
 const { getBounding } = useVirtualScrollAndThreeTools()
 
