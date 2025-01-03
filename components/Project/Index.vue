@@ -78,7 +78,6 @@ const {
   updateSection,
   updateInProjectScroll,
   updateInProjectNextProjectInView,
-  updateInProjectNextProjectTicker,
 } = store
 const { isInProject, isInProjectEntered, cursor, gridType, headerMobileButtonClicked } =
   storeToRefs(store)
@@ -129,16 +128,7 @@ watch(onResize, updateScroll)
 
 watch(headerMobileButtonClicked, () => {
   if (props.nextProject && nextProjectInView.value) goToNextProject()
-  else {
-    updateInProjectNextProjectTicker({
-      items: [],
-      current: 0,
-      target: 0,
-      speed: 1.25,
-      direction: -1,
-    })
-    closeProject()
-  }
+  else closeProject()
 })
 
 watch(nextProjectInView, () => {
