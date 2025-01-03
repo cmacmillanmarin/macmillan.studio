@@ -359,7 +359,7 @@ onBeforeUnmount(() => {
           padding: 0;
           width: max-content;
           text-decoration: underline;
-          font-family: 'HelveticaNowDisplayBold' !important;
+          // font-family: 'HelveticaNowDisplayBold' !important;
           margin-top: toScale(1.2rem, 37.5rem);
           @include t-black;
           @include t-b1;

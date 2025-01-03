@@ -229,7 +229,7 @@ const emit = defineEmits<{
     }
 
     &__title {
-      font-family: 'HelveticaNowDisplayBold' !important;
+      // font-family: 'HelveticaNowDisplayBold' !important;
       @include columns(8);
       @include t-black;
       @include t-b1;

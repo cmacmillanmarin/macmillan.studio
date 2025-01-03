@@ -63,7 +63,7 @@ function onMouseLeave() {
   &__anchor {
     color: var(--black);
     will-change: opacity;
-    font-family: 'HelveticaNowDisplayBold' !important;
+    // font-family: 'HelveticaNowDisplayBold' !important;
     @include t-b1;
     @include from__tablet--landscape {
       @include t-b1;

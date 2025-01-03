@@ -200,7 +200,7 @@ defineExpose({
         color: var(--dark-grey);
         position: relative;
         will-change: opacity;
-        font-family: 'HelveticaNowDisplayBold' !important;
+        // font-family: 'HelveticaNowDisplayBold' !important;
         @include t-b1;
       }
 

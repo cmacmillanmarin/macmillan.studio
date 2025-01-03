@@ -157,11 +157,11 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 
   &__mobile-list {
     padding: toScale(3.2rem, 37.5rem) var(--layout-margin) 0;
-    .accordion__title__content__number {
-      font-family: 'HelveticaNowDisplayBold' !important;
-    }
+    // .accordion__title__content__number {
+    //   font-family: 'HelveticaNowDisplayBold' !important;
+    // }
     .accordion__title__content__label {
-      font-family: 'HelveticaNowDisplayBold' !important;
+      // font-family: 'HelveticaNowDisplayBold' !important;
       @include t-b1;
     }
   }

@@ -337,7 +337,8 @@ function scrollDown() {
     padding-left: var(--layout-margin);
 
     p {
-      @include t-b1--bold;
+      // @include t-b1--bold;
+      @include t-b1;
     }
 
     &__button {
