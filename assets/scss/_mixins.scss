@@ -230,8 +230,8 @@
 }
 
 @mixin t-b3--number {
-  font-size: toScaleUp(1.4rem);
-  line-height: toScaleUp(1.7rem);
+  font-size: toScaleUp(1.2rem);
+  line-height: toScaleUp(1.2rem);
 
   // @include t-b--xbold;
   @include t-b--bold;
