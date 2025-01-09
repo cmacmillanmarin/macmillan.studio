@@ -5,6 +5,8 @@
       { 'svg__project__pixel-wallpapers--animation': animation },
     ]">
     <template v-if="isMobileLayout">
+      <SvgProjectPixelWallpapersFirstLine
+        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
       <Ticker
         ref="tickerEl"
         :drag-on-target="true"
@@ -13,20 +15,16 @@
         class="svg__project__pixel-wallpapers__ticker"
         @update="emit('update-scroll')">
         <div v-for="i in 2" :key="i">
-          <SvgProjectPixelWallpapersGoogle
+          <SvgProjectPixelWallpapersSecondLine
             v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
         </div>
       </Ticker>
-      <SvgProjectPixelWallpapersPixels
-        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
     </template>
     <template v-else>
-      <SvgProjectPixelWallpapersGoogle
+      <SvgProjectPixelWallpapersFirstLine
         v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
       <div class="svg__project__pixel-wallpapers__flex">
-        <SvgProjectPixelWallpapersPixels
-          v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
-        <SvgProjectPixelWallpapersPixels
+        <SvgProjectPixelWallpapersSecondLine
           v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
       </div>
     </template>
@@ -78,23 +76,27 @@ const emit = defineEmits(['update-scroll'])
       }
     }
   }
-  &__ticker {
-    margin-bottom: var(--layout-gutter);
-    > div {
-      padding-right: toScale(3.2rem, 37.5rem);
-    }
-  }
-  &__flex {
-    display: flex;
-    column-gap: toScale(3.2rem);
-    margin-top: toScale(1.2rem);
-  }
-  &__pixels {
+
+  &__first-line {
     margin: 0 auto;
     @include from__tablet--landscape {
       margin: 0;
     }
   }
+
+  &__second-line {
+    @include from__tablet--landscape {
+      margin-top: toScale(1.2rem);
+    }
+  }
+
+  &__ticker {
+    margin-top: var(--layout-gutter);
+    > div {
+      padding-right: toScale(3.2rem, 37.5rem);
+    }
+  }
+
   svg path {
     fill: v-bind(fill);
   }
