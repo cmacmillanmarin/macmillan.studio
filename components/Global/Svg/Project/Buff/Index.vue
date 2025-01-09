@@ -1,30 +1,24 @@
 <template>
   <div
-    :class="[
-      'svg__project__the-helldivers',
-      { 'svg__project__the-helldivers--animation': animation },
-    ]">
+    :class="['svg__project__buff-stories', { 'svg__project__buff-stories--animation': animation }]">
     <template v-if="isMobileLayout">
-      <SvgProjectTheHelldivers2FirstLine
-        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+      <SvgProjectBuffFirstLine v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
       <Ticker
         ref="tickerEl"
         :drag-on-target="true"
         :ignore-update-scroll="true"
         :ticker="!next ? nextProjectTicker : undefined"
-        class="svg__project__the-helldivers__ticker"
+        class="svg__project__buff-stories__ticker"
         @update="emit('update-scroll')">
         <div v-for="i in 2" :key="i">
-          <SvgProjectTheHelldivers2SecondLine
+          <SvgProjectBuffSecondLine
             v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
         </div>
       </Ticker>
     </template>
     <template v-else>
-      <SvgProjectTheHelldivers2FirstLine
-        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
-      <SvgProjectTheHelldivers2SecondLine
-        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+      <SvgProjectBuffFirstLine v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+      <SvgProjectBuffSecondLine v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
     </template>
   </div>
 </template>
@@ -40,7 +34,7 @@ const props = defineProps<{
   color?: string
 }>()
 
-const id = 'project-ticker-the-helldivers'
+const id = 'project-ticker-buff-stories'
 
 const nextProjectTicker = ref<NextProjectTicker | undefined>(
   window.localStorage.getItem(id)
@@ -65,7 +59,7 @@ const emit = defineEmits(['update-scroll'])
 </script>
 
 <style lang="scss">
-.svg__project__the-helldivers {
+.svg__project__buff-stories {
   &--animation {
     svg {
       > path,
@@ -80,6 +74,12 @@ const emit = defineEmits(['update-scroll'])
     @include from__tablet--landscape {
       margin: 0;
       margin-bottom: toScale(1.2rem);
+    }
+  }
+
+  &__second-line {
+    @include from__tablet--landscape {
+      margin-left: 24vw;
     }
   }
 

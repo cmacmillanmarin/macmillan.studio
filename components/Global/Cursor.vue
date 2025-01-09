@@ -73,13 +73,13 @@ watch(cursorPosition, () => {
   }
 })
 
-watch([cursor, down], () => {
+watch([cursor, down, mouseX], () => {
   if (!dotEl.value || !squareEl.value) return
   if (cursor.value === 'none') {
     _entered = false
     fadeOut({ el: squareEl.value, duration: 0.2 })
   }
-  const visible = cursor.value !== 'default' && cursor.value !== 'none'
+  const visible = cursor.value !== 'default' && cursor.value !== 'none' && mouseX.value !== 0
   const scale = visible ? (down.value ? 0.8 : 1) : 0
   const duration = visible ? 0.4 : 0.3
   gsap.killTweensOf(dotEl.value)

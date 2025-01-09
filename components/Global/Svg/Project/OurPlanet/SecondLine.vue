@@ -22,7 +22,7 @@
   height: auto;
   width: toScale(37.46rem, 37.5rem);
   @include from__tablet--landscape {
-    width: toScale(80.2rem);
+    width: toScale(65.2rem);
   }
   path {
     fill: var(--black);

@@ -68,19 +68,8 @@ const emit = defineEmits(['update-scroll'])
   }
 
   &__ticker {
-    margin-bottom: var(--layout-gutter);
     > div {
       padding-right: toScale(3.2rem, 37.5rem);
-    }
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  &__second-line {
-    @include from__tablet--landscape {
-      margin-top: toScale(1.2rem);
-      margin-left: 24vw;
     }
   }
 

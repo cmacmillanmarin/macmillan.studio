@@ -1,6 +1,8 @@
 <template>
-  <div :class="['svg__project__fenty', { 'svg__project__fenty--animation': animation }]">
-    <SvgProjectFentyFirstLine v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+  <div
+    :class="['svg__project__ambia-solar', { 'svg__project__ambia-solar--animation': animation }]">
+    <SvgProjectAmbiaFirstLine v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+    <SvgProjectAmbiaSecondLine v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
   </div>
 </template>
 
@@ -19,7 +21,7 @@ const emit = defineEmits(['update-scroll'])
 </script>
 
 <style lang="scss">
-.svg__project__fenty {
+.svg__project__ambia-solar {
   &--animation {
     svg {
       > path,
@@ -31,8 +33,18 @@ const emit = defineEmits(['update-scroll'])
 
   &__first-line {
     margin: auto;
+    margin-bottom: toScale(1.2rem, 37.5rem);
     @include from__tablet--landscape {
       margin: 0;
+      margin-bottom: toScale(1.2rem);
+    }
+  }
+
+  &__second-line {
+    margin: auto;
+    @include from__tablet--landscape {
+      margin: 0;
+      margin-left: 24vw;
     }
   }
 

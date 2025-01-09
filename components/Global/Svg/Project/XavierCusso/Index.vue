@@ -1,1 +1,103 @@
-<template></template>
+<template>
+  <div
+    :class="['svg__project__xavier-cusso', { 'svg__project__xavier-cusso--animation': animation }]">
+    <template v-if="isMobileLayout">
+      <Ticker
+        ref="tickerEl"
+        :drag-on-target="true"
+        :ignore-update-scroll="true"
+        :ticker="!next ? nextProjectTicker : undefined"
+        class="svg__project__xavier-cusso__ticker"
+        @update="emit('update-scroll')">
+        <div v-for="i in 2" :key="i">
+          <SvgProjectXavierCussoFirstLine
+            v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+        </div>
+      </Ticker>
+      <SvgProjectXavierCussoSecondLine
+        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+    </template>
+    <template v-else>
+      <SvgProjectXavierCussoFirstLine
+        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+      <SvgProjectXavierCussoSecondLine
+        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+    </template>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { shuffleIn } from '~/utils/animations'
+import Ticker from '~/components/Global/Ticker.vue'
+import { type NextProjectTicker } from '~/types/front/store'
+
+const props = defineProps<{
+  next: boolean
+  animation: boolean
+  color?: string
+}>()
+
+const id = 'project-ticker-xavier-cusso'
+
+const nextProjectTicker = ref<NextProjectTicker | undefined>(
+  window.localStorage.getItem(id)
+    ? JSON.parse(window.localStorage.getItem(id) as string)
+    : undefined
+)
+
+const { isMobileLayout } = useDevice()
+
+const tickerEl = ref<typeof Ticker>()
+
+const fill = computed(() => props.color || 'var(--black)')
+
+onBeforeUnmount(() => {
+  if (props.next && tickerEl.value) {
+    tickerEl.value.pause()
+    window.localStorage.setItem(id, JSON.stringify(tickerEl.value.getTicker()))
+  }
+})
+
+const emit = defineEmits(['update-scroll'])
+</script>
+
+<style lang="scss">
+.svg__project__xavier-cusso {
+  &--animation {
+    svg {
+      > path,
+      > g {
+        @include will-fade;
+      }
+    }
+  }
+
+  &__first-line {
+    margin: auto;
+    @include from__tablet--landscape {
+      margin: 0;
+      margin-bottom: toScale(1.2rem);
+      transform: translateY(3.6rem);
+    }
+  }
+
+  &__second-line {
+    margin: auto;
+    @include from__tablet--landscape {
+      margin: 0;
+      margin-left: 24vw;
+    }
+  }
+
+  &__ticker {
+    margin-bottom: var(--layout-gutter);
+    > div {
+      padding-right: toScale(3.2rem, 37.5rem);
+    }
+  }
+
+  svg path {
+    fill: v-bind(fill);
+  }
+}
+</style>

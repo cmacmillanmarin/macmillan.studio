@@ -1,8 +1,8 @@
 <template>
   <div
     :class="[
-      'svg__project__hublot-digital-boutique',
-      { 'svg__project__hublot-digital-boutique--animation': animation },
+      'svg__project__mortgage-expert',
+      { 'svg__project__mortgage-expert--animation': animation },
     ]">
     <template v-if="isMobileLayout">
       <Ticker
@@ -10,10 +10,10 @@
         :drag-on-target="true"
         :ignore-update-scroll="true"
         :ticker="!next ? nextProjectTickerFirstLine : undefined"
-        class="svg__project__hublot-digital-boutique__ticker"
+        class="svg__project__mortgage-expert__ticker"
         @update="emit('update-scroll')">
         <div v-for="i in 2" :key="i">
-          <SvgProjectHublotDigitalBoutiqueFirstLine
+          <SvgProjectTheMortgageExpertFirstLine
             v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
         </div>
       </Ticker>
@@ -23,18 +23,18 @@
         :ignore-update-scroll="true"
         :ticker="!next ? nextProjectTickerSecondLine : undefined"
         :starting-direction="1"
-        class="svg__project__hublot-digital-boutique__ticker"
+        class="svg__project__mortgage-expert__ticker"
         @update="emit('update-scroll')">
         <div v-for="i in 2" :key="i">
-          <SvgProjectHublotDigitalBoutiqueSecondLine
+          <SvgProjectTheMortgageExpertSecondLine
             v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
         </div>
       </Ticker>
     </template>
     <template v-else>
-      <SvgProjectHublotDigitalBoutiqueFirstLine
+      <SvgProjectTheMortgageExpertFirstLine
         v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
-      <SvgProjectHublotDigitalBoutiqueSecondLine
+      <SvgProjectTheMortgageExpertSecondLine
         v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
     </template>
   </div>
@@ -51,7 +51,7 @@ const props = defineProps<{
   color?: string
 }>()
 
-const id = 'project-ticker-hublot-digital-boutique'
+const id = 'project-ticker-mortgage-expert'
 
 const nextProjectTickerFirstLine = ref<NextProjectTicker | undefined>(
   window.localStorage.getItem(`${id}-first-line`)
@@ -90,7 +90,7 @@ const emit = defineEmits(['update-scroll'])
 </script>
 
 <style lang="scss">
-.svg__project__hublot-digital-boutique {
+.svg__project__mortgage-expert {
   &--animation {
     svg {
       > path,
@@ -113,6 +113,7 @@ const emit = defineEmits(['update-scroll'])
   &__second-line {
     @include from__tablet--landscape {
       margin-top: toScale(1.2rem);
+      margin-left: 38.9vw;
     }
   }
 
