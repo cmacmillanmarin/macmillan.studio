@@ -45,6 +45,8 @@ const down = ref<boolean>(false)
 const targetX = ref<number>(0)
 const targetY = ref<number>(0)
 
+const visible = ref<boolean>(false)
+
 let _x: number = 0
 let _y: number = 0
 let _entered: boolean = false
@@ -73,15 +75,19 @@ watch(cursorPosition, () => {
   }
 })
 
-watch([cursor, down, mouseX], () => {
+watch([cursor, mouseX], () => {
   if (!dotEl.value || !squareEl.value) return
   if (cursor.value === 'none') {
     _entered = false
     fadeOut({ el: squareEl.value, duration: 0.2 })
   }
-  const visible = cursor.value !== 'default' && cursor.value !== 'none' && mouseX.value !== 0
-  const scale = visible ? (down.value ? 0.8 : 1) : 0
-  const duration = visible ? 0.4 : 0.3
+  visible.value = cursor.value !== 'default' && cursor.value !== 'none' && mouseX.value !== 0
+})
+
+watch([visible, down], () => {
+  if (!dotEl.value || !squareEl.value) return
+  const scale = visible.value ? (down.value ? 0.8 : 1) : 0
+  const duration = visible.value ? 0.4 : 0.3
   gsap.killTweensOf(dotEl.value)
   gsap.to(dotEl.value, { scale, duration })
 })

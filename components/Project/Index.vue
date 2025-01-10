@@ -43,8 +43,6 @@
       <ProjectNext
         v-if="nextProject"
         :data="nextProject"
-        @mouseenter="onMouseEnter"
-        @mouseleave="onMouseLeave"
         @next-project="goToNextProject"
         @update-scroll="updateScroll"
         @in-view="onNextProjectInViewUpdated" />
@@ -90,6 +88,7 @@ const router = useRouter()
 const { addTicker, killTicker } = useRaf()
 const { vw, vh, onResize } = useResize()
 const { touch, isMobileLayout } = useDevice()
+const { x: mouseX } = useMouse()
 
 const el = ref<HTMLElement>()
 const contentEl = ref<HTMLElement>()
@@ -199,12 +198,19 @@ function _onRaf() {
   const y = isMobileLayout.value ? _scroll.current * -1 : 0
   contentEl.value && gsap.set(contentEl.value, { x, y })
   scrollOnTop.value = _scroll.target === 0
+
   if (toNextProject.value && Math.abs(_scroll.target - _scroll.current) < 0.5) {
     _scroll.current = _scroll.target
-
     emit('next')
     killTicker(_onRaf)
     router.push(`/${props.nextProject?.slug}`)
+  }
+
+  if (!toNextProject.value && !!props.nextProject) {
+    const mouseOnNextScrolling =
+      _scroll.bounding - vw.value * 0.75 - _scroll.current + (vw.value - mouseX.value) < 0
+    if (mouseOnNextScrolling && cursor.value === 'close') updateCursor('arrow-right')
+    else if (!mouseOnNextScrolling && cursor.value === 'arrow-right') updateCursor('close')
   }
 }
 
@@ -249,14 +255,6 @@ function onElementFocus(e: Event) {
   updateCursor('default')
 }
 
-function onMouseEnter() {
-  updateCursor('arrow-right')
-}
-
-function onMouseLeave() {
-  updateCursor('close')
-}
-
 function onClick() {
   if (touch.value) return
   cursor.value === 'close' && closeProject()
@@ -288,6 +286,8 @@ function closeProject() {
 }
 
 onBeforeUnmount(() => {
+  killTicker(_onRaf)
+  killScroll()
   getKeyboardFocusableElements(el.value).forEach(el => {
     el.removeEventListener('focus', onElementFocus)
   })
@@ -300,8 +300,6 @@ onBeforeUnmount(() => {
     disableScroll(false)
     updateHeader(!isMobileLayout.value)
   }
-  killTicker(_onRaf)
-  killScroll()
 })
 
 const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
