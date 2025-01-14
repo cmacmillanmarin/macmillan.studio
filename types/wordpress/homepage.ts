@@ -9,6 +9,7 @@ import {
   type MediaType,
   type FileVideo,
   parseFile,
+  type WP_Head,
 } from '~/types/wordpress'
 import {
   type WP_Projects,
@@ -47,7 +48,7 @@ export interface WP_Homepage_About_Gallery_Image {
 
 export interface WP_Homepage {
   acf: {
-    seo: Head
+    seo: WP_Head
     hero: {
       title: string
       hint: string

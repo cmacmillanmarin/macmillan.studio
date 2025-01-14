@@ -22,6 +22,7 @@ export interface WP_Image {
 
 export interface Image {
   src: string
+  original: string
   alt: string
   width: number
   height: number
@@ -43,6 +44,7 @@ export interface Image {
 
 export interface Thumbnail {
   src: string
+  original: string
   alt: string
   width: number
   height: number
@@ -51,6 +53,7 @@ export interface Thumbnail {
 export function parseImage(data?: WP_Image): Image {
   return {
     src: (data && data.url) || '',
+    original: (data && data.url.replace('-scaled', '')) || '',
     alt: (data && data.alt) || '',
     width: (data && data.width) || 0,
     height: (data && data.height) || 0,
@@ -74,6 +77,7 @@ export function parseImage(data?: WP_Image): Image {
 export function parseThumbnail(data?: WP_Image): Thumbnail {
   return {
     src: data?.sizes?.thumbnail || '',
+    original: (data && data.url.replace('-scaled', '')) || '',
     alt: data?.alt || '',
     width: data?.width || 0,
     height: data?.height || 0,

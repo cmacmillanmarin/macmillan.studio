@@ -80,7 +80,6 @@ watch([width, height], async () => {
 
 onMounted(() => {
   active.value = true
-  console.log(props.data)
 })
 
 function onIntersect(el: HTMLElement, visible: boolean) {

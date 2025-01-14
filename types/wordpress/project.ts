@@ -59,6 +59,7 @@ export interface WP_Project_Asset {
   layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   gap: 'l' | 'm' | 's'
   transparent: boolean
+  mobile: boolean
   file: WP_File
 }
 
@@ -66,6 +67,7 @@ export interface ProjectAsset {
   layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   gap: 'l' | 'm' | 's'
   transparent: boolean
+  mobile: boolean
   file: File
 }
 
@@ -172,6 +174,7 @@ export function parseProject(params: {
         layout: asset.layout,
         gap: asset.gap,
         transparent: !!asset.transparent,
+        mobile: !!asset.mobile,
         file: parseFile(asset.file),
       }
     }),

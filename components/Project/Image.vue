@@ -19,6 +19,7 @@ const props = defineProps<{
   data: Image
   ready?: boolean
   transparent?: boolean
+  mobile?: boolean
   layout?: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
   bgColor: string
   first?: boolean
@@ -59,13 +60,17 @@ const height = computed<string>(() => {
   if (isMobileLayout.value)
     return toPx(((vw.value - gap.value) * props.data.height) / props.data.width)
   if (props.layout === 'scroll')
-    return toPx(((((vh.value - gap.value) * 16) / 9) * props.data.height) / props.data.width)
+    return toPx(
+      ((((vh.value - gap.value) * 16) / 9) * (props.mobile ? 0.5 : 1) * props.data.height) /
+        props.data.width
+    )
   return toPx(vh.value - gap.value)
 })
 const heightNumber = computed<number>(() => parseInt(height.value))
 const width = computed<string>(() => {
   if (isMobileLayout.value) return toPx(vw.value - gap.value)
-  if (props.layout === 'scroll') return toPx(((vh.value - gap.value) * 16) / 9)
+  if (props.layout === 'scroll')
+    return toPx((((vh.value - gap.value) * 16) / 9) * (props.mobile ? 0.5 : 1))
   return toPx(((vh.value - gap.value) * props.data.width) / props.data.height)
 })
 

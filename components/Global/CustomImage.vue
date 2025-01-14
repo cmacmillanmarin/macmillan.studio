@@ -2,7 +2,7 @@
   <img
     ref="el"
     v-if="!virtual"
-    :src="thumbnail ? data.src : undefined"
+    :src="thumbnail ? data.original : undefined"
     :srcset="thumbnail ? undefined : imgSrcset"
     :sizes="thumbnail ? undefined : imgSizes"
     :alt="data.alt"
