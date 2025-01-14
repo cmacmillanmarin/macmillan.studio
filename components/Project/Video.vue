@@ -1,5 +1,5 @@
 <template>
-  <div class="project__video">
+  <div ref="el" class="project__video">
     <video
       ref="videoEl"
       class="project__video__el"
@@ -14,12 +14,13 @@
       <source :src="data.webm" type="video/webm" />
       <source :src="data.mp4" type="video/mp4" />
     </video>
+    <div ref="bgEl" class="project__video__bg" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { FileVideo } from '~/types/wordpress'
-import { fadeIn } from '~/utils/animations'
+import { fadeIn, fadeOut } from '~/utils/animations'
 
 const props = defineProps<{
   data: FileVideo
@@ -33,6 +34,10 @@ const props = defineProps<{
 const { vw, vh } = useResize()
 const { toScale } = useCss()
 const { isMobileLayout } = useDevice()
+
+const el = ref<HTMLElement>()
+const bgEl = ref<HTMLElement>()
+const videoEl = ref<HTMLVideoElement>()
 
 const gap = computed<number>(() =>
   props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center'
@@ -50,8 +55,6 @@ const width = computed<string>(() => {
   if (isMobileLayout.value) return toPx(Math.ceil(vw.value - gap.value))
   return toPx(Math.ceil(((vh.value - gap.value) * props.data.width) / props.data.height))
 })
-
-const videoEl = ref<HTMLVideoElement>()
 
 const active = ref<boolean>(false)
 const inView = ref<boolean>(false)
@@ -86,9 +89,10 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   inView.value = visible
 }
 
-function enter() {
+async function enter() {
   playing.value = true
-  fadeIn({ el: videoEl.value })
+  await fadeIn({ el: videoEl.value })
+  fadeOut({ el: bgEl.value })
 }
 
 onBeforeUnmount(() => {
@@ -105,8 +109,16 @@ const emit = defineEmits(['update-scroll'])
 
 <style lang="scss">
 .project__video {
-  background-color: v-bind(background);
+  position: relative;
+  &__bg {
+    pointer-events: none;
+    background-color: v-bind(background);
+    will-change: opacity;
+    @include absolute-fill;
+  }
   &__el {
+    position: relative;
+    z-index: 2;
     display: block;
     width: v-bind(width);
     height: v-bind(height);

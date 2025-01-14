@@ -60,7 +60,7 @@ const gap = computed<number>(() =>
     : toScale((isMobileLayout.value && props.first) || props.layout === 'scroll' ? 32 : 0)
 )
 
-const normalized = ref<number>(props.mobile ? 0.5 : 1)
+const normalized = ref<number>(props.mobile ? 0.413 : 1)
 
 const height = computed<string>(() => {
   if (isMobileLayout.value)
@@ -89,9 +89,11 @@ watch([width, height], async () => {
 
 watch([loaded, () => props.ready], async () => {
   const img = el.value?.querySelector('.custom-image')
-  props.ready && loaded.value && img && fadeIn({ el: img })
+
   await nextTick()
   emit('update-scroll')
+  props.ready && loaded.value && img && (await fadeIn({ el: img }))
+  if (el.value) el.value.style.backgroundColor = 'transparent'
 })
 
 function onLoaded() {
