@@ -42,13 +42,13 @@ const gap = computed<number>(() =>
 
 const height = computed<string>(() => {
   if (isMobileLayout.value)
-    return toPx(((vw.value - gap.value) * props.data.height) / props.data.width)
-  return toPx(vh.value - gap.value)
+    return toPx(Math.ceil(((vw.value - gap.value) * props.data.height) / props.data.width))
+  return toPx(Math.ceil(vh.value - gap.value))
 })
 
 const width = computed<string>(() => {
-  if (isMobileLayout.value) return toPx(vw.value - gap.value)
-  return toPx(((vh.value - gap.value) * props.data.width) / props.data.height)
+  if (isMobileLayout.value) return toPx(Math.ceil(vw.value - gap.value))
+  return toPx(Math.ceil(((vh.value - gap.value) * props.data.width) / props.data.height))
 })
 
 const videoEl = ref<HTMLVideoElement>()

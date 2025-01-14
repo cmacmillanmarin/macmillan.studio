@@ -1,5 +1,10 @@
 <template>
-  <div ref="el" class="project__image" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave">
+  <div
+    ref="el"
+    class="project__image"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
+    v-intersect="{ callback: onIntersect }">
     <CustomImage
       :data="data"
       :thumbnail="layout === 'scroll'"
@@ -45,7 +50,6 @@ let _panInit: number = 0
 let _target: number = 0
 let _current: number = 0
 let _rendering: boolean = false
-let _image: HTMLImageElement | null = null
 
 const gap = computed<number>(() =>
   props.layout === 'top' ||
@@ -56,22 +60,26 @@ const gap = computed<number>(() =>
     : toScale((isMobileLayout.value && props.first) || props.layout === 'scroll' ? 32 : 0)
 )
 
+const normalized = ref<number>(props.mobile ? 0.5 : 1)
+
 const height = computed<string>(() => {
   if (isMobileLayout.value)
-    return toPx(((vw.value - gap.value) * props.data.height) / props.data.width)
+    return toPx(Math.ceil(((vw.value - gap.value) * props.data.height) / props.data.width))
   if (props.layout === 'scroll')
     return toPx(
-      ((((vh.value - gap.value) * 16) / 9) * (props.mobile ? 0.5 : 1) * props.data.height) /
-        props.data.width
+      Math.ceil(
+        ((((vh.value - gap.value) * 16) / 9) * normalized.value * props.data.height) /
+          props.data.width
+      )
     )
-  return toPx(vh.value - gap.value)
+  return toPx(Math.ceil(vh.value - gap.value))
 })
 const heightNumber = computed<number>(() => parseInt(height.value))
 const width = computed<string>(() => {
-  if (isMobileLayout.value) return toPx(vw.value - gap.value)
+  if (isMobileLayout.value) return toPx(Math.ceil(vw.value - gap.value))
   if (props.layout === 'scroll')
-    return toPx((((vh.value - gap.value) * 16) / 9) * (props.mobile ? 0.5 : 1))
-  return toPx(((vh.value - gap.value) * props.data.width) / props.data.height)
+    return toPx(Math.ceil((((vh.value - gap.value) * 16) / 9) * normalized.value))
+  return toPx(Math.ceil(((vh.value - gap.value) * props.data.width) / props.data.height))
 })
 
 watch([width, height], async () => {
@@ -86,12 +94,15 @@ watch([loaded, () => props.ready], async () => {
   emit('update-scroll')
 })
 
-onMounted(() => {
-  _image = el.value?.querySelector('.custom-image') || null
-})
-
 function onLoaded() {
   loaded.value = true
+}
+
+function onIntersect(el: HTMLElement, visible: boolean) {
+  if (props.layout === 'scroll' && visible && _target === 0 && !isMobileLayout.value) {
+    gsap.set(el, { y: toScale(130) })
+    gsap.to(el, { y: 0, duration: 1 })
+  }
 }
 
 function onMouseEnter() {
