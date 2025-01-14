@@ -3,6 +3,7 @@ import type { State, GridType, Section, Cursor, NextProjectTicker } from '~/type
 
 let _to: any
 let _toCursor: any
+let _toCursorPosition: any
 
 export default defineStore('use-store', {
   state: (): State => ({
@@ -93,15 +94,18 @@ export default defineStore('use-store', {
       this.headerMobileButtonClicked = !this.headerMobileButtonClicked
     },
     updateCursor(state: Cursor) {
-      this.cursor = state
+      _toCursor && clearTimeout(_toCursor)
+      _toCursor = setTimeout(() => {
+        this.cursor = state
+      }, 0)
     },
     updateCursorColor(state: 'lime' | 'black') {
       this.cursorColor = state
     },
     updateCursorPosition(state: { x: number; y: number }) {
-      _toCursor && clearTimeout(_toCursor)
+      _toCursorPosition && clearTimeout(_toCursorPosition)
       if (state.x === -1) {
-        _toCursor = setTimeout(() => {
+        _toCursorPosition = setTimeout(() => {
           this.cursorPosition = state
         }, 100)
       } else this.cursorPosition = state

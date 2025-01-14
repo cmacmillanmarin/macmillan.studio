@@ -15,6 +15,7 @@
         :layout="data.layout"
         :first="first"
         :transparent="data.transparent"
+        :mobile="data.mobile"
         @update-scroll="$emit('update-scroll')" />
       <ProjectImage
         v-else-if="data.file.type === 'img' && data.file.image"
@@ -24,6 +25,7 @@
         :first="first"
         :layout="data.layout"
         :transparent="data.transparent"
+        :mobile="data.mobile"
         @update-scroll="$emit('update-scroll')" />
     </div>
   </div>
