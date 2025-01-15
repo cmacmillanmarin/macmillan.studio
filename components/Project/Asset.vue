@@ -7,8 +7,9 @@
       `project__asset--layout-${data.layout}`,
     ]">
     <div class="project__asset__content">
+      <ProjectVimeo v-if="data.layout === 'vimeo'" :src="data.vimeoURL" />
       <ProjectVideo
-        v-if="data.file.type === 'vid' && data.file.video"
+        v-else-if="data.file.type === 'vid' && data.file.video"
         :data="data.file.video"
         :ready="ready"
         :bg-color="bgColor"
@@ -78,7 +79,8 @@ onMounted(() => {
     }
   }
 
-  &--layout-center {
+  &--layout-center,
+  &--layout-vimeo {
     .project__asset__content {
       justify-content: center;
       @include from__tablet--landscape {

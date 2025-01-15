@@ -18,6 +18,7 @@
 import { gsap } from 'gsap/gsap-core'
 import useStore from '~/store/useStore'
 import type { Image } from '~/types/wordpress'
+import type { ProjectAssetLayoutType } from '~/types/wordpress/project'
 import { Swiper } from '~/utils/swiper'
 
 const props = defineProps<{
@@ -25,7 +26,7 @@ const props = defineProps<{
   ready?: boolean
   transparent?: boolean
   mobile?: boolean
-  layout?: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
+  layout?: ProjectAssetLayoutType
   bgColor: string
   first?: boolean
 }>()

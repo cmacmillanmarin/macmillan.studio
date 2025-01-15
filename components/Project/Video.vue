@@ -21,11 +21,12 @@
 <script lang="ts" setup>
 import type { FileVideo } from '~/types/wordpress'
 import { fadeIn, fadeOut } from '~/utils/animations'
+import type { ProjectAssetLayoutType } from '~/types/wordpress/project'
 
 const props = defineProps<{
   data: FileVideo
   ready?: boolean
-  layout?: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
+  layout?: ProjectAssetLayoutType
   transparent: boolean
   bgColor: string
   first?: boolean
