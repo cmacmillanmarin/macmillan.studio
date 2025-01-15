@@ -114,7 +114,11 @@ const emit = defineEmits(['update-scroll'])
     pointer-events: none;
     background-color: v-bind(background);
     will-change: opacity;
-    @include absolute-fill;
+    position: absolute;
+    top: 0rem;
+    left: 0rem;
+    right: 0.1rem;
+    bottom: 0.1rem;
   }
   &__el {
     position: relative;
