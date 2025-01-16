@@ -142,5 +142,13 @@ onMounted(() => {
       padding-bottom: 0;
     }
   }
+
+  &--layout-vimeo {
+    padding-top: 0rem;
+    padding-bottom: 4rem;
+    @include from__tablet--landscape {
+      padding-bottom: 0;
+    }
+  }
 }
 </style>
