@@ -2,6 +2,7 @@
   <div ref="el" class="home__about__gallery">
     <Ticker
       ref="tickerEl"
+      :init-zero="true"
       :planes-id="planeIds"
       @mouseenter="onMouseEnter"
       @mouseleave="onMouseLeave">

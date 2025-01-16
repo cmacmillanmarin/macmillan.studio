@@ -30,6 +30,7 @@ const props = defineProps<{
   transparent: boolean
   bgColor: string
   first?: boolean
+  mobile?: boolean
 }>()
 
 const { vw, vh } = useResize()
@@ -41,8 +42,9 @@ const bgEl = ref<HTMLElement>()
 const videoEl = ref<HTMLVideoElement>()
 
 const gap = computed<number>(() =>
-  props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center'
-    ? toScale(isMobileLayout.value ? 150 : 260)
+  (props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center') &&
+  !(!!props.mobile && isMobileLayout.value)
+    ? toScale(isMobileLayout.value ? 120 : 260)
     : toScale(isMobileLayout.value && !!props.first ? 32 : 0)
 )
 
@@ -115,11 +117,7 @@ const emit = defineEmits(['update-scroll'])
     pointer-events: none;
     background-color: v-bind(background);
     will-change: opacity;
-    position: absolute;
-    top: 0rem;
-    left: 0rem;
-    right: 0.1rem;
-    bottom: 0.1rem;
+    @include absolute-fill;
   }
   &__el {
     position: relative;

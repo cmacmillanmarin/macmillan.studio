@@ -8,15 +8,16 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
+const props = defineProps<{
   src: string
+  mobile: boolean
 }>()
 
 const { vw, vh } = useResize()
 const { toScale } = useCss()
 const { isMobileLayout } = useDevice()
 
-const gap = computed<number>(() => toScale(isMobileLayout.value ? 150 : 260))
+const gap = computed<number>(() => toScale(isMobileLayout.value ? (props.mobile ? 0 : 120) : 260))
 
 const height = computed<string>(() => {
   if (isMobileLayout.value) return toPx(Math.ceil(((vw.value - gap.value) * 9) / 16))

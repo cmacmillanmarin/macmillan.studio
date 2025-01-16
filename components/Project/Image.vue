@@ -53,19 +53,26 @@ let _current: number = 0
 let _rendering: boolean = false
 
 const gap = computed<number>(() =>
-  props.layout === 'top' ||
-  props.layout === 'bottom' ||
-  props.layout === 'center' ||
-  (props.layout === 'scroll' && !isMobileLayout.value)
-    ? toScale(isMobileLayout.value ? 150 : 260)
+  (props.layout === 'top' ||
+    props.layout === 'bottom' ||
+    props.layout === 'center' ||
+    (props.layout === 'scroll' && !isMobileLayout.value)) &&
+  !(props.mobile && isMobileLayout.value)
+    ? toScale(isMobileLayout.value ? 120 : 260)
     : toScale((isMobileLayout.value && props.first) || props.layout === 'scroll' ? 32 : 0)
 )
 
 const normalized = ref<number>(props.mobile ? 0.413 : 1)
 
+const mobileNormalizer = computed<number>(() => (props.layout === 'scroll' ? 0.6 : 1))
+
 const height = computed<string>(() => {
   if (isMobileLayout.value)
-    return toPx(Math.ceil(((vw.value - gap.value) * props.data.height) / props.data.width))
+    return toPx(
+      Math.ceil(
+        ((vw.value - gap.value) * mobileNormalizer.value * props.data.height) / props.data.width
+      )
+    )
   if (props.layout === 'scroll')
     return toPx(
       Math.ceil(
@@ -77,7 +84,7 @@ const height = computed<string>(() => {
 })
 const heightNumber = computed<number>(() => parseInt(height.value))
 const width = computed<string>(() => {
-  if (isMobileLayout.value) return toPx(Math.ceil(vw.value - gap.value))
+  if (isMobileLayout.value) return toPx(Math.ceil(vw.value - gap.value) * mobileNormalizer.value)
   if (props.layout === 'scroll')
     return toPx(Math.ceil((((vh.value - gap.value) * 16) / 9) * normalized.value))
   return toPx(Math.ceil(((vh.value - gap.value) * props.data.width) / props.data.height))

@@ -5,9 +5,10 @@
       'project__asset',
       `project__asset--gap-${data.gap}`,
       `project__asset--layout-${data.layout}`,
+      { 'project__asset--layout-mobile': data.mobile && isMobileLayout },
     ]">
     <div class="project__asset__content">
-      <ProjectVimeo v-if="data.layout === 'vimeo'" :src="data.vimeoURL" />
+      <ProjectVimeo v-if="data.layout === 'vimeo'" :src="data.vimeoURL" :mobile="data.mobile" />
       <ProjectVideo
         v-else-if="data.file.type === 'vid' && data.file.video"
         :data="data.file.video"
@@ -44,6 +45,8 @@ const props = defineProps<{
 }>()
 
 const el = ref<HTMLElement>()
+
+const { isMobileLayout } = useDevice()
 
 watch(
   () => props.ready,
@@ -106,6 +109,13 @@ onMounted(() => {
     @include from__tablet--landscape {
       overflow: var(--overflow-hidden);
       padding-top: toScale(13rem);
+    }
+  }
+
+  &--layout-mobile {
+    .project__asset__content {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
     }
   }
 

@@ -24,6 +24,7 @@ const props = defineProps<{
   ignoreUpdateScroll?: boolean
   ticker?: NextProjectTicker
   startingDirection?: number
+  initZero?: boolean
 }>()
 
 const scrollStore = useScrollStore()
@@ -32,11 +33,12 @@ const { scrollUpdated } = storeToRefs(scrollStore)
 
 const { onResize } = useResize()
 const { getBounding } = useVirtualScrollAndThreeTools()
+const { toScale } = useCss()
 
 const el = ref<HTMLElement>()
 const inView = ref<boolean>(false)
 
-const minHeight = ref<number>(0)
+const minHeight = ref<number>(!!props.initZero ? 0 : toScale(77))
 const height = computed(() => (minHeight.value !== 0 ? toPx(minHeight.value) : 'auto'))
 
 const y = ref<number>(0)
