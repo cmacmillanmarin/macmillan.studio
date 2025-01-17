@@ -19,7 +19,6 @@
     ref="el"
     class="custom-image"
     data-custom-image-virtual
-    :aria-label="data.alt"
     :data-width="data.width"
     :data-height="data.height"
     :style="{ aspectRatio: data.width / data.height }"

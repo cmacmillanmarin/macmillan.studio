@@ -35,6 +35,7 @@
             v-html="data.detail" />
           <button
             v-if="isMobileLayout && !allContentVisible"
+            aria-label="Read More"
             class="home__about__intro__content__detail__read-more"
             @click="onReadMore">
             Read More
@@ -58,6 +59,7 @@
         </div>
         <div class="home__about__intro__collaborator__thumbnail">
           <button
+            aria-label="Visit Gatzara Studio website"
             @click="onCollaboratorImageClick"
             @mouseenter="onCollaboratorMouseEnter"
             @mouseleave="onCollaboratorMouseLeave">
