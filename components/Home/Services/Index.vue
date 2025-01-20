@@ -74,7 +74,9 @@ const isActive = computed(() => section.value === 'services')
 const el = ref<HTMLElement>()
 
 watch(isInReel, () => {
-  activeService.value = 0
+  if (!isInReel.value) {
+    activeService.value = 0
+  }
 })
 
 watch(isActive, () => {
@@ -100,7 +102,7 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   will-change: opacity, transform;
 
   @include from__tablet--landscape {
-    padding: toScale(4rem) 0 0;
+    padding: toScale(8rem) 0 0;
   }
 
   &__index {

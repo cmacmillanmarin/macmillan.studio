@@ -78,6 +78,7 @@
 
     <HomeHeroPlayer
       v-if="isInReel"
+      ref="playerEl"
       :ready="reelReady"
       :progress="reelProgress"
       @close="closeReel"
@@ -87,6 +88,7 @@
 
     <HomeHeroPlayer
       v-if="isInReel"
+      ref="playerBlendEl"
       :blend="true"
       :ready="reelReady"
       :progress="reelProgress"
@@ -110,6 +112,7 @@ import { toPx, round, sleep } from '~/utils'
 import type { FirstTransition } from '~/types/front'
 import type { HomepageHero } from '~/types/wordpress/homepage'
 import { shuffleIn, shuffleElsOut, transitionFadeOut } from '~/utils/animations'
+import HomeHeroPlayer from '~/components/Home/Hero/Player.vue'
 
 defineProps<{
   data: HomepageHero
@@ -164,6 +167,8 @@ const reelVideoActive = computed(
 const hintEl = ref<HTMLElement>()
 const videoEl = ref<HTMLVideoElement>()
 const reelButtonEl = ref<HTMLElement>()
+const playerEl = ref<typeof HomeHeroPlayer>()
+const playerBlendEl = ref<typeof HomeHeroPlayer>()
 const videoPlaying = ref<boolean>(false)
 const videoInView = ref<boolean>(false)
 const videoCanPlay = ref<boolean>(false)
@@ -179,6 +184,7 @@ const reelProgress = ref<number>(0)
 const reelButtonVisible = ref<boolean>(false)
 const reelReady = ref<boolean>(false)
 const reelOpened = ref<boolean>(false)
+const reelScrollBackTo = ref<number>(0)
 
 const verticalGap = computed<number>(() => lvw.value * 0.0825)
 const verticalGapPx = computed<string>(() =>
@@ -503,6 +509,7 @@ function goToReel() {
   reelReady.value = false
   reelProgress.value = 0
   reelButtonVisible.value = false
+  reelScrollBackTo.value = current.value
   updateInReel(true)
   disableScroll(true)
   $three.planes.update({
@@ -575,7 +582,8 @@ function closeReel() {
   reelReady.value = false
   updateInReel(false)
   disableScroll(false)
-  updateScrollTargetId('projects')
+  if (reelScrollBackTo.value > vh.value * 2) updateScrollTarget(reelScrollBackTo.value)
+  else updateScrollTargetId('projects')
   $three.planes.update({
     id: 'reel',
     onClick: isMobileLayout.value ? null : goToReel,
@@ -726,10 +734,14 @@ function onSmallReelHovered(value: boolean) {
 
 function onPlay() {
   videoPlaying.value = true
+  playerEl.value?.updatePlaying(true)
+  playerBlendEl.value?.updatePlaying(true)
 }
 
 function onPause() {
   videoPlaying.value = false
+  playerEl.value?.updatePlaying(false)
+  playerBlendEl.value?.updatePlaying(false)
 }
 
 function onIntersectTop(el: HTMLElement, visible: boolean) {

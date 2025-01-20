@@ -10,7 +10,7 @@
       loop
       playsinline
       v-intersect="{ callback: onIntersect }"
-      @playing="enter">
+      @timeupdate="enter">
       <source :src="data.webm" type="video/webm" />
       <source :src="data.mp4" type="video/mp4" />
     </video>
@@ -62,6 +62,7 @@ const width = computed<string>(() => {
 const active = ref<boolean>(false)
 const inView = ref<boolean>(false)
 const playing = ref<boolean>(false)
+const entered = ref<boolean>(false)
 const background = ref<string>(props.transparent ? 'transparent' : props.bgColor)
 
 let playPromise: Promise<void> | undefined = undefined
@@ -92,7 +93,10 @@ function onIntersect(el: HTMLElement, visible: boolean) {
   inView.value = visible
 }
 
-async function enter() {
+async function enter(e: Event) {
+  const { currentTime } = e.currentTarget as HTMLVideoElement
+  if (entered.value || currentTime === 0) return
+  entered.value = true
   playing.value = true
   await fadeIn({ el: videoEl.value })
   fadeOut({ el: bgEl.value })

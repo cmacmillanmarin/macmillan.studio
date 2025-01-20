@@ -161,7 +161,6 @@ function onClick(e: MouseEvent) {
   if (cursor.value === 'pause' || cursor.value === 'play') {
     e.preventDefault()
     e.stopPropagation()
-    playing.value = !playing.value
     emit('toggle')
   }
 }
@@ -223,7 +222,6 @@ async function delayedShuffleIn(el: Element, done: Function) {
 function onToggleButtonClick(e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
-  playing.value = !playing.value
   emit('toggle')
 }
 
@@ -240,6 +238,10 @@ function onMuteButtonClick(e: MouseEvent) {
   emit('mute')
 }
 
+function updatePlaying(state: boolean) {
+  playing.value = state
+}
+
 onBeforeUnmount(() => {
   _to && clearTimeout(_to)
   killTicker(updateProgress)
@@ -249,6 +251,10 @@ onBeforeUnmount(() => {
 })
 
 const emit = defineEmits(['close', 'pause', 'toggle', 'mute', 'update'])
+
+defineExpose({
+  updatePlaying,
+})
 </script>
 
 <style lang="scss">
