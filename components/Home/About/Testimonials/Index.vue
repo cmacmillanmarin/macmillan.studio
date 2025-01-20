@@ -13,8 +13,7 @@
           :data="testimonial"
           :active="activeEntered === i"
           :expanded="expanded && active === i"
-          @mouseenter="onTestimonialMouseEnter"
-          @mouseleave="onTestimonialMouseLeave"
+          @update:hover="onTestimonialHoverUpdate"
           @update:expanded="updateScroll" />
       </div>
     </div>
@@ -86,8 +85,6 @@ const { updateScroll } = scrollStore
 const { direction } = storeToRefs(scrollStore)
 
 const { toScale } = useCss()
-const { vw } = useResize()
-const { x: mouseX } = useMouse()
 const { isMobileLayout } = useDevice()
 
 const el = ref<HTMLElement>()
@@ -121,6 +118,14 @@ watch(active, () => {
   })
 })
 
+watch(activeEntered, () => {
+  if (
+    (cursor.value === 'arrow-left' && activeEntered.value === 0) ||
+    (cursor.value === 'arrow-right' && activeEntered.value === props.data.length - 1)
+  )
+    updateCursor('default')
+})
+
 watch(section, (to, from) => {
   section.value === 'about-testimonials'
     ? fadeIn({ el: el.value, delay: 0.2 })
@@ -129,26 +134,9 @@ watch(section, (to, from) => {
 })
 
 watch(expanded, () => {
-  onTestimonialMouseEnter()
   emit('update-expanded', expanded.value)
   updateScroll()
-})
-
-watch(inReelHovered, () => {
-  !inReelHovered.value && cursorInTestimonials.value && updateCarouselCursor()
-})
-
-watch(mouseX, () => {
-  if (
-    section.value === 'about-testimonials' &&
-    cursorInTestimonials.value &&
-    cursor.value !== 'plus' &&
-    cursor.value !== 'close' &&
-    cursor.value !== 'drag' &&
-    cursor.value !== 'play'
-  ) {
-    updateCarouselCursor()
-  }
+  updateCursor(expanded.value ? 'close' : 'plus')
 })
 
 onMounted(() => {
@@ -214,18 +202,18 @@ function onMouseLeave() {
   !inReelHovered.value && updateCursor('default')
 }
 
-function onTestimonialMouseEnter() {
-  !inReelHovered.value && updateCursor(expanded.value ? 'close' : 'plus')
-}
-
-function onTestimonialMouseLeave() {
-  !inReelHovered.value && updateCarouselCursor()
-}
-
-function updateCarouselCursor() {
-  if (active.value === 0) updateCursor('arrow-right')
-  else if (active.value === props.data.length - 1) updateCursor('arrow-left')
-  else mouseX.value > vw.value * 0.5 ? updateCursor('arrow-right') : updateCursor('arrow-left')
+async function onTestimonialHoverUpdate(params: { pos: number; value: boolean; dir: number }) {
+  await nextTick()
+  if (cursorInTestimonials.value) {
+    if (params.value) {
+      if (params.pos === active.value) updateCursor(expanded.value ? 'close' : 'plus')
+      else updateCursor(params.pos > active.value ? 'arrow-right' : 'arrow-left')
+    } else {
+      if (params.dir === 1 && active.value !== props.data.length - 1) updateCursor('arrow-right')
+      else if (params.dir === -1 && active.value !== 0) updateCursor('arrow-left')
+      else updateCursor('default')
+    }
+  }
 }
 
 onBeforeUnmount(() => {
@@ -259,13 +247,13 @@ const emit = defineEmits(['update-expanded'])
         vertical-align: top;
         white-space: normal;
         will-change: transform;
-        pointer-events: none;
+        // pointer-events: none;
 
-        &--active {
-          .home__about__testimonials__testimonial__quote__label {
-            pointer-events: auto;
-          }
-        }
+        // &--active {
+        //   .home__about__testimonials__testimonial__quote__label {
+        //     pointer-events: auto;
+        //   }
+        // }
       }
     }
   }

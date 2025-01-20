@@ -13,7 +13,9 @@
           'home__about__testimonials__testimonial__quote__label',
           { 'home__about__testimonials__testimonial__quote__label--expanded': isExpanded },
         ]"
-        :data-pos="pos">
+        :data-pos="pos"
+        @mouseenter="onLabelMouseEnter"
+        @mouseleave="onLabelMouseLeave">
         {{ data.quote }}
       </p>
     </div>
@@ -98,7 +100,24 @@ function updateSize() {
   }
 }
 
-const emit = defineEmits(['update:expanded'])
+function onLabelMouseEnter() {
+  emit('update:hover', {
+    pos: props.pos,
+    value: true,
+    dir: 0,
+  })
+}
+
+function onLabelMouseLeave(e: MouseEvent) {
+  const { left } = quoteEl.value?.getBoundingClientRect() || { left: 0 }
+  emit('update:hover', {
+    pos: props.pos,
+    value: false,
+    dir: e.clientX < left ? -1 : 1,
+  })
+}
+
+const emit = defineEmits(['update:expanded', 'update:hover'])
 </script>
 
 <style lang="scss">
