@@ -116,7 +116,7 @@
           <p>Cádiz—36.5282º N, 6.18892º W</p>
         </div>
         <div class="footer__location__year">
-          <p>©2023</p>
+          <p>©{{ year }}</p>
         </div>
       </div>
     </transition>
@@ -197,6 +197,7 @@ const rrss = ref([
 
 const el = ref<HTMLElement>()
 const hour = ref<string>('')
+const year = ref<string>(`${new Date().getFullYear()}`)
 const tetrisInstructions = ref<boolean>(true)
 let _to: any
 let _to2: any

@@ -1,0 +1,79 @@
+<template>
+  <div :class="['svg__project__gold-vi', { 'svg__project__gold-vi--animation': animation }]">
+    <template v-if="isMobileLayout">
+      <Ticker
+        ref="firstLineTickerEl"
+        :drag-on-target="true"
+        :ignore-update-scroll="true"
+        :ticker="!next ? nextProjectTickerFirstLine : undefined"
+        class="svg__project__gold-vi__ticker"
+        @update="emit('update-scroll')">
+        <div v-for="i in 2" :key="i">
+          <SvgProjectGoldViFirstLine
+            v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+        </div>
+      </Ticker>
+    </template>
+    <template v-else>
+      <SvgProjectGoldViFirstLine v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+    </template>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { shuffleIn } from '~/utils/animations'
+import Ticker from '~/components/Global/Ticker.vue'
+import { type NextProjectTicker } from '~/types/front/store'
+
+const props = defineProps<{
+  next: boolean
+  animation: boolean
+  color?: string
+}>()
+
+const id = 'project-ticker-gold-vi'
+
+const nextProjectTickerFirstLine = ref<NextProjectTicker | undefined>(
+  window.localStorage.getItem(id)
+    ? JSON.parse(window.localStorage.getItem(id) as string)
+    : undefined
+)
+
+const { isMobileLayout } = useDevice()
+
+const firstLineTickerEl = ref<typeof Ticker>()
+
+const fill = computed(() => props.color || 'var(--black)')
+
+onBeforeUnmount(() => {
+  if (props.next && firstLineTickerEl.value) {
+    firstLineTickerEl.value.pause()
+    window.localStorage.setItem(id, JSON.stringify(firstLineTickerEl.value.getTicker()))
+  }
+})
+
+const emit = defineEmits(['update-scroll'])
+</script>
+
+<style lang="scss">
+.svg__project__gold-vi {
+  &--animation {
+    svg {
+      > path,
+      > g {
+        @include will-fade;
+      }
+    }
+  }
+
+  &__ticker {
+    > div {
+      padding-right: toScale(3.2rem, 37.5rem);
+    }
+  }
+
+  svg path {
+    fill: v-bind(fill);
+  }
+}
+</style>
