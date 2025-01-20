@@ -72,6 +72,11 @@ export default defineNuxtConfig({
   //   rules: robotsRules,
   // },
 
+  site: {
+    title: 'Christian MacMillan ~ Independent Tech Lead—Developer',
+    url: `${FE_PROTOCOL}${FE_BASE_URL}`,
+  },
+
   sitemap: {
     // defaults: {
     //   lastmod: new Date(),

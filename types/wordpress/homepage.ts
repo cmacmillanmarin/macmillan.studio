@@ -191,9 +191,16 @@ export function parseHomepage(params: {
 }): Homepage {
   const { homepage, projects, services, clients, testimonials } = params
 
-  const listedClients = clients
-    ?.filter(client => !!homepage?.acf.about.clients.list.find(c => c.post_name === client.slug))
-    .sort((a, b) => (a.title > b.title ? 1 : -1))
+  // const listedClients = clients?.filter(
+  //   client => !!homepage?.acf.about.clients.list.find(c => c.post_name === client.slug)
+  // )
+  const listedClients: WP_Clients = []
+  for (const { post_name } of homepage?.acf.about.clients.list || []) {
+    const client = clients?.find(c => c.slug === post_name)
+    if (client) {
+      listedClients.push(client)
+    }
+  }
 
   return {
     head: parseHead(homepage?.acf.seo),

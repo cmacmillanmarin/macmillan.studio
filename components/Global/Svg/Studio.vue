@@ -25,6 +25,7 @@ import { shuffleIn } from '~/utils/animations'
 
 <style lang="scss">
 .svg__studio {
+  display: block;
   fill: none;
   &__path {
     fill: black;

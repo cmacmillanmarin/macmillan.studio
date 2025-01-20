@@ -55,20 +55,24 @@ export interface WP_Project_Object {
   post_name: string
 }
 
+export type ProjectAssetLayoutType = 'full' | 'top' | 'bottom' | 'center' | 'scroll' | 'vimeo'
+
 export interface WP_Project_Asset {
-  layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
+  layout: ProjectAssetLayoutType
   gap: 'l' | 'm' | 's'
   transparent: boolean
   mobile: boolean
   file: WP_File
+  vimeo_url?: string
 }
 
 export interface ProjectAsset {
-  layout: 'full' | 'top' | 'bottom' | 'center' | 'scroll'
+  layout: ProjectAssetLayoutType
   gap: 'l' | 'm' | 's'
   transparent: boolean
   mobile: boolean
   file: File
+  vimeoURL: string
 }
 
 export type Projects = Array<Project>
@@ -125,6 +129,7 @@ export function parseProject(params: {
   const assets: Array<WP_Project_Asset> = project?.acf.assets
     ? project?.acf.assets.filter(
         asset =>
+          (asset.layout === 'vimeo' && asset.vimeo_url) ||
           (asset.file.type === 'img' && asset.file.image?.url) ||
           (asset.file.type === 'vid' && asset.file.videos.mp4?.url && asset.file.videos.webm?.url)
       )
@@ -176,6 +181,7 @@ export function parseProject(params: {
         transparent: !!asset.transparent,
         mobile: !!asset.mobile,
         file: parseFile(asset.file),
+        vimeoURL: asset.vimeo_url || '',
       }
     }),
     recognitions: project?.acf.recognitions?.length
