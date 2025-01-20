@@ -188,10 +188,12 @@ function onLaunchProjectMouseEnter(e: MouseEvent) {
     const { left, top } = label.getBoundingClientRect()
     updateCursorPosition({ x: left - toScale(18), y: top + toScale(4) })
   }
+  if (e.target) (e.target as HTMLElement).dataset.tabFixed = ''
 }
 
 function onLaunchProjectMouseLeave(e: MouseEvent) {
   updateCursorPosition({ x: -1, y: -1 })
+  if (e.target) (e.target as HTMLElement).dataset.tabFixed = undefined
 }
 
 function onTitleClick() {
