@@ -166,7 +166,7 @@ onBeforeUnmount(() => {
   &__credits {
     display: none;
     width: toColumns(v-bind(columns));
-    padding: toScale(1.2rem);
+    padding: toScale(1.2rem) 0;
     user-select: none;
     pointer-events: none;
     @include will-fade;
