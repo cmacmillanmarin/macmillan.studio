@@ -248,9 +248,11 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .home__about {
   position: relative;
+  margin-top: toScale(2.8rem, 37.5rem);
   padding: toScale(5.2rem, 37.5rem) 0 0;
 
   @include from__tablet--landscape {
+    margin-top: 0;
     padding: toScale(8rem) 0 0;
   }
 
@@ -472,7 +474,7 @@ onBeforeUnmount(() => {
   }
 
   &__testimonials {
-    padding: toScale(4rem, 37.5rem) 0 0;
+    padding: toScale(8rem, 37.5rem) 0 0;
     @include from__tablet--landscape {
       padding-top: toScale(8rem);
     }

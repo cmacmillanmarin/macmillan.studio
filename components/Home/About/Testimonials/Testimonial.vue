@@ -6,7 +6,7 @@
       { 'home__about__testimonials__testimonial--expanded': isExpanded },
     ]">
     <div class="home__about__testimonials__testimonial__quote">
-      <SvgQuote :data-pos="pos" />
+      <SvgQuote v-if="!isMobileLayout" :data-pos="pos" />
       <p
         ref="quoteEl"
         :class="[
@@ -123,9 +123,9 @@ const emit = defineEmits(['update:expanded', 'update:hover'])
 <style lang="scss">
 .home__about__testimonials__testimonial {
   position: relative;
-  width: calc(var(--layout-column-width) * 8 + var(--layout-gutter) * 7 + var(--layout-margin) * 2);
+  width: calc(var(--layout-column-width) * 7 + var(--layout-gutter) * 7);
   padding-left: var(--layout-margin);
-  padding-right: var(--layout-margin);
+  padding-right: var(--layout-gutter);
 
   @include from__tablet--landscape {
     width: calc(var(--layout-column-width) * 9 + var(--layout-gutter) * 9);
@@ -197,6 +197,13 @@ const emit = defineEmits(['update:expanded', 'update:hover'])
     @include from__tablet--landscape {
       column-gap: toScale(0.8rem);
       margin-top: toScale(2.2rem);
+    }
+
+    br {
+      display: none;
+      @include from__tablet--landscape {
+        display: block;
+      }
     }
 
     &__thumbnail {

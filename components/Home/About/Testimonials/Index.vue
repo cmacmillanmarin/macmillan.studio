@@ -1,6 +1,10 @@
 <template>
   <div ref="el" class="home__about__testimonials">
     <div class="home__about__testimonials__intersect" v-intersect="{ callback: onIntersect }" />
+    <div v-if="isMobileLayout" class="home__about__testimonials__mobile-quote">
+      <SvgQuote />
+    </div>
+
     <div
       class="home__about__testimonials__container"
       @mouseenter="onMouseEnter"
@@ -19,7 +23,7 @@
     </div>
 
     <div class="home__about__testimonials__indicator">
-      <ClientOnly>
+      <!-- <ClientOnly>
         <button
           v-if="isMobileLayout"
           class="home__about__testimonials__indicator__button--prev"
@@ -27,7 +31,7 @@
           :tabindex="landingTabIndex">
           <SvgPixelArrow />
         </button>
-      </ClientOnly>
+      </ClientOnly> -->
 
       <div class="home__about__testimonials__indicator__index">
         <p
@@ -35,7 +39,7 @@
           v-text="`{${startWithZero(active + 1)}—${startWithZero(data.length)}}`" />
       </div>
 
-      <ClientOnly>
+      <!-- <ClientOnly>
         <button
           v-if="isMobileLayout"
           class="home__about__testimonials__indicator__button"
@@ -43,7 +47,7 @@
           :tabindex="landingTabIndex">
           <SvgPixelArrow />
         </button>
-      </ClientOnly>
+      </ClientOnly> -->
 
       <div class="home__about__testimonials__indicator__buttons">
         <button
@@ -233,6 +237,13 @@ const emit = defineEmits(['update-expanded'])
     padding-bottom: 0;
   }
 
+  &__mobile-quote {
+    margin: 0 auto toScale(2rem, 37.5rem);
+    svg {
+      margin: auto;
+    }
+  }
+
   &__container {
     cursor: pointer;
     overflow: var(--overflow--hidden);
@@ -265,7 +276,7 @@ const emit = defineEmits(['update-expanded'])
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    padding: toScale(4rem, 37.5rem) var(--layout-margin) 0;
+    padding: toScale(3.2rem, 37.5rem) var(--layout-margin) 0;
 
     @include from__tablet--landscape {
       justify-content: space-between;
@@ -318,7 +329,7 @@ const emit = defineEmits(['update-expanded'])
     &__buttons {
       display: flex;
       column-gap: 0.4rem;
-      margin-top: toScale(2.8rem, 37.5rem);
+      margin-top: toScale(2.4rem, 37.5rem);
 
       @include from__tablet--landscape {
         margin-top: 0;
