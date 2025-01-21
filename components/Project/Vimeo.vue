@@ -142,11 +142,11 @@ const emit = defineEmits(['update-scroll'])
       border-radius: 100%;
       width: toScale(5.6rem, 37.5rem);
       height: toScale(5.6rem, 37.5rem);
+      @include absolute-center;
       @include from__tablet--landscape {
         width: toScale(8rem);
         height: toScale(8rem);
       }
-      @include absolute-center;
       svg {
         left: 55% !important;
         @include absolute-center;

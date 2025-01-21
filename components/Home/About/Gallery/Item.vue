@@ -23,7 +23,8 @@
         loop
         autoplay
         crossorigin="anonymous"
-        @canplaythrough="onVideoLoaded">
+        @canplaythrough="onVideoLoaded"
+        @timeupdate="onVideoTimeUpdate">
         <source :src="data.video.webm" type="video/webm" />
         <source :src="data.video.mp4" type="video/mp4" />
       </video>
@@ -75,6 +76,7 @@ const creditsEl = ref<HTMLElement>()
 const id: string = `${props.planesId}-${props.pos}`
 
 const instancedVideo = ref<boolean>(false)
+const instancedVideoSent = ref<boolean>(false)
 
 // watch(current, () => {
 //   updateCursorPosition({ x: -1, y: -1 })
@@ -119,7 +121,21 @@ function instanceVideo() {
 }
 
 function onVideoLoaded() {
-  $three.planes.update({ id, video: videoEl.value })
+  width.value = getWidth()
+  height.value = getHeight()
+  $three.planes.update({
+    id,
+    size: { x: width.value, y: height.value, z: 1 },
+    border: toScale(isMobileLayout.value ? 8 : 16),
+  })
+}
+
+function onVideoTimeUpdate() {
+  if (!videoEl.value) return
+  if (videoEl.value.currentTime > 0 && !instancedVideoSent.value) {
+    instancedVideoSent.value = true
+    $three.planes.update({ id, video: videoEl.value })
+  }
 }
 
 function onImageLoaded(img: HTMLImageElement) {
