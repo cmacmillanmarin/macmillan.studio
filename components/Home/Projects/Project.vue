@@ -380,9 +380,9 @@ onBeforeMount(() => {
 
 onMounted(async () => {
   const { type } = props.data.thumbnail
-  if (type === 'vid' && !inTransition.value) {
-    emit('request-video', projectVideo.value)
-  }
+  // if (type === 'vid' && !inTransition.value) {
+  //   emit('request-video', projectVideo.value)
+  // }
   await nextTick()
   const video = document.getElementById(projectVideo.value.id) as HTMLVideoElement | undefined
   if (video) videoEl.value = video

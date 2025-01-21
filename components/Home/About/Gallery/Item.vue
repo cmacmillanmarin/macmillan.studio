@@ -1,5 +1,5 @@
 <template>
-  <div ref="el" class="home__about__gallery__item">
+  <div ref="el" class="home__about__gallery__item" v-transition:in="{ callback: instanceVideo }">
     <div
       class="home__about__gallery__item__content"
       @mouseenter="onMouseEnter"
@@ -13,7 +13,7 @@
         :size="{ d: data.columns / 12, t: data.columns / 8, m: data.columns / 8 }"
         @load="onImageLoaded" />
       <video
-        v-else-if="data.type === 'vid' && !!data.video"
+        v-else-if="data.type === 'vid' && !!data.video && instancedVideo"
         ref="videoEl"
         :alt="data.video.alt"
         :width="data.video.width"
@@ -74,6 +74,8 @@ const creditsEl = ref<HTMLElement>()
 
 const id: string = `${props.planesId}-${props.pos}`
 
+const instancedVideo = ref<boolean>(false)
+
 // watch(current, () => {
 //   updateCursorPosition({ x: -1, y: -1 })
 // })
@@ -110,6 +112,10 @@ function getHeight() {
     ar = videoEl.value.clientHeight / videoEl.value.clientWidth
   }
   return width.value * ar
+}
+
+function instanceVideo() {
+  instancedVideo.value = true
 }
 
 function onVideoLoaded() {
