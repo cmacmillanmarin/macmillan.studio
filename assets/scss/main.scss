@@ -2,10 +2,8 @@
 @use 'mixins';
 @use 'vars';
 
-// @include import-font('HelveticaNowDisplayXBold');
-@include import-font('HelveticaNowDisplayBold');
 @include import-font('HelveticaNowDisplayMedium');
-@include import-font('NeuePixelRegular');
+@include import-font('HelveticaNowDisplayBold');
 
 html {
   font-size: 10px; // 1rem = 10px
