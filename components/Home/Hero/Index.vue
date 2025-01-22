@@ -65,7 +65,7 @@
         class="home__hero__content__video"
         width="1920"
         height="1080"
-        preload="true"
+        :preload="!!$route.params.slug ? 'none' : 'true'"
         autoplay
         muted
         loop
