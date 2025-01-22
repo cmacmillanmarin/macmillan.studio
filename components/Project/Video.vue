@@ -1,6 +1,7 @@
 <template>
-  <div ref="el" class="project__video">
+  <div ref="el" class="project__video" v-transition:in="{ callback: instanceVideo }">
     <video
+      v-if="instanced"
       ref="videoEl"
       class="project__video__el"
       :width="data.width"
@@ -9,7 +10,7 @@
       muted
       loop
       playsinline
-      preload="none"
+      preload="true"
       v-intersect="{ callback: onIntersect }"
       @timeupdate="enter">
       <source :src="data.webm" type="video/webm" />
@@ -41,6 +42,8 @@ const { isMobileLayout } = useDevice()
 const el = ref<HTMLElement>()
 const bgEl = ref<HTMLElement>()
 const videoEl = ref<HTMLVideoElement>()
+
+const instanced = ref<boolean>(false)
 
 const gap = computed<number>(() =>
   (props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center') &&
@@ -91,8 +94,11 @@ onMounted(() => {
 })
 
 function onIntersect(el: HTMLVideoElement, visible: boolean) {
-  el.load()
   inView.value = visible
+}
+
+function instanceVideo() {
+  instanced.value = true
 }
 
 async function enter(e: Event) {
