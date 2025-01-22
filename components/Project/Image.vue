@@ -11,6 +11,7 @@
       :size="{ d: 1, t: 1, m: 1 }"
       :lazy="true"
       @load="onLoaded" />
+    <div ref="bgEl" class="project__image__bg" />
   </div>
 </template>
 
@@ -40,8 +41,12 @@ const { isMobileLayout } = useDevice()
 const { addTicker, killTicker } = useRaf()
 
 const el = ref<HTMLElement>()
+const bgEl = ref<HTMLElement>()
 
 const loaded = ref<boolean>(false)
+const inView = ref<boolean>(false)
+const entered = ref<boolean>(false)
+
 const background = ref<string>(props.transparent ? 'transparent' : props.bgColor)
 
 const _Swiper = new Swiper({})
@@ -96,12 +101,17 @@ watch([width, height], async () => {
 })
 
 watch([loaded, () => props.ready], async () => {
-  const img = el.value?.querySelector('.custom-image')
-
   await nextTick()
   emit('update-scroll')
-  props.ready && loaded.value && img && (await fadeIn({ el: img }))
-  if (el.value) el.value.style.backgroundColor = 'transparent'
+})
+
+watch([loaded, inView, () => props.ready], async () => {
+  const img = el.value?.querySelector('.custom-image')
+  if (props.ready && loaded.value && img && inView.value && !entered.value) {
+    entered.value = true
+    await fadeIn({ el: img })
+    fadeOut({ el: bgEl.value })
+  }
 })
 
 function onLoaded() {
@@ -109,6 +119,7 @@ function onLoaded() {
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
+  inView.value = visible
   if (props.layout === 'scroll' && visible && _target === 0 && !isMobileLayout.value) {
     gsap.set(el, { y: toScale(130) })
     gsap.to(el, { y: 0, duration: 1 })
@@ -168,9 +179,22 @@ const emit = defineEmits(['update-scroll'])
 
 <style lang="scss">
 .project__image {
-  background-color: v-bind(background);
+  position: relative;
+  width: v-bind(width);
   height: v-bind(height);
+  &__bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-color: v-bind(background);
+    will-change: opacity;
+    width: 100%;
+    height: 100%;
+  }
   .custom-image {
+    position: relative;
+    z-index: 2;
     pointer-events: none;
     display: block;
     width: v-bind(width);

@@ -90,7 +90,8 @@ onMounted(() => {
   active.value = true
 })
 
-function onIntersect(el: HTMLElement, visible: boolean) {
+function onIntersect(el: HTMLVideoElement, visible: boolean) {
+  el.load()
   inView.value = visible
 }
 
