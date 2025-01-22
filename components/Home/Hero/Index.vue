@@ -259,6 +259,14 @@ watch(isReady, ready => {
   ready && animate()
 })
 
+watch(
+  route,
+  () => {
+    isInReel.value && closeReel()
+  },
+  { deep: true }
+)
+
 watch([current, isInReel], () => {
   reelOpened.value = current.value === vh.value && isInReel.value
 })
