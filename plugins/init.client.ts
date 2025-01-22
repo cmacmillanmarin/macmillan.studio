@@ -12,6 +12,15 @@ export default defineNuxtPlugin(async () => {
     'background: black; color: white; padding: 16px 24px; line-height: 1.4'
   )
 
+  const route = useRoute()
+  const { slug } = route.params
+
+  if (slug) {
+    window.localStorage.removeItem(`project-ticker-${slug}`)
+    window.localStorage.removeItem(`project-ticker-${slug}-first-line`)
+    window.localStorage.removeItem(`project-ticker-${slug}-second-line`)
+  }
+
   const store = useStore()
 
   gsap.registerPlugin(CustomEase, ScrollToPlugin)
