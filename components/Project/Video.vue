@@ -9,6 +9,7 @@
       muted
       loop
       playsinline
+      preload="none"
       v-intersect="{ callback: onIntersect }"
       @timeupdate="enter">
       <source :src="data.webm" type="video/webm" />
@@ -117,11 +118,17 @@ const emit = defineEmits(['update-scroll'])
 <style lang="scss">
 .project__video {
   position: relative;
+  width: v-bind(width);
+  height: v-bind(height);
   &__bg {
+    position: absolute;
+    top: 0;
+    left: 0;
     pointer-events: none;
     background-color: v-bind(background);
     will-change: opacity;
-    @include absolute-fill;
+    width: 100%;
+    height: 100%;
   }
   &__el {
     position: relative;

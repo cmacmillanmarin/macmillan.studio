@@ -309,7 +309,7 @@ const emit = defineEmits(['update-expanded'])
     }
 
     &__index {
-      width: calc(100% - toScale(11.2rem, 37.5rem));
+      width: 100%;
 
       @include from__tablet--landscape {
         width: max-content;

@@ -1,4 +1,12 @@
-import { parseText, parseFile, type File, type WP_File } from '~/types/wordpress'
+import {
+  parseText,
+  parseFile,
+  type File,
+  type WP_File,
+  type Head,
+  type WP_Head,
+  parseHead,
+} from '~/types/wordpress'
 import {
   type WP_Client_Object,
   type Client,
@@ -20,6 +28,7 @@ export interface WP_Project {
   }
   tech_stack_tag?: Array<number>
   acf: {
+    seo: WP_Head
     selected_project?: boolean
     link: string
     primary_color: string
@@ -79,6 +88,7 @@ export type Projects = Array<Project>
 
 export interface Project {
   slug: string
+  head: Head
   title: string
   selected: boolean
   link: string
@@ -158,6 +168,7 @@ export function parseProject(params: {
 
   return {
     slug: parseText(project?.slug),
+    head: parseHead(project?.acf.seo),
     link: parseText(project?.acf.link),
     title: parseText(project?.title.rendered),
     selected: !!project?.acf.selected_project,

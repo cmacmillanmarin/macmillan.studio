@@ -62,12 +62,31 @@ import { transitionFadeOut } from '~/utils/animations'
 import { storeToRefs } from 'pinia'
 import { toPx, getKeyboardFocusableElements } from '~/utils'
 import { Swiper, type PanParams } from '~/utils/swiper'
+import type { Head } from '~/types/wordpress'
 
 const props = defineProps<{
   data: Project
   list: 'selected' | 'all'
   nextProject?: Project
 }>()
+
+const { head }: { head: Head } = props.data
+const headTitle: string = head.title || props.data.title
+const headDescription: string = head.description || props.data.description
+
+useHead({
+  title: headTitle,
+  meta: [
+    { name: 'description', content: headDescription },
+    { name: 'theme-color', content: props.data.color },
+    { name: 'og:title', content: headTitle },
+    { name: 'og:description', content: headDescription },
+    { name: 'og:image', content: !!head.og_image ? head.og_image : undefined },
+    { name: 'twitter:title', content: headTitle },
+    { name: 'twitter:description', content: headDescription },
+    { name: 'twitter:image', content: !!head.tw_image ? head.tw_image : undefined },
+  ],
+})
 
 const store = useStore()
 const {

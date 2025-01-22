@@ -58,13 +58,24 @@
             v-html="data.collaborator.description" />
         </div>
         <div class="home__about__intro__collaborator__thumbnail">
-          <button
-            aria-label="Visit Gatzara Studio website"
+          <!-- <button
+            aria-label="Visit Xavier Cussó website"
             @click="onCollaboratorImageClick"
             @mouseenter="onCollaboratorMouseEnter"
             @mouseleave="onCollaboratorMouseLeave">
             <SvgGatzara />
-          </button>
+          </button> -->
+          <CustomImage
+            ref="collaboratorImageEl"
+            :data="data.collaborator.thumbnail"
+            :size="{ d: 0.2, t: 0.4, m: 0.5 }"
+            :lazy="true"
+            :virtual="true"
+            data-scroll-set-position
+            @load="onCollaboratorImageLoaded"
+            @mouseenter="onCollaboratorMouseEnter"
+            @mouseleave="onCollaboratorMouseLeave" />
+          <DecorativeLink label="Xavier Cussó" to="https://xaviercusso.com" type="external" />
         </div>
       </div>
     </div>
@@ -111,6 +122,7 @@ const { isMobileLayout } = useDevice()
 
 const introEl = ref<HTMLElement>()
 const thumbnailImageEl = ref<typeof CustomImage>()
+const collaboratorImageEl = ref<typeof CustomImage>()
 const galleryEl = ref<typeof HomeAboutGallery>()
 
 const imagesFade = ref<number>(0)
@@ -142,11 +154,20 @@ onMounted(() => {
     color: rbgToVec4(hexToRgb('#000000')),
     multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
   })
+  $three.planes.add({
+    id: 'about-collaborator',
+    position: { x: 0, y: 0 },
+    size: { x: 0, y: 0, z: 1 },
+    blackAndWhite: true,
+    opacity: 0,
+    color: rbgToVec4(hexToRgb('#000000')),
+    multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
+  })
   updateImagePositions()
 })
 
 function updateImagePositions() {
-  if (!thumbnailImageEl.value) return
+  if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
   const thumbnailImageBounding = getBounding(thumbnailImageEl.value.el)
   const thumbnailImageWidth = thumbnailImageEl.value.el.clientWidth
   const thumbnailImageHeight = thumbnailImageEl.value.el.clientHeight
@@ -154,6 +175,15 @@ function updateImagePositions() {
     id: 'about-thumbnail',
     position: { x: thumbnailImageBounding.left, y: thumbnailImageBounding.top },
     size: { x: thumbnailImageWidth, y: thumbnailImageHeight, z: 1 },
+    border: toScale(isMobileLayout.value ? 8 : 16),
+  })
+  const collaboratorImageBounding = getBounding(collaboratorImageEl.value.el)
+  const collaboratorImageWidth = collaboratorImageEl.value.el.clientWidth
+  const collaboratorImageHeight = collaboratorImageEl.value.el.clientHeight
+  $three.planes.update({
+    id: 'about-collaborator',
+    position: { x: collaboratorImageBounding.left, y: collaboratorImageBounding.top },
+    size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
     border: toScale(isMobileLayout.value ? 8 : 16),
   })
 }
@@ -166,6 +196,7 @@ async function onReadMore() {
 
 function onImagesFadeUpdate() {
   $three.planes.update({ id: 'about-thumbnail', opacity: imagesFade.value })
+  $three.planes.update({ id: 'about-collaborator', opacity: imagesFade.value })
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -179,6 +210,11 @@ function onTestimonialsUpdateExpanded() {
 
 function onThumbnailLoaded(img: HTMLImageElement) {
   $three.planes.update({ id: 'about-thumbnail', img })
+  updateImagePositions()
+}
+
+function onCollaboratorImageLoaded(img: HTMLImageElement) {
+  $three.planes.update({ id: 'about-collaborator', img })
   updateImagePositions()
 }
 
@@ -207,18 +243,36 @@ function onThumbnailMouseLeave() {
 }
 
 function onCollaboratorMouseEnter(e: MouseEvent) {
-  if (inReelHovered.value) return
-  const { target } = e
-  const svgEl = (target as HTMLElement).querySelector('.svg__gatzara')
-  if (svgEl) {
-    const { bottom, left, width } = svgEl.getBoundingClientRect()
-    updateCursorPosition({ x: left + width * 0.5 - toScale(6), y: bottom + toScale(12) })
-    shuffleIn({ el: svgEl as HTMLElement })
-  }
+  updateCursor('none')
+  gsap.killTweensOf(_color)
+  gsap.to(_color, {
+    alpha: 0,
+    duration: 0.4,
+    onUpdate: () => {
+      updateTint('about-collaborator')
+    },
+  })
+  // if (inReelHovered.value) return
+  // const { target } = e
+  // const svgEl = (target as HTMLElement).querySelector('.svg__gatzara')
+  // if (svgEl) {
+  //   const { bottom, left, width } = svgEl.getBoundingClientRect()
+  //   updateCursorPosition({ x: left + width * 0.5 - toScale(6), y: bottom + toScale(12) })
+  //   shuffleIn({ el: svgEl as HTMLElement })
+  // }
 }
 
 function onCollaboratorMouseLeave(e: MouseEvent) {
-  updateCursorPosition({ x: -1, y: -1 })
+  updateCursor('default')
+  gsap.killTweensOf(_color)
+  gsap.to(_color, {
+    alpha: 1,
+    duration: 0.4,
+    onUpdate: () => {
+      updateTint('about-collaborator')
+    },
+  })
+  // updateCursorPosition({ x: -1, y: -1 })
 }
 
 function onCollaboratorImageClick(e: MouseEvent) {
@@ -428,19 +482,42 @@ onBeforeUnmount(() => {
           @include columns(2);
         }
 
-        button {
-          padding: 0;
-          border: none;
-          margin-top: toScale(3.2rem, 37.5rem);
+        // button {
+        //   padding: 0;
+        //   border: none;
+        //   margin-top: toScale(3.2rem, 37.5rem);
+        //   @include from__tablet--landscape {
+        //     position: absolute;
+        //     top: 50%;
+        //     left: 50%;
+        //     transform: translate(-50%, -50%) rotate(-90deg);
+        //     transform-origin: center;
+        //     margin-top: 0;
+        //   }
+        // }
+
+        .custom-image {
+          margin-top: toScale(1.6rem, 37.5rem);
           @include from__tablet--landscape {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-90deg);
-            transform-origin: center;
             margin-top: 0;
           }
         }
+
+        .decorative-link {
+          will-change: opacity;
+          @include t-black;
+          @include t-b1;
+          .svg__link-arrow {
+            path {
+              fill: var(--black);
+            }
+          }
+        }
+
+        //   svg {
+        //     transform: translateY(25%);
+        //   }
+        // }
 
         .custom-image {
           margin-bottom: 1.2rem;
