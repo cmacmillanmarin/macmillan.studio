@@ -319,6 +319,9 @@ onBeforeUnmount(() => {
     disableScroll(false)
     updateHeader(!isMobileLayout.value)
   }
+  window.localStorage.removeItem(`project-ticker-${props.data.slug}`)
+  window.localStorage.removeItem(`project-ticker-${props.data.slug}-first-line`)
+  window.localStorage.removeItem(`project-ticker-${props.data.slug}-second-line`)
 })
 
 const emit = defineEmits(['mounted', 'entered', 'next', 'closed'])
