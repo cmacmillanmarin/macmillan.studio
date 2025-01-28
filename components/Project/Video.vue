@@ -48,6 +48,8 @@ const instanced = ref<boolean>(false)
 const gap = computed<number>(() => {
   if (props.first && isMobileLayout.value) return toScale(32)
   if (props.mobile && isMobileLayout.value) return toScale(0)
+  if (props.layout === 'center' && isMobileLayout.value && props.data.width > props.data.height)
+    return toScale(32)
   if (props.layout === 'top' || props.layout === 'bottom') {
     return toScale(isMobileLayout.value ? 60 : 260)
   }

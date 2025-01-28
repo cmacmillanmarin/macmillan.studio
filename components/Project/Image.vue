@@ -59,8 +59,6 @@ let _rendering: boolean = false
 
 const gap = computed<number>(() => {
   if (props.layout === 'top' || props.layout === 'bottom') {
-    console.log('hereeee', props.layout)
-
     return toScale(isMobileLayout.value ? 60 : 260)
   }
 
