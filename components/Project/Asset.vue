@@ -73,7 +73,7 @@ onMounted(() => {
 
   &--layout-top {
     .project__asset__content {
-      padding-left: var(--layout-margin);
+      // padding-left: var(--layout-margin);
       justify-content: flex-start;
       @include from__tablet--landscape {
         padding-left: 0;
@@ -94,7 +94,7 @@ onMounted(() => {
 
   &--layout-bottom {
     .project__asset__content {
-      padding-right: var(--layout-margin);
+      // padding-right: var(--layout-margin);
       justify-content: flex-end;
       @include from__tablet--landscape {
         padding-right: 0;

@@ -45,12 +45,14 @@ const videoEl = ref<HTMLVideoElement>()
 
 const instanced = ref<boolean>(false)
 
-const gap = computed<number>(() =>
-  (props.layout === 'top' || props.layout === 'bottom' || props.layout === 'center') &&
-  !(!!props.mobile && isMobileLayout.value)
-    ? toScale(isMobileLayout.value ? 120 : 260)
-    : toScale(isMobileLayout.value && !!props.first ? 32 : 0)
-)
+const gap = computed<number>(() => {
+  if (props.first && isMobileLayout.value) return toScale(32)
+  if (props.mobile && isMobileLayout.value) return toScale(0)
+  if (props.layout === 'top' || props.layout === 'bottom') {
+    return toScale(isMobileLayout.value ? 60 : 260)
+  }
+  return props.layout === 'center' ? toScale(isMobileLayout.value ? 120 : 260) : toScale(0)
+})
 
 const height = computed<string>(() => {
   if (isMobileLayout.value)

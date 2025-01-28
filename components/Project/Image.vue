@@ -57,19 +57,25 @@ let _target: number = 0
 let _current: number = 0
 let _rendering: boolean = false
 
-const gap = computed<number>(() =>
-  (props.layout === 'top' ||
-    props.layout === 'bottom' ||
-    props.layout === 'center' ||
-    (props.layout === 'scroll' && !isMobileLayout.value)) &&
-  !(props.mobile && isMobileLayout.value)
+const gap = computed<number>(() => {
+  if (props.layout === 'top' || props.layout === 'bottom') {
+    console.log('hereeee', props.layout)
+
+    return toScale(isMobileLayout.value ? 60 : 260)
+  }
+
+  if (props.layout === 'scroll') {
+    return toScale(isMobileLayout.value ? 32 + 90 : 260)
+  }
+
+  return props.layout === 'center' && !(props.mobile && isMobileLayout.value)
     ? toScale(isMobileLayout.value ? 120 : 260)
-    : toScale((isMobileLayout.value && props.first) || props.layout === 'scroll' ? 32 : 0)
-)
+    : toScale(isMobileLayout.value && props.first ? 32 : 0)
+})
 
-const normalized = ref<number>(props.mobile ? 0.413 : 1)
+const normalized = ref<number>(props.mobile ? 0.368 : 1)
 
-const mobileNormalizer = computed<number>(() => (props.layout === 'scroll' ? 0.6 : 1))
+const mobileNormalizer = computed<number>(() => 1)
 
 const height = computed<string>(() => {
   if (isMobileLayout.value)
