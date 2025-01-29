@@ -8,7 +8,7 @@ import { ease } from '~/utils/animations'
 
 export default defineNuxtPlugin(async () => {
   console.log(
-    '%cDeveloped at https://macmillan.studio',
+    '%c{{}} Developed by https://macmillan.studio',
     'background: black; color: white; padding: 16px 24px; line-height: 1.4'
   )
 

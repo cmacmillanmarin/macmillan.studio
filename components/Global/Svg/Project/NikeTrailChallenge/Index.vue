@@ -51,7 +51,7 @@ const props = defineProps<{
   color?: string
 }>()
 
-const id = 'project-ticker-nike-trail-callenge'
+const id = 'project-ticker-nike-trail-challenge'
 
 const nextProjectTickerFirstLine = ref<NextProjectTicker | undefined>(
   window.localStorage.getItem(`${id}-first-line`)

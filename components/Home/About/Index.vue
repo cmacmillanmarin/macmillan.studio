@@ -18,9 +18,7 @@
             :lazy="true"
             :virtual="true"
             data-scroll-set-position
-            @load="onThumbnailLoaded"
-            @mouseenter="onThumbnailMouseEnter"
-            @mouseleave="onThumbnailMouseLeave" />
+            @load="onThumbnailLoaded" />
           <p class="home__about__intro__content__thumbnail__credit">{{ data.credit }}</p>
         </div>
         <div class="home__about__intro__content__detail">
@@ -72,9 +70,7 @@
             :lazy="true"
             :virtual="true"
             data-scroll-set-position
-            @load="onCollaboratorImageLoaded"
-            @mouseenter="onCollaboratorMouseEnter"
-            @mouseleave="onCollaboratorMouseLeave" />
+            @load="onCollaboratorImageLoaded" />
           <DecorativeLink label="Xavier Cussó" to="https://xaviercusso.com" type="external" />
         </div>
       </div>
@@ -122,7 +118,9 @@ const { isMobileLayout } = useDevice()
 
 const introEl = ref<HTMLElement>()
 const thumbnailImageEl = ref<typeof CustomImage>()
+const thumbnailImageElHovered = ref<boolean>(false)
 const collaboratorImageEl = ref<typeof CustomImage>()
+const collaboratorImageElHovered = ref<boolean>(false)
 const galleryEl = ref<typeof HomeAboutGallery>()
 
 const imagesFade = ref<number>(0)
@@ -144,6 +142,16 @@ watch(section, () => {
   }
 })
 
+watch(thumbnailImageElHovered, () => {
+  if (thumbnailImageElHovered.value) onThumbnailMouseEnter()
+  else onThumbnailMouseLeave()
+})
+
+watch(collaboratorImageElHovered, () => {
+  if (collaboratorImageElHovered.value) onCollaboratorMouseEnter()
+  else onCollaboratorMouseLeave()
+})
+
 onMounted(() => {
   $three.planes.add({
     id: 'about-thumbnail',
@@ -153,6 +161,9 @@ onMounted(() => {
     opacity: 0,
     color: rbgToVec4(hexToRgb('#000000')),
     multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
+    onIntersect: (value: boolean) => {
+      thumbnailImageElHovered.value = value
+    },
   })
   $three.planes.add({
     id: 'about-collaborator',
@@ -162,6 +173,9 @@ onMounted(() => {
     opacity: 0,
     color: rbgToVec4(hexToRgb('#000000')),
     multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
+    onIntersect: (value: boolean) => {
+      collaboratorImageElHovered.value = value
+    },
   })
   updateImagePositions()
 })
@@ -242,7 +256,7 @@ function onThumbnailMouseLeave() {
   })
 }
 
-function onCollaboratorMouseEnter(e: MouseEvent) {
+function onCollaboratorMouseEnter() {
   updateCursor('none')
   gsap.killTweensOf(_color)
   gsap.to(_color, {
@@ -262,7 +276,7 @@ function onCollaboratorMouseEnter(e: MouseEvent) {
   // }
 }
 
-function onCollaboratorMouseLeave(e: MouseEvent) {
+function onCollaboratorMouseLeave() {
   updateCursor('default')
   gsap.killTweensOf(_color)
   gsap.to(_color, {
@@ -296,6 +310,7 @@ function updateTint(id: string) {
 
 onBeforeUnmount(() => {
   $three.planes.remove('about-thumbnail')
+  $three.planes.remove('about-collaborator')
 })
 </script>
 
