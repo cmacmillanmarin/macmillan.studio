@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia'
 import type { State, GridType, Section, Cursor } from '~/types/front/store'
-import useAudio from '~/composables/useAudio'
+import { sound } from '~/utils/sound'
 
 let _to: any
 let _toCursor: any
 let _toCursorPosition: any
-
-const { emit } = useAudio()
 
 export default defineStore('use-store', {
   state: (): State => ({
@@ -112,7 +110,7 @@ export default defineStore('use-store', {
           this.cursorPosition = state
         }, 100)
       } else {
-        emit('click')
+        sound.emit('click')
         this.cursorPosition = state
       }
     },

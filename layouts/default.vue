@@ -15,6 +15,7 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
+import { sound } from '~/utils/sound'
 
 const store = useStore()
 const { updateLoading } = store
@@ -38,6 +39,7 @@ async function init() {
   await nextTick()
   isInProject.value && updateLoading(false)
   el.value && scroll.init({ el: el.value })
+  sound.init()
 }
 
 onBeforeUnmount(() => {
