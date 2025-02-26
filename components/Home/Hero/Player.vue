@@ -88,6 +88,7 @@ import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { toPercentage } from '~/utils'
 import { fadeIn, shuffleIn, fadeOut } from '~/utils/animations'
+import { sound } from '~/utils/sound'
 
 const props = defineProps<{
   ready: boolean
@@ -161,6 +162,7 @@ function onClick(e: MouseEvent) {
   if (cursor.value === 'pause' || cursor.value === 'play') {
     e.preventDefault()
     e.stopPropagation()
+    sound.emit('click')
     emit('toggle')
   }
 }
@@ -175,6 +177,7 @@ function onTimelineClick(e: MouseEvent) {
   if (props.ready) {
     e.preventDefault()
     e.stopPropagation()
+    sound.emit('click')
     const target = e.target as HTMLElement
     const { left, width } = target.getBoundingClientRect()
     const current = (e.clientX - left) / width
@@ -207,6 +210,7 @@ function onTimelineMouseLeave() {
 }
 
 function onButtonMouseEnter() {
+  sound.emit('hover')
   updateCursor('none')
 }
 
@@ -222,18 +226,21 @@ async function delayedShuffleIn(el: Element, done: Function) {
 function onToggleButtonClick(e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
+  sound.emit('click')
   emit('toggle')
 }
 
 function onCloseButtonClick(e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
+  sound.emit('click')
   emit('close')
 }
 
 function onMuteButtonClick(e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
+  sound.emit('click')
   muted.value = !muted.value
   emit('mute')
 }

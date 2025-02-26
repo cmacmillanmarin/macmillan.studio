@@ -11,6 +11,7 @@ import {
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { ConstructorParams, CreateParams } from '~/types/front/three'
 import { gsap } from 'gsap/gsap-core'
+import { sound } from '~/utils/sound'
 
 export default class {
   debug: boolean = false
@@ -95,6 +96,7 @@ export default class {
 
   rotate(y: number) {
     if (this.logo) {
+      sound.emit('hover')
       gsap.killTweensOf(this.logo.rotation)
       gsap.to(this.logo.rotation, { y, onUpdate: this.updateLight.bind(this) })
     }

@@ -69,6 +69,7 @@
 import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
+import { sound } from '~/utils/sound'
 
 const props = defineProps<{
   activeList: 'selected' | 'all'
@@ -99,6 +100,7 @@ function updateActiveListToSelected(e: MouseEvent) {
   if (cursor.value === 'plus') return
   e.preventDefault()
   e.stopPropagation()
+  sound.emit('click')
   emit('update-list', 'selected')
 }
 
@@ -106,6 +108,7 @@ function updateActiveListToAll(e: MouseEvent) {
   if (cursor.value === 'plus') return
   e.preventDefault()
   e.stopPropagation()
+  sound.emit('click')
   emit('update-list', 'all')
 }
 

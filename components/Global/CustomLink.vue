@@ -23,6 +23,7 @@
 
 <script lang="ts" setup>
 import useScrollStore from '~/store/useScrollStore'
+import { sound } from '~/utils/sound'
 
 const props = defineProps<{
   to?: string
@@ -50,6 +51,7 @@ async function onClick(e: MouseEvent): Promise<void> {
   if (props.type === 'referral') {
     e.preventDefault()
     e.stopPropagation()
+    sound.emit('click')
     if (props.to === route.fullPath) updateScrollTargetId(props.to.replace('/#', ''))
     else if (props.to) router.push(props.to)
   }

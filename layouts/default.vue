@@ -43,6 +43,7 @@ async function init() {
 }
 
 onBeforeUnmount(() => {
+  sound.destroy()
   scroll.destroy()
 })
 </script>

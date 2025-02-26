@@ -110,7 +110,7 @@ export default defineStore('use-store', {
           this.cursorPosition = state
         }, 100)
       } else {
-        sound.emit('click')
+        sound.emit('hover')
         this.cursorPosition = state
       }
     },
