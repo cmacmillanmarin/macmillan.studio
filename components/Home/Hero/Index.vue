@@ -73,6 +73,7 @@
         @timeupdate="onVideoPlaying"
         @ended="closeReel">
         <source src="/assets/video/reel--short.webm" type="video/webm" />
+        <source src="/assets/video/reel--short.mp4" type="video/mp4" />
       </video>
     </div>
 
