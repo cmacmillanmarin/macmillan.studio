@@ -96,7 +96,7 @@ export default class {
 
   rotate(y: number) {
     if (this.logo) {
-      sound.emit('hover')
+      if (y === Math.PI * 2) sound.emit('hover')
       gsap.killTweensOf(this.logo.rotation)
       gsap.to(this.logo.rotation, { y, onUpdate: this.updateLight.bind(this) })
     }

@@ -103,14 +103,14 @@ export default defineStore('use-store', {
     updateCursorColor(state: 'lime' | 'black') {
       this.cursorColor = state
     },
-    updateCursorPosition(state: { x: number; y: number }) {
+    updateCursorPosition(state: { x: number; y: number; silent?: boolean }) {
       _toCursorPosition && clearTimeout(_toCursorPosition)
       if (state.x === -1) {
         _toCursorPosition = setTimeout(() => {
           this.cursorPosition = state
         }, 100)
       } else {
-        sound.emit('hover')
+        !state.silent && sound.emit('hover')
         this.cursorPosition = state
       }
     },

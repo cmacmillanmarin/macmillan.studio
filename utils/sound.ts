@@ -1,20 +1,45 @@
 type SoundType = 'click' | 'hover' | 'decode'
-type Click = '1'
-type Hover = '2' | '3' | '4'
+type SoundFile = '1' | '2' | '3' | '4' | 'decode'
 type Decode = 'decode'
-const clicks: Array<Click> = ['1']
-const hovers: Array<Hover> = ['2', '3', '4']
-const decodes: Array<Decode> = ['decode']
+const clicks: Array<SoundFile> = ['4']
+const hovers: Array<SoundFile> = ['3']
+const decodes: Array<SoundFile> = ['decode']
+
+import { loadScript } from '~/utils'
 
 class Sound {
   private static instance: Sound
-  private audio: HTMLAudioElement | null = null
+  private players: { [key: string]: { [key: string]: any } } = {}
+
   private _onClick: () => void = this.onClick.bind(this)
-  private _previous: Click | Hover | Decode | null = null
+  private _previous: SoundFile | null = null
 
   private constructor() {}
 
-  public init() {
+  public async init() {
+    await loadScript({ src: 'http://unpkg.com/tone', name: 'Tone' })
+    for (const click of clicks) {
+      this.players.click = {}
+      const player = new Tone.Player({
+        url: `/assets/audio/${click}.mp3`,
+        autostart: false,
+        loop: false,
+        onload: () => {
+          this.players.click[click] = player
+        },
+      }).toDestination()
+    }
+    for (const hover of hovers) {
+      this.players.hover = {}
+      const player = new Tone.Player({
+        url: `/assets/audio/${hover}.mp3`,
+        autostart: false,
+        loop: false,
+        onload: () => {
+          this.players.hover[hover] = player
+        },
+      }).toDestination()
+    }
     document.addEventListener('click', this._onClick)
   }
 
@@ -26,7 +51,6 @@ class Sound {
   }
 
   private onClick() {
-    this.audio = new Audio()
     this.emit('click')
   }
 
@@ -40,7 +64,7 @@ class Sound {
     return this.random(decodes)
   }
 
-  private random(options: Array<Click | Hover | Decode>): Click | Hover | Decode {
+  private random(options: Array<SoundFile>): SoundFile {
     if (options.length === 1) return options[0]
     let index = Math.floor(Math.random() * options.length)
     while (options[index] === this._previous) {
@@ -50,23 +74,13 @@ class Sound {
     return options[index]
   }
 
-  public emit(type: SoundType, params?: { loop?: boolean }) {
-    if (this.audio && this.audio.paused) {
-      this.audio.src = '/assets/audio/' + this.getSource(type) + '.mp3'
-      this.audio.loop = !!params?.loop
-      this.audio.play()
-    }
-  }
-
-  public stop() {
-    if (this.audio && !this.audio.paused) {
-      this.audio.pause()
-    }
+  public emit(type: SoundType) {
+    this.players[type][this.getSource(type)].start()
   }
 
   public destroy() {
     document.removeEventListener('click', this._onClick)
-    this.audio = null
+    this.players = {}
   }
 }
 

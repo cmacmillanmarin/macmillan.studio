@@ -200,7 +200,7 @@ function onTimelineMouseEnter(e: MouseEvent) {
 function onTimelineMouseMove(e: MouseEvent) {
   if (timelineEl.value && props.ready) {
     const { top } = timelineEl.value.getBoundingClientRect()
-    updateCursorPosition({ x: e.clientX - toScale(12), y: top + toScale(16) })
+    updateCursorPosition({ x: e.clientX - toScale(12), y: top + toScale(16), silent: true })
   }
 }
 

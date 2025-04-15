@@ -265,7 +265,9 @@ function onIntersect(el: HTMLElement, visible: boolean) {
 }
 
 function onEmailMouseEnter() {
-  !tetris.value && updateCursor('copy')
+  if (tetris.value) return
+  updateCursor('copy')
+  sound.emit('hover')
 }
 
 function onEmailMouseLeave() {

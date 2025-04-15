@@ -81,13 +81,13 @@ export function loadScript(params: { src: string; name: string }) {
     const { src, name } = params
     if (window[name as any]) resolve(true)
     else {
-      console.log('Load script', name, src)
+      // console.log('Load script', name, src)
       document?.body?.classList.add('loading')
       const script = document.createElement('script')
       script.src = src
       script.onload = () => {
         document?.body?.classList.remove('loading')
-        console.log('Script loaded', name, window[name as any])
+        // console.log('Script loaded', name, window[name as any])
         resolve(true)
       }
       document?.head?.appendChild(script)
