@@ -23,6 +23,7 @@ export default function useDevice() {
   const isMobileLayout = computed<boolean>(() => isMobile.value || isTabletPortrait.value)
 
   // Device
+  const inAppBrowser = ref<boolean>(false)
   const isPhoneOrTablet = ref<boolean>(false)
 
   const hasWheelEvent = ref<boolean>(false)
@@ -36,8 +37,14 @@ export default function useDevice() {
       navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') <= -1
 
     isPhoneOrTablet.value = _isPhoneOrTablet()
+    inAppBrowser.value = _detectInAppBrowser()
 
     hasWheelEvent.value = 'onwheel' in document
+  }
+
+  function _detectInAppBrowser(): boolean {
+    const { userAgent, vendor } = navigator
+    return /FBAN|FBAV|Instagram|LinkedInApp|Messenger|TikTok|Twitter/.test(userAgent || vendor)
   }
 
   function _update(): void {
@@ -99,6 +106,7 @@ export default function useDevice() {
     touch,
     safari,
     hasWheelEvent,
+    inAppBrowser,
     isPhoneOrTablet,
     isMobile,
     isDesktop,

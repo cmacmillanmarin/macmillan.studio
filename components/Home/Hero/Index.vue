@@ -146,7 +146,7 @@ const {
 } = scrollStore
 const { current, direction, bounding } = storeToRefs(scrollStore)
 
-const { isMobileLayout, isTabletPortrait } = useDevice()
+const { inAppBrowser, isMobileLayout, isTabletPortrait } = useDevice()
 const { layoutMargin, toScale } = useCss()
 const { lvw, vw, vh } = useResize()
 
@@ -493,6 +493,7 @@ onMounted(() => {
   videoInProject.value = !firstTransition.state
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
+  console.log(inAppBrowser.value)
   videoEl.value?.addEventListener('canplaythrough', onVideoReady)
   !videoInProject.value && videoEl.value?.load()
   videoInView.value = current.value < componentHeight.value && section.value === 'hero'
