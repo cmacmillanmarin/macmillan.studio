@@ -102,6 +102,7 @@ const emit = defineEmits(['update-scroll'])
 
   &__ticker {
     margin-bottom: var(--layout-gutter);
+    min-height: toScale(7.7rem, 37.5rem);
     > div {
       padding-right: toScale(3.2rem, 37.5rem);
     }
