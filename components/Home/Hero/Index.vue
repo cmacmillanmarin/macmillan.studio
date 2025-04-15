@@ -496,10 +496,8 @@ onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
   videoEl.value?.addEventListener('canplaythrough', onVideoReady)
-
-  if (inAppBrowser.value) {
-    animate()
-  } else if (!videoInProject.value) videoEl.value?.load()
+  if (inAppBrowser.value) setTimeout(onVideoReady, 1500) // If it's in App Browser, wait for 1.5s and force video ready
+  !videoInProject.value && videoEl.value?.load()
 
   videoInView.value = current.value < componentHeight.value && section.value === 'hero'
   $three.planes.add({
