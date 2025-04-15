@@ -73,6 +73,7 @@
         @timeupdate="onVideoPlaying"
         @ended="closeReel">
         <source src="/assets/video/reel--short.webm" type="video/webm" />
+        <source src="/assets/video/reel--short.mp4" type="video/mp4" />
       </video>
     </div>
 
@@ -145,7 +146,7 @@ const {
 } = scrollStore
 const { current, direction, bounding } = storeToRefs(scrollStore)
 
-const { isMobileLayout, isTabletPortrait } = useDevice()
+const { inAppBrowser, isMobileLayout, isTabletPortrait } = useDevice()
 const { layoutMargin, toScale } = useCss()
 const { lvw, vw, vh } = useResize()
 
@@ -493,7 +494,11 @@ onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
   videoEl.value?.addEventListener('canplaythrough', onVideoReady)
-  !videoInProject.value && videoEl.value?.load()
+
+  if (inAppBrowser.value) {
+    animate()
+  } else if (!videoInProject.value) videoEl.value?.load()
+
   videoInView.value = current.value < componentHeight.value && section.value === 'hero'
   $three.planes.add({
     id: 'reel',

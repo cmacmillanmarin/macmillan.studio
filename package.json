@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "1.1.16",
+  "version": "1.1.17",
   "scripts": {
     "build": "nuxt build",
     "dev": "OFFLINE=1 nuxt dev",
@@ -16,6 +16,7 @@
     "@nuxtjs/sitemap": "^5.1.0",
     "@pinia/nuxt": "^0.4.3",
     "@types/he": "^1.2.3",
+    "@types/node": "^22.14.1",
     "@types/three": "^0.170.0",
     "@types/webfontloader": "^1.6.38",
     "dotenv": "^16.0.3",
