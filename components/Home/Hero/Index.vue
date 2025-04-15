@@ -493,9 +493,12 @@ onMounted(() => {
   videoInProject.value = !firstTransition.state
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
-  console.log(inAppBrowser.value)
   videoEl.value?.addEventListener('canplaythrough', onVideoReady)
-  !videoInProject.value && videoEl.value?.load()
+
+  if (inAppBrowser.value) {
+    animate()
+  } else if (!videoInProject.value) videoEl.value?.load()
+
   videoInView.value = current.value < componentHeight.value && section.value === 'hero'
   $three.planes.add({
     id: 'reel',
