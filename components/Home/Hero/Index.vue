@@ -147,7 +147,7 @@ const {
 const { current, direction, bounding } = storeToRefs(scrollStore)
 
 const { inAppBrowser, isMobileLayout, isTabletPortrait } = useDevice()
-const { layoutMargin, toScale } = useCss()
+const { layoutMargin, maxWidth, toScale } = useCss()
 const { lvw, vw, vh } = useResize()
 
 const firstTransition = reactive<FirstTransition>({ state: false, step: 1, progress: 0, steps: [] })
@@ -351,6 +351,7 @@ watch(
     reelSmallScale,
     reelSmallTransition,
     isMobileLayout,
+    vw,
   ],
   () => {
     reelSmallVisible.value =
@@ -370,10 +371,11 @@ watch(
     const x: number = toScale(164 * reelSmallScale.value) + offsetX
     const y: number = toScale(82 * reelSmallScale.value) + offsetY
 
+    const maxOffsetX = vw.value > maxWidth.value ? (vw.value - maxWidth.value) * 0.5 : 0
     $three.planes.update({
       id: 'reel--small',
       position: {
-        x: vw.value - x - layoutMargin.value * tX,
+        x: vw.value - x - layoutMargin.value * tX - maxOffsetX,
         y: vh.value * 3 - y - layoutMargin.value * tX,
       },
       fixed: { from: vh.value * 2, to: bounding.value - vh.value },
@@ -937,6 +939,10 @@ onUnmounted(() => {
       pointer-events: none;
       opacity: 0.000001;
       will-change: opacity, transform;
+
+      @include from__desktop--x-large {
+        right: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin) * 1.5);
+      }
 
       .svg__pixel-arrow {
         width: toScale(1.2rem);
