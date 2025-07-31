@@ -257,7 +257,7 @@ const position = computed<{ x: number; y: number }>(() => {
 const isReady = computed<boolean>(() => isPreloaded.value && videoCanPlay.value)
 
 watch(isReady, ready => {
-  ready && animate()
+  ready && requestAnimationFrame(animate)
 })
 
 watch(
