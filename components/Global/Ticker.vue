@@ -58,6 +58,8 @@ let _containerWidth: number = 0
 let _moving: boolean = false
 let _onPan: boolean = false
 let _panDirection: number = 0
+let _seeded: boolean = false
+let _zeroWidthRetries: number = 0
 
 const _Swiper = new Swiper({
   dragOnTarget: !!props.dragOnTarget,
@@ -168,21 +170,52 @@ async function update(params?: { ticker?: NextProjectTicker; ignoreUpdateScroll?
   const { top } = getBounding(el.value)
   y.value = top
 
+  // Snapshot the live marquee state (init/x/reset) BEFORE re-measuring, so a resize
+  // or scroll-layout update doesn't snap the ticker back to its starting position.
+  const previous = items.value.map(item => ({ init: item.init, reset: item.reset, x: item.x }))
+
   let maxHeight = 0
-  items.value.splice(0, items.value.length)
+  let hasZeroWidth = false
+  const measured: Array<{ el: HTMLElement; width: number }> = []
 
   const children: NodeListOf<HTMLElement> = el.value.querySelectorAll(':scope > *')
   for (const child of children) {
     const width = child.clientWidth
     const height = child.clientHeight
     if (height > maxHeight) maxHeight = height
-    items.value.push({ el: child, width: Math.ceil(width), position: 0, init: 0, reset: 0, x: 0 })
+    if (width === 0) hasZeroWidth = true
+    measured.push({ el: child, width: Math.ceil(width) })
+  }
+
+  // iPhone/Safari can report a 0 width while the SVG is still laying out (especially
+  // during the project enter transition). Baking that in breaks the wrap math, so
+  // retry next frame instead. Capped to avoid an infinite loop if it stays hidden.
+  if (hasZeroWidth && _zeroWidthRetries < 10) {
+    _zeroWidthRetries++
+    requestAnimationFrame(() => update(params))
+    return
+  }
+  _zeroWidthRetries = 0
+
+  const firstUpdate = !_seeded
+
+  items.value.splice(0, items.value.length)
+  for (const { el: child, width } of measured) {
+    items.value.push({ el: child, width, position: 0, init: 0, reset: 0, x: 0 })
   }
 
   for (let i = 0; i < items.value.length; i++) {
     const item = items.value[i]
+    const prev = previous[i]
     const nextProjectItem = props.ticker?.items[i]
-    if (nextProjectItem) {
+    if (!firstUpdate && prev) {
+      // Subsequent updates: keep the live animated position; only widths are refreshed.
+      item.init = prev.init
+      item.reset = prev.reset
+      item.x = prev.x
+      gsap.set(item.el, { x: item.x })
+    } else if (nextProjectItem) {
+      // First update with a saved snapshot: seed a seamless project→project continuation.
       item.x = nextProjectItem.x
       item.init = nextProjectItem.init
       item.reset = nextProjectItem.reset
@@ -190,6 +223,7 @@ async function update(params?: { ticker?: NextProjectTicker; ignoreUpdateScroll?
       item.position = nextProjectItem.position
       gsap.set(item.el, { x: item.x })
     } else {
+      // First update, fresh ticker: compute the start layout from cumulative widths.
       for (let j = 0; j < i; j++) {
         item.init += items.value[j].width
         item.reset = item.init
@@ -197,6 +231,8 @@ async function update(params?: { ticker?: NextProjectTicker; ignoreUpdateScroll?
       gsap.set(item.el, { x: item.init })
     }
   }
+
+  _seeded = true
   minHeight.value = maxHeight
   _containerWidth = el.value.clientWidth
 
