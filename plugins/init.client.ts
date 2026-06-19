@@ -37,6 +37,10 @@ export default defineNuxtPlugin(async () => {
     active: (): void => {
       store.updatePreloadedFonts(true)
     },
+    inactive: (): void => {
+      // Fonts failed to load (or timed out): don't block the site, carry on with fallback fonts.
+      store.updatePreloadedFonts(true)
+    },
   })
 
   window.scrollTo({ top: 0 })

@@ -2,7 +2,8 @@
     "recommendations": [
       "esbenp.prettier-vscode",
       "johnsoncodehk.volar",
-      "johnsoncodehk.vscode-typescript-vue-plugin"
+      "johnsoncodehk.vscode-typescript-vue-plugin",
+      "streetsidesoftware.code-spell-checker"
     ]
   }
   

@@ -173,6 +173,7 @@ const playerBlendEl = ref<typeof HomeHeroPlayer>()
 const videoPlaying = ref<boolean>(false)
 const videoInView = ref<boolean>(false)
 const videoCanPlay = ref<boolean>(false)
+let videoReadyTimeout: ReturnType<typeof setTimeout>
 const videoInProject = ref<boolean>(false)
 const heroAnimation = ref<boolean>(false)
 const reelFade = ref<number>(1)
@@ -256,8 +257,13 @@ const position = computed<{ x: number; y: number }>(() => {
 
 const isReady = computed<boolean>(() => isPreloaded.value && videoCanPlay.value)
 
-watch(isReady, ready => {
-  ready && requestAnimationFrame(animate)
+watch(isReady, async ready => {
+  if (!ready) return
+  // Warm up the WebGL pipeline (compile shaders + upload the first video frame)
+  // BEFORE the entrance animation so the first run is as smooth as the next ones.
+  // Gated on isReady so Three is guaranteed to be created (preloaded) by now.
+  await $three.planes?.warmup?.(videoEl.value)
+  requestAnimationFrame(animate)
 })
 
 watch(
@@ -496,7 +502,16 @@ onMounted(() => {
   videoEl.value?.addEventListener('play', onPlay)
   videoEl.value?.addEventListener('pause', onPause)
   videoEl.value?.addEventListener('canplaythrough', onVideoReady)
-  if (inAppBrowser.value) setTimeout(onVideoReady, 1500) // If it's in App Browser, wait for 1.5s and force video ready
+  videoEl.value?.addEventListener('error', onVideoReady) // If the video fails to load, don't block the site
+  // Prefer requestVideoFrameCallback when available: it fires once a frame is
+  // actually decoded and ready to present (warming the decoder), a more reliable
+  // signal than `canplaythrough` for a smooth first paint.
+  if (videoEl.value && 'requestVideoFrameCallback' in videoEl.value) {
+    ;(videoEl.value as any).requestVideoFrameCallback(() => onVideoReady())
+  }
+  // Safety net: never get stuck waiting for `canplaythrough` (unreliable on slow/failed loads).
+  // In-app browsers force it after 1.5s; regular browsers wait a bit longer for the video.
+  videoReadyTimeout = setTimeout(onVideoReady, inAppBrowser.value ? 1500 : 4000)
   !videoInProject.value && videoEl.value?.load()
 
   videoInView.value = current.value < componentHeight.value && section.value === 'hero'
@@ -707,6 +722,7 @@ function updateFirstTransitionSteps() {
 }
 
 function onVideoReady() {
+  clearTimeout(videoReadyTimeout)
   videoCanPlay.value = true
 }
 
@@ -769,6 +785,8 @@ onUnmounted(() => {
   videoEl.value?.removeEventListener('play', onPlay)
   videoEl.value?.removeEventListener('pause', onPause)
   videoEl.value?.removeEventListener('canplaythrough', onVideoReady)
+  videoEl.value?.removeEventListener('error', onVideoReady)
+  clearTimeout(videoReadyTimeout)
   $three.planes.remove('reel')
   $three.planes.destroy()
 })

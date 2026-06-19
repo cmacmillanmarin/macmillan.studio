@@ -127,6 +127,29 @@ export default class {
     this.ready = true
   }
 
+  // Pre-warm the GPU pipeline so the first entrance animation is as smooth as the
+  // following ones. Without this, the plane shaders compile (and the first video
+  // frame uploads) lazily on the first draw, which lands right on the entrance and
+  // stutters. On subsequent loads the driver/browser caches make it smooth.
+  async warmup(video?: HTMLVideoElement) {
+    if (!this.renderer || !this.scene || !this.camera) return
+
+    // Compile the plane shader programs up-front (all planes share one program).
+    this.renderer.compile(this.scene, this.camera)
+
+    // Decode + upload the hero video's first frame so the first texture upload
+    // doesn't happen mid-animation. Best-effort: never block the entrance.
+    if (video && videoLoaded(video)) {
+      try {
+        const texture = new VideoTexture(video)
+        await this.renderer.initTexture(texture)
+        texture.dispose()
+      } catch (e) {
+        this.log(`warmup video texture failed: ${e}`)
+      }
+    }
+  }
+
   preload(img?: HTMLImageElement) {
     if (!img) {
       console.warn('No image to preload')

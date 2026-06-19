@@ -5,7 +5,6 @@
     "[javascript]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "cSpell.words": ["preorder", "subheadline"],
     "[vue]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
