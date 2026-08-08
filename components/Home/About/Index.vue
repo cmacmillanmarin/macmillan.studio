@@ -56,14 +56,14 @@
             v-html="data.collaborator.description" />
         </div>
         <div class="home__about__intro__collaborator__thumbnail">
-          <!-- <button
-            aria-label="Visit Xavier Cussó website"
+          <button
+            aria-label="Visit Gatzara Studio website"
             @click="onCollaboratorImageClick"
             @mouseenter="onCollaboratorMouseEnter"
             @mouseleave="onCollaboratorMouseLeave">
             <SvgGatzara />
-          </button> -->
-          <CustomImage
+          </button>
+          <!-- <CustomImage
             ref="collaboratorImageEl"
             :data="data.collaborator.thumbnail"
             :size="{ d: 0.2, t: 0.4, m: 0.5 }"
@@ -71,7 +71,7 @@
             :virtual="true"
             data-scroll-set-position
             @load="onCollaboratorImageLoaded" />
-          <DecorativeLink label="Xavier Cussó" to="https://xaviercusso.com" type="external" />
+          <DecorativeLink label="Xavier Cussó" to="https://xaviercusso.com" type="external" /> -->
         </div>
       </div>
     </div>
@@ -119,8 +119,8 @@ const { isMobileLayout } = useDevice()
 const introEl = ref<HTMLElement>()
 const thumbnailImageEl = ref<typeof CustomImage>()
 const thumbnailImageElHovered = ref<boolean>(false)
-const collaboratorImageEl = ref<typeof CustomImage>()
-const collaboratorImageElHovered = ref<boolean>(false)
+// const collaboratorImageEl = ref<typeof CustomImage>()
+// const collaboratorImageElHovered = ref<boolean>(false)
 const galleryEl = ref<typeof HomeAboutGallery>()
 
 const imagesFade = ref<number>(0)
@@ -147,10 +147,10 @@ watch(thumbnailImageElHovered, () => {
   else onThumbnailMouseLeave()
 })
 
-watch(collaboratorImageElHovered, () => {
-  if (collaboratorImageElHovered.value) onCollaboratorMouseEnter()
-  else onCollaboratorMouseLeave()
-})
+// watch(collaboratorImageElHovered, () => {
+//   if (collaboratorImageElHovered.value) onCollaboratorMouseEnter()
+//   else onCollaboratorMouseLeave()
+// })
 
 onMounted(() => {
   $three.planes.add({
@@ -165,23 +165,23 @@ onMounted(() => {
       thumbnailImageElHovered.value = value
     },
   })
-  $three.planes.add({
-    id: 'about-collaborator',
-    position: { x: 0, y: 0 },
-    size: { x: 0, y: 0, z: 1 },
-    blackAndWhite: true,
-    opacity: 0,
-    color: rbgToVec4(hexToRgb('#000000')),
-    multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
-    onIntersect: (value: boolean) => {
-      collaboratorImageElHovered.value = value
-    },
-  })
+  // $three.planes.add({
+  //   id: 'about-collaborator',
+  //   position: { x: 0, y: 0 },
+  //   size: { x: 0, y: 0, z: 1 },
+  //   blackAndWhite: true,
+  //   opacity: 0,
+  //   color: rbgToVec4(hexToRgb('#000000')),
+  //   multiplyColor: rbgToVec4(hexToRgb('#bdff00')),
+  //   onIntersect: (value: boolean) => {
+  //     collaboratorImageElHovered.value = value
+  //   },
+  // })
   updateImagePositions()
 })
 
 function updateImagePositions() {
-  if (!thumbnailImageEl.value || !collaboratorImageEl.value) return
+  if (!thumbnailImageEl.value) return
   const thumbnailImageBounding = getBounding(thumbnailImageEl.value.el)
   const thumbnailImageWidth = thumbnailImageEl.value.el.clientWidth
   const thumbnailImageHeight = thumbnailImageEl.value.el.clientHeight
@@ -191,15 +191,16 @@ function updateImagePositions() {
     size: { x: thumbnailImageWidth, y: thumbnailImageHeight, z: 1 },
     border: toScale(isMobileLayout.value ? 8 : 16),
   })
-  const collaboratorImageBounding = getBounding(collaboratorImageEl.value.el)
-  const collaboratorImageWidth = collaboratorImageEl.value.el.clientWidth
-  const collaboratorImageHeight = collaboratorImageEl.value.el.clientHeight
-  $three.planes.update({
-    id: 'about-collaborator',
-    position: { x: collaboratorImageBounding.left, y: collaboratorImageBounding.top },
-    size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
-    border: toScale(isMobileLayout.value ? 8 : 16),
-  })
+  // if (!collaboratorImageEl.value) return
+  // const collaboratorImageBounding = getBounding(collaboratorImageEl.value.el)
+  // const collaboratorImageWidth = collaboratorImageEl.value.el.clientWidth
+  // const collaboratorImageHeight = collaboratorImageEl.value.el.clientHeight
+  // $three.planes.update({
+  //   id: 'about-collaborator',
+  //   position: { x: collaboratorImageBounding.left, y: collaboratorImageBounding.top },
+  //   size: { x: collaboratorImageWidth, y: collaboratorImageHeight, z: 1 },
+  //   border: toScale(isMobileLayout.value ? 8 : 16),
+  // })
 }
 
 async function onReadMore() {
@@ -210,7 +211,7 @@ async function onReadMore() {
 
 function onImagesFadeUpdate() {
   $three.planes.update({ id: 'about-thumbnail', opacity: imagesFade.value })
-  $three.planes.update({ id: 'about-collaborator', opacity: imagesFade.value })
+  // $three.planes.update({ id: 'about-collaborator', opacity: imagesFade.value })
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
@@ -227,10 +228,10 @@ function onThumbnailLoaded(img: HTMLImageElement) {
   updateImagePositions()
 }
 
-function onCollaboratorImageLoaded(img: HTMLImageElement) {
-  $three.planes.update({ id: 'about-collaborator', img })
-  updateImagePositions()
-}
+// function onCollaboratorImageLoaded(img: HTMLImageElement) {
+//   $three.planes.update({ id: 'about-collaborator', img })
+//   updateImagePositions()
+// }
 
 function onThumbnailMouseEnter() {
   updateCursor('none')
@@ -256,37 +257,37 @@ function onThumbnailMouseLeave() {
   })
 }
 
-function onCollaboratorMouseEnter() {
-  updateCursor('none')
-  gsap.killTweensOf(_color)
-  gsap.to(_color, {
-    alpha: 0,
-    duration: 0.4,
-    onUpdate: () => {
-      updateTint('about-collaborator')
-    },
-  })
-  // if (inReelHovered.value) return
-  // const { target } = e
-  // const svgEl = (target as HTMLElement).querySelector('.svg__gatzara')
-  // if (svgEl) {
-  //   const { bottom, left, width } = svgEl.getBoundingClientRect()
-  //   updateCursorPosition({ x: left + width * 0.5 - toScale(6), y: bottom + toScale(12) })
-  //   shuffleIn({ el: svgEl as HTMLElement })
-  // }
+function onCollaboratorMouseEnter(e: MouseEvent) {
+  // updateCursor('none')
+  // gsap.killTweensOf(_color)
+  // gsap.to(_color, {
+  //   alpha: 0,
+  //   duration: 0.4,
+  //   onUpdate: () => {
+  //     updateTint('about-collaborator')
+  //   },
+  // })
+  if (inReelHovered.value) return
+  const { target } = e
+  const svgEl = (target as HTMLElement).querySelector('.svg__gatzara')
+  if (svgEl) {
+    const { bottom, left, width } = svgEl.getBoundingClientRect()
+    updateCursorPosition({ x: left + width * 0.5 - toScale(6), y: bottom + toScale(12) })
+    shuffleIn({ el: svgEl as HTMLElement })
+  }
 }
 
 function onCollaboratorMouseLeave() {
-  updateCursor('default')
-  gsap.killTweensOf(_color)
-  gsap.to(_color, {
-    alpha: 1,
-    duration: 0.4,
-    onUpdate: () => {
-      updateTint('about-collaborator')
-    },
-  })
-  // updateCursorPosition({ x: -1, y: -1 })
+  // updateCursor('default')
+  // gsap.killTweensOf(_color)
+  // gsap.to(_color, {
+  //   alpha: 1,
+  //   duration: 0.4,
+  //   onUpdate: () => {
+  //     updateTint('about-collaborator')
+  //   },
+  // })
+  updateCursorPosition({ x: -1, y: -1 })
 }
 
 function onCollaboratorImageClick(e: MouseEvent) {
@@ -310,7 +311,7 @@ function updateTint(id: string) {
 
 onBeforeUnmount(() => {
   $three.planes.remove('about-thumbnail')
-  $three.planes.remove('about-collaborator')
+  // $three.planes.remove('about-collaborator')
 })
 </script>
 
@@ -497,40 +498,35 @@ onBeforeUnmount(() => {
           @include columns(2);
         }
 
-        // button {
-        //   padding: 0;
-        //   border: none;
-        //   margin-top: toScale(3.2rem, 37.5rem);
-        //   @include from__tablet--landscape {
-        //     position: absolute;
-        //     top: 50%;
-        //     left: 50%;
-        //     transform: translate(-50%, -50%) rotate(-90deg);
-        //     transform-origin: center;
-        //     margin-top: 0;
-        //   }
-        // }
-
-        .custom-image {
-          margin-top: toScale(1.6rem, 37.5rem);
+        button {
+          padding: 0;
+          border: none;
+          margin-top: toScale(3.2rem, 37.5rem);
           @include from__tablet--landscape {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-90deg);
+            transform-origin: center;
             margin-top: 0;
           }
         }
 
-        .decorative-link {
-          will-change: opacity;
-          @include t-black;
-          @include t-b1;
-          .svg__link-arrow {
-            path {
-              fill: var(--black);
-            }
-          }
-        }
+        // .custom-image {
+        //   margin-top: toScale(1.6rem, 37.5rem);
+        //   @include from__tablet--landscape {
+        //     margin-top: 0;
+        //   }
+        // }
 
-        //   svg {
-        //     transform: translateY(25%);
+        // .decorative-link {
+        //   will-change: opacity;
+        //   @include t-black;
+        //   @include t-b1;
+        //   .svg__link-arrow {
+        //     path {
+        //       fill: var(--black);
+        //     }
         //   }
         // }
 
