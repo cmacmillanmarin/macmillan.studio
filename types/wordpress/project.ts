@@ -64,7 +64,14 @@ export interface WP_Project_Object {
   post_name: string
 }
 
-export type ProjectAssetLayoutType = 'full' | 'top' | 'bottom' | 'center' | 'scroll' | 'vimeo'
+export type ProjectAssetLayoutType =
+  | 'full'
+  | 'top'
+  | 'bottom'
+  | 'center'
+  | 'scroll'
+  | 'vimeo'
+  | 'youtube'
 
 export interface WP_Project_Asset {
   layout: ProjectAssetLayoutType
@@ -73,6 +80,7 @@ export interface WP_Project_Asset {
   mobile: boolean
   file: WP_File
   vimeo_url?: string
+  youtube_id?: string
 }
 
 export interface ProjectAsset {
@@ -82,6 +90,7 @@ export interface ProjectAsset {
   mobile: boolean
   file: File
   vimeoURL: string
+  youtubeId: string
 }
 
 export type Projects = Array<Project>
@@ -140,6 +149,7 @@ export function parseProject(params: {
     ? project?.acf.assets.filter(
         asset =>
           (asset.layout === 'vimeo' && asset.vimeo_url) ||
+          (asset.layout === 'youtube' && asset.youtube_id) ||
           (asset.file.type === 'img' && asset.file.image?.url) ||
           (asset.file.type === 'vid' && asset.file.videos.mp4?.url && asset.file.videos.webm?.url)
       )
@@ -162,7 +172,7 @@ export function parseProject(params: {
 
   techStack = orderArrayWithKeywords({
     array: techStack,
-    keywordsStart: ['Nuxt', 'Vue', 'React', 'Three.js', 'Gsap'],
+    keywordsStart: ['Nuxt', 'Vue', 'Astro', '11ty', 'React', 'Three.js', 'Gsap'],
     keywordsEnd: ['Vercel'],
   })
 
@@ -193,6 +203,7 @@ export function parseProject(params: {
         mobile: !!asset.mobile,
         file: parseFile(asset.file),
         vimeoURL: asset.vimeo_url || '',
+        youtubeId: asset.youtube_id || '',
       }
     }),
     recognitions: project?.acf.recognitions?.length

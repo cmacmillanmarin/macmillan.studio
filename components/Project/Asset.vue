@@ -9,6 +9,10 @@
     ]">
     <div class="project__asset__content">
       <ProjectVimeo v-if="data.layout === 'vimeo'" :src="data.vimeoURL" :mobile="data.mobile" />
+      <ProjectYoutube
+        v-else-if="data.layout === 'youtube'"
+        :src="data.youtubeId"
+        :mobile="data.mobile" />
       <ProjectVideo
         v-else-if="data.file.type === 'vid' && data.file.video"
         :data="data.file.video"
@@ -83,7 +87,8 @@ onMounted(() => {
   }
 
   &--layout-center,
-  &--layout-vimeo {
+  &--layout-vimeo,
+  &--layout-youtube {
     .project__asset__content {
       justify-content: center;
       @include from__tablet--landscape {
@@ -143,7 +148,8 @@ onMounted(() => {
     }
   }
 
-  &--layout-vimeo {
+  &--layout-vimeo,
+  &--layout-youtube {
     padding-top: 0rem;
     padding-bottom: 4rem;
     @include from__tablet--landscape {
