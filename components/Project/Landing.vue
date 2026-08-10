@@ -76,6 +76,7 @@
             :title="info.title"
             :content="info.label"
             :animation="true"
+            :html="true"
             @toggle="onAccordionToggle" />
         </div>
       </div>
