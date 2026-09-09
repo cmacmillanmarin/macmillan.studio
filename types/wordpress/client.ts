@@ -40,7 +40,6 @@ export function parseClients(params: { clients?: WP_Clients }): Clients {
 
 export function parseClient(params: { client?: WP_Client }): Client {
   const { client } = params
-  console.log(client?.acf.short_name ?? 'no short name')
   return {
     slug: parseText(client?.slug),
     logo: parseText(client?.acf.logo.url),

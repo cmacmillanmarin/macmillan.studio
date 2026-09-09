@@ -32,7 +32,7 @@
       <p class="home__about__clients__list__title">{{ data.hint }}</p>
       <div class="home__about__clients__list__content">
         <template v-for="client in data.list">
-          <p v-if="!client.featured" class="home__about__clients__list__content__client">
+          <p class="home__about__clients__list__content__client">
             {{ client.name }}
           </p>
         </template>
