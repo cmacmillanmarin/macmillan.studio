@@ -1,21 +1,26 @@
 <template>
-  <div :class="['svg__project__tate-law', { 'svg__project__tate-law--animation': animation }]">
+  <div
+    :class="['svg__project__already-home', { 'svg__project__already-home--animation': animation }]">
     <template v-if="isMobileLayout">
       <Ticker
         ref="firstLineTickerEl"
         :drag-on-target="true"
         :ignore-update-scroll="true"
         :ticker="!next ? nextProjectTickerFirstLine : undefined"
-        class="svg__project__tate-law__ticker"
+        class="svg__project__already-home__ticker"
         @update="emit('update-scroll')">
         <div v-for="i in 2" :key="i">
-          <SvgProjectTateLawFirstLine
+          <SvgProjectAlreadyHomeFirstLine
             v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
         </div>
       </Ticker>
+      <SvgProjectAlreadyHomeSecondLine
+        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
     </template>
     <template v-else>
-      <SvgProjectTateLawFirstLine
+      <SvgProjectAlreadyHomeFirstLine
+        v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
+      <SvgProjectAlreadyHomeSecondLine
         v-transition:in="{ callback: animation ? shuffleIn : () => {} }" />
     </template>
   </div>
@@ -32,7 +37,7 @@ const props = defineProps<{
   color?: string
 }>()
 
-const id = 'project-ticker-tate-law'
+const id = 'project-ticker-already-home'
 
 const nextProjectTickerFirstLine = ref<NextProjectTicker | undefined>(
   window.localStorage.getItem(id)
@@ -57,7 +62,7 @@ const emit = defineEmits(['update-scroll'])
 </script>
 
 <style lang="scss">
-.svg__project__tate-law {
+.svg__project__already-home {
   &--animation {
     svg {
       > path,
@@ -73,15 +78,14 @@ const emit = defineEmits(['update-scroll'])
     > div {
       padding-right: toScale(3.2rem, 37.5rem);
     }
-    &:last-child {
-      margin-bottom: 0;
-    }
   }
 
   &__second-line {
+    margin: auto;
     @include from__tablet--landscape {
+      margin: 0;
       margin-top: toScale(1.2rem);
-      margin-left: 24vw;
+      margin-left: 23.5vw;
     }
   }
 

@@ -87,7 +87,7 @@
               class="home__projects__project__collaborator__name"
               :style="{ color: projectThumbnailCopyColor }">
               {{ data.freelance ? 'w/ ' : 'at ' }}
-              {{ data.collaborator.name }}
+              {{ data.collaborator.shortName || data.collaborator.name }}
             </div>
           </div>
         </transition>
