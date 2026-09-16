@@ -185,6 +185,14 @@ async function play() {
             resolve()
           },
           onStateChange,
+          // cc_load_policy only prevents forcing captions on; youtube may
+          // still auto-enable them from the user's account preferences.
+          // The captions module loads asynchronously, so we clear its track
+          // once the api reports it is available.
+          onApiChange: () => {
+            _player.setOption('captions', 'track', {})
+            _player.setOption('cc', 'track', {})
+          },
         },
       })
     })
@@ -231,8 +239,6 @@ const emit = defineEmits(['update-scroll'])
     height: 100%;
     opacity: 0;
     will-change: opacity;
-    // The player is driven through the api, so blocking the pointer
-    // keeps youtube from showing its title bar and buttons on hover.
     pointer-events: none;
     @include absolute-fill;
   }

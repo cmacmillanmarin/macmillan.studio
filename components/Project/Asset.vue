@@ -6,6 +6,8 @@
       `project__asset--gap-${data.gap}`,
       `project__asset--layout-${data.layout}`,
       { 'project__asset--layout-mobile': data.mobile && isMobileLayout },
+      { 'project__asset--just-mobile': data.device === 'just-mobile' },
+      { 'project__asset--just-desktop': data.device === 'just-desktop' },
     ]">
     <div class="project__asset__content">
       <ProjectVimeo v-if="data.layout === 'vimeo'" :src="data.vimeoURL" :mobile="data.mobile" />
@@ -77,7 +79,6 @@ onMounted(() => {
 
   &--layout-top {
     .project__asset__content {
-      // padding-left: var(--layout-margin);
       justify-content: flex-start;
       @include from__tablet--landscape {
         padding-left: 0;
@@ -99,7 +100,7 @@ onMounted(() => {
 
   &--layout-bottom {
     .project__asset__content {
-      // padding-right: var(--layout-margin);
+      /* padding-right: var(--layout-margin); */
       justify-content: flex-end;
       @include from__tablet--landscape {
         padding-right: 0;
@@ -121,6 +122,19 @@ onMounted(() => {
     .project__asset__content {
       padding-left: 0 !important;
       padding-right: 0 !important;
+    }
+  }
+
+  &--just-mobile {
+    @include from__tablet--landscape {
+      display: none !important;
+    }
+  }
+
+  &--just-desktop {
+    display: none;
+    @include from__tablet--landscape {
+      display: unset;
     }
   }
 

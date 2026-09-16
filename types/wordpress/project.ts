@@ -81,6 +81,7 @@ export interface WP_Project_Asset {
   file: WP_File
   vimeo_url?: string
   youtube_id?: string
+  device: 'all' | 'just-mobile' | 'just-desktop'
 }
 
 export interface ProjectAsset {
@@ -91,6 +92,7 @@ export interface ProjectAsset {
   file: File
   vimeoURL: string
   youtubeId: string
+  device: 'all' | 'just-mobile' | 'just-desktop'
 }
 
 export type Projects = Array<Project>
@@ -204,6 +206,7 @@ export function parseProject(params: {
         file: parseFile(asset.file),
         vimeoURL: asset.vimeo_url || '',
         youtubeId: asset.youtube_id || '',
+        device: asset.device || 'all',
       }
     }),
     recognitions: project?.acf.recognitions?.length
