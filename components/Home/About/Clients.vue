@@ -19,7 +19,8 @@
           <SvgNetflix />
         </div>
         <div class="home__about__clients__featured-mobile__client">
-          <SvgWWF />
+          <!-- <SvgWWF /> -->
+          <SvgUnicef />
         </div>
         <div class="home__about__clients__featured-mobile__client">
           <SvgGorillaz />
@@ -54,7 +55,8 @@
         class="home__about__clients__featured__transition-in"
         v-transition:in="{ callback: enterLogos }" />
       <div class="home__about__clients__featured__client">
-        <SvgBuff />
+        <!-- <SvgBuff /> -->
+        <SvgUnicef />
       </div>
     </div>
 

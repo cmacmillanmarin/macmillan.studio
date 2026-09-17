@@ -34,7 +34,7 @@ const { updateCursor } = store
 const { section, inReelHovered } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
-const items = ref<HomepageAboutGallery>([...props.data])
+const items = ref<HomepageAboutGallery>(sortByYear([...props.data]))
 const itemsFade = ref<number>(0)
 const planeIds = ref<string>(`gallery-image-${Date.now()}`)
 const mouseInGallery = ref<boolean>(false)
@@ -80,6 +80,28 @@ function onMouseLeave() {
 
 function update() {
   tickerEl.value?.update()
+}
+
+function parseYear(alt: string): number {
+  if (!alt) return -Infinity
+  const m = alt.match(/['’](\d{2})/)
+  if (!m) return -Infinity
+  const yy = parseInt(m[1], 10)
+  return yy < 50 ? 2000 + yy : 1900 + yy
+}
+
+function getAlt(item: HomepageAboutGallery[number]): string {
+  return item.type === 'img' ? item.image.alt : item.video?.alt || ''
+}
+
+function sortByYear(arr: HomepageAboutGallery): HomepageAboutGallery {
+  const pinned = arr.filter(x => x.pinned)
+  const rest = arr.filter(x => !x.pinned).sort((a, b) => {
+    const yearDiff = parseYear(getAlt(b)) - parseYear(getAlt(a))
+    if (yearDiff !== 0) return yearDiff
+    return a.columns - b.columns
+  })
+  return [...pinned, ...rest]
 }
 
 defineExpose({

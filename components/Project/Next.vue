@@ -40,6 +40,7 @@ const emit = defineEmits(['in-view', 'update-scroll', 'next-project'])
 .project__next {
   position: relative;
   background-color: v-bind(backgroundColor);
+  max-height: calc(var(--vh) - 24px);
 
   .project__landing {
     position: relative;
