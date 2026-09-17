@@ -4,7 +4,6 @@ import {
   Vector3,
   Vector4,
   Raycaster,
-  TextureLoader,
   PlaneGeometry,
   Mesh,
   ShaderMaterial,
@@ -57,6 +56,7 @@ export default class {
   batch: Array<Plane> = []
 
   objects: Array<Object> = []
+  objectsById: Map<string, Object> = new Map()
   intersects: Array<Object3D> = []
 
   frame: number = 0
@@ -81,11 +81,12 @@ export default class {
 
   videoFrames: WeakMap<HTMLVideoElement, number> = new WeakMap()
 
-  textures: Array<PlaneTexture> = []
-  texturesLoader: TextureLoader = new TextureLoader()
-  texturesLoaderRequests: number = 0
-  texturesLoaderRequestsThreshold: number = 2
-  texturesLoaderRequestQueue: Array<HTMLImageElement> = []
+  textures: Map<string, PlaneTexture> = new Map()
+  textureIds: WeakMap<HTMLImageElement, string> = new WeakMap()
+  texturesDecodeQueue: Array<HTMLImageElement> = []
+  texturesUploadQueue: Array<HTMLImageElement> = []
+  texturesDecoding: number = 0
+  texturesDecodingMax: number = 3
 
   rotateLogo: Function = () => {}
   updateCursor: Function = () => {}
@@ -93,7 +94,6 @@ export default class {
   getDevicePixelRatio: Function = (): number => 1
 
   _onClick: (this: Window, ev: MouseEvent) => any = () => {}
-  _onTextureLoaded: (data: Texture) => void = () => {}
   _onMouseMovement: (this: Window, ev: MouseEvent) => any = () => {}
   _onTouchStart: (this: Window, ev: TouchEvent) => any = () => {}
   _onTouchEnd: (this: Window, ev: TouchEvent) => any = () => {}
@@ -160,54 +160,70 @@ export default class {
     this.createTexture(img)
   }
 
+  // Texture pipeline: decode off the main thread (a few in parallel, FIFO), then
+  // upload to the GPU one per frame from render(). Doing the upload up-front (with
+  // needsUpdate set before initTexture, otherwise three defers it) keeps the decode
+  // + upload stall away from the frame where the plane first shows the image.
   createTexture(img: HTMLImageElement): PlaneTexture {
     const id = this.getTextureId(img)
     const texture: PlaneTexture = { id }
-    this.textures.push(texture)
-    this.loadTexture(img)
+    this.textures.set(id, texture)
+    this.texturesDecodeQueue.push(img)
+    this.decodeTextures()
     return texture
   }
 
-  loadTexture(img: HTMLImageElement) {
-    if (this.texturesLoaderRequests <= this.texturesLoaderRequestsThreshold) {
-      this.texturesLoaderRequests++
-      this.initTexture(img, this._onTextureLoaded)
-    } else {
-      this.texturesLoaderRequestQueue.push(img)
+  decodeTextures() {
+    while (this.texturesDecoding < this.texturesDecodingMax && this.texturesDecodeQueue.length) {
+      const img = this.texturesDecodeQueue.shift() as HTMLImageElement
+      this.texturesDecoding++
+      const done = () => {
+        this.texturesDecoding--
+        this.texturesUploadQueue.push(img)
+        this.decodeTextures()
+      }
+      img.decode ? img.decode().then(done, done) : done()
     }
   }
 
-  async initTexture(img: HTMLImageElement, cb: Function) {
+  uploadTexture() {
+    const img = this.texturesUploadQueue.shift()
+    if (!img || !this.renderer) return
+    const texture = this.textures.get(this.getTextureId(img))
+    if (!texture) return // disposed while it was loading
     const txt = new Texture(img)
-    await this.renderer?.initTexture(txt)
     txt.needsUpdate = true
-    cb(txt)
+    this.renderer.initTexture(txt)
+    texture.txt = txt
   }
 
-  async onTextureLoaded(txt: Texture) {
-    const texture = this.getTexture(txt.image)
-    texture.txt = txt
-    this.texturesLoaderRequests--
-    const queueTexture = this.texturesLoaderRequestQueue.pop()
-    queueTexture && this.loadTexture(queueTexture)
+  disposeTexture(img: HTMLImageElement) {
+    const id = this.getTextureId(img)
+    const inUse = this.objects.some(o => o.img && this.getTextureId(o.img) === id)
+    if (inUse) return
+    this.textures.get(id)?.txt?.dispose()
+    this.textures.delete(id)
+    this.texturesDecodeQueue = this.texturesDecodeQueue.filter(i => this.getTextureId(i) !== id)
+    this.texturesUploadQueue = this.texturesUploadQueue.filter(i => this.getTextureId(i) !== id)
   }
 
   getTextureId(img: HTMLImageElement): string {
+    const cached = this.textureIds.get(img)
+    if (cached !== undefined) return cached
     const src = img.src || img.currentSrc
-    return slugify(src)
+    const id = slugify(src)
+    src && this.textureIds.set(img, id)
+    return id
   }
 
   getTexture(img: HTMLImageElement): PlaneTexture {
-    const id = this.getTextureId(img)
-    const existingTexture = this.textures.find(t => t.id === id)
-    if (existingTexture) return existingTexture
-    return this.createTexture(img)
+    return this.textures.get(this.getTextureId(img)) || this.createTexture(img)
   }
 
   add(param: ObjectParam) {
     this.log('add()')
 
-    this.objects.push({
+    const object: Object = {
       ...param,
       meshId: -1,
       border: param.border || 0,
@@ -233,15 +249,16 @@ export default class {
       onIntersect: param.onIntersect || null,
       onInView: param.onInView || null,
       inView: false,
-    })
+    }
+    this.objects.push(object)
+    this.objectsById.set(object.id, object)
   }
 
   getObject(id: string): Object | undefined {
-    return this.objects.find(obj => obj.id === id)
+    return this.objectsById.get(id)
   }
 
   update(param: ObjectParam) {
-    this.log(`update() ${param.img}`)
     const object = this.getObject(param.id)
     if (object) {
       object.zoom = param.zoom !== undefined ? param.zoom : object.zoom
@@ -286,12 +303,19 @@ export default class {
           const index = this.objects.findIndex(object => object.id === id)
           const object = this.objects[index]
           this.releasePlane(object.meshId)
-          this.objects.splice(index, 1)
+          this.removeObject(index)
         },
       })
     } else if (index !== -1) {
-      this.objects.splice(index, 1)
+      this.removeObject(index)
     }
+  }
+
+  removeObject(index: number) {
+    const [object] = this.objects.splice(index, 1)
+    if (!object) return
+    this.objectsById.get(object.id) === object && this.objectsById.delete(object.id)
+    object.img && this.disposeTexture(object.img)
   }
 
   updateCamera(y: number) {
@@ -520,7 +544,7 @@ export default class {
     if (!video) return
 
     const { uniforms } = object.mesh.material
-    const { clientWidth, clientHeight, width, height, readyState, HAVE_CURRENT_DATA } = video
+    const { readyState, HAVE_CURRENT_DATA } = video
 
     const loaded = videoLoaded(video)
 
@@ -534,6 +558,7 @@ export default class {
     if (loaded && !object.videoAssigned) {
       object.videoAssigned = true
 
+      const { clientWidth, clientHeight, width, height } = video
       const videoWidth = clientWidth || width
       const videoHeight = clientHeight || height
 
@@ -576,6 +601,8 @@ export default class {
     this.frame++
 
     this.renderer.clear()
+
+    this.uploadTexture()
 
     this.intersects = this.raycaster.intersectObjects(this.scene.children, false).map(i => i.object)
 
@@ -761,7 +788,6 @@ export default class {
 
   bind() {
     this._onClick = this.onClick.bind(this)
-    this._onTextureLoaded = this.onTextureLoaded.bind(this)
     this._onMouseMovement = this.onMouseMovement.bind(this)
     this._onTouchStart = this.onTouchStart.bind(this)
     this._onTouchEnd = this.onTouchEnd.bind(this)
@@ -796,6 +822,7 @@ export default class {
     this.camera = null
     this.renderer = null
     this.objects = []
+    this.objectsById.clear()
     for (const i in this.batch) {
       delete this.batch[i]
     }
