@@ -16,12 +16,15 @@ const IS_OFFLINE: boolean = OFFLINE == '1'
 const IS_PRODUCTION: boolean = PRODUCTION == '1'
 const DEPLOY_DATE: string = Date.now().toString()
 
-// const robotsRules: Array<any> = [
-//   { UserAgent: '*' },
-//   { Disallow: '/' },
-//   { BlankLine: true },
-//   { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
-// ]
+const robotsRules: Array<any> = IS_PRODUCTION
+  ? [
+      { UserAgent: '*' },
+      { Allow: '/' },
+      { Disallow: '/api/' },
+      { BlankLine: true },
+      { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
+    ]
+  : [{ UserAgent: '*' }, { Disallow: '/' }]
 
 const genericRouteRules = IS_DEV ? { ssr: true } : { prerender: true }
 
@@ -68,9 +71,9 @@ export default defineNuxtConfig({
 
   modules: ['@pinia/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap'],
 
-  // robots: {
-  //   rules: robotsRules,
-  // },
+  robots: {
+    rules: robotsRules,
+  },
 
   site: {
     title: 'Christian MacMillan ~ Independent Tech Lead—Developer',
