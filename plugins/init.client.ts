@@ -30,6 +30,8 @@ export default defineNuxtPlugin(async () => {
     ease: ease(),
   })
 
+  gsap.ticker.fps(60)
+
   WebFont.load({
     custom: {
       families: ['HelveticaNowDisplayMedium', 'HelveticaNowDisplayBold'],

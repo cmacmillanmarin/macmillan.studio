@@ -79,6 +79,8 @@ export default class {
 
   raycaster: Raycaster = new Raycaster()
 
+  videoFrames: WeakMap<HTMLVideoElement, number> = new WeakMap()
+
   textures: Array<PlaneTexture> = []
   texturesLoader: TextureLoader = new TextureLoader()
   texturesLoaderRequests: number = 0
@@ -229,6 +231,7 @@ export default class {
       video: param.video || null,
       onClick: param.onClick || null,
       onIntersect: param.onIntersect || null,
+      onInView: param.onInView || null,
       inView: false,
     })
   }
@@ -263,12 +266,13 @@ export default class {
         param.blackAndWhite !== undefined ? param.blackAndWhite : object.blackAndWhite
       object.forcePixel = param.forcePixel !== undefined ? param.forcePixel : object.forcePixel
       object.onIntersect = param.onIntersect !== undefined ? param.onIntersect : object.onIntersect
+      object.onInView = param.onInView !== undefined ? param.onInView : object.onInView
     }
   }
 
-  remove(params: { id: string }) {
+  remove(params: string | { id: string }) {
     if (!this.objects) return
-    const { id } = params
+    const id = typeof params === 'string' ? params : params.id
     const index = this.objects.findIndex(object => object.id === id)
     const object = this.objects[index]
     if (!object) return
@@ -304,6 +308,8 @@ export default class {
     for (const object of this.objects) {
       object.inView = this.inView(object)
 
+      if (object.inView !== !!object.wasInView) object.onInView?.(object.inView)
+
       if (object.inView || object.wasInView) {
         if (!object.mesh) {
           const plane = this.getAvailablePlane(object.id)
@@ -317,6 +323,7 @@ export default class {
           object.wasClickable = false
           object.previousCursor = object.cursor
           object.videoAssigned = object.imgAssigned = false
+          object.videoFrame = undefined
           this.assignPlaneToObject({ plane, object })
         }
 
@@ -455,11 +462,17 @@ export default class {
 
     const { uniforms } = object.mesh.material
 
+    // Meshes are pooled, so this one may have just been released by another object
+    // whose texture fade / pixel tweens are still running. Kill them and drop its
+    // texture, otherwise the previous image bleeds into this object until its own
+    // texture is ready.
+    gsap.killTweensOf([uniforms.uFade, uniforms.uTextureFade, uniforms.uPixel])
     uniforms.uTextureFade.value = 0
+    uniforms.uTextureImage.value = null
+    uniforms.uPixel.value = 0
     uniforms.uBlackAndWhite.value = object.blackAndWhite ? 1 : 0
     uniforms.uDevicePixelRatio.value = this.getDevicePixelRatio()
 
-    gsap.killTweensOf(uniforms.uFade)
     gsap[object.fade ? 'to' : 'set'](uniforms.uFade, { value: 1 })
   }
 
@@ -486,6 +499,22 @@ export default class {
     }
   }
 
+  // One requestVideoFrameCallback loop per video element, bumping a counter each time
+  // the browser presents a new frame. processVideo() compares it against the last
+  // frame it uploaded so the GPU upload happens at the video's frame rate (24-30fps)
+  // instead of on every render (120fps on ProMotion), which otherwise starves the
+  // video decoder and makes the videos themselves drop frames.
+  trackVideoFrames(video: HTMLVideoElement) {
+    if (this.videoFrames.has(video)) return
+    this.videoFrames.set(video, 0)
+    if (!('requestVideoFrameCallback' in video)) return
+    const onFrame = () => {
+      this.videoFrames.set(video, (this.videoFrames.get(video) || 0) + 1)
+      video.requestVideoFrameCallback(onFrame)
+    }
+    video.requestVideoFrameCallback(onFrame)
+  }
+
   processVideo(object: Object) {
     const { video } = object
     if (!video) return
@@ -495,7 +524,12 @@ export default class {
 
     const loaded = videoLoaded(video)
 
-    uniforms.uTextureVideo.value.needsUpdate = readyState >= HAVE_CURRENT_DATA && loaded
+    this.trackVideoFrames(video)
+    const frame = this.videoFrames.get(video)
+    const newFrame = 'requestVideoFrameCallback' in video ? frame !== object.videoFrame : true
+    object.videoFrame = frame
+
+    uniforms.uTextureVideo.value.needsUpdate = readyState >= HAVE_CURRENT_DATA && loaded && newFrame
 
     if (loaded && !object.videoAssigned) {
       object.videoAssigned = true
@@ -505,6 +539,7 @@ export default class {
 
       uniforms.uTextureType.value = 0
       uniforms.uTextureVideo.value.image = video
+      uniforms.uTextureVideo.value.needsUpdate = true
       uniforms.uTextureSize.value.x = object.size.x
       uniforms.uTextureSize.value.y = (object.size.x * videoHeight) / videoWidth
 
