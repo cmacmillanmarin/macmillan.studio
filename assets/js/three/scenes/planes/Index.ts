@@ -338,7 +338,7 @@ export default class {
         if (!object.mesh) {
           const plane = this.getAvailablePlane(object.id)
           if (!plane) {
-            console.warn(`No available planes for ${object.id}`)
+            // console.warn(`No available planes for ${object.id}`)
             continue
           }
           object.firstFrame = true
