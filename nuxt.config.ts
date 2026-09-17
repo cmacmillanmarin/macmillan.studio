@@ -81,9 +81,10 @@ export default defineNuxtConfig({
   },
 
   sitemap: {
-    // defaults: {
-    //   lastmod: new Date(),
-    // },
+    defaults: {
+      lastmod: new Date().toISOString(),
+      changefreq: 'weekly',
+    },
     // @ts-expect-error
     hostname: `${FE_PROTOCOL}${FE_BASE_URL}`,
     gzip: true,
