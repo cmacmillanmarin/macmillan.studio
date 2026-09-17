@@ -6,6 +6,18 @@ export function ease(): string {
   return CustomEase.create('custom', 'M0,0 C0.53,0.24 0.08,0.99 1,1')
 }
 
+// All the per-tick motion in the site (ticker speed, scroll/cursor lerps) is tuned for
+// a 60fps tick. The gsap ticker runs at the display refresh rate, so on 120Hz screens
+// scale per-tick speeds by deltaRatio() and use lerp() for easings, and the motion
+// feels the same on every monitor while rendering at full refresh rate.
+export function deltaRatio(): number {
+  return gsap.ticker.deltaRatio(60)
+}
+
+export function lerp(current: number, target: number, factor: number): number {
+  return current + (target - current) * (1 - Math.pow(1 - factor, deltaRatio()))
+}
+
 export function prepareFadeIn(el: Element) {
   gsap.set(el, { opacity: 0 })
 }
@@ -30,12 +42,13 @@ export async function fadeIn(params: {
       opacity: 1,
     }
     gsap.killTweensOf(el)
-    gsap.set(el, { y: translate ? 16 : undefined })
+    gsap.set(el, { y: translate ? 16 : undefined, willChange: 'opacity' })
     gsap.to(el, { y: translate ? 0 : undefined, delay, ease: 'Power1.out' })
     gsap.to(el, {
       ...opacity,
       delay,
       onComplete: () => {
+        gsap.set(el, { clearProps: 'willChange' })
         done && done()
         resolve()
       },
@@ -64,10 +77,12 @@ export async function fadeOut(params: {
       y: translate ? 16 : undefined,
     }
     gsap.killTweensOf(el)
+    gsap.set(el, { willChange: 'opacity' })
     gsap.to(el, {
       ...opacity,
       delay,
       onComplete: () => {
+        gsap.set(el, { clearProps: 'willChange' })
         done && done()
         resolve()
       },

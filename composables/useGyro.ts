@@ -4,6 +4,7 @@
 //
 
 import { round } from '~/utils/index'
+import { lerp } from '~/utils/animations'
 interface GyroOptions {
   normalizedY: boolean
 }
@@ -63,9 +64,9 @@ export default function useGyro(opts?: GyroOptions) {
   function raf(): void {
     rendering = true
 
-    x.value += (tx - x.value) * 0.025
-    y.value += (ty - y.value) * 0.025
-    z.value += (tz - z.value) * 0.025
+    x.value = lerp(x.value, tx, 0.025)
+    y.value = lerp(y.value, ty, 0.025)
+    z.value = lerp(z.value, tz, 0.025)
 
     if (inTarget()) {
       x.value = tx

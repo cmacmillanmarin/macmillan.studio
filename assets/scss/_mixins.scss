@@ -55,9 +55,10 @@
   will-change: opacity;
 }
 
+// Elements start invisible and are faded in by fadeIn(); the compositor layer is
+// promoted only while the tween runs (see utils/animations.ts), not permanently.
 @mixin will-fade() {
   opacity: 0.00001;
-  will-change: opacity;
 }
 
 @mixin absolute-fill() {

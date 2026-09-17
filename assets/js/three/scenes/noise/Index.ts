@@ -31,6 +31,7 @@ export default class Noise {
   maxPixelRatio: number = 2
 
   rendering: boolean = false
+  frame: number = 0
 
   toScale: Function = (): number => 1
   getDevicePixelRatio: Function = (): number => 1
@@ -67,8 +68,12 @@ export default class Noise {
     this.ready = true
   }
 
+  // Film grain doesn't need 60fps: render every other tick (30fps at the 60fps gsap
+  // ticker). It stays at device pixel ratio because the grain size is one device
+  // pixel and rendering lower makes it visibly coarser.
   render() {
     if (!this.noise || !this.scene || !this.renderer || !this.camera) return
+    if (++this.frame % 2) return
     this.noise.material.uniforms.uFrame.value++
     this.noise.material.uniforms.uTime.value += 0.05
 

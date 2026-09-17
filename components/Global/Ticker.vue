@@ -13,6 +13,7 @@
 import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import { toPx, round } from '~/utils/index'
+import { lerp, deltaRatio } from '~/utils/animations'
 import useScrollStore from '~/store/useScrollStore'
 import type { TickerItems, TickerItem } from '~/types/front'
 import { Swiper, type PanParams } from '~/utils/swiper'
@@ -120,10 +121,10 @@ function move() {
   if (_onPan) {
     _direction = _panDirection
   } else {
-    _panSpeed += (0 - _panSpeed) * 0.1
-    _target += _direction * (_speed + _panSpeed)
+    _panSpeed = lerp(_panSpeed, 0, 0.1)
+    _target += _direction * (_speed + _panSpeed) * deltaRatio()
   }
-  _current += (_target - _current) * 0.1
+  _current = lerp(_current, _target, 0.1)
   const orderedItems = _direction === -1 ? [...items.value] : [...items.value].reverse()
   for (let i = 0; i < orderedItems.length; i++) {
     const item = orderedItems[i]

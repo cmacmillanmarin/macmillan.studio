@@ -8,6 +8,7 @@
 import { storeToRefs } from 'pinia'
 import useScrollStore from '~/store/useScrollStore'
 import { toPercentage } from '~/utils'
+import { lerp } from '~/utils/animations'
 
 const { progress } = storeToRefs(useScrollStore())
 const { addTicker, killTicker } = useRaf()
@@ -25,7 +26,7 @@ watch(current, (): void => {
 })
 
 function raf(): void {
-  current.value += (progress.value - current.value) * 0.1
+  current.value = lerp(current.value, progress.value, 0.1)
   inTarget() && kill()
 }
 

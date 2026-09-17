@@ -65,15 +65,16 @@
         class="home__hero__content__video"
         width="1920"
         height="1080"
-        :preload="!!$route.params.slug ? 'none' : 'true'"
+        :preload="!!$route.params.slug ? 'none' : 'auto'"
         autoplay
         muted
         loop
         playsinline
         @timeupdate="onVideoPlaying"
         @ended="closeReel">
-        <source src="/assets/video/reel--short.webm" type="video/webm" />
+        <!-- H.264 first: hardware-decoded everywhere; the AV1 webm is software-decoded on most machines -->
         <source src="/assets/video/reel--short.mp4" type="video/mp4" />
+        <source src="/assets/video/reel--short.webm" type="video/webm" />
       </video>
     </div>
 
@@ -625,8 +626,8 @@ function closeReel() {
     noPixel: false,
   })
   if (videoEl.value) {
-    videoEl.value.src = '/assets/video/reel--short.webm'
-    videoEl.value.setAttribute('type', 'video/webm')
+    videoEl.value.src = '/assets/video/reel--short.mp4'
+    videoEl.value.setAttribute('type', 'video/mp4')
     videoEl.value.muted = true
     videoEl.value.loop = true
     videoEl.value.play()

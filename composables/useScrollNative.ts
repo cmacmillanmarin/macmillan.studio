@@ -1,5 +1,6 @@
 import { gsap } from 'gsap/gsap-core'
 import type { Direction } from '~/types/front/store/scroll'
+import { lerp } from '~/utils/animations'
 
 export default function useScrollNative() {
   const { vh } = useResize()
@@ -54,7 +55,7 @@ export default function useScrollNative() {
 
   function onNativeScrollRaf() {
     if (!onNativeScrollInTarget()) {
-      _current += (_target - _current) * 0.175
+      _current = lerp(_current, _target, 0.175)
     } else {
       _current = _target
     }

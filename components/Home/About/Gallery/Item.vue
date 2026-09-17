@@ -24,8 +24,8 @@
         crossorigin="anonymous"
         @canplaythrough="onVideoLoaded"
         @timeupdate="onVideoTimeUpdate">
-        <source :src="data.video.webm" type="video/webm" />
         <source :src="data.video.mp4" type="video/mp4" />
+        <source :src="data.video.webm" type="video/webm" />
       </video>
     </div>
     <div ref="creditsEl" class="home__about__gallery__item__credits">

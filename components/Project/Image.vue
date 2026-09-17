@@ -21,6 +21,7 @@ import useStore from '~/store/useStore'
 import type { Image } from '~/types/wordpress'
 import type { ProjectAssetLayoutType } from '~/types/wordpress/project'
 import { Swiper } from '~/utils/swiper'
+import { lerp } from '~/utils/animations'
 
 const props = defineProps<{
   data: Image
@@ -158,7 +159,7 @@ function onPanEnd() {
 
 function move() {
   _rendering = true
-  _current += (_target - _current) * 0.1
+  _current = lerp(_current, _target, 0.1)
   if (Math.abs(_target - _current) < 0.05) {
     _current = _target
     _rendering = false

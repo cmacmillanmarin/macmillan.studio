@@ -58,7 +58,7 @@ import { gsap } from 'gsap/gsap-core'
 import { type Project } from '~/types/wordpress/project'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { transitionFadeOut } from '~/utils/animations'
+import { transitionFadeOut, lerp } from '~/utils/animations'
 import { storeToRefs } from 'pinia'
 import { toPx, getKeyboardFocusableElements } from '~/utils'
 import { Swiper, type PanParams } from '~/utils/swiper'
@@ -213,7 +213,7 @@ function _clampTarget(value: number): number {
 }
 
 function _onRaf() {
-  _scroll.current += (_scroll.target - _scroll.current) * 0.1
+  _scroll.current = lerp(_scroll.current, _scroll.target, 0.1)
   const x = isMobileLayout.value ? 0 : _scroll.current * -1
   const y = isMobileLayout.value ? _scroll.current * -1 : 0
   contentEl.value && gsap.set(contentEl.value, { x, y })

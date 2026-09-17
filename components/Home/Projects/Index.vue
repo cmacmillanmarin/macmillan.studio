@@ -83,13 +83,13 @@
             :alt="video.alt"
             :width="video.width"
             :height="video.height"
-            preload="true"
+            preload="auto"
             muted
             loop
             playsinline
             crossorigin="anonymous">
-            <source :src="video.webm" type="video/webm" />
             <source :src="video.mp4" type="video/mp4" />
+            <source :src="video.webm" type="video/webm" />
           </video>
         </template>
       </div>

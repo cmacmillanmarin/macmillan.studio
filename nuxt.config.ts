@@ -56,6 +56,25 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: 'en',
       },
+      // The preloader waits for these (fonts + logo mesh); hint them from the HTML so
+      // they download in parallel with the JS instead of after CSS/plugin execution.
+      link: [
+        {
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff',
+          href: '/assets/font/HelveticaNowDisplayMedium.woff',
+          crossorigin: 'anonymous',
+        },
+        {
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff',
+          href: '/assets/font/HelveticaNowDisplayBold.woff',
+          crossorigin: 'anonymous',
+        },
+        { rel: 'preload', as: 'fetch', href: '/assets/gltf/logo.glb', crossorigin: 'anonymous' },
+      ],
     },
   },
 

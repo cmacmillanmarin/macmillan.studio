@@ -42,8 +42,6 @@ watch(keyPressed, () => {
 
 <style lang="scss">
 .__main {
-  will-change: opacity;
-
   // * {
   //   cursor: none !important;
   // }
