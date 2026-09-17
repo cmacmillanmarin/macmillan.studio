@@ -149,11 +149,13 @@ export default function useScroll() {
   }
 
   function onScroll(data: Data) {
+    // Render callbacks (ticker, project labels) write this frame's plane positions,
+    // so they must run before three draws or the planes trail the DOM by a frame.
+    for (const callback of renderCallbacks.value) callback()
     if ($three.ready) {
       $three.updateCamera(data.current)
       $three.render()
     }
-    for (const callback of renderCallbacks.value) callback()
     updateSectionThrottle(data.speed > 1000)
     updateScrollData(data)
   }
