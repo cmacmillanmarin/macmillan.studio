@@ -44,6 +44,7 @@ export interface WP_Homepage_About_Gallery_Image {
     mp4?: WP_Video
   }
   columns: string
+  pinned: boolean
 }
 
 export interface WP_Homepage {
@@ -140,6 +141,7 @@ export interface HomepageAboutGalleryItem {
   type: MediaType
   image: Image
   video?: FileVideo
+  pinned: boolean
   columns: number
 }
 
@@ -150,6 +152,7 @@ function parseGallery(data?: Array<WP_Homepage_About_Gallery_Image>): HomepageAb
       type: item.type || 'img',
       image: parseImage(item.image),
       video: parseFile(item).video,
+      pinned: item.pinned || false,
       columns: parseFloat(item.columns || '3'),
     })
   }

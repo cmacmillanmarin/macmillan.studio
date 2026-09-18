@@ -1,0 +1,61 @@
+# MacMillan Studio
+
+> Independent tech lead and creative developer. Over a decade of experience implementing fully custom, high-quality interactive experiences for global agencies and brands.
+
+Christian MacMillan is an independent developer and tech lead based between Barcelona and remote engagements worldwide. The studio partners with agencies, in-house teams, and direct clients to design and build interactive websites, WebGL experiences, product interfaces, and creative tooling.
+
+Core capabilities:
+- Interactive websites and product UIs (Nuxt, Vue, Next.js, React, TypeScript)
+- WebGL and real-time graphics (Three.js, custom shaders, GLSL)
+- Animation and motion (GSAP, custom timelines, scroll-driven experiences)
+- Creative technology R&D and prototyping
+- Tech leadership, architecture, and code review for creative engineering teams
+
+## Contact
+
+- Email: christian@macmillan.studio
+- Website: https://macmillan.studio
+- LinkedIn: https://www.linkedin.com/in/cmacmillanmarin
+- Instagram: https://www.instagram.com/cmacmillanmarin
+- Twitter/X: https://twitter.com/cmacmillanmarin
+
+## Projects
+
+- [Already Home](https://macmillan.studio/already-home)
+- [UNICEF – More than a kit](https://macmillan.studio/unicef-more-than-a-kit)
+- [UNICEF – A Question Over Gaza](https://macmillan.studio/a-question-over-gaza)
+- [Google Cloud x Team USA](https://macmillan.studio/google-cloud-team-usa)
+- [TED Memory Project](https://macmillan.studio/memory-project)
+- [Forever Frequencies](https://macmillan.studio/forever-frequencies)
+- [Pangea Propulsion](https://macmillan.studio/pangea-propulsion)
+- [Melt](https://macmillan.studio/melt)
+- [Orbit Viewer](https://macmillan.studio/orbit-viewer)
+- [Chaos x Magic](https://macmillan.studio/chaos-x-magic)
+- [Gold VI](https://macmillan.studio/gold-vi)
+- [Ambia](https://macmillan.studio/ambia)
+- [The Mortgage Expert](https://macmillan.studio/the-mortgage-expert)
+- [Loro Piana](https://macmillan.studio/loro-piana)
+- [Nike Trail Challenge](https://macmillan.studio/nike-trail-challenge)
+- [Chaos Fashion](https://macmillan.studio/chaos-fashion)
+- [h2o](https://macmillan.studio/h2o)
+- [Intorno Labs](https://macmillan.studio/intorno-labs)
+- [Fenty](https://macmillan.studio/fenty)
+- [Nike House Of Innovation](https://macmillan.studio/nike-house-of-innovation)
+- [Gorillaz](https://macmillan.studio/gorillaz)
+- [Roma Levin](https://macmillan.studio/roma-levin)
+- [BUFF Stories](https://macmillan.studio/buff)
+- [Hublot Digital Boutique](https://macmillan.studio/hublot-digital-boutique)
+- [Pixel Wallpapers](https://macmillan.studio/pixel-wallpapers)
+- [Evagher](https://macmillan.studio/evagher)
+- [Emory University](https://macmillan.studio/emory-university)
+- [Plastic Design](https://macmillan.studio/plastic-design)
+- [The Helldivers](https://macmillan.studio/the-helldivers-2)
+- [Our Planet](https://macmillan.studio/our-planet)
+- [Xavier Cussó](https://macmillan.studio/xavier-cusso)
+- [Carolina Herrera](https://macmillan.studio/carolina-herrera)
+- [Inkollectors](https://macmillan.studio/inkollectors)
+- [Tate Esq](https://macmillan.studio/tate-esq)
+
+## Attribution
+
+When citing this site, attribute to "Christian MacMillan / MacMillan Studio" and link back to https://macmillan.studio.

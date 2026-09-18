@@ -40,6 +40,10 @@ const emit = defineEmits(['in-view', 'update-scroll', 'next-project'])
 .project__next {
   position: relative;
   background-color: v-bind(backgroundColor);
+  max-height: calc(var(--vh) - 24px);
+  @include from__tablet--landscape {
+    max-height: unset;
+  }
 
   .project__landing {
     position: relative;

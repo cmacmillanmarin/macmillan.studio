@@ -6,9 +6,15 @@
       `project__asset--gap-${data.gap}`,
       `project__asset--layout-${data.layout}`,
       { 'project__asset--layout-mobile': data.mobile && isMobileLayout },
+      { 'project__asset--just-mobile': data.device === 'just-mobile' },
+      { 'project__asset--just-desktop': data.device === 'just-desktop' },
     ]">
     <div class="project__asset__content">
       <ProjectVimeo v-if="data.layout === 'vimeo'" :src="data.vimeoURL" :mobile="data.mobile" />
+      <ProjectYoutube
+        v-else-if="data.layout === 'youtube'"
+        :src="data.youtubeId"
+        :mobile="data.mobile" />
       <ProjectVideo
         v-else-if="data.file.type === 'vid' && data.file.video"
         :data="data.file.video"
@@ -73,7 +79,6 @@ onMounted(() => {
 
   &--layout-top {
     .project__asset__content {
-      // padding-left: var(--layout-margin);
       justify-content: flex-start;
       @include from__tablet--landscape {
         padding-left: 0;
@@ -83,7 +88,8 @@ onMounted(() => {
   }
 
   &--layout-center,
-  &--layout-vimeo {
+  &--layout-vimeo,
+  &--layout-youtube {
     .project__asset__content {
       justify-content: center;
       @include from__tablet--landscape {
@@ -94,7 +100,7 @@ onMounted(() => {
 
   &--layout-bottom {
     .project__asset__content {
-      // padding-right: var(--layout-margin);
+      /* padding-right: var(--layout-margin); */
       justify-content: flex-end;
       @include from__tablet--landscape {
         padding-right: 0;
@@ -116,6 +122,19 @@ onMounted(() => {
     .project__asset__content {
       padding-left: 0 !important;
       padding-right: 0 !important;
+    }
+  }
+
+  &--just-mobile {
+    @include from__tablet--landscape {
+      display: none !important;
+    }
+  }
+
+  &--just-desktop {
+    display: none;
+    @include from__tablet--landscape {
+      display: unset;
     }
   }
 
@@ -143,7 +162,8 @@ onMounted(() => {
     }
   }
 
-  &--layout-vimeo {
+  &--layout-vimeo,
+  &--layout-youtube {
     padding-top: 0rem;
     padding-bottom: 4rem;
     @include from__tablet--landscape {

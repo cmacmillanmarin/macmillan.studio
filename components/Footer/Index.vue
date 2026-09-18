@@ -173,11 +173,11 @@ const rrss = ref([
     to: 'https://www.instagram.com/cmacmillanmarin',
     type: 'external',
   },
-  {
-    label: 'Twitter',
-    to: 'https://www.twitter.com/cmacmillanmarin',
-    type: 'external',
-  },
+  // {
+  //   label: 'Twitter',
+  //   to: 'https://www.twitter.com/cmacmillanmarin',
+  //   type: 'external',
+  // },
   {
     label: 'GitHub',
     to: 'https://www.github.com/cmacmillanmarin',
@@ -188,11 +188,11 @@ const rrss = ref([
     to: 'https://www.linkedin.com/in/cmacmillanmarin/',
     type: 'external',
   },
-  {
-    label: 'Unsplash',
-    to: 'https://unsplash.com/@cmacmillanmarin',
-    type: 'external',
-  },
+  // {
+  //   label: 'Unsplash',
+  //   to: 'https://unsplash.com/@cmacmillanmarin',
+  //   type: 'external',
+  // },
 ])
 
 const el = ref<HTMLElement>()

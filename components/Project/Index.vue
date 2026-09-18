@@ -58,7 +58,7 @@ import { gsap } from 'gsap/gsap-core'
 import { type Project } from '~/types/wordpress/project'
 import useStore from '~/store/useStore'
 import useScrollStore from '~/store/useScrollStore'
-import { transitionFadeOut } from '~/utils/animations'
+import { transitionFadeOut, lerp } from '~/utils/animations'
 import { storeToRefs } from 'pinia'
 import { toPx, getKeyboardFocusableElements } from '~/utils'
 import { Swiper, type PanParams } from '~/utils/swiper'
@@ -129,6 +129,7 @@ let _scroll: any = {
   current: 0,
   target: 0,
   bounding: 0,
+  nextLeft: Infinity, // left edge of the next-project block, in content (unscrolled) coordinates
 }
 
 let _Swiper = new Swiper({ prevent: false, dragOnTarget: true })
@@ -212,7 +213,7 @@ function _clampTarget(value: number): number {
 }
 
 function _onRaf() {
-  _scroll.current += (_scroll.target - _scroll.current) * 0.1
+  _scroll.current = lerp(_scroll.current, _scroll.target, 0.1)
   const x = isMobileLayout.value ? 0 : _scroll.current * -1
   const y = isMobileLayout.value ? _scroll.current * -1 : 0
   contentEl.value && gsap.set(contentEl.value, { x, y })
@@ -226,8 +227,7 @@ function _onRaf() {
   }
 
   if (!toNextProject.value && !!props.nextProject) {
-    const mouseOnNextScrolling =
-      _scroll.bounding - vw.value * 0.75 - _scroll.current + (vw.value - mouseX.value) < 0
+    const mouseOnNextScrolling = mouseX.value >= _scroll.nextLeft - _scroll.current
     if (mouseOnNextScrolling && cursor.value === 'close') updateCursor('arrow-right')
     else if (!mouseOnNextScrolling && cursor.value === 'arrow-right') updateCursor('close')
   }
@@ -255,6 +255,10 @@ function updateScroll() {
     _scroll.bounding = (contentEl.value?.clientHeight || 0) - (el.value?.clientHeight || 0)
   } else {
     _scroll.bounding = (contentEl.value?.clientWidth || 0) - (el.value?.clientWidth || 0)
+    // Measure the real block instead of assuming it spans 75vw: above the layout
+    // max-width the landing gets side padding and the assumption drifts.
+    const nextEl = el.value?.querySelector('.project__next')
+    _scroll.nextLeft = nextEl ? nextEl.getBoundingClientRect().left + _scroll.current : Infinity
   }
 
   _scroll.target = _clampTarget(_scroll.target)

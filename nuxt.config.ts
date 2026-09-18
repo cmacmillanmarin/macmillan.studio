@@ -16,12 +16,15 @@ const IS_OFFLINE: boolean = OFFLINE == '1'
 const IS_PRODUCTION: boolean = PRODUCTION == '1'
 const DEPLOY_DATE: string = Date.now().toString()
 
-// const robotsRules: Array<any> = [
-//   { UserAgent: '*' },
-//   { Disallow: '/' },
-//   { BlankLine: true },
-//   { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
-// ]
+const robotsRules: Array<any> = IS_PRODUCTION
+  ? [
+      { UserAgent: '*' },
+      { Allow: '/' },
+      { Disallow: '/api/' },
+      { BlankLine: true },
+      { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
+    ]
+  : [{ UserAgent: '*' }, { Disallow: '/' }]
 
 const genericRouteRules = IS_DEV ? { ssr: true } : { prerender: true }
 
@@ -53,6 +56,25 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: 'en',
       },
+      // The preloader waits for these (fonts + logo mesh); hint them from the HTML so
+      // they download in parallel with the JS instead of after CSS/plugin execution.
+      link: [
+        {
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff',
+          href: '/assets/font/HelveticaNowDisplayMedium.woff',
+          crossorigin: 'anonymous',
+        },
+        {
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff',
+          href: '/assets/font/HelveticaNowDisplayBold.woff',
+          crossorigin: 'anonymous',
+        },
+        { rel: 'preload', as: 'fetch', href: '/assets/gltf/logo.glb', crossorigin: 'anonymous' },
+      ],
     },
   },
 
@@ -68,9 +90,9 @@ export default defineNuxtConfig({
 
   modules: ['@pinia/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap'],
 
-  // robots: {
-  //   rules: robotsRules,
-  // },
+  robots: {
+    rules: robotsRules,
+  },
 
   site: {
     title: 'Christian MacMillan ~ Independent Tech Lead—Developer',
@@ -78,9 +100,10 @@ export default defineNuxtConfig({
   },
 
   sitemap: {
-    // defaults: {
-    //   lastmod: new Date(),
-    // },
+    defaults: {
+      lastmod: new Date().toISOString(),
+      changefreq: 'weekly',
+    },
     // @ts-expect-error
     hostname: `${FE_PROTOCOL}${FE_BASE_URL}`,
     gzip: true,

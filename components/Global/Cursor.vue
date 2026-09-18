@@ -27,7 +27,7 @@
 import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
-import { fadeIn, fadeOut, transitionShuffleIn, transitionDone } from '~/utils/animations'
+import { fadeIn, fadeOut, transitionShuffleIn, transitionDone, lerp } from '~/utils/animations'
 
 const { isPreloaded, cursor, cursorColor, cursorPosition } = storeToRefs(useStore())
 
@@ -111,8 +111,8 @@ function onMouseDown() {
 
 function move() {
   const s = _inFixedPosition ? 0.125 : 0.2
-  _x += (targetX.value - _x) * s
-  _y += (targetY.value - _y) * s
+  _x = lerp(_x, targetX.value, s)
+  _y = lerp(_y, targetY.value, s)
   el.value && gsap.set(el.value, { x: _x, y: _y })
 }
 

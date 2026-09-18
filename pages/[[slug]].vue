@@ -1,6 +1,6 @@
 <template>
   <div v-if="data" ref="el" class="home">
-    <CustomHead :head="data.head" />
+    <CustomHead :head="activeHead" :project="project" />
 
     <Project
       v-if="project"
@@ -36,6 +36,7 @@
 
 <script lang="ts" setup>
 import { gsap } from 'gsap/gsap-core'
+import { type Head } from '~/types/wordpress'
 import { type Homepage } from '~/types/wordpress/homepage'
 import { type Project, type Projects } from '~/types/wordpress/project'
 import useStore from '~/store/useStore'
@@ -59,6 +60,10 @@ const temporaryProjectList = ref<Projects>([])
 const project = computed<Project | undefined>(() => {
   return data.value?.projects.list.find(project => project.slug === projectSlug.value)
 })
+const activeHead = computed<Head>(
+  () => project.value?.head ?? data.value?.head ?? ({} as Head)
+)
+
 const nextProject = computed<Project | undefined>(() => {
   if (temporaryProjectList.value.length) {
     const index = temporaryProjectList.value.findIndex(p => p.slug === projectSlug.value)

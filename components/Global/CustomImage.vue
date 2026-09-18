@@ -69,6 +69,16 @@ watch([isLoaded, inView], () => {
   isVirtual.value && inView.value && !isLoaded.value && createVirtualImage()
 })
 
+// A lazy virtual image only loads once its DOM element intersects the viewport. When
+// the parent stops being lazy (e.g. a selected project reused in the "all" list, where
+// the DOM never scrolls into view because the list is virtual) load it right away.
+watch(
+  () => props.lazy,
+  () => {
+    isVirtual.value && !isLoaded.value && !props.lazy && createVirtualImage()
+  }
+)
+
 onMounted(() => {
   el.value?.complete && el.value?.naturalHeight !== 0 && onload()
   isVirtual.value && !isLoaded.value && !props.lazy && createVirtualImage()
@@ -90,8 +100,12 @@ function enter(): void {
 
 // needed while threejs does not support images from DOM with CSS: mrdoob/three.js#23164
 
+let virtualImage: HTMLImageElement | undefined
+
 function createVirtualImage() {
+  if (virtualImage) return
   const image = new Image()
+  virtualImage = image
   image.crossOrigin = 'annonymus'
   image.srcset = imgSrcset.value
   image.sizes = imgSizes.value

@@ -7,6 +7,7 @@
 
 import { gsap } from 'gsap'
 import { round, toPx, focusable } from '~/utils/index'
+import { lerp } from '~/utils/animations'
 import type { Direction } from '~/types/front/store/scroll'
 import { Swiper, type PanParams } from '~/utils/swiper'
 import useStore from '~/store/useStore'
@@ -352,7 +353,7 @@ export default function useScrollVirtual() {
   // }
 
   function _raf(): void {
-    current.value += (target.value - current.value) * _elasticity
+    current.value = lerp(current.value, target.value, _elasticity)
     _run()
     // _inTarget() && _stopRaf()
   }

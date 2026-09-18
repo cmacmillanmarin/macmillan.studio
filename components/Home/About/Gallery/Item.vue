@@ -21,12 +21,11 @@
         muted
         playsinline
         loop
-        autoplay
         crossorigin="anonymous"
         @canplaythrough="onVideoLoaded"
         @timeupdate="onVideoTimeUpdate">
-        <source :src="data.video.webm" type="video/webm" />
         <source :src="data.video.mp4" type="video/mp4" />
+        <source :src="data.video.webm" type="video/webm" />
       </video>
     </div>
     <div ref="creditsEl" class="home__about__gallery__item__credits">
@@ -77,6 +76,7 @@ const id: string = `${props.planesId}-${props.pos}`
 
 const instancedVideo = ref<boolean>(false)
 const instancedVideoSent = ref<boolean>(false)
+const planeInView = ref<boolean>(false)
 
 // watch(current, () => {
 //   updateCursorPosition({ x: -1, y: -1 })
@@ -92,6 +92,18 @@ watch(scrollUpdated, () => {
   })
 })
 
+// Only decode the videos whose plane is actually on screen: every playing <video>
+// costs a decoder, and the ticker keeps every item mounted while it loops.
+watch([videoEl, planeInView], () => {
+  const video = videoEl.value
+  if (!video) return
+  if (planeInView.value) {
+    video.paused && video.play().catch(() => {})
+  } else {
+    !video.paused && video.pause()
+  }
+})
+
 onMounted(() => {
   $three.planes.add({
     id,
@@ -99,6 +111,9 @@ onMounted(() => {
     size: { x: 0, y: 0, z: 1 },
     opacity: 0,
     color: rbgToVec4(hexToRgb('#000000')),
+    onInView: (inView: boolean) => {
+      planeInView.value = inView
+    },
   })
 })
 

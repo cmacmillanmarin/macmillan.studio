@@ -34,7 +34,7 @@ const { updateCursor } = store
 const { section, inReelHovered } = storeToRefs(store)
 
 const el = ref<HTMLElement>()
-const items = ref<HomepageAboutGallery>([...props.data])
+const items = ref<HomepageAboutGallery>(sortByYear([...props.data]))
 const itemsFade = ref<number>(0)
 const planeIds = ref<string>(`gallery-image-${Date.now()}`)
 const mouseInGallery = ref<boolean>(false)
@@ -80,6 +80,62 @@ function onMouseLeave() {
 
 function update() {
   tickerEl.value?.update()
+}
+
+function parseYear(alt: string): number {
+  if (!alt) return -Infinity
+  const m = alt.match(/['’](\d{2})/)
+  if (!m) return -Infinity
+  const yy = parseInt(m[1], 10)
+  return yy < 50 ? 2000 + yy : 1900 + yy
+}
+
+function getAlt(item: HomepageAboutGallery[number]): string {
+  return item.type === 'img' ? item.image.alt : item.video?.alt || ''
+}
+
+function interleaveByColumns(group: HomepageAboutGallery): HomepageAboutGallery {
+  const buckets = new Map<number, HomepageAboutGallery>()
+  group.forEach(item => {
+    buckets.set(item.columns, [...(buckets.get(item.columns) || []), item])
+  })
+  const queues = [...buckets.values()]
+  const out: HomepageAboutGallery = []
+  while (out.length < group.length) {
+    const last = out[out.length - 1]?.columns
+    const candidates = queues.filter(q => q.length && q[0].columns !== last)
+    const pool = candidates.length ? candidates : queues.filter(q => q.length)
+    const queue = pool.sort((a, b) => b.length - a.length)[0]
+    out.push(queue.shift()!)
+  }
+  return out
+}
+
+function spreadVideos(group: HomepageAboutGallery): HomepageAboutGallery {
+  const videos = group.filter(x => x.type === 'vid')
+  const images = interleaveByColumns(group.filter(x => x.type !== 'vid'))
+  if (!videos.length || !images.length) return interleaveByColumns(group)
+  const n = group.length
+  const slots = new Set(videos.map((_, i) => Math.floor(((i + 0.5) * n) / videos.length)))
+  const out: HomepageAboutGallery = []
+  for (let i = 0; i < n; i++) {
+    if (!slots.has(i)) {
+      out.push(images.shift()!)
+      continue
+    }
+    const last = out[out.length - 1]
+    const idx = Math.max(0, videos.findIndex(v => v.columns !== last?.columns))
+    out.push(videos.splice(idx, 1)[0])
+  }
+  return out
+}
+
+function sortByYear(arr: HomepageAboutGallery): HomepageAboutGallery {
+  const pinned = arr.filter(x => x.pinned)
+  const rest = arr.filter(x => !x.pinned)
+  const years = [...new Set(rest.map(x => parseYear(getAlt(x))))].sort((a, b) => b - a)
+  const grouped = years.flatMap(year => spreadVideos(rest.filter(x => parseYear(getAlt(x)) === year)))
+  return [...pinned, ...grouped]
 }
 
 defineExpose({

@@ -7,7 +7,7 @@
       { 'project__landing--animation': animation },
     ]">
     <div class="project__landing__title" @click="onTitleClick">
-      <h2 v-if="!next" v-html="data.title" />
+      <h1 v-if="!next" v-html="data.title" />
       <ClientOnly>
         <button
           v-if="next"
@@ -76,6 +76,7 @@
             :title="info.title"
             :content="info.label"
             :animation="true"
+            :html="true"
             @toggle="onAccordionToggle" />
         </div>
       </div>
@@ -145,10 +146,16 @@ const linkEl = ref<HTMLElement>()
 const scrollEl = ref<HTMLElement>()
 const scrollLineEl = ref<HTMLElement>()
 
+const { freelance } = props.data
+const clientName = props.data.client.name
+const collaboratorName = props.data.collaborator.name
+
 const client = ref<string>(
-  `${props.data.client.name}
-  ${props.data.collaborator.name ? (props.data.freelance ? ' w/ ' : ' at ') : ''}
-  ${props.data.collaborator.name}`
+  collaboratorName
+    ? freelance
+      ? `${collaboratorName} for ${clientName}`
+      : `${clientName} at ${collaboratorName}`
+    : clientName
 )
 
 watch(
@@ -255,7 +262,7 @@ const emit = defineEmits(['update-scroll', 'next-project'])
       left: calc((100vw - var(--layout-max-width)) * 0.5 + var(--layout-margin));
     }
 
-    h2 {
+    h1 {
       @include t-seo;
     }
 

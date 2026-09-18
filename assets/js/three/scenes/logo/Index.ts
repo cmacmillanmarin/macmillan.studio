@@ -72,7 +72,7 @@ export default class {
     this.updateSize({ size })
 
     const loader = new GLTFLoader()
-    loader.load('./assets/gltf/logo.gltf', async gltf => {
+    loader.load('/assets/gltf/logo.glb', async gltf => {
       this.logo = gltf.scene.children[0].children[0].children[0]
       this.logo.scale.set(1, 1, 1)
       this.logo.rotation.set(0, 0, 0)

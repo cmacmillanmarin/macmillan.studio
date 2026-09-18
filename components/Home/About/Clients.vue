@@ -19,7 +19,8 @@
           <SvgNetflix />
         </div>
         <div class="home__about__clients__featured-mobile__client">
-          <SvgWWF />
+          <!-- <SvgWWF /> -->
+          <SvgUnicef />
         </div>
         <div class="home__about__clients__featured-mobile__client">
           <SvgGorillaz />
@@ -32,7 +33,7 @@
       <p class="home__about__clients__list__title">{{ data.hint }}</p>
       <div class="home__about__clients__list__content">
         <template v-for="client in data.list">
-          <p v-if="!client.featured" class="home__about__clients__list__content__client">
+          <p class="home__about__clients__list__content__client">
             {{ client.name }}
           </p>
         </template>
@@ -54,7 +55,8 @@
         class="home__about__clients__featured__transition-in"
         v-transition:in="{ callback: enterLogos }" />
       <div class="home__about__clients__featured__client">
-        <SvgBuff />
+        <!-- <SvgBuff /> -->
+        <SvgUnicef />
       </div>
     </div>
 

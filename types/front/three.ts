@@ -41,6 +41,7 @@ export interface ObjectParam {
   video?: HTMLVideoElement
   onClick?: Function
   onIntersect?: Function
+  onInView?: (inView: boolean) => void
 }
 
 export interface Fixed {
@@ -71,6 +72,7 @@ export interface Object {
   video: HTMLVideoElement | null
   onClick: Function | null
   onIntersect: Function | null
+  onInView: ((inView: boolean) => void) | null
 
   mesh?: any
   meshId: number
@@ -84,6 +86,7 @@ export interface Object {
   previousCursor?: Cursor
   imgAssigned?: boolean
   videoAssigned?: boolean
+  videoFrame?: number
   inZoomTransition?: boolean
 }
 

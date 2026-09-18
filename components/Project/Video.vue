@@ -10,11 +10,11 @@
       muted
       loop
       playsinline
-      preload="true"
+      preload="auto"
       v-intersect="{ callback: onIntersect }"
       @timeupdate="enter">
-      <source :src="data.webm" type="video/webm" />
       <source :src="data.mp4" type="video/mp4" />
+      <source :src="data.webm" type="video/webm" />
     </video>
     <div ref="bgEl" class="project__video__bg" />
   </div>

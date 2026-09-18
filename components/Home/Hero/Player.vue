@@ -87,7 +87,7 @@ import { gsap } from 'gsap/gsap-core'
 import { storeToRefs } from 'pinia'
 import useStore from '~/store/useStore'
 import { toPercentage } from '~/utils'
-import { fadeIn, shuffleIn, fadeOut } from '~/utils/animations'
+import { fadeIn, shuffleIn, fadeOut, lerp } from '~/utils/animations'
 
 const props = defineProps<{
   ready: boolean
@@ -167,7 +167,7 @@ function onClick(e: MouseEvent) {
 
 function updateProgress() {
   if (!props.ready) return
-  progress.value += (props.progress - progress.value) * 0.025
+  progress.value = lerp(progress.value, props.progress, 0.025)
   barEl.value && gsap.set(barEl.value, { x: toPercentage(-100 + 100 * progress.value) })
 }
 

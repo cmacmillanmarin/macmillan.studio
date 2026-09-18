@@ -15,6 +15,7 @@ export interface WP_Client {
     featured: boolean
     logo: WP_Image
     name: string
+    short_name: string
     link: string
   }
 }
@@ -24,6 +25,7 @@ export interface Client {
   slug: string
   logo: string
   name: string
+  shortName: string
   featured: boolean
   link: string
 }
@@ -42,6 +44,7 @@ export function parseClient(params: { client?: WP_Client }): Client {
     slug: parseText(client?.slug),
     logo: parseText(client?.acf.logo.url),
     name: parseText(client?.acf.name),
+    shortName: parseText(client?.acf.short_name),
     featured: !!client?.acf.featured,
     link: parseText(client?.acf.link),
   }

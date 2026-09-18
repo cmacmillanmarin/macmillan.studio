@@ -66,25 +66,33 @@ void main() {
   uv -= vec2(0.5);
   uv += vec2(0.5);
 
-  // vec2 pixel = floor(vUv * (uPixelSize - (uPixelSize - 1.0) * time)) / (uPixelSize - (uPixelSize - 1.0) * time);
-  vec2 pixel = floor(vUv * uPixelSize) / uPixelSize;
-  pixel = (pixel - 0.5) / uZoom + 0.5;
-  pixel.x = pixel.x + uParallax.x;
-  pixel.y = pixel.y + uParallax.y;
-  pixel = pixel * s / new + offset;
-  pixel -= vec2(0.5);
-  pixel += vec2(0.5);
+  vec4 mixedTexture;
+  if (uTextureType == 1) {
+    mixedTexture = texture2D(uTextureImage, uv);
+  } else {
+    mixedTexture = texture2D(uTextureVideo, uv);
+  }
 
-  vec4 coveredTexture = texture2D(uTextureVideo, uv);
-  if (uTextureType == 1) {
-    coveredTexture = vec4(1.0, 0.0, 0.0, 1.0);
-    coveredTexture = texture2D(uTextureImage, uv);
+  // The pixelated sample is only needed while the hover transition runs; skipping
+  // it otherwise halves the texture fetches (uPixel is a uniform, so the branch is free).
+  if (uPixel > 0.0) {
+    // vec2 pixel = floor(vUv * (uPixelSize - (uPixelSize - 1.0) * time)) / (uPixelSize - (uPixelSize - 1.0) * time);
+    vec2 pixel = floor(vUv * uPixelSize) / uPixelSize;
+    pixel = (pixel - 0.5) / uZoom + 0.5;
+    pixel.x = pixel.x + uParallax.x;
+    pixel.y = pixel.y + uParallax.y;
+    pixel = pixel * s / new + offset;
+    pixel -= vec2(0.5);
+    pixel += vec2(0.5);
+
+    vec4 pixelatedTexture;
+    if (uTextureType == 1) {
+      pixelatedTexture = texture2D(uTextureImage, pixel);
+    } else {
+      pixelatedTexture = texture2D(uTextureVideo, pixel);
+    }
+    mixedTexture = mix(mixedTexture, pixelatedTexture, uPixel);
   }
-  vec4 pixelatedTexture = texture2D(uTextureVideo, pixel);
-  if (uTextureType == 1) {
-    pixelatedTexture = texture2D(uTextureImage, pixel);
-  }
-  vec4 mixedTexture = mix(coveredTexture, pixelatedTexture, uPixel);
   vec4 blackAndWhiteTexture = vec4(vec3(0.2126 * mixedTexture.x + 0.7152 * mixedTexture.y + 0.0722 * mixedTexture.z), 1.0);
   vec4 finalTexture = mix(mixedTexture, blackAndWhiteTexture, uBlackAndWhite) * uMultiplyColor;
 

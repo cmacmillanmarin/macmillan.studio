@@ -1,4 +1,3 @@
-import WebFont from 'webfontloader'
 import useStore from '~/store/useStore'
 
 import { gsap } from 'gsap/gsap-core'
@@ -30,18 +29,19 @@ export default defineNuxtPlugin(async () => {
     ease: ease(),
   })
 
-  WebFont.load({
-    custom: {
-      families: ['HelveticaNowDisplayMedium', 'HelveticaNowDisplayBold'],
-    },
-    active: (): void => {
-      store.updatePreloadedFonts(true)
-    },
-    inactive: (): void => {
-      // Fonts failed to load (or timed out): don't block the site, carry on with fallback fonts.
-      store.updatePreloadedFonts(true)
-    },
-  })
+  // No gsap.ticker.fps() cap: the loop runs at the display refresh rate and per-tick
+  // motion is normalised with deltaRatio()/lerp() from utils/animations instead.
+
+  // Native font loading (replaces webfontloader): the <link rel="preload"> hints in
+  // nuxt.config start the downloads with the HTML, this just waits for them. Never
+  // block the site on a failed or slow font: fall back to system fonts after 3s.
+  const fonts = ['HelveticaNowDisplayMedium', 'HelveticaNowDisplayBold'].map(family =>
+    document.fonts.load(`1em ${family}`)
+  )
+  const timeout = new Promise(resolve => setTimeout(resolve, 3000))
+  Promise.race([Promise.all(fonts), timeout])
+    .catch(() => {})
+    .then(() => store.updatePreloadedFonts(true))
 
   window.scrollTo({ top: 0 })
 })
