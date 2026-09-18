@@ -29,7 +29,7 @@
     </ClientOnly>
 
     <div class="home__about__clients__list">
-      <Separator :left="isMobileLayout ? 8 : 4" />
+      <Separator :left="isMobileLayout ? 8 : 3" />
       <p class="home__about__clients__list__title">{{ data.hint }}</p>
       <div class="home__about__clients__list__content">
         <template v-for="client in data.list">
@@ -135,7 +135,8 @@ function enterMobileLogos(params: { el: HTMLElement }) {
 
     @include from__tablet--landscape {
       margin-bottom: 0;
-      @include columns(4);
+      @include columns(3);
+      @include gap(1, 'right');
     }
 
     &__title {
