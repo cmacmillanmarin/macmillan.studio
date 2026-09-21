@@ -72,9 +72,19 @@
         playsinline
         @timeupdate="onVideoPlaying"
         @ended="closeReel">
-        <!-- H.264 first: hardware-decoded everywhere; the AV1 webm is software-decoded on most machines -->
-        <source src="/assets/video/reel--short-small.mp4" type="video/mp4" />
-        <source src="/assets/video/reel--short-small.webm" type="video/webm" />
+        <!-- Mobile layout (same breakpoint as isMobileLayout) gets the 720p encode; the browser
+             picks the source while parsing the HTML, so no desktop bytes are wasted on phones.
+             H.264 first: hardware-decoded everywhere. -->
+        <source
+          src="/assets/video/reel--short-mobile.mp4"
+          type="video/mp4"
+          media="(max-width: 768px)" />
+        <source
+          src="/assets/video/reel--short-mobile.webm"
+          type="video/webm"
+          media="(max-width: 768px)" />
+        <source src="/assets/video/reel--short-desktop.mp4" type="video/mp4" />
+        <source src="/assets/video/reel--short-desktop.webm" type="video/webm" />
       </video>
     </div>
 
@@ -626,8 +636,10 @@ function closeReel() {
     noPixel: false,
   })
   if (videoEl.value) {
-    videoEl.value.src = '/assets/video/reel--short.mp4'
-    videoEl.value.setAttribute('type', 'video/mp4')
+    // changeReelSource() set a `src` attribute, which overrides the <source> children.
+    // Drop it and re-run source selection so the short reel (desktop/mobile) is picked again.
+    videoEl.value.removeAttribute('src')
+    videoEl.value.load()
     videoEl.value.muted = true
     videoEl.value.loop = true
     videoEl.value.play()

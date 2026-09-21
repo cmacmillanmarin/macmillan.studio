@@ -94,7 +94,7 @@
 @mixin import-font($fontname) {
   @font-face {
     font-family: $fontname;
-    src: url('/assets/font/#{$fontname}.woff') format('woff');
+    src: url('/assets/font/#{$fontname}.woff2') format('woff2');
     font-display: swap;
   }
 }
