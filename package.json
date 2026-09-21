@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "1.2.4",
+  "version": "1.2.5",
   "scripts": {
     "build": "nuxt build",
     "dev": "OFFLINE=1 nuxt dev",
@@ -22,7 +22,7 @@
     "dotenv": "^16.0.3",
     "gsap": "^3.12.5",
     "he": "^1.2.0",
-    "nuxt": "^3.11.2",
+    "nuxt": "^3.21.8",
     "pinia": "^2.0.23",
     "sass": "^1.55.0",
     "three": "^0.154.0",

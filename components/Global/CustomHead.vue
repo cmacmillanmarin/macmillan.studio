@@ -50,7 +50,8 @@ const config = useRuntimeConfig()
 const { FE_BASE_URL } = config.public
 
 const route = useRoute()
-const canonical = computed(() => `${FE_BASE_URL}${route.fullPath !== '/' ? route.fullPath : ''}`)
+// route.path, not fullPath: query strings (UTM tags, etc.) must never leak into the canonical URL
+const canonical = computed(() => `${FE_BASE_URL}${route.path !== '/' ? route.path : ''}`)
 
 const ogType = computed(() => (props.project ? 'article' : props.type))
 
