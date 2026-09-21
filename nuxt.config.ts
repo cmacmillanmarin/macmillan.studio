@@ -82,7 +82,7 @@ export default defineNuxtConfig({
     ],
   },
 
-  modules: ['@pinia/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap'],
+  modules: ['@vercel/analytics/nuxt', '@pinia/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap'],
 
   robots: {
     groups: robotsGroups,
