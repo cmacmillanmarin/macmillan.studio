@@ -112,7 +112,9 @@ export default defineNuxtConfig({
   css: ['@/assets/scss/main.scss'],
 
   features: {
-    inlineStyles: false,
+    // Inline component <style> blocks into the prerendered HTML instead of emitting
+    // one render-blocking <link rel="stylesheet"> per component (~33 requests).
+    inlineStyles: true,
   },
 
   vite: {
