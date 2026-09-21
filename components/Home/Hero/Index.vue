@@ -73,8 +73,8 @@
         @timeupdate="onVideoPlaying"
         @ended="closeReel">
         <!-- H.264 first: hardware-decoded everywhere; the AV1 webm is software-decoded on most machines -->
-        <source src="/assets/video/reel--short.mp4" type="video/mp4" />
-        <source src="/assets/video/reel--short.webm" type="video/webm" />
+        <source src="/assets/video/reel--short-small.mp4" type="video/mp4" />
+        <source src="/assets/video/reel--short-small.webm" type="video/webm" />
       </video>
     </div>
 
@@ -212,8 +212,8 @@ const size = computed<{ x: number; y: number; z: number }>(() => {
   const initHeight = isTabletPortrait.value
     ? vh.value - toScale(340)
     : isMobileLayout.value
-    ? vh.value - toScale(244) - toScale(208)
-    : vh.value * 0.666666 - verticalGap.value
+      ? vh.value - toScale(244) - toScale(208)
+      : vh.value * 0.666666 - verticalGap.value
   const finalHeight = vh.value
   const incrementHeight = finalHeight - initHeight
 
@@ -245,8 +245,8 @@ const position = computed<{ x: number; y: number }>(() => {
   const initY = isTabletPortrait.value
     ? toScale(186)
     : isMobileLayout.value
-    ? toScale(244)
-    : verticalGap.value
+      ? toScale(244)
+      : verticalGap.value
   const finalY = 0
   const incrementY = finalY - initY
 
@@ -685,8 +685,8 @@ function updateFirstTransitionSteps() {
   const finalHeight = isTabletPortrait.value
     ? vh.value - toScale(340)
     : isMobileLayout.value
-    ? vh.value - toScale(244) - toScale(208)
-    : vh.value * 0.666666 - verticalGap.value
+      ? vh.value - toScale(244) - toScale(208)
+      : vh.value * 0.666666 - verticalGap.value
 
   const layoutGap = Math.min(0, lvw.value - vw.value) * -0.5
 
@@ -694,8 +694,8 @@ function updateFirstTransitionSteps() {
   const finalY = isTabletPortrait.value
     ? toScale(186)
     : isMobileLayout.value
-    ? toScale(244)
-    : verticalGap.value
+      ? toScale(244)
+      : verticalGap.value
 
   firstTransition.steps = [
     {
