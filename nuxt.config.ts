@@ -16,15 +16,9 @@ const IS_OFFLINE: boolean = OFFLINE == '1'
 const IS_PRODUCTION: boolean = PRODUCTION == '1'
 const DEPLOY_DATE: string = Date.now().toString()
 
-const robotsRules: Array<any> = IS_PRODUCTION
-  ? [
-      { UserAgent: '*' },
-      { Allow: '/' },
-      { Disallow: '/api/' },
-      { BlankLine: true },
-      { Sitemap: `${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml` },
-    ]
-  : [{ UserAgent: '*' }, { Disallow: '/' }]
+const robotsGroups = IS_PRODUCTION
+  ? [{ userAgent: '*', allow: '/', disallow: '/api/' }]
+  : [{ userAgent: '*', disallow: '/' }]
 
 const genericRouteRules = IS_DEV ? { ssr: true } : { prerender: true }
 
@@ -91,7 +85,8 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap'],
 
   robots: {
-    rules: robotsRules,
+    groups: robotsGroups,
+    sitemap: IS_PRODUCTION ? [`${FE_PROTOCOL}${FE_BASE_URL}/sitemap.xml`] : [],
   },
 
   site: {
@@ -112,9 +107,7 @@ export default defineNuxtConfig({
   css: ['@/assets/scss/main.scss'],
 
   features: {
-    // Inline component <style> blocks into the prerendered HTML instead of emitting
-    // one render-blocking <link rel="stylesheet"> per component (~33 requests).
-    inlineStyles: true,
+    inlineStyles: false,
   },
 
   vite: {
