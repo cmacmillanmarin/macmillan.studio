@@ -165,7 +165,6 @@ defineExpose({
   &__button {
     width: 100%;
     border: none;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
     @include will-fade;
 

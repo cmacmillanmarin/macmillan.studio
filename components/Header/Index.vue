@@ -70,15 +70,13 @@
 
       <transition mode="out-in" :css="false" @enter="mobileButtonEnter" @leave="mobileButtonLeave">
         <nav v-if="mobileButton" class="header__nav--mobile">
-          <button aria-label="Mobile button">
+          <button aria-label="Mobile button" @click="onMobileButtonClick">
             <transition
               mode="out-in"
               :css="false"
               :appear="true"
               @enter="transitionShuffleIn"
-              @leave="transitionDone"
-              @click="onMobileButtonClick"
-              :tabindex="landingTabIndex">
+              @leave="transitionDone">
               <SvgDots v-if="mobileButtonIcon && !headerOverlay && !isInProject && !isInReel" />
               <SvgAspa v-else-if="!inProjectNextProjectInView" />
               <SvgPixelArrow v-else />
