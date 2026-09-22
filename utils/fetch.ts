@@ -2,6 +2,10 @@
 import { Query } from '~/types/wordpress/index'
 import fs from 'fs'
 
+const RETRIES: number = 3
+const RETRY_DELAY: number = 1000
+const TIMEOUT: number = 20000
+
 export function apiCall(data: { call: string; page?: number }): string {
   const config = useRuntimeConfig()
   const { IS_PRODUCTION, DEPLOY_DATE } = config.public
@@ -30,78 +34,90 @@ export function pathFrom(params: { call: string }): string {
   return path.substring(0, 50)
 }
 
-export async function get(call: string): Promise<any> {
-  return new Promise(async (resolve): Promise<any> => {
-    const config = useRuntimeConfig()
-    const { IS_OFFLINE } = config.public
+// A transient WordPress hiccup during the build used to be swallowed and turned into an
+// empty page, so every request is retried and anything still broken is thrown.
+async function fetchJson(url: string): Promise<{ data: any; headers: Headers }> {
+  let lastError: string = 'unknown error'
 
-    if (IS_OFFLINE) {
-      console.log(pathFrom({ call }))
-      return resolve(getData({ call: pathFrom({ call }) }))
-    }
-
+  for (let attempt: number = 1; attempt <= RETRIES; attempt++) {
     try {
-      const data = await fetch(apiCall({ call })).then(r => r.json())
-      saveData({ call: pathFrom({ call }), data: data[0] })
+      const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT) })
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`)
 
-      return resolve(data[0])
+      return { data: await res.json(), headers: res.headers }
     } catch (error) {
-      return resolve(error)
+      lastError = (error as Error)?.message || `${error}`
+      console.warn(`[fetch] attempt ${attempt}/${RETRIES} failed for ${url}: ${lastError}`)
+
+      if (attempt < RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * attempt))
+      }
     }
-  })
+  }
+
+  throw new Error(`[fetch] ${url} failed after ${RETRIES} attempts: ${lastError}`)
+}
+
+export async function get(call: string): Promise<any> {
+  const config = useRuntimeConfig()
+  const { IS_OFFLINE } = config.public
+
+  if (IS_OFFLINE) {
+    console.log(pathFrom({ call }))
+    return getData({ call: pathFrom({ call }) })
+  }
+
+  const { data } = await fetchJson(apiCall({ call }))
+  const item = Array.isArray(data) ? data[0] : undefined
+
+  if (!item) throw new Error(`[fetch] ${call} returned no post`)
+
+  saveData({ call: pathFrom({ call }), data: item })
+
+  return item
 }
 
 export async function getRankMath(link?: string): Promise<any> {
-  return new Promise(async (resolve): Promise<any> => {
-    const config = useRuntimeConfig()
-    const { BE_BASE_URL, IS_OFFLINE } = config.public
+  const config = useRuntimeConfig()
+  const { BE_BASE_URL, IS_OFFLINE } = config.public
 
-    const call: string = '/rankmath' + (link || '').replace(BE_BASE_URL, '').slice(0, -1)
+  const call: string = '/rankmath' + (link || '').replace(BE_BASE_URL, '').slice(0, -1)
 
-    if (IS_OFFLINE) return resolve(getData({ call }))
+  if (IS_OFFLINE) return getData({ call })
 
-    try {
-      const data = await fetch(
-        `${BE_BASE_URL}/wp-json/rankmath/v1/getHead?url=${link}&date=${Date.now()}`
-      ).then(r => r.json())
-      saveData({ call, data: data })
+  const { data } = await fetchJson(
+    `${BE_BASE_URL}/wp-json/rankmath/v1/getHead?url=${link}&date=${Date.now()}`
+  )
+  saveData({ call, data })
 
-      resolve(data)
-    } catch (error) {
-      resolve(error)
-    }
-  })
+  return data
 }
 
 export async function getList(call: string): Promise<any> {
-  return new Promise(async (resolve): Promise<any> => {
-    const config = useRuntimeConfig()
-    const { IS_OFFLINE } = config.public
+  const config = useRuntimeConfig()
+  const { IS_OFFLINE } = config.public
 
-    if (IS_OFFLINE) return resolve(getData({ call: pathFrom({ call }) }))
+  if (IS_OFFLINE) return getData({ call: pathFrom({ call }) })
 
-    try {
-      let data: Array<any> = []
+  const first = await fetchJson(apiCall({ call, page: 1 }))
+  if (!Array.isArray(first.data)) throw new Error(`[fetch] ${call} did not return a list`)
 
-      let res = await fetch(apiCall({ call, page: 1 }))
-      data = [...(await res.json())]
+  let data: Array<any> = [...first.data]
 
-      const totalPages: number = parseInt(res.headers.get('x-wp-totalpages') || '0')
+  const totalPages: number = parseInt(first.headers.get('x-wp-totalpages') || '0')
 
-      for (let page: number = 2; page <= totalPages; page++) {
-        let res = await fetch(apiCall({ call, page }))
-        data = [...data, ...(await res.json())]
-      }
+  for (let page: number = 2; page <= totalPages; page++) {
+    const next = await fetchJson(apiCall({ call, page }))
+    if (!Array.isArray(next.data)) throw new Error(`[fetch] ${call} page ${page} is not a list`)
 
-      data = data.filter(item => !!item)
+    data = [...data, ...next.data]
+  }
 
-      saveData({ call: pathFrom({ call }), data })
+  data = data.filter(item => !!item)
 
-      return resolve(data)
-    } catch (error) {
-      return resolve(error)
-    }
-  })
+  saveData({ call: pathFrom({ call }), data })
+
+  return data
 }
 
 export async function saveData(params: { call: string; data: any }): Promise<void> {

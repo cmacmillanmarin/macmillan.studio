@@ -43,7 +43,16 @@ import useStore from '~/store/useStore'
 import { storeToRefs } from 'pinia'
 
 const route = useRoute()
-const { data } = await useFetch<Homepage>('/api/data')
+const { data, error } = await useFetch<Homepage>('/api/data')
+
+// Without this the page would prerender as an empty shell and ship to production.
+if (error.value) {
+  throw createError({
+    statusCode: 503,
+    statusMessage: 'Unable to load content from the CMS',
+    fatal: true,
+  })
+}
 
 const store = useStore()
 const { updateInProject, updateInProjectEntered } = store

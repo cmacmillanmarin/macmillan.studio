@@ -6,11 +6,27 @@ import type { WP_Services, WP_Service } from '~/types/wordpress/service'
 import type { WP_Clients, WP_Client } from '~/types/wordpress/client'
 import type { WP_Testimonials, WP_Testimonial } from '~/types/wordpress/testimonial'
 
+// Every prerendered route calls this endpoint, so the CMS is read once per build
+// instead of once per page. A rejection is cached too: if WordPress is down there is
+// no point hammering it for each remaining route.
+let prerendered: Promise<Homepage> | undefined
+
 export default defineEventHandler(async (): Promise<Homepage> => {
   console.log('/api/data')
 
+  if (import.meta.prerender) {
+    prerendered = prerendered || getHomepage()
+    return prerendered
+  }
+
+  return getHomepage()
+})
+
+async function getHomepage(): Promise<Homepage> {
   try {
     const homepage: WP_Homepage = await get('/custom-page?slug=homepage')
+    if (!homepage?.acf) throw new Error('homepage post has no acf payload')
+
     let slugs: string
 
     slugs = getPostNamesFrom(homepage.acf.projects.list)
@@ -40,7 +56,13 @@ export default defineEventHandler(async (): Promise<Homepage> => {
 
     return parseHomepage({ homepage, projects, services, clients, testimonials })
   } catch (error) {
-    console.log(error)
-    return parseHomepage({})
+    // Returning an empty homepage here used to publish a blank site. Fail instead, so the
+    // prerender fails and the previous deployment stays live.
+    console.error('[api/data] unable to build the homepage payload', error)
+
+    throw createError({
+      statusCode: 502,
+      statusMessage: `Unable to load content from the CMS: ${(error as Error)?.message || error}`,
+    })
   }
-})
+}

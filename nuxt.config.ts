@@ -74,10 +74,9 @@ export default defineNuxtConfig({
 
   components: {
     dirs: [
-      {
-        path: '~/components/Global',
-        global: true,
-      },
+      // Not `global: true`: these are all referenced by name in templates, and global
+      // registration made Vite import each of them both statically and dynamically.
+      { path: '~/components/Global' },
       '~/components',
     ],
   },
@@ -124,6 +123,8 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
+      // Never publish a build whose pages errored: keep the previous deployment live.
+      failOnError: true,
     },
     routeRules,
   },
