@@ -14,13 +14,21 @@ export default function useResize() {
   onMounted(() => {
     updateSize()
     window.addEventListener('resize', onResizeHandler)
+    // In-app browsers (Instagram, Facebook, TikTok) collapse their chrome shortly after
+    // load and resize the webview without always firing a window resize, leaving every
+    // viewport-derived position measured against the pre-collapse height.
+    window.visualViewport?.addEventListener('resize', onResizeHandler)
   })
 
   onUnmounted(() => {
     window.removeEventListener('resize', onResizeHandler)
+    window.visualViewport?.removeEventListener('resize', onResizeHandler)
   })
 
-  function onResizeHandler(e: Event): void {
+  function onResizeHandler(): void {
+    // The visual viewport also fires on pinch zoom and on the soft keyboard, neither of
+    // which changes the layout viewport we measure.
+    if (vw.value === window.innerWidth && vh.value === window.innerHeight) return
     updateSize()
     clearTimeout(to)
     to = setTimeout(() => {

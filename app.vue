@@ -42,6 +42,14 @@ watch(keyPressed, () => {
 
 <style lang="scss">
 .__main {
+  // Containing block for the header: without it `.header { bottom: 0 }` resolves against
+  // the initial containing block, which mobile browsers size with their chrome retracted,
+  // so the logo and the nav links landed below the visible area until the chrome collapsed.
+  // The height is overwritten inline by the virtual scroller with the measured viewport;
+  // this keeps the box defined on the frames before that runs.
+  position: relative;
+  height: var(--vh);
+
   // * {
   //   cursor: none !important;
   // }

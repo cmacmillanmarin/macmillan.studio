@@ -172,11 +172,25 @@ watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], asy
     !headerOverlay.value
 })
 
-watch(current, () => {
-  if (!el.value) return
-  const y = Math.min(0, bounding.value - vh.value - current.value)
+// The header docks to the bottom of the viewport, so its offsets depend on the viewport
+// size and on the scroll bounding as much as on the scroll position. In-app browsers
+// (Instagram, Facebook) resize the webview once their chrome settles, right after load:
+// watching `current` alone left the logo and the nav links placed with the stale height
+// until the first scroll moved them.
+watch([current, vh, vw, bounding], updateLayout)
 
+// Scrolling back into the first half of the hero re-opens the header. This has to stay on
+// the scroll path alone: it is the same gate the hero opens when its intro ends, so running
+// it from a viewport measurement would shuffle the links and the logo in ahead of time.
+watch(current, () => {
   if (current.value <= vh.value * 0.5) updateHeader(true)
+})
+
+function updateLayout(): void {
+  // bounding is 0 until the virtual scroller has measured the page; running before that
+  // would resolve `y` to -vh and push the header a full viewport up.
+  if (!el.value || bounding.value === 0) return
+  const y = Math.min(0, bounding.value - vh.value - current.value)
 
   const threshold = vh.value - layoutMargin.value * 2
   const enterProgress = Math.min(1, current.value / vh.value)
@@ -208,11 +222,16 @@ watch(current, () => {
     const y = (vh.value - layoutMargin.value * 2 - toScale(75) - 96) * -1
     gsap.set(logoMobileEl.value, {
       scale,
+      // The centering is declared rather than inherited from the CSS translateX(-50%):
+      // gsap only recovers that percentage when it can match half the element's offsetWidth,
+      // and the button is display:none (v-show) until the logo shows, so it would otherwise
+      // cache xPercent 0 and leave the hit area half a logo off the 3D one.
+      xPercent: -50,
       x: toPx(x * progress),
       y: toPx(y * progress + leaveDistance * leaveProgress),
     })
   }
-})
+}
 
 function enterLinks() {
   if (!el.value) return
