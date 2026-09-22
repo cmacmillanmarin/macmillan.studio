@@ -74,8 +74,9 @@ export default defineNuxtConfig({
 
   components: {
     dirs: [
-      // Not `global: true`: these are all referenced by name in templates, and global
-      // registration made Vite import each of them both statically and dynamically.
+      // Not `global: true`: nothing resolves a component from a runtime string any
+      // more (see Svg/Project/Index.vue), and global registration made Vite import
+      // every component both statically and dynamically.
       { path: '~/components/Global' },
       '~/components',
     ],
