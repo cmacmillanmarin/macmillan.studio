@@ -39,7 +39,7 @@ import useScrollStore from '~/store/useScrollStore'
 import { storeToRefs } from 'pinia'
 import type { HomepageAboutAwards } from '~/types/wordpress/homepage'
 
-defineProps<{
+const props = defineProps<{
   data: HomepageAboutAwards
 }>()
 
@@ -61,7 +61,9 @@ let _to: any
 
 watch(isActive, () => {
   if (isActive.value) {
-    activeAward.value = 0
+    // Coming back from the footer the awards are already stacked at the end of the list,
+    // so the last one must be the active one and the rest must stay hidden
+    activeAward.value = direction.value === 'up' ? props.data.awards.length : 0
     fadeIn({ el: el.value, delay: 0.2 })
     _to = setTimeout(() => {
       listEl.value?.classList.add('home__about__awards__list--visible')

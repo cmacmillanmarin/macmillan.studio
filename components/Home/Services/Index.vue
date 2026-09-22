@@ -56,7 +56,7 @@ import useScrollStore from '~/store/useScrollStore'
 import type { HomepageServices } from '~/types/wordpress/homepage'
 import { storeToRefs } from 'pinia'
 
-defineProps<{
+const props = defineProps<{
   data: HomepageServices
 }>()
 
@@ -80,7 +80,10 @@ watch(isInReel, () => {
 })
 
 watch(isActive, () => {
-  isActive.value ? fadeIn({ el: el.value, delay: 0.2 }) : fadeOut({ el: el.value })
+  if (isActive.value) {
+    activeService.value = direction.value === 'up' ? props.data.list.length : 0
+    fadeIn({ el: el.value, delay: 0.2 })
+  } else fadeOut({ el: el.value })
 })
 
 function updateActive(i: number) {
