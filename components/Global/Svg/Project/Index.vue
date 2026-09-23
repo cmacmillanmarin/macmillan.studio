@@ -8,16 +8,9 @@
     @update-scroll="emit('update-scroll')" />
 </template>
 
-<script lang="ts" setup>
-import type { Component } from 'vue'
+<script lang="ts">
+import { defineAsyncComponent, type Component } from 'vue'
 import { hyphensToCamelcase } from '~/utils'
-
-const props = defineProps<{
-  project: string
-  next: boolean
-  animation: boolean
-  color?: string
-}>()
 
 // Keyed by folder name so the lookup stays `hyphensToCamelcase(slug)`, as before.
 // Static keys let Vite emit one chunk per project; resolving `:is` from a runtime
@@ -60,17 +53,41 @@ const loaders: Record<string, () => Promise<Component>> = {
   XavierCusso: () => import('./XavierCusso/Index.vue'),
 }
 
-const loader = loaders[hyphensToCamelcase(props.project)]
+// One wrapper per project, kept at module scope on purpose. defineAsyncComponent
+// caches the loaded component inside the wrapper, and a wrapper that already holds it
+// renders synchronously on every later mount. Building the wrapper inside setup()
+// gave each instance its own empty cache, so the import was awaited again and the SVG
+// was a placeholder for at least one frame — the flash when the next-project block
+// (which has already loaded that same SVG) is replaced by the project's own landing.
+const components: Record<string, Component> = {}
 
-// A project published in WordPress without a matching component used to render an
-// empty element with no height, silently.
-if (!loader) {
-  console.warn(`[SvgProject] no component for project "${props.project}"`)
+export function resolveProjectComponent(project: string): Component | undefined {
+  const key = hyphensToCamelcase(project)
+  const loader = loaders[key]
+
+  // A project published in WordPress without a matching component used to render an
+  // empty element with no height, silently.
+  if (!loader) {
+    console.warn(`[SvgProject] no component for project "${project}"`)
+    return undefined
+  }
+
+  if (!components[key]) components[key] = defineAsyncComponent(loader)
+  return components[key]
 }
+</script>
+
+<script lang="ts" setup>
+const props = defineProps<{
+  project: string
+  next: boolean
+  animation: boolean
+  color?: string
+}>()
 
 // Resolved once, matching the previous `ref()`: a changing `project` prop never
 // re-resolved the component either.
-const type = ref<Component | undefined>(loader ? defineAsyncComponent(loader) : undefined)
+const type = resolveProjectComponent(props.project)
 
 const emit = defineEmits(['update-scroll'])
 </script>
