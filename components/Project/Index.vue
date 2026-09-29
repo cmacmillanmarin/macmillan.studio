@@ -188,8 +188,10 @@ function enter() {
 
 function _onWheel(e: WheelEvent) {
   e.preventDefault()
-  const { deltaY } = e
-  const y = deltaY
+  const { deltaY, deltaX } = e
+  // The desktop layout scrolls sideways, so trackpad horizontal swipes drive it too
+  const horizontal = !isMobileLayout.value && Math.abs(deltaX) > Math.abs(deltaY)
+  const y = horizontal ? deltaX : deltaY
   _scroll.target = _clampTarget(_scroll.target + y)
   updateInProjectScroll(false)
 }

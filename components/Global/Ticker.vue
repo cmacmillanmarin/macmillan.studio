@@ -26,6 +26,7 @@ const props = defineProps<{
   ticker?: NextProjectTicker
   startingDirection?: number
   initZero?: boolean
+  wheel?: boolean
 }>()
 
 const scrollStore = useScrollStore()
@@ -77,10 +78,12 @@ watch(scrollUpdated, () => {
 watch(inView, () => {
   if (inView.value && el.value) {
     _Swiper.init({ el: el.value, cursor: true, onPanMove, onPanEnd })
+    props.wheel && el.value.addEventListener('wheel', onWheel, { passive: false })
     addRenderCallback(move)
   } else {
     removeRenderCallback(move)
     _Swiper.destroy()
+    el.value?.removeEventListener('wheel', onWheel)
   }
 })
 
@@ -104,6 +107,16 @@ function onPanMove(params: PanParams) {
   _onPan = true
   _target = _panInit - xDiff * (0.25 + inertia)
   _panDirection = xDir
+}
+
+// Trackpad horizontal swipes move the ticker like a drag; vertical ones still scroll the page
+function onWheel(e: WheelEvent) {
+  const { deltaX, deltaY } = e
+  if (Math.abs(deltaX) <= Math.abs(deltaY)) return
+  e.preventDefault()
+  e.stopPropagation()
+  _target -= deltaX
+  _direction = deltaX > 0 ? -1 : 1
 }
 
 function onPanEnd() {
@@ -268,6 +281,7 @@ function getTicker(): NextProjectTicker {
 
 onBeforeUnmount(() => {
   _Swiper.destroy()
+  el.value?.removeEventListener('wheel', onWheel)
   removeRenderCallback(move)
 })
 

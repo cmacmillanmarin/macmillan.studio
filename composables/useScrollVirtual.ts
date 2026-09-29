@@ -332,8 +332,10 @@ export default function useScrollVirtual() {
     if (_disabled) return
     _log('_onWheel()')
     e.preventDefault()
-    const { deltaY } = e
-    const y = deltaY * _velocity
+    const { deltaY, deltaX } = e
+    // Trackpads swipe sideways too: let that drive the horizontal project list
+    const horizontal = _allowHorizontal() && Math.abs(deltaX) > Math.abs(deltaY)
+    const y = (horizontal ? deltaX : deltaY) * _velocity
     target.value = _clampTarget(target.value + y)
   }
 
@@ -532,10 +534,13 @@ export default function useScrollVirtual() {
     const { yDiff, xDiff, inertia } = params
     let pan = yDiff
     const direction = Math.abs(yDiff) >= Math.abs(xDiff) ? 'vertical' : 'horizontal'
-    const allowHorizontal = section.value === 'projects' && activeProjectList.value === 'all'
-    if (!allowHorizontal && direction === 'horizontal') return
+    if (!_allowHorizontal() && direction === 'horizontal') return
     else if (direction === 'horizontal') pan = xDiff * -1
     target.value = _clampTarget(_panTarget - pan * (1 + inertia))
+  }
+
+  function _allowHorizontal(): boolean {
+    return section.value === 'projects' && activeProjectList.value === 'all'
   }
 
   function _onPanEnd(): void {
