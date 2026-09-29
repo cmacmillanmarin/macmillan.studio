@@ -20,7 +20,7 @@ const props = defineProps<{
   data: Project
 }>()
 
-const { isMobileLayout } = useDevice()
+const { isMobileLayout, touch } = useDevice()
 
 const ready = ref<boolean>(false)
 const backgroundColor = ref<string>(props.data.color)
@@ -30,7 +30,8 @@ function enter() {
 }
 
 function onIntersect(el: HTMLElement, visible: boolean) {
-  emit('in-view', isMobileLayout.value && visible)
+  // Touch devices get the header button instead of the cursor, so it needs to know too
+  emit('in-view', (isMobileLayout.value || touch.value) && visible)
 }
 
 const emit = defineEmits(['in-view', 'update-scroll', 'next-project'])

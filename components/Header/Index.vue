@@ -69,7 +69,9 @@
       </nav>
 
       <transition mode="out-in" :css="false" @enter="mobileButtonEnter" @leave="mobileButtonLeave">
-        <nav v-if="mobileButton" class="header__nav--mobile">
+        <nav
+          v-if="mobileButton"
+          :class="['header__nav--mobile', { 'header__nav--mobile-corner': !isMobileLayout }]">
           <button aria-label="Mobile button" @click="onMobileButtonClick">
             <transition
               mode="out-in"
@@ -126,7 +128,7 @@ const { updateScrollTarget } = scrollStore
 const { current, bounding } = storeToRefs(scrollStore)
 
 const { vw, vh } = useResize()
-const { isMobileLayout } = useDevice()
+const { isMobileLayout, touch } = useDevice()
 const { layoutMargin, toScale } = useCss()
 
 const links = computed<HeaderLinks>(() => {
@@ -159,9 +161,13 @@ watch(logoVisible, () => {
   $three.logo.updateState(logoVisible.value)
 })
 
-watch([current, header, headerOverlay, isInProject, isInReel, mobileButton], async () => {
+watch([current, header, headerOverlay, isInProject, isInReel, mobileButton, touch], async () => {
   current.value === 0 && !isInProject.value && onScrollDownMouseEnter()
-  mobileButton.value = isMobileLayout.value && (current.value > vh.value * 0.5 || isInProject.value)
+  // Touch devices on the desktop layout have no cursor to close or go to the next project,
+  // so they get the mobile button inside a project, docked to the top right corner.
+  mobileButton.value =
+    (isMobileLayout.value && (current.value > vh.value * 0.5 || isInProject.value)) ||
+    (touch.value && isInProject.value)
   isMobileLayout.value && (await nextTick())
   logoVisible.value = !isInProject.value && !isInReel.value && !headerOverlay.value
   linksVisible.value =
@@ -433,6 +439,28 @@ function scrollDown() {
           path {
             fill: var(--lime);
           }
+        }
+      }
+    }
+
+    // The header docks to the bottom of the viewport, so the top is reached from the bottom
+    &--mobile-corner {
+      --size: #{toScale(8rem)};
+      left: auto;
+      right: var(--layout-margin);
+      bottom: calc(var(--vh) - var(--layout-margin) - var(--size));
+      transform: scale(0);
+
+      button {
+        width: var(--size);
+        height: var(--size);
+        .svg__aspa {
+          width: toScale(3.2rem);
+          height: toScale(3.2rem);
+        }
+        // The next project comes in from the right on this layout
+        .svg__pixel-arrow {
+          transform: translateX(10%) rotate(-90deg);
         }
       }
     }
