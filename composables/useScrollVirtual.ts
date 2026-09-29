@@ -15,7 +15,7 @@ import { storeToRefs } from 'pinia'
 
 export default function useScrollVirtual() {
   const { vh } = useResize()
-  const { safari, hasWheelEvent, isMobileLayout } = useDevice()
+  const { safari, hasWheelEvent, isMobileLayout, touch } = useDevice()
   const { addTicker, killTicker } = useRaf()
   const store = useStore()
   const { section, activeProjectList } = storeToRefs(store)
@@ -72,8 +72,12 @@ export default function useScrollVirtual() {
   const current = ref<number>(0)
   const direction = ref<Direction>('down')
 
-  watch(isMobileLayout, () => {
-    isMobileLayout.value && _el
+  // Touch devices on the desktop layout (e.g. iPad landscape) only get wheel events
+  // from a trackpad, so they need the swiper as well or touch scrolling is dead.
+  const usesSwiper = computed<boolean>(() => isMobileLayout.value || touch.value)
+
+  watch(usesSwiper, () => {
+    usesSwiper.value && _el
       ? _Swiper.init({
           el: _el,
           cursor: false,
@@ -106,7 +110,7 @@ export default function useScrollVirtual() {
       _getChildren({ reset: true })
       await _updateSize()
       _addEventListeners()
-      isMobileLayout.value &&
+      usesSwiper.value &&
         _Swiper.init({
           el: _el,
           cursor: false,
