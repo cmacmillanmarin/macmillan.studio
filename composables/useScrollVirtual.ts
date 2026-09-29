@@ -18,7 +18,7 @@ export default function useScrollVirtual() {
   const { safari, hasWheelEvent, isMobileLayout, touch } = useDevice()
   const { addTicker, killTicker } = useRaf()
   const store = useStore()
-  const { section, activeProjectList, isInProject } = storeToRefs(store)
+  const { section, activeProjectList } = storeToRefs(store)
 
   const config = useRuntimeConfig()
   const { IS_DEV } = config.public
@@ -532,9 +532,7 @@ export default function useScrollVirtual() {
     const { yDiff, xDiff, inertia } = params
     let pan = yDiff
     const direction = Math.abs(yDiff) >= Math.abs(xDiff) ? 'vertical' : 'horizontal'
-    const allowHorizontal =
-      (section.value === 'projects' && activeProjectList.value === 'all') ||
-      (isInProject.value && !isMobileLayout.value)
+    const allowHorizontal = section.value === 'projects' && activeProjectList.value === 'all'
     if (!allowHorizontal && direction === 'horizontal') return
     else if (direction === 'horizontal') pan = xDiff * -1
     target.value = _clampTarget(_panTarget - pan * (1 + inertia))

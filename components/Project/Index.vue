@@ -200,8 +200,13 @@ function _onPanStart(): void {
 
 function _onPanMove(params: PanParams): void {
   const { yDiff, xDiff, inertia } = params
-  if (Math.abs(xDiff) > Math.abs(yDiff)) return
-  _scroll.target = _clampTarget(_panTarget - yDiff * (1 + inertia))
+  let pan = yDiff
+  // The desktop layout scrolls the content horizontally, so horizontal swipes drive it too
+  if (Math.abs(xDiff) > Math.abs(yDiff)) {
+    if (isMobileLayout.value) return
+    pan = xDiff * -1
+  }
+  _scroll.target = _clampTarget(_panTarget - pan * (1 + inertia))
 }
 
 function _onPanEnd(): void {
